@@ -1,0 +1,86 @@
+<title>Splash of Colour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: gallery of 9 small TV home screens; each carries one colour idea in the clear zone (top right), never behind titles or buttons. */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1320px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:24px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}
+p{margin:0;max-width:72ch}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 20px}
+@media (max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.grid{grid-template-columns:1fr}}
+figure{margin:0;display:grid;gap:10px;align-content:start;min-width:0}
+figcaption{display:grid;gap:3px;font-size:14px}
+figcaption b{font-size:16px}
+.infl{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#b04a1c}
+.tag{font:500 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 6px;justify-self:start;color:var(--muted)}
+
+/* mini TV (same layout as mockup 09) */
+.tv{position:relative;aspect-ratio:16/9;max-width:100%;container-type:inline-size;overflow:hidden;border-radius:10px;color:#ece8df;font-family:var(--f);
+  background:#141312;box-shadow:0 0 0 6px #0d0d0c,0 12px 30px #00000040}
+.tv .geo{position:absolute;inset:0}
+.tv .geo svg{width:100%;height:100%;display:block}
+.tv .trim{position:absolute;top:0;left:0;right:0;height:.5cqw;background:#5b3a22}
+.tv .in{position:absolute;inset:0;padding:4.6cqw 6cqw 4.4cqw;display:grid;grid-template-rows:auto 1fr auto;gap:2cqw}
+.tv .clock{font:500 3.6cqw/1 var(--f)}
+.tv .hero{align-self:end;display:grid;gap:.8cqw}
+.tv .hero .t{font:600 5cqw/1.05 var(--f)}
+.tv .hero .k{font:500 1.8cqw var(--f);color:#a8a397}
+.tv .rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2cqw;padding-bottom:1.4cqw}
+.tv .tile{position:relative;height:9cqw;border-radius:1.2cqw;background:linear-gradient(180deg,#2e2d2a,#252422);color:#a8a397;font:600 1.9cqw/1 var(--f);letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:flex-end;padding:0 1.6cqw 2.2cqw;box-shadow:inset 0 .1cqw 0 #ffffff24,inset 0 -.15cqw 0 #00000059,0 .6cqw 1.4cqw #00000080}
+.tv .tile .w{position:absolute;left:22%;right:22%;bottom:0;height:.75cqw;border-radius:.4cqw .4cqw 0 0;background:#0a0909}
+.tv .tile.on{transform:scale(1.05) translateY(-.4cqw);color:#f0dcc6}
+.tv .tile.on .w{background:linear-gradient(180deg,#ffa060,#e8641c 45%,#8a3812);transform:scale(.952);transform-origin:50% 100%}
+.rule{border-top:1px solid var(--line);padding-top:16px;display:grid;gap:6px}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Jam Design · Hi-Fi · Colour studies</span>
+    <h1>Splash of colour</h1>
+    <p class="muted">Nine ways to add a splash of colour to the Hi-Fi screens, each drawn from your influences. All are original shapes: no logos, emblems or copied designs. Every one stays in the clear zone (top right), so nothing sits behind a title or a button. They're flat, static shapes, which are cheap on the TV. The decorative oranges are kept darker than the button orange, so they never read as something to press.</p>
+  </header>
+  <div class="grid" id="grid"></div>
+  <section class="rule">
+    <b>They can also mix</b>
+    <p class="muted">One splash per screen, but different screens (or apps) could each get their own. For example: Stripes on the TV launchers, Mission patch on the NervOS boot, Braun keys on Jam-Dash, Horizon on the Jam Home screensaver.</p>
+  </section>
+</div>
+
+<script>
+const V='viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"';
+function star(x,y,r){return `M${x} ${y-r} Q${x} ${y} ${x+r} ${y} Q${x} ${y} ${x} ${y+r} Q${x} ${y} ${x-r} ${y} Q${x} ${y} ${x} ${y-r}Z`}
+const ideas=[
+ {name:'Stripes',infl:'Atari 2600 · 70s hi-fi',tag:'Chosen',note:'Your current pick. Three bent bands in chocolate, burnt orange and gold.',
+  svg:`<g fill="none" stroke-width="44"><path d="M1040 -40 V300 A260 260 0 0 0 1300 560 H1640" stroke="#6b3416"/><path d="M1092 -40 V300 A208 208 0 0 0 1300 508 H1640" stroke="#b04a1c"/><path d="M1144 -40 V300 A156 156 0 0 0 1300 456 H1640" stroke="#d69a2e"/></g>`},
+ {name:'Horizon',infl:'Ralph McQuarrie · Syd Mead',note:'A porthole onto a painted sunset, built from stepped bands like a 70s poster. Deep plum to gold, with a sun half set.',
+  svg:`<defs><clipPath id="ph"><rect x="1010" y="80" width="480" height="400" rx="200"/></clipPath></defs><g clip-path="url(#ph)"><rect x="1000" y="70" width="500" height="420" fill="#2a1c38"/><rect x="1000" y="190" width="500" height="44" fill="#45213f"/><rect x="1000" y="240" width="500" height="38" fill="#6e2a42"/><rect x="1000" y="284" width="500" height="32" fill="#9a3c3b"/><rect x="1000" y="322" width="500" height="26" fill="#c25a30"/><circle cx="1250" cy="400" r="86" fill="#e6a53a"/><rect x="1000" y="354" width="500" height="20" fill="#d77d2d" opacity=".85"/><rect x="1000" y="380" width="500" height="110" fill="#1d1622"/><rect x="1000" y="380" width="500" height="3" fill="#e6a53a" opacity=".6"/></g><rect x="1010" y="80" width="480" height="400" rx="200" fill="none" stroke="#ffffff1c" stroke-width="3"/><rect x="996" y="66" width="508" height="428" rx="214" fill="none" stroke="#00000080" stroke-width="10"/>`},
+ {name:'Mission patch',infl:'70s NASA',note:'An embroidered-patch roundel: navy field, gold border, a rust planet with one orbit and a satellite. Your house as a mission.',
+  svg:`<circle cx="1290" cy="290" r="214" fill="#1d2944"/><circle cx="1290" cy="290" r="214" fill="none" stroke="#c9a24a" stroke-width="14"/><circle cx="1290" cy="290" r="190" fill="none" stroke="#ffffff1f" stroke-width="2"/><ellipse cx="1290" cy="300" rx="160" ry="56" fill="none" stroke="#e9e2d0" stroke-width="4" transform="rotate(-18 1290 300)"/><circle cx="1290" cy="300" r="56" fill="#b0451c"/><path d="M1246 286 a56 56 0 0 0 88 34" fill="none" stroke="#00000040" stroke-width="16"/><circle cx="1428" cy="246" r="11" fill="#e9e2d0"/><g fill="#e9e2d0"><circle cx="1190" cy="170" r="4"/><circle cx="1360" cy="150" r="3"/><circle cx="1400" cy="390" r="3"/><circle cx="1170" cy="380" r="4"/><circle cx="1230" cy="130" r="2.5"/></g>`},
+ {name:'Atomic starburst',infl:'Mid-century · Atomic age',note:'Gold four-point sparkles and a teal boomerang, like 1950s laminate and diner signage. Playful, very household-friendly.',
+  svg:`<path d="M1060 140 C1200 60 1430 90 1520 210 C1440 170 1290 160 1140 230 Z" fill="#2f7f7a"/><path d="${star(1300,300,120)}" fill="#d9a63a"/><path d="${star(1300,300,62)}" fill="#f0d27a" transform="rotate(45 1300 300)"/><path d="${star(1470,420,52)}" fill="#d9a63a"/><path d="${star(1130,420,34)}" fill="#b0451c"/><path d="${star(1500,110,28)}" fill="#e9e2d0" opacity=".85"/><circle cx="1180" cy="330" r="7" fill="#e9e2d0" opacity=".7"/>`},
+ {name:'Eames dots',infl:'Mid-century furniture',note:'Overlapping circles in mustard, teal, rust and olive, the palette of 50s upholstery and Herman Miller ads.',
+  svg:`<circle cx="1170" cy="230" r="128" fill="#d4a12a"/><circle cx="1350" cy="170" r="94" fill="#2f7f7a" opacity=".95"/><circle cx="1430" cy="340" r="136" fill="#b0451c" opacity=".92"/><circle cx="1250" cy="400" r="72" fill="#7a8a3a" opacity=".95"/><g fill="#141312"><circle cx="1170" cy="230" r="12"/><circle cx="1430" cy="340" r="14"/><circle cx="1350" cy="170" r="9"/></g>`},
+ {name:'Colour bars',infl:'Atari 2600 · 70s TV',note:'Horizontal bars that thin out as they go, chocolate to pale gold, entering from the right edge. Like the trim on a 70s console.',
+  svg:`<g><rect x="1020" y="120" width="620" height="50" rx="25" fill="#6b3416"/><rect x="1080" y="184" width="560" height="40" rx="20" fill="#9a3f18"/><rect x="1140" y="236" width="500" height="32" rx="16" fill="#c45d22"/><rect x="1200" y="280" width="440" height="24" rx="12" fill="#d68a2c"/><rect x="1260" y="316" width="380" height="16" rx="8" fill="#e3b24a"/><rect x="1320" y="344" width="320" height="9" rx="4.5" fill="#efd58a"/></g>`},
+ {name:'Session blocks',infl:'Cowboy Bebop · Satoshi Kon',note:'Bold, slightly tilted blocks of jazz-poster colour: a deep blue slab, a yellow bar, one red square. The most graphic and loud.',
+  svg:`<g transform="rotate(-7 1300 260)"><rect x="1040" y="60" width="640" height="330" fill="#21406c"/><rect x="980" y="300" width="460" height="44" fill="#e3b02f"/><rect x="1440" y="96" width="70" height="70" fill="#c23a2b"/><rect x="1060" y="96" width="300" height="4" fill="#e9e2d0" opacity=".7"/><rect x="1060" y="112" width="190" height="4" fill="#e9e2d0" opacity=".45"/></g>`},
+ {name:'Braun keys',infl:'Dieter Rams',note:'A small control plate: a speaker grille and a row of square keys, two of them in Braun yellow and green. The quietest splash.',
+  svg:`<rect x="1060" y="120" width="440" height="300" rx="26" fill="#2a2926" stroke="#ffffff14" stroke-width="2"/><g fill="#0d0c0b">${Array.from({length:7*5},(_,i)=>`<circle cx="${1110+(i%7)*30}" cy="${170+Math.floor(i/7)*30}" r="7"/>`).join('')}</g><g>${['#3a3936','#3a3936','#e2b12c','#3a3936','#5d8a3a'].map((c,i)=>`<rect x="${1104+i*76}" y="330" width="60" height="60" rx="8" fill="${c}"/><rect x="${1104+i*76}" y="330" width="60" height="6" rx="3" fill="#ffffff22"/>`).join('')}</g><circle cx="1440" cy="190" r="34" fill="#1d1c1a" stroke="#ffffff14" stroke-width="2"/>`},
+ {name:'Launch chevrons',infl:'70s NASA · Evangelion',note:'Stacked chevrons climbing up and to the right, warm at the bottom and pale at the top, like a launch diagram. Energetic without hazard stripes.',
+  svg:`<g fill="none" stroke-linejoin="miter" stroke-width="36">${['#6b3416','#9a3f18','#c45d22','#d68a2c','#e3b24a'].map((c,i)=>`<path d="M${1170} ${500-i*76} l130 -130 l130 130" stroke="${c}"/>`).join('')}</g>`}
+];
+const grid=document.getElementById('grid');
+ideas.forEach((it,k)=>{const f=document.createElement('figure');
+  f.innerHTML=`<div class="tv" aria-label="${it.name} specimen"><div class="geo"><svg ${V}>${it.svg}</svg></div><i class="trim"></i><div class="in"><span class="clock">9:12</span><div class="hero"><span class="t">Severance</span><span class="k">Season 2 · Episode 4 · 19 min left</span></div><div class="rail"><div class="tile on">Watch<i class="w"></i></div><div class="tile">Play<i class="w"></i></div><div class="tile">Stream<i class="w"></i></div><div class="tile">Listen<i class="w"></i></div></div></div></div>
+  <figcaption><span class="infl">${it.infl}</span><b>${k+1}. ${it.name}</b>${it.tag?`<span class="tag">${it.tag}</span>`:''}<span class="muted">${it.note}</span></figcaption>`;
+  grid.append(f)});
+</script>
