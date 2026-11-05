@@ -26,5 +26,10 @@ The brief, in Isaac's words: **clarity without ever sacrificing fun.**
 
 ## Status
 
+**We are only building the design doc.** Nothing in any app, theme or look is being replaced, changed or deleted.
+
+When we do get to rollout, it goes **one app or service at a time**, and nothing existing gets deleted before that app's turn, with Isaac's OK.
+
+
 The **Hi-Fi** base look is being designed. It isn't final, and **no project should restyle its UI from this repo yet.**
 Current step: every project documents its existing UI in `projects/<name>/` so the bible can be checked against real screens.

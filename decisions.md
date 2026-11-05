@@ -180,3 +180,8 @@ Adopted without needing a call (no visible change): glows/soft shadows as pre-re
 
 ## Project check 2: Jam Home
 HA pushed profile + 44 screenshots. Correction: kitchen Echo Show 8 is ~961x601 CSS px; living-room iPad is 1024x768 (the interview had them swapped; mockup 08 labels the 1024x768 frame as the kitchen kiosk, which is wrong).
+
+## Process rule (Isaac, 2026-11-05)
+- We are only building the design doc. Nothing is replaced or deleted yet.
+- Rollout happens later, one app/service at a time. Nothing existing (looks, themes, dashboards) gets deleted until that app's turn, with Isaac's OK.
+- Answers to project questions describe the eventual design, not immediate changes.
