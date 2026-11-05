@@ -69,3 +69,15 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D18. The orange primary button needs its own focus cue on TV.
 - D19. Decide whether accents step back on art-heavy screens, and whether Session blocks' red square is allowed on TV homes.
 - D20. Per-profile looks save: look, Day/Night/Auto, Covers (Full colour/Toned), Calm.
+
+### Pass 1 · Jam-Dash
+- D21. Add **warn** ("needs a look, not urgent": amber + ▲ + word) to the shared state words; the five names stay shared but each app picks the visible word ("Running" for a container, "On" for a light).
+- D22. Accents step back while a screen shows trouble, and draw in once when it's calm again (see also D19).
+- D23. Order for the moving primary (D7): alert (newest first) → offline → warn → routine action.
+- D24. Destructive actions are never orange or red: a dark button inside a confirm sheet that names the consequence.
+- D25. A meter's own readout counts once ("never twice" exception: a bar plus its own number on a faceplate).
+- D26. No hidden destinations: every place visible on desktop, at most five phone tabs, never "More".
+- D27. Whole-server offline: the faceplate and all its tiles go dashed together, with "Last seen" and one Try again.
+- D28. A shape for "something on this day" (calendar strips): small slots, since squares mean "selected mode".
+- D29. Jobs show progress in place, on the button that started them.
+- D30. Uppercase labels are 13 px (settles 12 vs 13).
