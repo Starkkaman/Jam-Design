@@ -165,3 +165,6 @@ NervOS (Aero 15) and Lobby (Hisense Google TV) overlap (both list Moonlight/Retr
 - TV selector: W1 base window chosen. Refined: selected button does NOT change colour (only lifts); label gets an uneven warm glow strongest near the window; underglow lights the panel's rib texture (rib-masked glow layer).
 - Seven-segment placement A LOCKED (screen bottom on the arc baseline, punch-label unit below).
 - Jam Home mockup in Hi-Fi built (kiosk 1024x768 + phone 390): rooms list w/ rockers + bar-group counts, living room faders + scene buttons (square windows) + TV band w/ progress, music w/ ladder + volume fader, power quiet face + 7-seg lit scale, front door LED + Unlock, dock = W1 base-window tiles with rib underglow. Kiosk uses spare height for larger type.
+
+## TV title card (2026-11-05)
+- Mockup 09: three Hi-Fi title cards that mask real loading and stay dark (flash-safe): Shutter (band halves close, lit strip = load), Tape counter (faceplate, 7-seg 000-100, punch label LOADING -> READY + LED), Tuning dial (backlit dial, red needle sweeps with load, "Tuned" LED). Min hold ~1.6 s; slow loads hold until ready. Awaiting Isaac's pick.
