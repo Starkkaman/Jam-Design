@@ -152,6 +152,21 @@ p{margin:0;max-width:70ch}
 .tv.tx2 .tile{box-shadow:inset 0 .1cqw 0 #ffffff24,inset 0 -.15cqw 0 #00000059,0 .6cqw 1.4cqw #00000080}
 /* walnut trim gets grain */
 .tv.tx1 .trim,.tv.tx2 .trim{background-image:var(--brush);background-color:#5b3a22;background-blend-mode:overlay;background-size:600px 200px}
+
+/* ===== Rich v2: coarser grain, paper headlines, background geometry ===== */
+.tv{--coarse:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.42' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");--paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.03 .09' numOctaves='4' seed='7' stitchTiles='stitch' result='f'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='3' stitchTiles='stitch' result='g'/%3E%3CfeBlend in='f' in2='g' mode='multiply'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.62' intercept='.5'/%3E%3CfeFuncG type='linear' slope='.6' intercept='.47'/%3E%3CfeFuncB type='linear' slope='.56' intercept='.41'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")}
+.tv.tx2 .t1 .bar::before{background-image:var(--brush),var(--coarse);background-size:600px 200px,320px 320px;opacity:.55;z-index:1}
+.tv.tx2 .t1 .bar::after{z-index:1}
+.tv.tx2 .tile::before{background-image:var(--coarse),linear-gradient(180deg,rgba(255,255,255,.07),transparent 45%,rgba(0,0,0,.2));background-size:320px 320px,100% 100%;opacity:.75}
+/* paper headlines: big type only (the bible keeps small labels solid) */
+.tv.tx2 .t1 .ttl,.tv.tx2 .hero .t,.tv.tx2 .clock{color:transparent;background:var(--paper) 0 0/300px 300px,#e4dccc;-webkit-background-clip:text;background-clip:text;text-shadow:none;filter:drop-shadow(0 .12cqw 0 #000000b3)}
+/* geometry layer: flat shapes, static. Behind the home rows, and repeated inside each shutter half so the composition lines up when they close */
+.geo{position:absolute;inset:0;pointer-events:none}
+.geo svg{width:100%;height:100%;display:block}
+.home{z-index:1}
+.tv>.geo{z-index:0}
+.t1 .bar .geo{position:absolute;left:0;right:0;height:198%;z-index:0}
+.t1 .bar.a .geo{top:0}.t1 .bar.b .geo{top:auto;bottom:0}
 </style>
 
 <div class="wrap">
@@ -163,6 +178,7 @@ p{margin:0;max-width:70ch}
 
   <div class="controls">
     <div class="ctl"><span class="eyebrow">Style</span><div class="seg" id="sty" role="group" aria-label="Title card style"><button id="s1" data-v="t1s" aria-pressed="true">Shutter · slatted</button><button id="s1b" data-v="t1" aria-pressed="false">Shutter</button><button id="s2" data-v="t2" aria-pressed="false">Tape counter</button><button id="s3" data-v="t3" aria-pressed="false">Tuning dial</button></div></div>
+    <div class="ctl"><span class="eyebrow">Geometry</span><div class="seg" id="geo" role="group" aria-label="Background geometry"><button id="g0" data-v="none" aria-pressed="false">None</button><button id="g1" data-v="orbit" aria-pressed="true">Orbit</button><button id="g2" data-v="panels" aria-pressed="false">Panels</button><button id="g3" data-v="stripes" aria-pressed="false">Stripes</button></div></div>
     <div class="ctl"><span class="eyebrow">Texture</span><div class="seg" id="tex" role="group" aria-label="Texture"><button id="x0" data-v="tx0" aria-pressed="false">Current</button><button id="x1" data-v="tx1" aria-pressed="false">Subtle</button><button id="x2" data-v="tx2" aria-pressed="true">Rich</button></div></div>
     <div class="ctl"><span class="eyebrow">Load</span><div class="seg" id="spd" role="group" aria-label="Load speed"><button id="l1" data-v="fast" aria-pressed="true">Fast</button><button id="l2" data-v="slow" aria-pressed="false">Slow, with a stall</button></div></div>
     <button class="play" id="go">Play</button>
@@ -170,6 +186,7 @@ p{margin:0;max-width:70ch}
 
   <div class="tv tx2" id="tv" tabindex="0" aria-label="TV mock. Left and right move, Enter plays.">
     <div class="trim"></div>
+    <div class="geo" aria-hidden="true"></div>
     <div class="home" id="home">
       <div class="top"><span class="clock">9:12</span><span class="st"><i class="led on"></i>21.5°</span></div>
       <div class="hero" id="hero"><span class="t" id="ht">Severance</span><span class="k" id="hk">Season 2 · Episode 4 · 19 min left</span></div>
@@ -184,7 +201,7 @@ p{margin:0;max-width:70ch}
     <div class="playing" id="playing"><span class="k" id="pk">Now playing</span><span class="t" id="pt">Severance</span></div>
 
     <div class="card t1" id="c-t1">
-      <i class="bar a"></i><i class="bar b"></i>
+      <i class="bar a"><span class="geo" aria-hidden="true"></span></i><i class="bar b"><span class="geo" aria-hidden="true"></span></i>
       <div class="mid"><span class="eb" data-f="eb"></span><span class="ttl" data-f="ttl"></span><div class="lit"><i class="run"></i></div><span class="verb" data-f="verb"></span></div>
     </div>
 
@@ -245,6 +262,15 @@ addEventListener('resize',place);requestAnimationFrame(place);
 // ---------- controls
 let style='t1s',speed='fast';
 function seg(id,cb){const b=[...document.querySelectorAll('#'+id+' button')];b.forEach(x=>x.addEventListener('click',()=>{b.forEach(y=>y.setAttribute('aria-pressed',y===x));cb(x.dataset.v)}))}
+
+// ---------- background geometry (flat shapes, static)
+const V='viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"';
+const GEO={none:'',
+orbit:`<svg ${V}><circle cx="1330" cy="860" r="520" fill="#1d1b19"/><circle cx="1330" cy="860" r="520" fill="none" stroke="#ffffff0d" stroke-width="2"/><circle cx="1330" cy="860" r="640" fill="none" stroke="#ffffff0a" stroke-width="2"/><circle cx="1330" cy="860" r="770" fill="none" stroke="#ffffff08" stroke-width="2"/><circle cx="1330" cy="860" r="920" fill="none" stroke="#ffffff06" stroke-width="2"/><circle cx="1330" cy="860" r="380" fill="#211f1c"/><path d="M1330 860 m-640 0 a640 640 0 0 1 120 -372" fill="none" stroke="#5b3a22" stroke-width="6" stroke-linecap="round"/><circle cx="1478" cy="150" r="34" fill="#22201d"/><circle cx="1478" cy="150" r="34" fill="none" stroke="#ffffff0d" stroke-width="2"/></svg>`,
+panels:`<svg ${V}><rect x="0" y="0" width="34" height="900" fill="#3a2617"/><rect x="34" y="0" width="4" height="900" fill="#00000066"/><rect x="80" y="70" width="1460" height="500" rx="36" fill="#191816" stroke="#ffffff0b" stroke-width="2"/><rect x="80" y="610" width="1460" height="230" rx="36" fill="#1b1a17" stroke="#ffffff0b" stroke-width="2"/><rect x="82" y="72" width="1456" height="496" rx="34" fill="none" stroke="#00000059" stroke-width="3" transform="translate(0 3)"/><g fill="#2b2926" stroke="#00000080" stroke-width="2"><circle cx="112" cy="102" r="9"/><circle cx="1508" cy="102" r="9"/><circle cx="112" cy="538" r="9"/><circle cx="1508" cy="538" r="9"/></g><g stroke="#00000066" stroke-width="2"><line x1="106" y1="102" x2="118" y2="102"/><line x1="1502" y1="102" x2="1514" y2="102"/><line x1="106" y1="538" x2="118" y2="538"/><line x1="1502" y1="538" x2="1514" y2="538"/></g></svg>`,
+stripes:`<svg ${V}><g fill="none" stroke-linecap="butt" stroke-width="44"><path d="M-40 770 H1080 a300 300 0 0 0 300 -300 V-40" stroke="#4a2e1b"/><path d="M-40 718 H1080 a248 248 0 0 0 248 -248 V-40" stroke="#6b4325"/><path d="M-40 666 H1080 a196 196 0 0 0 196 -196 V-40" stroke="#8a6a3d" stroke-opacity=".75"/></g></svg>`};
+function setGeo(k){document.querySelectorAll('.geo').forEach(g=>g.innerHTML=GEO[k])}
+setGeo('orbit');seg('geo',setGeo);
 seg('sty',v=>style=v);seg('spd',v=>speed=v);seg('tex',v=>{tv.classList.remove('tx0','tx1','tx2');tv.classList.add(v)});
 document.getElementById('go').addEventListener('click',()=>{tv.focus();launch()});
 
