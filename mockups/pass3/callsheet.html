@@ -1,0 +1,1289 @@
+<title>Callsheet Calm v3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Callsheet pass 3 (settle and polish). One app template rendered into scaled frames: desktop 1440x900, phone 390x844.
+   Flows from projects/callsheet/FLOW.md drive a desktop and a phone frame. Simplified Braun Hi-Fi: flat cards, ribs only
+   on black bands, flat indicator windows, ONE orange per screen (D82), quiet paddles (D83), red alert key (D84),
+   warn triangle (D92). Fake sample data only (Sam, example.com, Co. A/B). */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5a5d5c;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--dec:cubic-bezier(.16,1,.3,1);--settle:cubic-bezier(.3,1.3,.5,1);--leave:cubic-bezier(.4,0,1,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a3a5a1;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a3a5a1;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:30px}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(28px,4vw,38px)/1.1 var(--f);margin:6px 0 8px}
+h2{font:600 21px var(--f);margin:0}
+p{margin:0;max-width:78ch}
+.muted{color:var(--muted)}
+.ctrls{display:flex;gap:14px 22px;flex-wrap:wrap;align-items:center}
+.ctrls>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line);flex-wrap:wrap}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 13px;border-radius:9px;cursor:pointer;min-height:38px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111213}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111213}}
+.seg button:focus-visible,.pbtn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+section.blk{display:grid;gap:14px;min-width:0}
+figure{margin:0;display:grid;gap:8px;min-width:0;width:100%;align-content:start}
+figcaption{font-size:14px;color:var(--muted)}
+.frame{position:relative;width:100%;border-radius:16px;background:#0d0d0c;padding:10px;box-shadow:0 20px 50px #0000004d}
+.screen{position:relative;overflow:hidden;border-radius:8px;outline:none}
+.screen:focus-visible{box-shadow:0 0 0 3px #ec7c22}
+.phone{max-width:414px;border-radius:44px;padding:12px;justify-self:center}.phone .screen{border-radius:34px}
+.scaler{position:absolute;top:0;left:0;transform-origin:0 0}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}
+@media (max-width:1100px){.stage{grid-template-columns:1fr}}
+.gal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.gal4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;align-items:start}
+@media (max-width:1100px){.gal4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.gal,.gal4{grid-template-columns:1fr}}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+@media (max-width:900px){.cols3{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:6px;font-size:15px;align-content:start}
+.note b{font-weight:600}
+ul.chg{margin:0;padding-left:20px;display:grid;gap:4px;max-width:96ch}
+/* flow player */
+.player{display:grid;gap:12px;border:1px solid var(--line);border-radius:16px;background:var(--chip);padding:14px 16px}
+.flows{display:flex;gap:6px;flex-wrap:wrap}
+.pbtn{font:500 14px var(--f);border:1px solid var(--line);background:transparent;color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer;min-height:40px;text-align:left}
+.pbtn[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9;border-color:#1d1c1a}
+:root[data-theme="dark"] .pbtn[aria-pressed="true"]{background:#e9e7e2;color:#111213}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pbtn[aria-pressed="true"]{background:#e9e7e2;color:#111213}}
+.pbtn b{font:500 12px var(--mono);margin-right:6px;opacity:.7}
+.prow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.dots{display:flex;gap:6px;flex-wrap:wrap}
+.dots button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);font:500 13px var(--mono);cursor:pointer}
+.dots button[aria-current="step"]{background:#ec7c22;border-color:#ec7c22;color:#1d1c1a}
+.cap{font-size:16px;flex:1;min-width:240px}
+.cap b{font-weight:600}
+table.t{border-collapse:collapse;width:100%;font-size:14px}
+table.t th,table.t td{text-align:left;vertical-align:top;padding:8px 10px;border-top:1px solid var(--line)}
+table.t th{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tablebox{overflow-x:auto}
+
+/* ================= Braun Hi-Fi tokens (Jam Theme values) ================= */
+.bh{--bg:#e3e1dc;--card:#f1efeb;--key:#e6e3de;--rule:#d4d1ca;--ink:#1d1c1a;--dim:#615e57;--band:#1d1c1a;--band-ink:#ece8df;--band-dim:#aaa598;
+  --orange:#ec7c22;--deep:#b55a12;--walnut:#6b4428;--field:#e9e6e0;--pad:#f7f5f1;--track:#cfcbc3;
+  --win:#151413;--cream:#f3e6c8;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;--alert-ink:#b3261b;--warn-ink:#7f5a00;
+  --ribs:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 2px,transparent 2px 8px);
+  position:relative;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:var(--f);overflow:hidden}
+.bh.night{--bg:#1c1c1b;--card:#2a2a28;--key:#353533;--rule:#3a3a37;--ink:#ece9e2;--dim:#a6a399;--band:#121211;--orange:#f08a2c;--field:#20201f;--pad:#55554f;--track:#141413;--alert-ink:#ff7466;--warn-ink:#f2c14e}
+.bh button{font-family:var(--f)}
+.lab{font:500 13px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.card{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px #0000001a,0 4px 12px #0000000f;min-width:0}
+.bh.night .card{box-shadow:0 1px 2px #00000059}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sm{font-size:15px;color:var(--dim);line-height:1.4}
+/* indicator windows */
+.ind{position:relative;display:inline-block;flex:none;background:var(--win);box-shadow:inset 0 1px 2px #000}
+.ind::after{content:"";position:absolute;inset:1.5px;border-radius:inherit;background:var(--c,var(--cream));opacity:0;transition:opacity 300ms var(--dec)}
+.ind.on::after{opacity:1}
+.led{width:10px;height:10px;border-radius:50%}.sq{width:10px;height:10px;border-radius:2px}.slot{width:22px;height:7px;border-radius:2px}
+.bars{display:inline-flex;gap:2px;align-items:center;background:var(--win);padding:2px;border-radius:3px;box-shadow:inset 0 1px 2px #000}.bars .ind{width:5px;height:14px;border-radius:1px;background:#2b2a27;box-shadow:none}.bars .ind::after{inset:0;border-radius:1px}.bars .ovf{color:var(--cream)!important;margin:0 4px 0 6px!important;font-size:13px!important}
+.bars .ovf{font:500 14px var(--mono);margin-left:6px;color:var(--ink)}
+.ind.ok{--c:var(--ok)}.ind.alert{--c:var(--alert)}.ind.warn{--c:var(--warn)}
+.word{font:500 13px var(--f);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.word.alert{color:var(--alert-ink)}.word.ok{color:var(--dim)}.word.warn{color:var(--warn-ink)}
+/* buttons */
+.btn{appearance:none;border:0;cursor:pointer;font:500 16px var(--f);border-radius:12px;padding:11px 18px;min-height:46px;display:inline-flex;gap:10px;align-items:center;justify-content:center;transition:transform 100ms;white-space:nowrap;position:relative;overflow:hidden}
+.btn.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 2px 0 var(--deep)}
+.btn.sec{background:var(--key);color:var(--ink);box-shadow:0 2px 0 #0000001f}
+.btn.ink{background:var(--ink);color:var(--bg);box-shadow:0 2px 0 #00000040}
+.btn:active{transform:translateY(1px)}
+.btn svg,.ql svg,.ib svg,.tab svg,.chipb svg,.hb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.kh{font:500 12px var(--mono);padding:1px 6px;border-radius:5px;background:#00000014;color:inherit;opacity:.85;text-decoration:none;display:inline-block;line-height:18px}
+.bh.night .btn.sec .kh,.bh.night .ql .kh{background:#ffffff14}
+.ql{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);font:500 15px var(--f);padding:8px 0;min-height:40px;display:inline-flex;gap:6px;align-items:center;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:4px;text-decoration-thickness:2px}
+.ql:hover{text-decoration-color:var(--ink)}
+.ib{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:none}
+.ib:hover{background:var(--key)}
+.ib svg{width:22px;height:22px}
+.key{appearance:none;border:0;cursor:pointer;font:500 15px var(--f);color:var(--ink);background:var(--key);border-radius:10px;padding:8px 14px;min-height:40px;display:inline-flex;gap:8px;align-items:center;box-shadow:0 2px 0 #0000001f}
+.key[aria-pressed="true"]{background:var(--card);box-shadow:inset 0 1px 3px #00000033}
+.bh.night .key[aria-pressed="true"]{background:#232321;box-shadow:inset 0 1px 3px #000}
+.key svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.key{white-space:nowrap}
+.kseg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--key)}
+.kseg .key{box-shadow:none;background:transparent}
+.kseg .key[aria-pressed="true"]{background:var(--card);box-shadow:inset 0 1px 3px #00000033}
+.bh.night .kseg .key[aria-pressed="true"]{background:#232321}
+.tag{font:500 13px var(--f);letter-spacing:.06em;color:var(--dim);border:1px solid var(--rule);border-radius:999px;padding:1px 9px;white-space:nowrap}
+.tag.vip{color:var(--ink);border-color:var(--ink)}
+.tag.warn{color:var(--warn-ink);border-color:currentColor}
+.bh :is(.btn,.ql,.ib,.key,.tab,.chipb,.rrow,.lrow,.hb,.findb,.sw,.place,.adv>button,.dayb):focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+/* rocker (bible: up = on, orange paddle) */
+.sw{appearance:none;border:0;padding:0;cursor:pointer;position:relative;width:28px;height:42px;border-radius:8px;background:var(--track);box-shadow:inset 0 2px 4px #00000040;flex:none}
+.sw .pad{position:absolute;left:3px;right:3px;top:19px;height:20px;border-radius:6px;background:var(--pad);box-shadow:0 2px 0 #00000026,0 3px 6px #00000026;transition:transform 260ms var(--settle),background 150ms}
+.sw[aria-pressed="true"] .pad{transform:translateY(-16px);background:var(--orange)}
+.swhit{display:grid;place-items:center;width:44px;height:48px;flex:none}
+/* app frame */
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.trim{flex:none;height:4px;background:var(--walnut)}
+.hdr{flex:none;display:flex;align-items:center;gap:18px;padding:0 24px;height:64px;background:var(--card);box-shadow:0 1px 0 var(--rule);position:relative;z-index:2}
+.wm{font:600 22px var(--f);letter-spacing:.01em}
+.dt{font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.tabs{display:flex;gap:2px;align-self:stretch;margin-left:8px}
+.htab{appearance:none;border:0;background:none;cursor:pointer;font:500 16px var(--f);color:var(--dim);padding:0 13px;position:relative;display:flex;gap:8px;align-items:center}
+.htab[aria-selected="true"]{color:var(--ink)}
+.htab[aria-selected="true"]::after{content:"";position:absolute;left:13px;right:13px;bottom:0;height:3px;border-radius:2px 2px 0 0;background:var(--ink)}
+.htab .n{font:500 13px var(--mono);background:var(--key);border-radius:999px;padding:0 7px;color:var(--ink)}
+.hr{margin-left:auto;display:flex;gap:8px;align-items:center}
+.findb{appearance:none;border:0;cursor:pointer;display:flex;gap:10px;align-items:center;background:var(--field);border-radius:12px;padding:0 10px 0 12px;height:40px;min-width:200px;color:var(--dim);font:400 15px var(--f);box-shadow:inset 0 1px 2px #00000026}
+.findb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.findb .kh{margin-left:auto}
+.hb{appearance:none;border:0;background:none;cursor:pointer;display:flex;gap:8px;align-items:center;color:var(--ink);font:500 15px var(--f);padding:0 10px;height:40px;border-radius:10px;position:relative;overflow:hidden;white-space:nowrap}
+.hb:hover{background:var(--key)}
+.hb .sub{font:500 13px var(--mono);color:var(--dim)}
+.hb[aria-current="page"]{background:var(--key)}
+/* job in place: a cream slot filling along the bottom of the button that started it (D29) */
+.job{position:absolute;left:8px;right:8px;bottom:3px;height:4px;border-radius:2px;background:var(--win);overflow:hidden}
+.job i{position:absolute;inset:1px;border-radius:1px;background:var(--cream);transform-origin:0 50%;transform:scaleX(var(--p,.06));animation:fill 2400ms linear forwards}
+.job.still i{animation:none}
+@keyframes fill{from{transform:scaleX(.04)}to{transform:scaleX(1)}}
+.body{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;position:relative}
+.body::-webkit-scrollbar{display:none}
+/* phone shell */
+.phn .hdr{height:58px;padding:0 4px 0 16px;gap:6px}
+.phn .wm{font-size:20px}
+.phn .dt{font-size:12px}
+.pbar{display:flex;margin-left:auto}
+.pbar .hb{flex-direction:column;gap:1px;height:56px;width:54px;padding:4px 0 0;font:500 12px var(--f);justify-content:center}
+.pbar .hb svg{width:20px;height:20px}
+.pbar .job{left:10px;right:10px;bottom:2px}
+.ptabs{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--card);box-shadow:0 -1px 0 var(--rule);padding:4px 2px 20px;position:relative;z-index:2}
+.tab{appearance:none;border:0;background:none;cursor:pointer;color:var(--dim);display:grid;justify-items:center;gap:3px;padding:6px 0 4px;min-height:58px;font:500 13px var(--f);position:relative}
+.tab svg{width:22px;height:22px}
+.tab .win{width:22px;height:4px;border-radius:2px;background:var(--win);position:relative;margin-bottom:2px}
+.tab .win::after{content:"";position:absolute;inset:1px;border-radius:1px;background:var(--cream);opacity:0}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab[aria-selected="true"] .win::after{opacity:1}
+.tab .n{position:absolute;top:9px;left:calc(50% + 9px);font:500 12px var(--mono);background:var(--key);color:var(--ink);border-radius:999px;padding:0 6px;line-height:18px}
+/* ===== Today ===== */
+.td{max-width:1344px;margin:0 auto;padding:26px 48px 18px;display:grid;gap:18px}
+.heroW{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start;min-height:132px}
+.hero{display:grid;gap:6px;max-width:800px}
+.hero h2{font:600 38px/1.1 var(--f);margin:0}
+.say{font:400 25px/1.36 var(--f);margin:0;max-width:30em;text-wrap:pretty}
+.ebl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.accent{height:130px;pointer-events:none;display:flex;justify-content:flex-end}
+.accent svg{height:100%;width:auto;display:block;max-width:100%}
+.accent path{stroke-dasharray:420;stroke-dashoffset:420;animation:draw 900ms var(--dec) forwards}
+.accent path:nth-child(2){animation-delay:110ms}.accent path:nth-child(3){animation-delay:220ms}
+.accent.still path{animation:none;stroke-dashoffset:0}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.accent path{animation:none;stroke-dashoffset:0}.job i{animation:none;transform:scaleX(.6)}}
+/* day band: the tuning scale, two lanes so a clash shows as two windows */
+.dayb{background:var(--band);background-image:var(--ribs);color:var(--band-ink);border-radius:16px;padding:12px 22px 8px;display:grid;gap:6px;cursor:pointer;border:0;text-align:left;font:inherit;width:100%}
+.dayb .lab{color:var(--band-dim)}
+.dayb .hdl{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.dayb .go{display:flex;gap:6px;align-items:center;font:500 15px var(--f);color:var(--band-ink);white-space:nowrap}
+.dayb .go svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.dayb .go .kh{background:#ffffff1a}
+.trk{position:relative;display:block}
+.names{position:relative;height:22px;display:block}
+.names span{position:absolute;bottom:0;font:500 15px/20px var(--f);white-space:nowrap;color:var(--band-ink)}
+.names span.past{color:var(--band-dim)}
+.names span.warn{color:var(--warn)}
+.scale{position:relative;display:block;margin-top:4px}
+.scale .w{position:absolute;border-radius:4px;background:var(--win);box-shadow:inset 0 1px 2px #000}
+.scale .w::after{content:"";position:absolute;inset:2px;border-radius:3px;background:var(--c,var(--cream))}
+.scale .w.past::after{opacity:0}
+.scale .w.warn{--c:var(--warn)}
+.ticks{position:relative;height:22px;display:block}
+.ticks i{position:absolute;top:2px;width:1px;height:6px;background:#ffffff47}
+.ticks b{position:absolute;top:7px;font:500 13px var(--mono);color:var(--band-dim);transform:translateX(-50%)}
+.needle{position:absolute;bottom:18px;width:2px;margin-left:-1px;background:#fbf6ea;border-radius:1px}
+.needle::before{content:"";position:absolute;top:-2px;left:-4px;width:10px;height:6px;border-radius:2px;background:#fbf6ea}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:22px;align-items:start}
+/* the Next card: the one next thing, workable in place */
+.nx{display:grid;gap:12px;padding:22px 24px}
+.nx .who{font:500 28px/1.15 var(--f)}
+.nx .why{font:400 19px/1.4 var(--f);margin:0}
+.nx .tl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.draft{background:var(--field);border-radius:12px;box-shadow:inset 0 1px 3px #00000026;padding:12px 16px;font:400 17px/1.5 var(--f);outline:none;min-height:56px}
+.draft:focus{box-shadow:inset 0 1px 3px #00000026,0 0 0 2px var(--orange)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.quiet{display:flex;gap:4px 18px;flex-wrap:wrap}
+.quiet .ql{color:var(--dim);font-size:15px}
+.facts{display:flex;gap:8px;flex-wrap:wrap}
+.fact{background:var(--key);border-radius:10px;padding:6px 12px;font-size:15px}
+.fact b{font-weight:500}
+/* rundown list */
+.rd{padding:6px 0}
+.rd .rh{display:flex;justify-content:space-between;align-items:center;padding:8px 20px 6px;gap:10px}
+.rrow{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);text-align:left;display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 20px;min-height:68px;border-top:1px solid var(--rule);width:100%;font:inherit}
+.rrow .nn{font:500 13px var(--mono);color:var(--dim)}
+.rrow .t0{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rrow .t1{font:500 17px/1.3 var(--f)}
+.rrow>svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2}
+.rrow .st{display:flex;gap:8px;align-items:center}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--dim);font:500 13px var(--mono);letter-spacing:.04em}
+/* phone today */
+.phn .td{padding:14px 16px 20px;gap:12px}
+.phn .heroW{grid-template-columns:minmax(0,1fr) 92px;min-height:0;gap:8px}
+.phn .accent{height:64px}
+.phn .hero h2{font-size:26px}
+.phn .say{font-size:19px;line-height:1.38}
+.phn .dayb{padding:10px 14px 4px;border-radius:14px}
+.phn .split{grid-template-columns:1fr;gap:12px}
+.phn .nx{padding:16px;gap:10px}
+.phn .nx .who{font-size:23px}
+.phn .nx .why{font-size:17px}
+.phn .draft{font-size:16px;padding:10px 14px}
+.phn .draft.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.phn .acts .btn{flex:1 1 auto}
+.phn .rrow{padding:10px 16px;min-height:62px}
+.phn .rd .rh{padding:8px 16px 4px}
+/* rundown step mode (Wheatley) */
+.rs{min-height:100%;display:flex;flex-direction:column;max-width:980px;margin:0 auto;padding:28px 48px 28px;gap:20px}
+.rs .bar{display:flex;align-items:center;gap:14px}
+.rs .segs{display:flex;gap:6px;flex:1}
+.rs .segs .ind{height:8px;flex:1;border-radius:3px}
+.rs .segs .ind::after{inset:2px;border-radius:2px}
+.rs .stp{display:grid;gap:18px;flex:1;align-content:center;padding:14px 0 40px}
+.rs h3{font:500 42px/1.2 var(--f);margin:0;text-wrap:pretty}
+.rs .ppl b,.rs .kn b,.rs .dt8 .nm{font-size:21px}.rs .sm{font-size:17px}
+.phn .rs .ppl b,.phn .rs .kn b,.phn .rs .dt8 .nm{font-size:18px}.phn .rs .sm{font-size:15px}
+.rs .nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rs .nav .sp{flex:1}
+.ppl{display:grid}
+.ppl>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 0;border-top:1px solid var(--rule)}
+.ppl>div:first-child{border-top:0}
+.ppl b{font:500 19px var(--f)}
+.kn{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:6px 12px;align-items:start;padding:12px 0;border-top:1px solid var(--rule)}
+.kn:first-child{border-top:0}
+.kn .ind{margin-top:7px}
+.kn b{font:500 18px/1.3 var(--f)}
+.tiles{display:grid;gap:10px}
+.dt8{display:grid;grid-template-columns:62px minmax(0,1fr);gap:14px;align-items:center}
+.dt8 .dd{background:var(--key);border-radius:12px;text-align:center;padding:6px 0;display:grid}
+.dt8 .dd b{font:600 24px/1 var(--f)}
+.dt8 .dd span{font:500 13px var(--mono);color:var(--dim);text-transform:uppercase}
+.dt8 .nm{font:500 18px var(--f)}
+.phn .rs{padding:12px 16px 18px;gap:14px}
+.phn .rs h3{font-size:25px;line-height:1.28}
+.phn .rs .stp{padding:4px 0 12px;gap:14px;align-content:start}
+.phn .rs .nav .btn{flex:1}
+.phn .rs .nav .sp{display:none}
+/* push lock screen */
+.lock{position:absolute;inset:0;background:#141413;color:#ece8df;display:grid;align-content:start;justify-items:center;padding:90px 14px 0;gap:4px;cursor:pointer}
+.lock .clk{font:300 84px/1 var(--f);letter-spacing:.01em}
+.lock .dte{font:500 18px var(--f);color:#c9c4b8;margin-bottom:28px}
+.lock .ntf{width:100%;background:#2a2a28;border-radius:18px;padding:14px 16px;display:grid;gap:4px;text-align:left;border:0;color:inherit;font:inherit;cursor:pointer}
+.lock .ntf .lab{color:#b9b4a8;display:flex;justify-content:space-between}
+.lock .ntf b{font:600 17px var(--f)}
+.lock .ntf span.t{font-size:16px;line-height:1.35;color:#e0dbcf}
+.lock .hint{position:absolute;bottom:26px;font-size:14px;color:#9a968c}
+/* replies */
+.rp{max-width:1344px;margin:0 auto;padding:24px 48px;display:grid;gap:16px}
+.rp .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.rp .top h2,.pg .top h2{font:600 30px var(--f);margin:0}
+.cnt{font:500 15px var(--mono);color:var(--dim)}
+.rpl{display:grid;grid-template-columns:500px minmax(0,1fr);gap:22px;align-items:start}
+.lst{padding:4px 0 8px}
+.lst .sec{display:flex;justify-content:space-between;padding:12px 18px 6px}
+.lrow{appearance:none;border:0;background:none;cursor:pointer;text-align:left;color:var(--ink);display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:4px 12px;padding:11px 18px 11px 12px;border-top:1px solid var(--rule);width:100%;font:inherit;min-height:60px;align-items:center}
+.lrow .sel{width:6px;height:28px;border-radius:2px;background:var(--win);position:relative;align-self:center}
+.lrow .sel::after{content:"";position:absolute;inset:1.5px;border-radius:1px;background:var(--cream);opacity:0}
+.lrow[aria-selected="true"]{background:var(--key)}
+.lrow[aria-selected="true"] .sel::after{opacity:1}
+.lrow b{font:500 17px var(--f)}
+.lrow .one{font-size:15px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.lrow .age{font:500 13px var(--mono);color:var(--dim)}
+.oat{max-width:820px;margin:0 auto;width:100%;display:grid;gap:14px}
+.peek{opacity:.6;transform:scale(.97);transform-origin:50% 0;padding:14px 22px;display:flex;gap:12px;align-items:center}
+.phn .rp{padding:12px 16px 20px;gap:12px}
+.phn .rp .top{gap:10px}
+.phn .rp .top h2,.phn .pg .top h2{font-size:24px}
+.phn .lrow{padding:10px 14px 10px 8px;min-height:64px}
+.phn .oatc{touch-action:pan-y;transition:transform 200ms var(--glide)}
+/* all clear */
+.clr{min-height:100%;display:grid;place-content:center;justify-items:center;text-align:center;gap:12px;padding:40px 24px}
+.clr .accent{height:150px;justify-content:center}
+.clr h2{font:600 46px/1.1 var(--f);margin:4px 0 0}
+.clr p{font-size:20px;color:var(--dim)}
+.clr p.foot{font-size:13px}
+.phn .clr .accent{height:110px}
+.phn .clr h2{font-size:34px}
+/* pages */
+.pg{max-width:1344px;margin:0 auto;padding:24px 48px;display:grid;gap:16px}
+.pg .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.phn .pg{padding:12px 16px 20px;gap:12px}
+/* agenda */
+.agl{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:22px;align-items:start}
+.ev{display:grid;grid-template-columns:62px 12px minmax(0,1fr);gap:14px;align-items:start;padding:11px 0}
+.ev .tm{font:500 16px var(--mono);padding-top:1px}
+.ev .nm{font:500 18px/1.3 var(--f)}
+.ev.past .nm,.ev.past .tm{color:var(--dim)}
+.ev .ind{margin-top:5px;width:10px;height:20px;border-radius:3px}
+.free{display:grid;grid-template-columns:62px minmax(0,1fr);gap:26px;align-items:center;padding:3px 0}
+.free span:last-child{border-top:1px dashed var(--rule);padding-top:4px}
+.nowl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;padding:4px 0}
+.nowl .lab{white-space:nowrap;color:var(--ink)}
+.nowl i{height:2px;background:var(--ink);border-radius:1px;position:relative}
+.nowl i::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--ink)}
+.clash{border-radius:14px;background:var(--card);padding:6px 16px 12px;box-shadow:inset 0 0 0 2px var(--warn);margin:4px -16px}
+.clash .ev{padding:8px 0}
+.msg{appearance:none;border:0;cursor:pointer;display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--key);border-radius:10px;padding:10px 12px;font:400 15px/1.35 var(--f);color:var(--ink);min-height:44px}
+.msg svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+.inv{display:grid;gap:4px;padding:12px 0;border-top:1px solid var(--rule)}
+.inv b{font:500 17px var(--f)}
+.invs{max-height:420px;overflow:auto}
+.phn .agl{grid-template-columns:1fr;gap:12px}
+.phn .clash{margin:4px -8px;padding:6px 10px 10px}
+.phn .invs{max-height:none}
+/* ask */
+.askp{max-width:820px;margin:0 auto;padding:24px 24px 0;display:flex;flex-direction:column;gap:14px;min-height:100%}
+.q{align-self:flex-end;background:var(--key);border-radius:16px 16px 4px 16px;padding:12px 16px;font-size:17px;max-width:80%}
+.ans{display:grid;gap:12px}
+.ans .tx{font:400 20px/1.45 var(--f);margin:0}
+.steps{display:grid;gap:6px;font-size:16px}
+.steps div{display:flex;gap:10px;align-items:center}
+.chipb{appearance:none;border:0;cursor:pointer;display:inline-flex;gap:8px;align-items:center;background:var(--key);color:var(--ink);border-radius:999px;padding:6px 14px;min-height:40px;font:400 15px var(--f);box-shadow:0 1px 0 #0000001f;text-align:left}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.compose{position:sticky;bottom:0;margin-top:auto;background:var(--bg);padding:12px 0 20px;display:flex;gap:10px}
+.fieldi{flex:1;background:var(--field);border:0;border-radius:12px;box-shadow:inset 0 1px 3px #00000026;padding:0 16px;font:400 17px var(--f);color:var(--ink);min-height:48px;min-width:0;width:100%}
+.fieldi::placeholder{color:var(--dim)}
+textarea.fieldi{padding:12px 16px;min-height:88px;resize:none;font:400 16px/1.45 var(--f)}
+.phn .askp{padding:14px 16px 0;gap:12px}
+.phn .ans .tx{font-size:18px}
+/* palette */
+.veil{position:absolute;inset:0;background:#00000066;z-index:4;animation:fade 150ms both}
+@keyframes fade{from{opacity:0}}
+.pal{position:absolute;top:100px;left:50%;transform:translateX(-50%);width:680px;background:var(--card);border-radius:18px;box-shadow:0 20px 60px #00000066;z-index:5;overflow:hidden}
+.pal .in{display:flex;gap:12px;align-items:center;padding:0 18px;height:64px;border-bottom:1px solid var(--rule)}
+.pal .in svg{width:20px;height:20px;fill:none;stroke:var(--dim);stroke-width:2}
+.pal .in input{flex:1;border:0;background:none;font:400 20px var(--f);color:var(--ink);outline:none;min-width:0}
+.pal .grp{padding:8px 10px}
+.pal .grp .lab{padding:8px 10px 4px;display:block}
+.po{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;font-size:16px}
+.po svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2}
+.po.sel{background:var(--key);box-shadow:inset 3px 0 0 var(--cream)}
+.pal .ft{display:flex;justify-content:space-between;gap:10px;padding:10px 18px;border-top:1px solid var(--rule);font:500 13px var(--mono);color:var(--dim)}
+.phn .pal{top:70px;width:calc(100% - 24px)}
+/* sheets (D43): phone bottom sheet; desktop centred; Close top right; Esc and veil close */
+.sheet{position:absolute;z-index:5;background:var(--card);box-shadow:0 20px 60px #00000066;display:grid;gap:14px;padding:22px 24px 24px;left:50%;top:50%;transform:translate(-50%,-50%);width:580px;border-radius:20px;animation:rise 250ms var(--dec) both}
+@keyframes rise{from{opacity:0;transform:translate(-50%,-46%)}}
+.sheet .sx{position:absolute;top:10px;right:10px}
+.sheet h3{font:600 26px/1.15 var(--f);margin:0;padding-right:44px}
+.phn .sheet{left:0;right:0;top:auto;bottom:0;width:auto;transform:none;border-radius:22px 22px 0 0;padding:20px 16px 30px;animation:up 250ms var(--dec) both}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.phn .sheet h3{font-size:22px}
+.grip{justify-self:center;width:40px;height:5px;border-radius:3px;background:var(--rule);margin:-8px 0 -4px}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opts .key{justify-content:flex-start;min-height:46px}
+.swrow{display:flex;gap:12px;align-items:center;justify-content:space-between;min-height:52px}
+.fl2{display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 14px;font-size:16px}
+.fl2 span:nth-child(odd){color:var(--dim)}
+/* toast */
+.toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:#1d1c1a;color:#ece8df;border-radius:12px;padding:6px 6px 6px 16px;display:flex;gap:12px;align-items:center;font-size:15px;box-shadow:0 6px 20px #0000004d;z-index:6;max-width:calc(100% - 24px)}
+.bh.night .toast{background:#3a3a37}
+.toast span{min-width:0}
+.toast button{appearance:none;border:0;background:#ffffff1a;color:#ece8df;border-radius:9px;padding:0 14px;height:40px;font:500 15px var(--f);cursor:pointer;flex:none}
+.phn .toast{bottom:96px;font-size:14px}
+/* projects */
+.pj{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:14px 0;border-top:1px solid var(--rule)}
+.pj:first-child{border-top:0}
+.pj b{font:500 18px var(--f)}
+.pjl{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:22px;align-items:start}
+.phn .pjl{grid-template-columns:1fr;gap:12px}
+/* setup */
+.su{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;align-items:start}
+.pnav{display:grid;gap:4px}
+.place{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);text-align:left;display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 14px;border-radius:12px;width:100%;font:inherit;min-height:56px}
+.place[aria-current="page"]{background:var(--card);box-shadow:inset 0 1px 3px #00000026}
+.place b{font:500 17px var(--f)}
+.place .sm{grid-column:2;font-size:14px}
+.place .ind{grid-row:1/3;align-self:center}
+.place>svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2;grid-row:1/3;grid-column:3}
+.srow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:10px 0;border-top:1px solid var(--rule);min-height:68px}
+.srow:first-child{border-top:0}
+.srow.no{grid-template-columns:minmax(0,1fr) auto}
+.srow b{font:500 17px var(--f)}
+.srow .big{font:500 22px var(--mono)}
+.srow .more{grid-column:2/-1;display:grid;gap:10px;padding:8px 0 4px}
+.dk{display:flex;gap:6px;flex-wrap:wrap}
+.dk .key{min-width:52px;justify-content:center;padding:8px 10px}
+.dk .key .ind{width:8px;height:8px}
+.adv{border-top:1px solid var(--rule)}
+.adv:first-child{border-top:0}
+.adv>button{appearance:none;border:0;background:none;cursor:pointer;width:100%;display:flex;justify-content:space-between;align-items:center;padding:14px 0;min-height:54px;color:var(--ink);font:500 17px var(--f);text-align:left}
+.adv>button svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2}
+.adv .in{padding:0 0 16px;display:grid;gap:10px}
+.phn .su{grid-template-columns:1fr;gap:12px}
+.phn .srow{grid-template-columns:44px minmax(0,1fr) auto;gap:2px 10px}
+.phn .srow.no{grid-template-columns:minmax(0,1fr) auto}
+/* ================= pass 3 additions ================= */
+/* warn = amber triangle window (D92); alert = round, red, ringed */
+.ind.tri{width:13px;height:11px;border-radius:0;clip-path:polygon(50% 0,100% 100%,0 100%);box-shadow:none}
+.ind.tri::after{inset:0;border-radius:0;clip-path:polygon(50% 30%,84% 90%,16% 90%)}
+.led.ring{box-shadow:inset 0 1px 2px #000,0 0 0 2px var(--card),0 0 0 3.5px var(--alert)}
+/* the alert key (D84): solid red with dark text; nothing else orange while it shows */
+.btn.al{background:var(--alert);color:#1d1c1a;box-shadow:0 2px 0 #a8281d}
+/* quiet paddles (D83): the paddle is never orange; on = up + a lit cream window on the paddle */
+.sw[aria-pressed="true"] .pad{background:var(--pad)}
+.sw .pad::after{content:"";position:absolute;left:50%;top:7px;width:14px;height:5px;margin-left:-7px;border-radius:2px;background:var(--win);box-shadow:inset 0 1px 1px #000}
+.sw .pad::before{content:"";position:absolute;left:50%;top:8px;width:12px;height:3px;margin-left:-6px;border-radius:1px;background:var(--cream);z-index:1;opacity:0;transition:opacity 200ms}
+.sw[aria-pressed="true"] .pad::before{opacity:1}
+.sw:disabled{opacity:.45;cursor:not-allowed}
+/* tab bars draw only the lit window (D91) */
+.tab .win{background:transparent;box-shadow:none}
+.tab .win::after{opacity:0}
+.tab[aria-selected="true"] .win{background:var(--win)}
+/* one orange per frame: the page behind a sheet or palette loses its orange (D97) */
+.app.hush .body .btn.pri,.app.hush .body .btn.al,.app.boxoff .body .btn.pri{background:var(--key);color:var(--ink);box-shadow:0 2px 0 #0000001f}
+/* the Then line under a non-reply Next card */
+.then{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 12px;align-items:center;border-top:1px solid var(--rule);padding-top:12px;margin-top:2px}
+.then .tw{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.then .tw b{font-weight:500}
+.phn .then{grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px}
+.phn .then .tw{font-size:15px}
+.phn .then .key{padding:8px 10px}
+.split{align-items:stretch}
+.split .nx{min-height:300px;align-content:start}
+/* offline (D27): dashed, a word, one Try again */
+.offc{background:transparent!important;box-shadow:none!important;border:2px dashed var(--rule)}
+.bh.night .offc{border-color:#4a4a46}
+.offbar{flex:none;display:flex;gap:10px 14px;align-items:center;padding:10px 24px;border-bottom:2px dashed var(--rule);background:var(--bg);position:relative;z-index:1}
+.offbar .tx{display:grid;gap:1px;min-width:0;flex:1}
+.offbar b{font:500 16px var(--f)}
+.phn .offbar{padding:10px 16px;flex-wrap:wrap}
+.phn .offbar .btn{flex:1 1 100%}
+.phn .offbar .tx{flex:1 1 calc(100% - 30px)}
+.app.boxoff .hb[data-act="refresh"],.app.boxoff .findb,.app.boxoff .hb[data-act="pal"]{opacity:.4;pointer-events:none}
+.scale .w.stale{background:transparent;box-shadow:none;outline:1.5px dashed #ffffff66;outline-offset:-1.5px}
+.scale .w.stale::after{opacity:0}
+.toast .ind{flex:none}
+/* black bands at night (D99) */
+.bh.night .dayb,.bh.night .vband{box-shadow:inset 0 0 0 1px #ffffff1a,inset 0 1px 0 #ffffff2e;--ribs:repeating-linear-gradient(0deg,#ffffff14 0 1px,#00000052 1px 2px,transparent 2px 8px)}
+.dayb .hdl{min-height:22px}
+/* sub-navigation inside Ask */
+.subn{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--key);justify-self:start;align-self:flex-start}
+.subn .key{box-shadow:none;background:transparent}
+.subn .key[aria-pressed="true"]{background:var(--card);box-shadow:inset 0 1px 3px #00000033}
+.bh.night .subn .key[aria-pressed="true"]{background:#232321}
+/* people */
+.ppl3{display:grid;grid-template-columns:minmax(0,1fr) 480px;gap:22px;align-items:start}
+.phn .ppl3{grid-template-columns:1fr;gap:12px}
+.same{display:grid;gap:12px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
+.pair>div{background:var(--key);border-radius:12px;padding:10px 14px;display:grid;gap:2px;min-width:0}
+.pair b{font:500 18px var(--f)}
+.pair .sm{font-size:14px;overflow-wrap:anywhere}
+.pair .eq{font:500 18px var(--mono);color:var(--dim)}
+.phn .pair{grid-template-columns:1fr;gap:6px}
+.phn .pair .eq{display:none}
+.pd{display:grid;gap:14px}
+.pd h3{font:600 30px/1.1 var(--f);margin:0}
+.srcs{display:grid}
+.srcs>div{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--rule);font-size:16px;min-width:0}
+.srcs>div:first-child{border-top:0}
+.srcs svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2}
+/* know me */
+.km{display:grid;gap:16px}
+.km2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.phn .km2{grid-template-columns:1fr;gap:12px}
+.kst{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:2px 14px;align-items:center;padding:14px 0;border-top:1px solid var(--rule)}
+.kst:first-child{border-top:0}
+.kst>.ind{grid-row:1/3}
+.kst b{font:500 18px var(--f)}
+.kst>.btn,.kst>.ql{grid-row:1/3;grid-column:3}
+.phn .kst{grid-template-columns:30px minmax(0,1fr)}
+.phn .kst>.btn,.phn .kst>.ql{grid-row:auto;grid-column:2;justify-self:start;margin-top:6px}
+.fact2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 0;border-top:1px solid var(--rule);align-items:start}
+.fact2:first-child{border-top:0}
+.fact2 b{font:400 17px/1.4 var(--f)}
+.kmc{max-width:760px;margin:0 auto;width:100%;display:grid;gap:18px;padding:30px 0}
+.kmc h3{font:500 34px/1.25 var(--f);margin:0;text-wrap:pretty}
+.phn .kmc{padding:8px 0}
+.phn .kmc h3{font-size:24px}
+/* full brief */
+.fb{display:grid;grid-template-columns:200px minmax(0,1fr);gap:44px;max-width:1120px;margin:0 auto;padding:28px 48px 48px}
+.fbn{position:sticky;top:20px;display:grid;gap:2px;align-self:start}
+.fbn button{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);text-align:left;display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:center;padding:9px 10px;border-radius:10px;font:500 16px var(--f);min-height:42px}
+.fbn button:hover{background:var(--key)}
+.fbm{display:grid;gap:0;min-width:0;max-width:720px}
+.fbm h2{font:600 34px var(--f);margin:0}
+.fbs{display:grid;gap:12px;padding:24px 0;border-top:1px solid var(--rule)}
+.fbs h3{font:600 22px var(--f);margin:0}
+.fbs .say2{font:400 19px/1.45 var(--f);margin:0}
+.fbr{display:grid;grid-template-columns:62px minmax(0,1fr);gap:4px 14px;align-items:baseline;padding:6px 0}
+.fbr .tm{font:500 15px var(--mono);color:var(--dim)}
+.fbr b{font-weight:500}
+.fbp{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);text-align:left;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:10px 0;border-top:1px solid var(--rule);width:100%;font:inherit;min-height:52px}
+.fbp:first-child{border-top:0}
+.fbp b{font:500 17px var(--f)}
+.phn .fb{grid-template-columns:1fr;padding:14px 16px 28px;gap:0}
+.phn .fbn{display:none}
+.phn .fbm h2{font-size:26px}
+.phn .fbs{padding:18px 0}
+.phn .fbs .say2{font-size:17px}
+/* voice: read it to me (Wheatley) */
+.vx{min-height:100%;display:flex;flex-direction:column;padding:22px 0 0;gap:18px}
+.vx>.vtop,.vx>.vprog,.vx>.vcap{width:min(820px,calc(100% - 80px));margin:0 auto}
+.vband>*{width:min(820px,100%);margin:0 auto}
+.vtop{display:flex;align-items:center;gap:10px}
+.vtop .lab{flex:1;min-width:0}
+.vprog{display:grid;gap:8px}
+.vprog .segs{display:flex;gap:6px}
+.vprog .segs .ind{height:8px;flex:1;border-radius:3px}
+.vprog .segs .ind::after{inset:2px;border-radius:2px}
+.vcap{flex:1;display:grid;align-content:center;gap:16px;padding:10px 0}
+.vprev{font:400 20px/1.4 var(--f);color:var(--dim);margin:0}
+.vnow{font:500 40px/1.28 var(--f);margin:0;text-wrap:pretty}
+.vline{display:block;height:6px;border-radius:3px;background:var(--win);position:relative;overflow:hidden;box-shadow:inset 0 1px 2px #000;max-width:360px}
+.vline i{position:absolute;inset:1.5px;border-radius:2px;background:var(--cream);transform-origin:0 50%;transform:scaleX(.42)}
+.vline.run i{animation:fill 5200ms linear forwards}
+.vline.end i{transform:scaleX(1)}
+.vband{margin:0;background:var(--band);background-image:var(--ribs);color:var(--band-ink);padding:16px 40px 26px;display:grid;gap:12px}
+.vband .lab{color:var(--band-dim)}
+.vband .heard{font:500 16px var(--f);color:var(--band-ink)}
+.vkeys{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:12px}
+.vk{appearance:none;border:0;cursor:pointer;min-height:80px;border-radius:16px;font:500 18px var(--f);display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;background:#353431;color:#ece8df;box-shadow:0 2px 0 #000}
+.vk.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 2px 0 var(--deep)}
+.vk svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vk .kh{background:#ffffff1a}
+.vk.pri .kh{background:#00000014}
+.vk:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
+.phn .vx{padding:14px 0 0;gap:14px}
+.phn .vx>.vtop,.phn .vx>.vprog,.phn .vx>.vcap{width:calc(100% - 32px)}
+.phn .vband{padding:14px 16px 30px}
+.phn .vnow{font-size:29px}
+.phn .vprev{font-size:17px}
+.phn .vk{min-height:76px;font-size:16px}
+/* push actions */
+.lock .acts2{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:8px}
+.lock .acts2 button{appearance:none;border:0;cursor:pointer;background:#3a3a37;color:#ece8df;border-radius:14px;min-height:48px;font:500 16px var(--f);display:flex;gap:8px;align-items:center;justify-content:center}
+.lock .acts2 svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* key sheet */
+.keys{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 28px;font-size:16px}
+.keys div{display:flex;gap:10px;align-items:center;min-height:30px}
+.keys .kh{min-width:44px;text-align:center;background:var(--key);opacity:1}
+/* rules list */
+.rule{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;align-items:center;padding:12px 0;border-top:1px solid var(--rule)}
+.rule:first-child{border-top:0}
+.rule b{font:500 17px var(--f)}
+/* large text stress (Easy read check) */
+.bh.big .body{zoom:1.2}
+/* count badge on captions */
+.cnt3{font:500 13px var(--mono);color:var(--fg);background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:1px 9px;margin-left:6px;white-space:nowrap}
+.budget td:nth-child(2),.budget td:nth-child(3){font-family:var(--mono)}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Jam Design · Overnight pass 3 of 3 · Callsheet</span>
+    <h1>Callsheet: fewer things, settled rules</h1>
+    <p class="muted">Pass 3 settles pass 2's open findings and draws the screens that were missing: People, Know me, the full brief, the voice rundown ("Read it to me", for Wheatley in the car) and the offline states. It also counts the things on the first screen and cuts them. The look stays simplified Braun Hi-Fi with three shared parts adopted from the other apps: one orange per screen (D82), quiet rocker paddles (D83) and the red alert key (D84). All names, mail and events are made-up sample data.</p>
+  </header>
+
+  <section class="blk">
+    <h2>What changed since pass 2</h2>
+    <ul class="chg">
+      <li><b>Alert and Priya together.</b> An open alert keeps the Next card, but a <b>Then</b> line under it names the next reply and copies its draft (C). The alert's own key is the red alert key (D84), so a busy morning shows no orange at all. The "Alert card" control below switches to pass 2's strict card for comparison.</li>
+      <li><b>Counted once.</b> Nav badges are gone. The rundown row shows the bar group and names the people after the one on the Next card; it never prints the count again. The bar group prints a number only above 10.</li>
+      <li><b>Warns get a time scope.</b> A clash takes the Next card only within 60 minutes of its start. Try Time 10:05: the 11:00 clash takes the card, with the next reply on its Then line. Warns use the amber triangle window (D92).</li>
+      <li><b>Not for me is "Just this one" by default.</b> "Everything from this sender" is a deliberate second key, and it's locked for people who always count. The rules it saves have their own list with Remove and Undo (Setup › Your day › Never needs a reply).</li>
+      <li><b>Setup has no orange.</b> Rocker paddles are quiet (up + a cream window, D83), so Your day goes from four orange paddles to zero.</li>
+      <li><b>New screens.</b> People (with the Same person? card), Know me (status, check what it wrote, questions), the full brief, Read it to me, and offline and error states (Google not answering; Callsheet unreachable; a refresh that fails).</li>
+      <li><b>Fewer things on the first screen.</b> Every frame counts what it shows (the number on each caption). Measured by the same rule in both mockups (08:15, normal day): desktop Today goes from 44 to 36 things with the alert up and from 51 to 37 with a reply; phone Today from 35 to 30. The cuts: nav badges, the eyebrow, the band's summary and "now" label, labels for past and later events, the second tag, three of the Next card's quiet links (behind More), and on the phone the date, the band label and the Full brief link.</li>
+      <li><b>Calm has no orange</b> (D95). See tomorrow and Back to Today are quiet keys. R plays the rundown (Space no longer clashes with focused buttons), B opens the full brief, and ? opens the key sheet.</li>
+    </ul>
+  </section>
+
+  <section class="blk">
+    <h2>1 · The flows, playable</h2>
+    <p class="muted">Pick a flow, then step through it. Each step sets both frames, and both stay live. Desktop keys: <b>Enter</b> does the loud button, <b>R</b> plays the rundown, <b>B</b> opens the full brief, <b>←/→</b> step, <b>1–5</b> switch tabs, <b>/</b> or <b>⌘K</b> opens Find or ask, <b>C D L O N X</b> work on a reply, <b>J/K</b> move through lists, <b>?</b> shows the keys and <b>Esc</b> goes back. Click the desktop frame first so it takes the keys.</p>
+    <div class="ctrls">
+      <div><span class="eyebrow">Lighting</span><div class="seg" role="group" aria-label="Day or night" id="seg-light"><button data-v="day" aria-pressed="true">Day</button><button data-v="night" aria-pressed="false">Night</button></div></div>
+      <div><span class="eyebrow">Time</span><div class="seg" role="group" aria-label="Time of day" id="seg-tod"><button data-v="morning" aria-pressed="true">08:15</button><button data-v="soon" aria-pressed="false">10:05</button><button data-v="midday" aria-pressed="false">12:40</button><button data-v="evening" aria-pressed="false">17:05</button></div></div>
+      <div><span class="eyebrow">Day</span><div class="seg" role="group" aria-label="How busy" id="seg-load"><button data-v="quiet" aria-pressed="false">Quiet</button><button data-v="normal" aria-pressed="true">Normal</button><button data-v="long" aria-pressed="false">Long (19 · 7 · 5)</button></div></div>
+      <div><span class="eyebrow">Connection</span><div class="seg" role="group" aria-label="Connection" id="seg-conn"><button data-v="ok" aria-pressed="true">OK</button><button data-v="google" aria-pressed="false">Google offline</button><button data-v="box" aria-pressed="false">Box unreachable</button></div></div>
+      <div><span class="eyebrow">Alert card</span><div class="seg" role="group" aria-label="Alert card" id="seg-ac"><button data-v="then" aria-pressed="true">With Then line</button><button data-v="strict" aria-pressed="false">Strict (pass 2)</button></div></div>
+    </div>
+    <div class="player" id="player">
+      <div class="flows" id="flows" role="group" aria-label="Flows"></div>
+      <div class="prow"><div class="dots" id="dots"></div><span class="cap" id="cap"></span><span style="display:flex;gap:8px"><button class="pbtn" id="pprev">← Back</button><button class="pbtn" id="pnext">Next step →</button></span></div>
+    </div>
+    <div class="stage">
+      <figure><div class="frame desk"><div class="screen" tabindex="0" aria-label="Callsheet desktop mockup, keyboard enabled"><div class="scaler" data-mount data-stage data-kind="desk" data-w="1440" data-h="900"></div></div></div><figcaption>Desktop 1440 × 900 <span class="cnt3" data-count></span></figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-stage data-kind="phone" data-w="390" data-h="844"></div></div></div><figcaption>Phone 390 × 844 <span class="cnt3" data-count></span></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2>2 · The rules this pass settles</h2>
+    <div class="cols3">
+      <div class="note"><b>What gets the Next card</b><span>1. An open security alert (red key, D84). 2. A source that's offline (dashed card, Try again). 3. A warn that starts within <b>60 minutes</b> (a clash). 4. The next reply (Copy draft). 5. Calm: no orange at all. Anything that isn't a reply gets a <b>Then</b> line naming the next reply, with a quiet Copy draft.</span></div>
+      <div class="note"><b>Count once</b><span>A value appears once per screen. The rundown's bar group is the reply count on Today; tab badges are gone; step 2 says the number in words and links "See them all", not "All 7". The bar group prints its own number only above 10 windows.</span></div>
+      <div class="note"><b>Not for me, scoped</b><span>The default is <b>Just this one</b>. "Everything from this sender" is a second key, locked for people who always count. It never applies to invites or security heads-ups. Each rule shows when it was added and how much it caught, with Remove and Undo.</span></div>
+      <div class="note"><b>Content contract (from pass 2, kept)</b><span>The Today sentence is 25 words or fewer and never repeats a time the scale shows. Rundown steps: one sentence, at most three items. Voice lines: one or two sentences each, the same facts as the step, no more.</span></div>
+      <div class="note"><b>Voice</b><span>Read it to me plays the same four steps. Captions show the current line only. Three big keys (Back, Pause, Next). It accepts "next", "back", "later", "repeat" and "stop", and nothing it hears can send, accept or delete. In quiet hours it opens with captions only.</span></div>
+      <div class="note"><b>Offline</b><span>A source that stops answering becomes a dashed Next card with one Try again, and its windows on the day scale go dashed. "Last read 06:30" appears once, on the card. If the box itself can't be reached, the phone keeps the last brief, Copy still works, and a dashed bar with Try again sits above everything.</span></div>
+    </div>
+    <div class="tablebox"><table class="t budget">
+      <tr><th>Screen (normal day, 08:15)</th><th>Orange, pass 2</th><th>Orange, pass 3</th><th>What carries it now</th></tr>
+      <tr><td>Today with an open alert</td><td>1</td><td>0 + red key</td><td>Check the sign-in is the red alert key; Copy draft on the Then line is quiet</td></tr>
+      <tr><td>Today, next reply</td><td>1</td><td>1</td><td>Copy draft</td></tr>
+      <tr><td>Today, calm / All clear</td><td>1 / 1</td><td>0 / 0</td><td>See tomorrow and Back to Today are quiet keys (D95)</td></tr>
+      <tr><td>Setup › Your day</td><td>4 paddles</td><td>0</td><td>Quiet paddles: up + a cream window (D83)</td></tr>
+      <tr><td>A sheet over a page</td><td>2 (page + sheet)</td><td>1</td><td>The page behind loses its orange (D97)</td></tr>
+      <tr><td>People / Know me / Full brief / Voice</td><td>not drawn</td><td>1 / 1 / 0 / 1</td><td>Same person / Check 2 things / none, a reading page / Pause</td></tr>
+      <tr><td>Offline (Google)</td><td>not drawn</td><td>1</td><td>Try again</td></tr>
+    </table></div>
+  </section>
+
+  <section class="blk">
+    <h2>3 · Day and night, side by side</h2>
+    <p class="muted">The same app with the lighting fixed, so the themes compare at once. Frames follow the Time, Day, Connection and Alert card controls unless their caption says otherwise. Numbers on the captions count the things in view.</p>
+    <div class="gal">
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-light="day" data-route="today" data-w="1440" data-h="900"></div></div></div><figcaption>Today · Day <span class="cnt3" data-count></span></figcaption></figure>
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-light="night" data-route="today" data-tod="soon" data-w="1440" data-h="900"></div></div></div><figcaption>Today at 10:05 · Night. The clash is within the hour, so it takes the card. <span class="cnt3" data-count></span></figcaption></figure>
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-light="day" data-route="brief" data-w="1440" data-h="900"></div></div></div><figcaption>Full brief · Day (a reading page, no orange)</figcaption></figure>
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-light="night" data-route="ask" data-sub="people" data-w="1440" data-h="900"></div></div></div><figcaption>Ask › People · Night</figcaption></figure>
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-light="day" data-route="ask" data-sub="knowme" data-w="1440" data-h="900"></div></div></div><figcaption>Ask › Know me · Day</figcaption></figure>
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-light="night" data-route="voice" data-vstep="1" data-vplay="0" data-w="1440" data-h="900"></div></div></div><figcaption>Read it to me · Night (desktop)</figcaption></figure>
+    </div>
+    <div class="gal4">
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="day" data-route="today" data-w="390" data-h="844"></div></div></div><figcaption>Today · Day <span class="cnt3" data-count></span></figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="night" data-route="today" data-tod="soon" data-w="390" data-h="844"></div></div></div><figcaption>Today 10:05 · Night <span class="cnt3" data-count></span></figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="day" data-route="voice" data-vstep="1" data-vplay="0" data-w="390" data-h="844"></div></div></div><figcaption>Read it to me · Day</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="night" data-route="voice" data-vstep="2" data-vplay="0" data-w="390" data-h="844"></div></div></div><figcaption>Read it to me · Night</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="day" data-route="ask" data-sub="people" data-w="390" data-h="844"></div></div></div><figcaption>People, Same person? · Day</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="night" data-route="ask" data-sub="knowme" data-km="check" data-w="390" data-h="844"></div></div></div><figcaption>Know me, check 1 of 2 · Night</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="day" data-route="brief" data-w="390" data-h="844"></div></div></div><figcaption>Full brief · Day</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="night" data-route="today" data-conn="google" data-tod="midday" data-w="390" data-h="844"></div></div></div><figcaption>Google offline · Night (always)</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="day" data-route="today" data-conn="box" data-tod="midday" data-w="390" data-h="844"></div></div></div><figcaption>Box unreachable · Day (always)</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="night" data-route="replies" data-sheet="nfm" data-who="0" data-w="390" data-h="844"></div></div></div><figcaption>Not for me on a VIP · Night</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="day" data-route="setup" data-place="rules" data-w="390" data-h="844"></div></div></div><figcaption>Never needs a reply · Day</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-light="night" data-route="setup" data-place="day" data-w="390" data-h="844"></div></div></div><figcaption>Your day, quiet paddles · Night</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2>4 · Stress and empty</h2>
+    <p class="muted">These frames ignore the Day control. The long day has 19 replies, 7 events and 5 security heads-ups (the top of FLOW §5's range). The quiet day has nothing. "Large text" zooms the app body 120%, a stand-in for Easy read's bigger type, to check that nothing breaks.</p>
+    <div class="gal">
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-load="long" data-route="today" data-w="1440" data-h="900"></div></div></div><figcaption>Long day · Today. The bar group prints "19" once; the row names people instead. <span class="cnt3" data-count></span></figcaption></figure>
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-load="quiet" data-route="today" data-w="1440" data-h="900"></div></div></div><figcaption>Quiet day · Today. Calm: Stripes drawn, no orange. <span class="cnt3" data-count></span></figcaption></figure>
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-big="1" data-route="today" data-w="1440" data-h="900"></div></div></div><figcaption>Large text · Today (desktop)</figcaption></figure>
+      <figure><div class="frame"><div class="screen" tabindex="0"><div class="scaler" data-mount data-kind="desk" data-load="long" data-route="replies" data-w="1440" data-h="900"></div></div></div><figcaption>Long day · Replies, list + detail</figcaption></figure>
+    </div>
+    <div class="gal4">
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-load="long" data-route="today" data-w="390" data-h="844"></div></div></div><figcaption>Long day · phone Today <span class="cnt3" data-count></span></figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-big="1" data-route="today" data-w="390" data-h="844"></div></div></div><figcaption>Large text · phone Today</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-load="quiet" data-route="agenda" data-w="390" data-h="844"></div></div></div><figcaption>Quiet · Agenda empty</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-load="long" data-route="rundown" data-step="1" data-w="390" data-h="844"></div></div></div><figcaption>Long · Rundown step 2, counted once</figcaption></figure>
+    </div>
+  </section>
+</div>
+<script>
+/* ================= sample data (all fake) ================= */
+const R=[
+ {who:'Priya N.',area:'Co. B',src:'Mail',age:'3 days',tags:['VIP','Due Fri'],why:'Wants you to sign off the Q4 budget by Friday.',short:'the Q4 budget sign-off',say:'Priya needs your sign-off on the Q4 budget by Friday.',facts:[['Deadline','Fri 6 Nov'],['Amount','€48,500']],draft:'Hi Priya, thanks for the numbers. I will sign off the Q4 budget by Friday.'},
+ {who:'Landlord',area:'Personal',src:'Mail',age:'1 day',tags:['VIP','Asked you'],why:'Needs a yes or no on the inspection date, Monday 9 Nov.',short:'the inspection date',say:'The landlord needs a yes or no on Monday’s inspection.',facts:[['Date','Mon 9 Nov']],draft:'Hi, Monday the 9th works. Any time after 10 is fine.'},
+ {who:'School office',area:'Personal',src:'Mail',age:'Today',tags:['▲ Due today'],why:'The trip form is due back today.',short:'the trip form',say:'And the school trip form is due back today.',draft:'Hi, I will bring the signed trip form to pickup this afternoon. Thanks for the reminder.'},
+ {who:'Alex at Example Supplies',area:'Co. B',src:'Mail',age:'1 day',tags:['Asked you'],why:'Wants to confirm the delivery window for next week.',short:'the delivery window',draft:'Hi Alex, Tuesday morning works best for us. Thanks.'},
+ {who:'Dev T.',area:'Co. A',src:'Slack',age:'2 h',tags:['Asked you'],why:'Asks if the roadmap review can move to 11:30.',short:'moving the roadmap review',draft:'Could we keep 11:00 and move the supplier call instead?'},
+ {who:'Northwind Store',area:'Personal',src:'Mail',age:'18 h',tags:[],why:'Big autumn sale this week.',short:'a sale',fyi:1,draft:''},
+ {who:'Jordan',area:'Personal',src:'Signal',age:'5 h',tags:[],why:'Asks if you are free for dinner on Saturday.',short:'dinner on Saturday',draft:'Saturday works. Seven?'}
+];
+[['Mina O.','Co. A','Asks for your notes on the design doc.'],['Ravi K.','Co. A','Wants a time for the hiring debrief.'],['Building manager','Personal','Asks which day suits the boiler check.'],['Lena at Example Labs','Co. B','Needs the signed NDA back.'],['Accounts team','Co. B','Asks you to approve two expenses.'],['Hannah','Personal','Asks if you can swap Sunday pickup.'],['Club secretary','Personal','Asks if you can help at the fair.'],['Ops team','Co. A','Want to know which deploy window you prefer.'],['Tom (next door)','Personal','Asks to borrow the ladder this weekend.'],['Dental reception','Personal','Asks you to confirm the 18:30 slot.']].forEach(([w,a,y],i)=>R.push({who:w,area:a,src:i%3?'Mail':'Slack',age:(i%4+1)+' days',tags:i===0?['Waiting on you']:['Asked you'],why:y,short:y.replace(/\.$/,'').toLowerCase(),draft:'Thanks, I will get back to you on this by tomorrow.'}));
+R.push({who:'Team list',area:'Co. A',src:'Mail',age:'18 h',tags:[],why:'Parking lot closed on Friday.',fyi:1,draft:''},{who:'Example Weekly',area:'Personal',src:'Mail',age:'1 day',tags:[],why:'This week in design.',fyi:1,draft:''});
+const ORD={
+ quiet:{morning:[],soon:[],midday:[],evening:[]},
+ normal:{morning:[0,2,1,3,4,6,5],soon:[0,1,3,4,6,5],midday:[3,6,5],evening:[]},
+ long:{morning:[0,2,1,3,4,6,7,8,9,10,11,12,13,14,15,16,5,17,18],soon:[0,1,3,4,6,7,8,9,10,11,12,13,14,15,16,5,17,18],midday:[3,6,9,10,11,12,13,14,5,17,18],evening:[12,13,5]}};
+const TOD={
+ morning:{now:8.25,clock:'08:15',hi:'Good morning, Sam.',phi:'Morning, Sam.'},
+ soon:{now:10.08,clock:'10:05',hi:'Good morning, Sam.',phi:'Morning, Sam.'},
+ midday:{now:12.67,clock:'12:40',hi:'Good afternoon, Sam.',phi:'Afternoon, Sam.'},
+ evening:{now:17.08,clock:'17:05',hi:'Good evening, Sam.',phi:'Evening, Sam.'}};
+const SAY={
+ quiet:{morning:'Nothing booked. A clear run.',soon:'Nothing booked. A clear run.',midday:'Nothing booked. A clear run.',evening:'Nothing booked. A clear run.'},
+ normal:{morning:'A full morning with one clash to settle. Priya’s budget sign-off is the reply that matters most.',
+   soon:'The clash is close now, so settle it first. Priya’s sign-off comes next.',
+   midday:'Four replies done since the morning. The design sync moved later, so you have a clear run until it.',
+   evening:'Replies are clear and nothing new came in. Tomorrow starts early with the car service.'},
+ long:{morning:'A packed day. Priya’s sign-off can’t wait, and two pairs of meetings clash.',
+   soon:'The first clash is close. Settle it, then Priya’s sign-off.',
+   midday:'Eight replies done. A clash is coming up soon, then the afternoon thins out.',
+   evening:'Three replies can wait until tomorrow. Nothing else needs you tonight.'}};
+function EVENTS(L,T){
+ if(L==='quiet')return[];
+ const e=[{s:7.75,e:8.25,n:'School drop-off',sh:'Drop-off',m:'30 min · Personal'},{s:9.5,e:10,n:'Daily stand-up',sh:'Stand-up',m:'30 min · Co. A'},
+  {s:11,e:12,n:'Q4 roadmap review',m:'1 hour · Co. A'},{s:11,e:11.5,n:'Supplier call',m:'30 min · Co. B',msg:1}];
+ if(L==='long')e.push({s:13.5,e:14.5,n:'Budget review',m:'1 hour · Co. B'},{s:13.5,e:14,n:'Site visit call',m:'30 min · Co. A'});
+ else e.push(T==='morning'||T==='soon'?{s:14,e:15,n:'Design sync',sh:'Design sync',m:'1 hour · Co. A'}:{s:14.5,e:15.5,n:'Design sync',sh:'Design sync · moved',m:'1 hour · Co. A · moved from 14:00'});
+ e.push({s:18.5,e:19.5,n:'Dentist',sh:'Dentist',m:'1 hour · Personal'});return e}
+const TOMORROW=[{s:9,e:10,n:'Car service',m:'Garage on Mill Road · Personal'},{s:10.5,e:11,n:'1:1 with Mina',m:'30 min · Co. A'},{s:13,e:14,n:'Lunch with Jordan',m:'1 hour · Personal'}];
+const INV=[['Design review','Fri 6 Nov · 14:00','Mina O. · Co. A'],['Quarterly review','Thu 12 Nov · 10:00','Ops team · Co. B'],['Hiring debrief','Fri 13 Nov · 15:00','Ravi K. · Co. A'],['Supplier visit','Mon 16 Nov · 11:00','Alex · Co. B'],['Parents’ evening','Tue 17 Nov · 18:00','School office'],['Roadmap planning','Wed 18 Nov · 09:30','Dev T. · Co. A'],['Budget close','Thu 19 Nov · 16:00','Priya N. · Co. B'],['Team lunch','Fri 20 Nov · 12:30','Co. A'],['Book club','Mon 23 Nov · 19:00','Jordan'],['Design crit','Tue 24 Nov · 14:00','Mina O. · Co. A'],['Security review','Wed 25 Nov · 10:00','Ops team · Co. A'],['Office move walkthrough','Thu 26 Nov · 11:00','Co. B'],['Board prep','Mon 30 Nov · 09:00','Priya N. · Co. B'],['Year planning','Tue 1 Dec · 10:00','Co. A'],['Conference travel call','Wed 2 Dec · 15:00','Co. A'],['Fair setup','Sat 5 Dec · 09:00','Club secretary'],['Holiday party','Fri 11 Dec · 18:30','Co. B'],['Year-end review','Tue 15 Dec · 10:00','Co. A']];
+const COMING=[['6','Nov','Car service','Tomorrow, 09:00 · Mill Road'],['12','Nov','Quarterly review','Thu, in 7 days · Co. B'],['3','Dec','Conference in Lisbon','3 days · in 4 weeks']];
+const LATER2=[['School holidays start','Fri 18 Dec · Personal'],['Lease renewal','Mon 11 Jan · the landlord asked for notice by then']];
+const CHANGES={morning:[['Supplier call moved to 11:00','It was at 14:00. Now it clashes with the roadmap review.'],['Gym class on Friday cancelled','The studio emailed at 21:40 last night.']],
+ midday:[['Design sync moved to 14:30','Mina moved it at 12:10. It was at 14:00.'],['Supplier call moved to 11:00','It was at 14:00.']],
+ evening:[['Nothing new since noon','The last change was at 12:10.']]};
+CHANGES.soon=CHANGES.morning;
+const SEC_EXTRA=[['Slack: new sign-in on a Mac','07:40 · you, most likely'],['Google: app password created','Yesterday 22:10 · for a mail client'],['GitHub: new SSH key added','Yesterday 19:02'],['Signal: linked device renewed','Tuesday']];
+const AREAS=[['Co. A','The roadmap review clashes with the supplier call at 11; Dev T. asked to move it.'],['Co. B','Priya’s budget sign-off by Friday; Alex wants a delivery window next week.'],['Personal','The trip form today, the car service tomorrow, and Jordan asked about Saturday.']];
+const ASKS=[
+ {q:'When is the car service, and did they confirm?',a:'Friday 6 Nov at 09:00. The garage confirmed by email on 21 Oct and asked you to bring the locking wheel nut.',src:[['cal','Calendar · Car service'],['mail','Mail · Booking confirmed, 21 Oct']],steps:['Looked in Calendar · 1 event','Looked in Mail · 2 threads']},
+ {q:'What did Priya send about the budget?',a:'Two emails. On Monday she sent the Q4 numbers; yesterday she asked you to sign off by Friday.',src:[['mail','Mail · Q4 numbers, 2 Nov'],['mail','Mail · Sign-off by Friday, 4 Nov']],steps:['Looked in Mail · 6 threads','Kept the 2 from Priya']},
+ {q:'What is due this week?',a:'The school trip form today, the Q4 budget sign-off on Friday, and the supplier invoice on Friday.',src:[['mail','Mail · Trip form'],['mail','Mail · Sign-off'],['note','Notes · Invoices']],steps:['Looked in Mail · 14 threads','Looked in Notes · 3 notes']}];
+const PROJ=[['ok','Kitchen refit','Next: pick the worktop · Fri','On track'],['warn','Q4 budget','Slipped: sign-off was due Tue','Slipped'],['ok','Hiring: designer','Next: debrief with Ravi · 13 Nov','On track'],['off','Garden shed','Nothing planned yet','Paused']];
+const PEOPLE=[
+ {n:'Priya N.',w:'Co. B · finance',src:[['mail','Mail · priya.n@example.com'],['msg','Slack · Co. B']],last:'Yesterday, 17:40',vip:1,wait:0},
+ {n:'Landlord',w:'Personal',src:[['mail','Mail · lettings@example.com']],last:'Yesterday, 09:12',vip:1,wait:1},
+ {n:'Dev T.',w:'Co. A · engineering',src:[['msg','Slack · Co. A'],['mail','Mail · dev.t@example.com']],last:'Today, 08:02',wait:4},
+ {n:'School office',w:'Personal',src:[['mail','Mail · office@school.example']],last:'Today, 07:30',wait:2},
+ {n:'Jordan',w:'Personal',src:[['msg','Signal']],last:'Today, 03:10',wait:6},
+ {n:'Alex at Example Supplies',w:'Co. B · supplier',src:[['mail','Mail · alex@example.com']],last:'Yesterday, 15:05',wait:3},
+ {n:'Mina O.',w:'Co. A · design',src:[['mail','Mail · mina@example.com'],['msg','Slack · Co. A']],last:'Tuesday'}];
+const SAME=[{a:['Priya N.','Mail · priya.n@example.com'],b:['Priya Nair','Slack · Co. B workspace'],why:'Same first name and company, and you talked to both about the Q4 budget this week.'},
+ {a:['Alex at Example Supplies','Mail · alex@example.com'],b:['Alex P.','Signal · +44 7700 900123'],why:'Signed “Alex, Example Supplies” in a Signal message on 28 Oct.'},
+ {a:['Mina O.','Mail · mina@example.com'],b:['Mina','Slack · Co. A'],why:'Same first name, and both sent you the design doc.'}];
+const FACTS=[['Work','You work at Co. A (product) and Co. B (finance, two days a week).','From 312 emails and your calendars',1],
+ ['Replies','You keep replies short and sign off with “Thanks, Sam”.','From your sent mail',1],
+ ['People','Priya N. and the landlord always need a quick answer.','You said so in Setup',1],
+ ['Home','School drop-off is at 07:45 on weekdays.','From Calendar, 9 weeks in a row',0],
+ ['Habits','You read the brief on your phone before 07:00.','From when you open it',0]];
+const RULES0=[['Team list','Just for my info','28 Oct','11 caught since'],['Example Weekly','A promo or newsletter','20 Oct','4 caught since']];
+/* ================= icons ================= */
+const P={today:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ ask:'<path d="M4 5h16v11H10l-5 4v-4H4z"/>',search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',set:'<path d="M4 7h9M18 7h2M4 17h3M11 17h9"/><circle cx="15.5" cy="7" r="2.3"/><circle cx="8.5" cy="17" r="2.3"/>',
+ proj:'<path d="M4 6h16M4 12h10M4 18h13"/>',chev:'<path d="M9 6l6 6-6 6"/>',back:'<path d="M15 6l-6 6 6 6"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5H4v11h4"/>',check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+ later:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>',note:'<path d="M5 3h10l4 4v14H5z"/><path d="M9 12h6M9 16h4"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ refresh:'<path d="M20 11a8 8 0 0 0-14.6-4.5M4 4v4h4M4 13a8 8 0 0 0 14.6 4.5M20 20v-4h-4"/>',msg:'<path d="M4 5h16v11H10l-5 4v-4H4z"/>',play:'<path d="M8 5v14l11-7z"/>',pause:'<path d="M8 5v14M16 5v14"/>',plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',shield:'<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/>',
+ voice:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',more:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M9 7h3"/>',next:'<path d="M5 6l7 6-7 6M13 6l7 6-7 6"/>',prev:'<path d="M19 6l-7 6 7 6M11 6l-7 6 7 6"/>'};
+const ic=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hm=h=>{const H=Math.floor(h),M=Math.round((h-H)*60);return String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')};
+const dur=h=>{const H=Math.floor(h),M=Math.round((h-H)*60);return (H?H+' h':'')+(H&&M?' ':'')+(M?M+' min':'')};
+const NW=['No','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten'];const nw=n=>NW[n]||String(n);
+const stripes=(still)=>{const c=['#6b3416','#b04a1c','#d69a2e'];let o='';c.forEach((k,i)=>{const x=160+i*16,r=60-i*16;o+=`<path d="M${x} -4 V40 A${r} ${r} 0 0 0 220 ${40+r} H364" fill="none" stroke="${k}" stroke-width="13"/>`});return `<div class="accent ${still?'still':''}" aria-hidden="true"><svg viewBox="140 0 224 130">${o}</svg></div>`};
+/* ================= globals ================= */
+let LIGHT='day',TODK='morning',LOAD='normal',CONN='ok',AC='then';
+const mounts=[];
+const Lo=m=>m.o.load||LOAD, To=m=>m.o.tod||TODK;
+function fresh(m){const L=Lo(m),T=To(m),o=m.o;
+ m.st={route:o.route||'today',order:[...ORD[L][T]],alert:L==='quiet'?null:(T==='morning'?'open':'seen'),seenAt:'08:20',view:'list',sel:0,rstep:+(o.step||0),
+  sheet:o.sheet||null,sheetIdx:null,toast:null,bad:false,undo:null,pal:false,ask:0,thinking:false,agDay:'today',invAll:false,place:o.place||'home',
+  expand:null,adv:null,refresh:0,copied:false,acked:false,briefs:{m:1,md:1,ev:1,qh:1},days:[1,1,1,1,1,1,1],nfmPick:0,scope:'one',drawn:{},
+  conn:o.conn||CONN,tries:0,retrying:0,sub:o.sub||'ask',psel:0,pview:'list',same:0,vip:PEOPLE.map(p=>!!p.vip),
+  km:o.km||null,kmi:0,kmEdit:false,checked:0,qpick:null,qdone:0,facts:FACTS.map(f=>f[3]),
+  v:{i:+(o.vstep||0),playing:o.vplay!=='0',sound:true,heard:null},rules:RULES0.map(r=>[...r])};
+ if(o.sheet==='nfm'){const w=o.who!=null?+o.who:5;m.st.sel=Math.max(0,m.st.order.indexOf(w));m.st.sheetIdx=w}}
+/* ================= logic ================= */
+const needs=s=>s.order.filter(i=>!R[i].fyi);
+function soonWarn(m){const s=m.st,T=TOD[To(m)];if(s.acked)return null;return groups(EVENTS(Lo(m),To(m))).find(x=>x.items.length>1&&x.s>T.now&&x.s-T.now<=1)||null}
+function next(m){const s=m.st;
+ if(s.alert==='open')return 'alert';
+ if(s.conn==='google')return 'off';
+ if(soonWarn(m))return 'warn';
+ if(s.order.length)return 'reply';
+ return 'calm'}
+function groups(ev){const g=[];[...ev].sort((a,b)=>a.s-b.s).forEach(e=>{const l=g[g.length-1];if(l&&e.s<l.end){l.items.push(e);l.end=Math.max(l.end,e.e)}else g.push({items:[e],s:e.s,end:e.e})});return g}
+function sentence(m){const s=m.st,L=Lo(m),T=To(m);if(next(m)==='calm'&&ORD[L][T].length&&!s.order.length)return 'All clear. Nobody is waiting on you, and nothing needs a look.';return SAY[L][T]}
+function bars(n,cap=10){const w=Math.min(Math.max(n,7),cap),lit=Math.min(n,cap);return `<span class="bars" role="img" aria-label="${n} waiting" data-c>${Array.from({length:w},(_,i)=>`<i class="ind ${i<lit?'on':''}"></i>`).join('')}${n>cap?`<span class="ovf">${n}</span>`:''}</span>`}
+const kh=(m,k)=>m.kind==='phone'?'':` <span class="kh">${k}</span>`;
+const tagH=t=>`<span class="tag ${t==='VIP'?'vip':''} ${t.startsWith('▲')?'warn':''}" data-c>${esc(t)}</span>`;
+const firstReply=s=>{const n=needs(s);return n.length?n[0]:null};
+/* ================= shell ================= */
+function header(m){
+ const ph=m.kind==='phone',r=m.st.route,s=m.st;
+ const job=s.refresh?`<span class="job ${s.refreshStill?'still':''}" style="--p:.62"><i></i></span>`:'';
+ if(ph)return `<div class="trim"></div><header class="hdr"><span class="wm" data-c>Callsheet</span><span class="pbar"><button class="hb" data-act="refresh" aria-label="Refresh now" data-c>${ic('refresh')}${s.refresh?'Writing':'Refresh'}${job}</button><button class="hb" data-act="pal" aria-label="Find or ask" data-c>${ic('search')}Find</button><button class="hb" data-go="setup" aria-label="Setup" ${r==='setup'?'aria-current="page"':''} data-c>${ic('set')}Setup</button></span></header>`;
+ const tabs=[['today','Today'],['replies','Replies'],['agenda','Agenda'],['ask','Ask'],['projects','Projects']].map(([k,l])=>`<button class="htab" data-go="${k}" aria-selected="${sel(r,k)}" data-c>${l}</button>`).join('');
+ return `<div class="trim"></div><header class="hdr"><span class="wm" data-c>Callsheet</span><span class="dt" data-c>Thu 5 Nov</span><nav class="tabs">${tabs}</nav>
+  <div class="hr"><button class="hb" data-act="refresh" data-c>${ic('refresh')}${s.refresh?'Refreshing…':'Refresh'}${job}</button><button class="findb" data-act="pal" data-c>${ic('search')}Find or ask<span class="kh">⌘K</span></button><button class="hb" data-go="setup" ${r==='setup'?'aria-current="page"':''} data-c>${ic('set')}Setup</button></div></header>`}
+const sel=(r,k)=>r===k||(k==='replies'&&r==='clear')||(k==='today'&&(r==='rundown'||r==='brief'||r==='voice'));
+function ptabs(m){const r=m.st.route;return `<nav class="ptabs">${[['today','Today','today'],['replies','Replies','mail'],['agenda','Agenda','cal'],['ask','Ask','ask'],['projects','Projects','proj']].map(([k,l,i])=>`<button class="tab" data-go="${k}" aria-selected="${sel(r,k)}" data-c><i class="win"></i>${ic(i)}${l}</button>`).join('')}</nav>`}
+function offbar(m){const s=m.st;if(s.conn!=='box')return '';
+ const t=s.tries?'Still can’t reach Callsheet. Is Home Assistant on, and is this phone on your home network or VPN?':'Showing the brief from 06:30. Copy still works; the rest waits until it’s back.';
+ return `<div class="offbar" role="status"><i class="ind led"></i><span class="tx"><b data-c>Can’t reach Callsheet</b><span class="sm" data-c>${t}</span></span><button class="btn pri" data-act="retry" data-c>${ic('refresh')}${s.retrying?'Trying…':'Try again'}${s.retrying?'<span class="job"><i></i></span>':kh(m,'↵')}</button></div>`}
+/* ================= day band (tuning scale) ================= */
+function dayband(m,opt={}){
+ const ph=m.kind==='phone',T=TOD[To(m)],ev=EVENTS(Lo(m),To(m)),H0=7,H1=21,pc=h=>((h-H0)/(H1-H0)*100).toFixed(2)+'%';
+ const stale=m.st.conn==='google';
+ const W=ph?326:(opt.w||1204),pxh=W/(H1-H0);
+ const lane=ph?9:13,gap=ph?3:4,lh=lane*2+gap;
+ const gs=groups(ev);let wins='',names='',lastR=-99;
+ gs.forEach(g=>{const past=g.end<=T.now,cl=g.items.length>1;
+  g.items.forEach((e,k)=>{const top=cl?k*(lane+gap):Math.round((lh-lane)/2);wins+=`<i class="w ${cl&&!past?'warn':''} ${e.e<=T.now?'past':''} ${stale?'stale':''}" style="left:${pc(e.s)};width:calc(${pc(e.e)} - ${pc(e.s)} - 2px);top:${top}px;height:${lane}px"></i>`});
+  if(!ph&&!past&&(cl||g===gs.find(x=>x.end>T.now&&x.items.length===1&&x.s>T.now))){const lab=cl?'▲ Clash · pick one':(g.items[0].sh||g.items[0].n);const x=(g.s-H0)*pxh,wd=lab.length*8.2;if(x>lastR+14){names+=`<span class="${cl?'warn':''}" style="left:${pc(g.s)}" data-c>${esc(lab)}</span>`;lastR=x+wd}}});
+ let tk='';for(let h=H0;h<=H1;h++){tk+=`<i style="left:${pc(h)}"></i>`;if(!ph||h%2===1)tk+=`<b style="left:${pc(h)}">${String(h).padStart(2,'0')}</b>`}
+ const nt=ph?-4:27;
+ return `<button class="dayb" data-go="agenda" aria-label="Your day, now ${T.clock}. Open the agenda."><span class="hdl">${ph&&!stale?'<span></span>':`<span class="lab" data-c>${stale?'Your day · not updated':'Your day'}</span>`}<span class="go" data-c>Agenda${kh(m,'A')}${ic('chev')}</span></span>
+  <span class="trk">${ph?'':`<span class="names">${names}</span>`}<span class="scale" style="height:${lh}px" data-c>${wins}</span><span class="ticks">${tk}</span><i class="needle" style="left:${pc(T.now)};top:${nt}px"></i></span></button>`}
+/* ================= the Next card ================= */
+function thenRow(m){const s=m.st;if(AC==='strict')return '';const i=firstReply(s);if(i===null)return '';const r=R[i];
+ return `<div class="then"><span class="lab" data-c>Then</span><span class="tw" data-c><b>${esc(r.who)}</b> · ${esc(r.short)}</span>${r.draft?`<button class="key" data-act="copy" data-c>${ic(s.copied?'check':'copy')}${s.copied?'Copied':m.kind==='phone'?'Copy':'Copy draft'}${kh(m,'C')}</button>`:'<span></span>'}</div>`}
+function nextCard(m){const s=m.st,ph=m.kind==='phone',k=next(m);
+ if(k==='alert')return `<article class="card nx"><div class="tl"><i class="ind led ring alert on"></i><span class="word alert" data-c>Alert</span><span class="lab" data-c>Security · 07:58</span></div>
+   <div class="who" data-c>New sign-in on your Google account</div><p class="why" data-c>A Linux device signed in. Check it was you before anything else.</p>
+   <div class="acts"><button class="btn al" data-act="sec" data-c>${ic('shield')}Check the sign-in${kh(m,'↵')}</button><button class="btn sec" data-act="itwasme" data-c>It was me</button></div>${thenRow(m)}</article>`;
+ if(k==='off'){const t=s.tries;return `<article class="card nx offc"><div class="tl"><i class="ind led"></i><span class="word ok" data-c>Offline</span><span class="lab" data-c>Google · last read 06:30</span></div>
+   <div class="who" data-c>${t?'Google still isn’t answering':'Google isn’t answering'}</div><p class="why" data-c>${t?'Tried again at 12:41. If it keeps failing, the sign-in key may have expired.':'This brief came from Slack and Signal only, so mail and calendars may be out of date.'}</p>
+   <div class="acts"><button class="btn pri" data-act="retry" data-c>${ic('refresh')}${s.retrying?'Trying…':'Try again'}${s.retrying?'<span class="job"><i></i></span>':kh(m,'↵')}</button>${t?`<button class="btn sec" data-go="setup" data-place="conn" data-c>Connections</button>`:''}</div>${thenRow(m)}</article>`}
+ if(k==='warn'){const g=soonWarn(m);return `<article class="card nx"><div class="tl"><i class="ind tri warn on"></i><span class="word warn" data-c>Clash</span><span class="lab" data-c>${hm(g.s)} · in ${dur(g.s-TOD[To(m)].now)}</span></div>
+   <div class="who" data-c>Pick one: ${g.items.map(e=>esc(e.n)).join(' or ')}</div><p class="why" data-c>Callsheet only reads, so you’ll move one in Calendar. Dev T. asked to move the review.</p>
+   <div class="acts"><button class="btn pri" data-go="agenda" data-c>${ic('cal')}See the clash${kh(m,'↵')}</button><button class="btn sec" data-act="ack" data-c>Got it</button></div>${thenRow(m)}</article>`}
+ if(k==='reply'){const idx=s.order[0],r=R[idx];
+  return `<article class="card nx"><div class="tl"><span class="lab" data-c>Next reply · ${esc(r.src)} · ${esc(r.age)}</span>${r.tags.slice(0,1).map(tagH).join('')}</div>
+   <div class="who" data-c>${esc(r.who)}</div><p class="why" data-c>${esc(r.why)}</p>
+   ${r.draft?`<div class="draft ${ph?'clamp':''}" contenteditable="true" spellcheck="false" aria-label="Suggested reply" data-c>${esc(r.draft)}</div>`:'<p class="sm" data-c>No draft. This looks like it doesn’t need a reply.</p>'}
+   <div class="acts">${r.draft?`<button class="btn pri" data-act="copy" data-c>${ic(s.copied?'check':'copy')}${s.copied?'Copied':'Copy draft'}${kh(m,'C')}</button>`:`<button class="btn pri" data-act="nfm" data-c>${ic('x')}Not for me${kh(m,'X')}</button>`}<button class="btn sec" data-act="done" data-c>${ic('check')}Done${kh(m,'D')}</button>${ph?'':`<button class="ql" data-act="open" data-c>${ic('ext')}Open in ${r.src==='Mail'?'Gmail':r.src}${kh(m,'O')}</button>`}<button class="ql" data-act="more" data-c aria-label="More actions">${ic('more')}More</button></div></article>`}
+ const cl=Lo(m)==='quiet';
+ return `<article class="card nx"><div class="tl"><i class="ind led ok on"></i><span class="word ok" data-c>All clear</span></div>
+   <div class="who" data-c>Nobody is waiting on you.</div><p class="why" data-c>${To(m)==='evening'||cl?'Tomorrow starts with the car service at 09:00.':'Next on the calendar: the design sync at 14:30.'}</p>
+   <div class="acts"><button class="btn sec" data-go="agenda" data-day="tomorrow" data-c>${ic('cal')}See tomorrow</button></div></article>`}
+/* ================= rundown rows (Today) ================= */
+function rundownRows(m){const s=m.st,ph=m.kind==='phone',n=s.order.length,L=Lo(m),T=To(m),k=next(m);
+ const nd=needs(s);const shown=(k==='reply'||(AC!=='strict'&&k!=='calm'))?1:0;const rest=nd.slice(shown,shown+2).map(i=>esc(R[i].who));
+ const who=!n?'Nobody is waiting on you':!nd.length?'Only “for your info” left':shown?(rest.length?`Then ${rest.join(', ')}${nd.length>shown+2?'…':''}`:'Nothing after this one'):`${rest.join(', ')}${nd.length>2?'…':''}`;
+ const ch=CHANGES[T]||[];const chT=L==='quiet'?'Nothing new':T==='evening'?'Nothing new since noon':`${nw(ch.length)} change${ch.length>1?'s':''} since last night`;
+ const secN=L==='long'?4:0;
+ const know=s.alert==='seen'?{w:`<span class="word ok" data-c>Seen ${s.seenAt}</span>`,t:chT+(secN?` · ${secN} more heads-ups`:'')}:{w:'',t:chT+(secN?` · ${secN} more heads-ups`:'')};
+ const rows=[['Who needs an answer',who,n?bars(n):'<span class="word ok" data-c>Clear</span>','go="replies"'],
+  ['Worth knowing',know.t,know.w,'act="play" data-step="2"'],
+  ['Coming up','Car service · tomorrow 09:00','','act="play" data-step="3"']];
+ return `<div class="card rd"><div class="rh"><button class="ql" data-act="play" style="font-size:15px" data-c>${ic('play')}Play the rundown${kh(m,'R')}</button>${ph?'':`<button class="ql" data-go="brief" style="font-size:15px;color:var(--dim)" data-c>${ic('doc')}Full brief${kh(m,'B')}</button>`}</div>
+  ${rows.map(([l,t,ind,a])=>`<button class="rrow" style="grid-template-columns:minmax(0,1fr) auto" data-${a}><span style="display:grid;gap:3px;min-width:0"><span class="lab" data-c>${l}</span><span class="t1" data-c>${t}</span></span><span class="st">${ind}${ic('chev')}</span></button>`).join('')}</div>`}
+function today(m){const ph=m.kind==='phone',T=TOD[To(m)],s=m.st,calm=next(m)==='calm';
+ const eb=s.refresh?`<span class="ebl"><i class="ind slot on"></i><span class="lab" data-c>Writing the summary · started 08:16</span></span>`:'';
+ const acc=calm?stripes(s.drawn.today):'';if(calm)s.drawn.today=1;
+ const hero=`<div class="heroW" style="min-height:${ph?0:96}px"><div class="hero">${eb}<h2 data-c>${ph?T.phi:T.hi}</h2><p class="say" data-c>${esc(sentence(m))}</p></div>${acc||'<span></span>'}</div>`;
+ const src=s.conn==='google'?'Slack and Signal (Google missing)':'4 Google accounts, 8 calendars, Slack';
+ const foot=`<div class="foot"><span data-c>Written 06:30 from ${src} · Nothing was sent. Drafts wait for you.</span></div>`;
+ if(ph)return `<div class="td">${hero}${dayband(m)}${nextCard(m)}${rundownRows(m)}<p class="foot" style="justify-content:center" data-c>Nothing was sent. Drafts wait for you.</p></div>`;
+ return `<div class="td">${hero}${dayband(m)}<div class="split">${nextCard(m)}${rundownRows(m)}</div>${foot}</div>`}
+/* ================= rundown step mode ================= */
+function rsPrimary(m){const k=next(m);
+ return k==='alert'?`<button class="btn al" data-act="sec">${ic('shield')}Check the sign-in${kh(m,'↵')}</button>`:k==='off'?`<button class="btn pri" data-act="retry">${ic('refresh')}Try Google again${kh(m,'↵')}</button>`:k==='warn'?`<button class="btn pri" data-go="agenda">${ic('cal')}See the clash${kh(m,'↵')}</button>`:k==='reply'?`<button class="btn pri" data-go="today">${ic('mail')}Start replies${kh(m,'↵')}</button>`:''}
+function rundown(m){const ph=m.kind==='phone',s=m.st,L=Lo(m),T=To(m),i=s.rstep,nd=needs(s);
+ const titles=['Your day','Who needs an answer','Worth knowing','Coming up'];
+ const segs=`<span class="segs">${titles.map((_,k)=>`<i class="ind ${k<=i?'on':''}"></i>`).join('')}</span>`;
+ const bar=`<div class="bar"><span class="lab">${i<4?`${i+1} of 4 · ${titles[i]}`:'The rundown'}</span>${segs}<button class="ib" data-act="voice" aria-label="Read it to me">${ic('voice')}</button><button class="ib" data-act="rclose" aria-label="Close the rundown">${ic('x')}</button></div>`;
+ let h='',body='',pri='';
+ if(i===0){const ev=EVENTS(L,T);h=ev.length?(L==='long'?'Seven events, and two pairs clash: at 11 and at 13:30. You’re free after 15:00.':'Six events. The roadmap review and the supplier call both land at 11, so you’ll need to pick one.'):'Nothing booked today. A clear run.';
+  body=dayband(m,{w:ph?326:840})}
+ else if(i===1){const top=nd.slice(0,3);h=nd.length?`${nw(nd.length)} ${nd.length>1?'people are':'person is'} waiting.${top.length>1?' These matter most.':''}`:'Nobody is waiting on you.';
+  body=nd.length?`<div class="card" style="padding:4px 20px"><div class="ppl">${top.map(x=>`<div><b>${esc(R[x].who)}</b><span>${R[x].tags.slice(0,1).map(tagH).join('')}</span><span class="sm" style="grid-column:1/-1">${esc(R[x].why)}</span></div>`).join('')}</div></div><button class="ql" data-go="replies" style="justify-self:start">See them all</button>`:'';
+  if(nd.length&&next(m)==='reply')pri=rsPrimary(m)}
+ else if(i===2){const ch=CHANGES[T];const sec=L==='quiet'?[]:[[s.alert==='open'?'alert':'seen','New sign-in on your Google account','07:58 · a Linux device'],...(L==='long'?SEC_EXTRA.map(x=>['info',...x]):[])];
+  h=s.alert==='open'?'One thing to check first: a new sign-in on your Google account.':(L==='quiet'?'Nothing new since last night.':`You checked the sign-in at ${s.seenAt}. ${nw(ch.length)} other change${ch.length>1?'s':''}.`);
+  const rows=[...sec.slice(0,3).map(([k,t,d])=>`<div class="kn">${k==='alert'?'<i class="ind led ring alert on"></i>':'<span></span>'}<span style="display:grid;gap:2px"><span class="lab">${k==='alert'?'<span class="word alert">Alert</span> · Security':k==='seen'?`Security · seen ${s.seenAt}`:'Security'}</span><b>${esc(t)}</b><span class="sm">${esc(d)}</span></span><span></span></div>`),
+   ...(L==='quiet'?[]:ch.map(([t,d])=>`<div class="kn"><span></span><span style="display:grid;gap:2px"><span class="lab">Changed</span><b>${esc(t)}</b><span class="sm">${esc(d)}</span></span><span></span></div>`))];
+  body=rows.length?`<div class="card" style="padding:4px 20px">${rows.join('')}</div>${sec.length>3?`<button class="ql" data-go="brief" style="justify-self:start">All ${sec.length} heads-ups</button>`:''}`:`<p class="sm">Security heads-ups always show here when there are any.</p>`;
+  if(s.alert==='open')pri=rsPrimary(m)}
+ else if(i===3){h='Tomorrow starts with the car service at 09:00. The quarterly review is next week.';
+  body=`<div class="card tiles" style="padding:14px 20px">${COMING.map(([d,mo,nm,sub])=>`<div class="dt8"><span class="dd"><b>${d}</b><span>${mo}</span></span><span style="display:grid"><span class="nm">${nm}</span><span class="sm">${sub}</span></span></div>`).join('')}</div>`}
+ else {h='That’s the rundown.';
+  body=`<p class="sm" style="font-size:18px">Nothing was sent. Drafts wait for you.</p><span style="display:flex;gap:4px 22px;flex-wrap:wrap"><button class="ql" data-go="brief">${ic('doc')}Read the full brief${kh(m,'B')}</button><button class="ql" data-act="note">${ic('note')}Something missing? Tell Callsheet</button></span>`;
+  pri=rsPrimary(m)}
+ const nav=`<div class="nav">${i>0?`<button class="btn sec" data-act="rprev">${ic('back')}Back${kh(m,'←')}</button>`:''}<span class="sp"></span>${pri}${i<4?`<button class="btn sec" data-act="rnext">Next${kh(m,'→')}${ic('chev')}</button>`:`<button class="btn sec" data-act="rclose">Today${kh(m,'Esc')}</button>`}</div>`;
+ return `<div class="rs" data-swipe="rundown">${bar}<div class="stp"><h3>${esc(h)}</h3>${body}</div>${nav}</div>`}
+function lock(){return `<div class="lock"><div class="clk">06:34</div><div class="dte">Thursday 5 November</div>
+ <button class="ntf" data-act="openpush"><span class="lab"><span>Callsheet</span><span>now</span></span><b>Your brief is ready</b><span class="t">7 replies, one clash to settle and a sign-in to check.</span></button>
+ <div class="acts2"><button data-act="openpush">${ic('doc')}Open</button><button data-act="voice">${ic('voice')}Read it to me</button></div><span class="hint">Tap the notification, or Read it to me in the car</span></div>`}
+/* ================= voice: read it to me ================= */
+function vlines(m){const L=Lo(m),T=To(m),s=m.st,nd=needs(s),ev=EVENTS(L,T),ch=CHANGES[T]||[];
+ return [ev.length?(L==='long'?'Good morning, Sam. Seven things on the calendar, and two pairs clash: at eleven and at half past one.':'Good morning, Sam. Six things today. The roadmap review and the supplier call both land at eleven, so you’ll need to pick one.'):'Good morning, Sam. Nothing booked today. A clear run.',
+  nd.length?`${nw(nd.length)} ${nd.length>1?'people are':'person is'} waiting. ${nd.slice(0,2).map(i=>R[i].say||`${R[i].who}: ${R[i].why}`).join(' ')}`:'Nobody is waiting on you.',
+  s.alert==='open'?'One thing to check: a new sign-in on your Google account at 7:58, from a Linux device. It’s at the top of Today when you’re back.':L==='quiet'?'Nothing new since last night.':`You checked the sign-in earlier. ${ch[0]?ch[0][0]+'.':''}`,
+  'Tomorrow starts with the car service at nine. The quarterly review is next week.',
+  'That’s the rundown. Nothing was sent. Drafts wait for you.']}
+function voice(m){const s=m.st,v=s.v,ph=m.kind==='phone',L=vlines(m),i=Math.min(v.i,4);
+ const titles=['Your day','Who needs an answer','Worth knowing','Coming up'];
+ const heard=v.heard?`<span class="heard">Heard “${esc(v.heard)}”. ${v.heard==='later'?`${esc(R[firstReply(s)??0].who)} waits for your desk at 12:30.`:'Paused.'}</span>`:`<span class="lab">Say “next”, “back”, “later”, “repeat” or “stop”</span>`;
+ const end=i>=4;
+ const keys=end?`<button class="vk" data-act="vprev">${ic('prev')}Back${kh(m,'←')}</button><button class="vk" data-act="vagain">${ic('play')}Play again</button><button class="vk" data-act="vclose">${ic('x')}Close${kh(m,'Esc')}</button>`
+  :`<button class="vk" data-act="vprev" ${i===0?'disabled style="opacity:.45"':''}>${ic('prev')}Back${kh(m,'←')}</button><button class="vk pri" data-act="vplay">${ic(v.playing?'pause':'play')}${v.playing?'Pause':'Play'}${kh(m,'Space')}</button><button class="vk" data-act="vnext">${ic('next')}Next${kh(m,'→')}</button>`;
+ return `<div class="vx"><div class="vtop"><span class="lab">${ph?'Wheatley':'Read it to me · Wheatley'}${v.sound?'':' · captions only'}</span><button class="key" data-act="vsound" aria-pressed="${!v.sound}">${v.sound?'Sound on':'Sound off'}</button><button class="ib" data-act="vclose" aria-label="Close">${ic('x')}</button></div>
+  <div class="vprog"><span class="segs">${titles.map((_,k)=>`<i class="ind ${k<=i?'on':''}"></i>`).join('')}</span><span class="lab">${end?'The end':`${i+1} of 4 · ${titles[i]}`}</span></div>
+  <div class="vcap">${i>0?`<p class="vprev">${esc(L[i-1])}</p>`:''}<p class="vnow" aria-live="polite">${esc(L[i])}</p><span class="vline ${end?'end':v.playing?'run':''}"><i></i></span></div>
+  <div class="vband">${heard}<div class="vkeys">${keys}</div></div></div>`}
+/* ================= full brief ================= */
+function brief(m){const s=m.st,L=Lo(m),T=To(m),ph=m.kind==='phone',ev=EVENTS(L,T),nd=needs(s),fy=s.order.filter(i=>R[i].fyi),ch=CHANGES[T]||[];
+ const secs=[['b1','Your day'],['b2','Who needs an answer'],['b3','Worth knowing'],['b4','Coming up'],['b5','By area']];
+ const nav=`<nav class="fbn" aria-label="Sections">${secs.map(([id,t],k)=>`<button data-fb="${id}"><i class="ind slot ${k===(s.fbk||0)?'on':''}"></i>${t}</button>`).join('')}<button class="ql" data-act="rclose" style="margin-top:10px;padding-left:10px">${ic('back')}Today</button></nav>`;
+ const cls=new Set();groups(ev).forEach(g=>{if(g.items.length>1)g.items.forEach(e=>cls.add(e))});
+ const evs=ev.length?ev.map(e=>`<div class="fbr"><span class="tm">${hm(e.s)}</span><span>${cls.has(e)&&e.e>TOD[T].now?'<i class="ind tri warn on" style="margin-right:8px"></i>':''}<b style="${e.e<=TOD[T].now?'color:var(--dim)':''}">${esc(e.n)}</b> <span class="sm">· ${esc(e.m)}</span></span></div>`).join(''):'<p class="sm">Nothing booked.</p>';
+ const ppl=nd.map(i=>`<button class="fbp" data-go="replies" data-who="${i}"><span style="display:grid;gap:2px;min-width:0"><b>${esc(R[i].who)}</b><span class="sm">${esc(R[i].why)}</span></span><span>${R[i].tags.slice(0,1).map(tagH).join('')}</span></button>`).join('');
+ const sec=L==='quiet'?[]:[[s.alert==='open'?'Alert':'Seen '+s.seenAt,'New sign-in on your Google account','07:58 · a Linux device'],...(L==='long'?SEC_EXTRA.map(x=>['',...x]):[])];
+ const know=[...sec.map(([w,t,d])=>`<div class="kn">${w==='Alert'?'<i class="ind led ring alert on"></i>':'<span></span>'}<span style="display:grid;gap:2px"><span class="lab">${w==='Alert'?'<span class="word alert">Alert</span> · Security':'Security'+(w?' · '+w.toLowerCase():'')}</span><b>${esc(t)}</b><span class="sm">${esc(d)}</span></span><span></span></div>`),...(L==='quiet'?[]:ch.map(([t,d])=>`<div class="kn"><span></span><span style="display:grid;gap:2px"><span class="lab">Changed</span><b>${esc(t)}</b><span class="sm">${esc(d)}</span></span><span></span></div>`))].join('');
+ return `<div class="fb">${ph?'':nav}<article class="fbm"><span class="lab">Thursday 5 Nov · written 06:30 · about 3 minutes to read</span><h2>The full brief</h2>
+  <section class="fbs" id="b1" style="border-top:0"><h3>Your day</h3><p class="say2">${esc(sentence(m))}</p>${evs}</section>
+  <section class="fbs" id="b2"><h3>Who needs an answer</h3><p class="sm">Sorted: people who always count, then due today, then questions. Nothing is hidden.</p>${nd.length?`<div>${ppl}</div>`:'<p class="sm">Nobody is waiting on you.</p>'}${fy.length?`<span class="lab">For your info · ${fy.map(i=>esc(R[i].who)).join(', ')}</span>`:''}</section>
+  <section class="fbs" id="b3"><h3>Worth knowing</h3>${know?`<div>${know}</div>`:'<p class="sm">Nothing new since last night.</p>'}</section>
+  <section class="fbs" id="b4"><h3>Coming up</h3><span class="lab">Next two weeks</span><div class="tiles">${COMING.map(([d,mo,nm,sub])=>`<div class="dt8"><span class="dd"><b>${d}</b><span>${mo}</span></span><span style="display:grid"><span class="nm">${nm}</span><span class="sm">${sub}</span></span></div>`).join('')}</div><span class="lab" style="margin-top:8px">Next two months</span>${LATER2.map(([a,b])=>`<div class="fbr" style="grid-template-columns:minmax(0,1fr)"><span><b>${a}</b> <span class="sm">· ${b}</span></span></div>`).join('')}</section>
+  <section class="fbs" id="b5"><h3>By area</h3>${AREAS.map(([a,t])=>`<div class="fbr" style="grid-template-columns:90px minmax(0,1fr)"><span class="lab">${a}</span><span>${esc(t)}</span></div>`).join('')}</section>
+  <section class="fbs"><button class="ql" data-act="note" style="justify-self:start">${ic('note')}Something missing? Tell Callsheet</button><span class="foot"><span>Written 06:30 from 4 Google accounts, 8 calendars, Slack</span><span>Nothing was sent. Drafts wait for you.</span></span></section></article></div>`}
+/* ================= replies ================= */
+function replyCard(m,idx,cls=''){const r=R[idx],s=m.st;
+ return `<article class="card nx ${cls}" data-card><div class="tl"><span class="lab">${esc(r.area)} · ${esc(r.src)} · ${esc(r.age)}</span>${r.tags.map(tagH).join('')}${r.fyi?'<span class="tag">For your info</span>':''}</div>
+  <div class="who">${esc(r.who)}</div><p class="why">${esc(r.why)}</p>
+  ${r.facts?`<span class="lab">Quoted from the message</span><div class="facts" style="margin-top:-4px">${r.facts.map(([a,b])=>`<span class="fact"><b>${a}:</b> ${b}</span>`).join('')}</div>`:''}
+  ${r.draft?`<span class="lab">Draft · edit before you copy</span><div class="draft" contenteditable="true" spellcheck="false" aria-label="Suggested reply">${esc(r.draft)}</div>`:`<p class="sm">No draft: the sorter thinks this needs no reply. If it’s right, take it out of Replies.</p>`}
+  <div class="acts">${r.draft?`<button class="btn pri" data-act="copy">${ic(s.copied?'check':'copy')}${s.copied?'Copied':'Copy draft'}${kh(m,'C')}</button>`:`<button class="btn pri" data-act="nfm">${ic('x')}Not for me${kh(m,'X')}</button>`}<button class="btn sec" data-act="done">${ic('check')}Done${kh(m,'D')}</button></div>
+  <div class="quiet"><button class="ql" data-act="open">${ic('ext')}Open in ${r.src==='Mail'?'Gmail':r.src}${kh(m,'O')}</button><button class="ql" data-act="later">${ic('later')}Later${kh(m,'L')}</button><button class="ql" data-act="note">${ic('note')}Note${kh(m,'N')}</button>${r.draft?`<button class="ql" data-act="nfm">${ic('x')}Not for me${kh(m,'X')}</button>`:''}</div></article>`}
+function replies(m){const ph=m.kind==='phone',s=m.st,o=s.order;
+ if(!o.length)return allclear(m);
+ s.sel=Math.max(0,Math.min(s.sel,o.length-1));
+ const segv=`<div class="kseg" role="group" aria-label="View" style="margin-left:auto"><button class="key" data-view="list" aria-pressed="${s.view==='list'}">List</button><button class="key" data-view="one" aria-pressed="${s.view==='one'}">One at a time</button></div>`;
+ const top=`<div class="top">${ph&&s.view==='one'?`<button class="ib" data-view="list" aria-label="Back to the list" style="margin-left:-10px">${ic('back')}</button>`:''}<h2>Replies</h2><span class="cnt">${s.view==='one'?`${s.sel+1} of ${o.length}`:o.length+' waiting'}</span>${ph?'':segv}</div>`;
+ const nd=o.map((x,k)=>[x,k]).filter(([x])=>!R[x].fyi),fyi=o.map((x,k)=>[x,k]).filter(([x])=>R[x].fyi);
+ const row=([x,k])=>`<button class="lrow" data-pick="${k}" aria-selected="${!ph&&k===s.sel}"><i class="sel"></i><span style="display:grid;gap:1px;min-width:0"><b>${esc(R[x].who)}</b><span class="one">${esc(R[x].why)}</span></span><span style="display:grid;justify-items:end;gap:4px"><span class="age">${esc(R[x].age)}</span>${R[x].tags[0]?tagH(R[x].tags[0]):''}</span></button>`;
+ const list=`<div class="card lst" style="padding:4px 0 8px"><div class="sec"><span class="lab">Needs you · ${nd.length}</span>${ph?'':'<span class="lab" style="letter-spacing:.06em">J / K</span>'}</div>${nd.map(row).join('')}${fyi.length?`<div class="sec" style="border-top:1px solid var(--rule)"><span class="lab">For your info · ${fyi.length}</span><span class="sm" style="font-size:13px">sorted, never hidden</span></div>${fyi.map(row).join('')}`:''}</div>`;
+ if(ph){if(s.view==='one')return `<div class="rp">${top}<div class="oatc" data-swipe="card">${replyCard(m,o[s.sel])}</div><p class="lab" style="text-align:center">Swipe right: done · left: later</p></div>`;
+  return `<div class="rp">${top}<div class="kseg" role="group" aria-label="View"><button class="key" data-view="list" aria-pressed="true" style="flex:1;justify-content:center">List</button><button class="key" data-view="one" aria-pressed="false" style="flex:1;justify-content:center">One at a time</button></div>${list}</div>`}
+ if(s.view==='one'){const nx=o[s.sel+1];return `<div class="rp">${top}<div class="oat">${replyCard(m,o[s.sel])}${nx!==undefined?`<div class="card peek"><span class="lab">Up next</span><b style="font-weight:500">${esc(R[nx].who)}</b><span class="sm">${esc(R[nx].why)}</span></div>`:''}</div></div>`}
+ return `<div class="rp">${top}<div class="rpl">${list}${replyCard(m,o[s.sel])}</div><div class="foot"><span>Sorted: people who always count, due dates and questions first. It never hides one.</span><span>Nothing was sent. Drafts wait for you.</span></div></div>`}
+function allclear(m){const s=m.st,done=Math.max(ORD[Lo(m)][To(m)].length,7);const a=stripes(s.drawn.clear);s.drawn.clear=1;
+ return `<div class="clr">${a}<span class="row" style="gap:8px"><i class="ind led ok on"></i><span class="lab">${done} of ${done} done today</span></span><h2>All clear.</h2><p>Nobody is waiting on you.</p><button class="btn sec" data-go="today" style="margin-top:10px">Back to Today${kh(m,'Esc')}</button><p class="foot" style="margin-top:8px">Nothing was sent. Drafts wait for you.</p></div>`}
+/* ================= agenda ================= */
+function agenda(m){const ph=m.kind==='phone',s=m.st,T=TOD[To(m)],tom=s.agDay==='tomorrow',ev=tom?TOMORROW:EVENTS(Lo(m),To(m)),now=tom?-1:T.now;
+ const seg=`<div class="kseg" role="group" aria-label="Day" style="${ph?'':'margin-left:auto'}"><button class="key" data-day="today" aria-pressed="${!tom}">Today</button><button class="key" data-day="tomorrow" aria-pressed="${tom}">Tomorrow</button></div>`;
+ const gs=groups(ev),ng=gs.find(g=>g.s>now);
+ const evRow=(e,cl)=>{const past=e.e<=now;return `<div class="ev ${past?'past':''}"><span class="tm">${hm(e.s)}</span><i class="ind ${past?'':'on'} ${cl&&!past?'warn':''}"></i><span style="display:grid;gap:2px;min-width:0">${ng&&ng.items.length===1&&ng.items[0]===e?`<span class="lab" style="color:var(--ink)">Next · in ${dur(e.s-now)}</span>`:''}<span class="nm">${esc(e.n)}</span><span class="sm">${esc(e.m)}</span></span></div>`};
+ let rows='',prevEnd=null,nowDone=now<0;
+ gs.forEach(g=>{
+  if(!nowDone&&now<g.s){rows+=`<div class="nowl"><span class="lab">Now ${T.clock}</span><i></i></div>`;nowDone=true}
+  if(prevEnd!==null&&g.s-prevEnd>=1)rows+=`<div class="free"><span></span><span class="lab">Free · ${dur(g.s-prevEnd)}</span></div>`;
+  if(g.items.length>1){const past=g.end<=now;rows+=`<div class="clash" style="${past?'box-shadow:inset 0 0 0 1px var(--rule)':''}"><div class="row" style="justify-content:flex-start;gap:8px;padding:6px 0 0">${past?'':'<i class="ind tri warn on"></i>'}<span class="word ${past?'ok':'warn'}">${past?'Clashed':'Clash · pick one'}</span>${g===ng?`<span class="lab">· in ${dur(g.s-now)}</span>`:''}${s.acked&&!past?'<span class="lab">· got it</span>':''}</div>${g.items.map(e=>evRow(e,1)).join('')}${g.items.some(e=>e.msg)?`<button class="msg" data-go="replies" data-who="4">${ic('msg')}<span><b style="font-weight:500">Dev T.</b> asked to move the review to 11:30</span></button>`:''}</div>`}
+  else rows+=evRow(g.items[0]);
+  prevEnd=g.end});
+ if(!nowDone&&ev.length)rows+=`<div class="nowl"><span class="lab">Now ${T.clock}</span><i></i></div>`;
+ if(!ev.length)rows=`<div style="padding:28px 4px;display:grid;gap:6px"><span style="font:500 22px var(--f)">Nothing booked.</span><span class="sm">A clear run. Invites still show ${ph?'below':'on the right'}.</span></div>`;
+ const list=s.invAll?INV:INV.slice(0,3);
+ const inv=`<div class="card" style="display:grid;gap:2px"><div class="row"><span class="lab">Invites to answer · ${INV.length}</span><span class="sm" style="font-size:14px">soonest first</span></div>
+   <div class="${s.invAll?'invs':''}">${list.map(([a,b,c])=>`<div class="inv"><b>${a}</b><span class="sm">${b} · ${c}</span><button class="ql" style="justify-self:start">${ic('ext')}Answer in Google Calendar</button></div>`).join('')}</div>
+   <div class="row" style="padding-top:6px;border-top:1px solid var(--rule)">${s.invAll?'<button class="ql" data-act="inv">Show the first 3</button>':`<button class="key" data-act="inv">See all invites</button>`}<span class="sm" style="font-size:14px">Callsheet only reads.</span></div></div>`;
+ return `<div class="pg"><div class="top"><h2>${tom?'Friday 6 Nov':'Thursday 5 Nov'}</h2>${seg}</div><div class="agl"><div class="card" style="padding:8px 20px">${rows}</div>${inv}</div></div>`}
+/* ================= ask, people, know me ================= */
+function subnav(m){const s=m.st;return `<div class="subn" role="group" aria-label="Ask">${[['ask','Ask'],['people','People'],['knowme','Know me']].map(([k,l])=>`<button class="key" data-sub="${k}" aria-pressed="${s.sub===k}">${l}</button>`).join('')}</div>`}
+function ask(m){const s=m.st;if(s.sub==='people')return people(m);if(s.sub==='knowme')return knowme(m);const a=ASKS[s.ask];
+ const ans=s.thinking?`<div class="card ans"><div class="row" style="justify-content:flex-start;gap:10px"><i class="ind slot on"></i><span class="lab">Looking</span></div><div class="steps">${a.steps.map((t,i)=>`<div><i class="ind led ${i===0?'on':''}"></i>${esc(i===0?t:t.replace(/ ·.*/,'…'))}</div>`).join('')}</div><div><button class="btn sec" data-act="stop">${ic('x')}Stop</button></div></div>`
+  :`<div class="card ans"><p class="tx">${esc(a.a)}</p><div class="chips">${a.src.map(([i,t])=>`<button class="chipb">${ic(i)}${esc(t)}</button>`).join('')}</div><div><button class="ql" data-act="copyans">${ic('copy')}Copy answer</button></div></div>`;
+ return `<div class="askp">${subnav(m)}<span class="lab">Reads your mail, chat, calendar and notes · never sends</span>
+  <div class="q">${esc(a.q)}</div>${ans}
+  <div style="display:grid;gap:8px"><span class="lab">Try</span><div class="chips">${ASKS.map((x,i)=>i===s.ask?'':`<button class="chipb" data-q="${i}">${esc(x.q)}</button>`).join('')}</div></div>
+  <div class="compose"><input class="fieldi" placeholder="Ask a question" aria-label="Question"><button class="btn pri">${s.thinking?'Asking…':'Ask'}${s.thinking?'<span class="job"><i></i></span>':kh(m,'↵')}</button></div></div>`}
+function sameCard(m){const s=m.st;if(s.same>=SAME.length)return `<div class="card" style="display:flex;gap:10px;align-items:center"><i class="ind led ok on"></i><span>No more to check. Callsheet asks again when it finds a new pair.</span></div>`;
+ const p=SAME[s.same];return `<article class="card same"><div class="row"><span class="lab">Same person? · ${s.same+1} of ${SAME.length}</span></div>
+  <div class="pair"><div><b>${esc(p.a[0])}</b><span class="sm">${esc(p.a[1])}</span></div><span class="eq">=?</span><div><b>${esc(p.b[0])}</b><span class="sm">${esc(p.b[1])}</span></div></div>
+  <p class="sm" style="color:var(--ink)">${esc(p.why)}</p>
+  <div class="acts"><button class="btn pri" data-act="same">${ic('check')}Same person${kh(m,'↵')}</button><button class="btn sec" data-act="notsame">Not the same</button><button class="ql" data-act="unsure">Not sure</button></div></article>`}
+function personDetail(m){const s=m.st,ph=m.kind==='phone',p=PEOPLE[s.psel],i=s.psel;const w=p.wait!=null?R[p.wait]:null;const live=w&&s.order.includes(p.wait);
+ return `<article class="card pd">${ph?`<button class="ib" data-act="pback" aria-label="Back to People" style="margin:-8px 0 -8px -10px">${ic('back')}</button>`:''}<span class="lab">${esc(p.w)}</span><h3>${esc(p.n)}</h3>
+  <div class="srow" style="border-top:0;padding-top:0"><span class="swhit"><button class="sw" data-vip="${i}" aria-pressed="${s.vip[i]}" aria-label="Always counts"><span class="pad"></span></button></span><span style="display:grid;gap:1px"><b>Always counts</b><span class="sm">${s.vip[i]?'Always shows in Replies and is never sorted away.':'Off. Sorted like everyone else.'}</span></span><span></span></div>
+  <span class="lab">Where Callsheet sees them</span><div class="srcs">${p.src.map(([ic2,t])=>`<div>${ic(ic2)}<span style="min-width:0;overflow-wrap:anywhere">${esc(t)}</span></div>`).join('')}</div>
+  <div class="fl2"><span>Last heard</span><span>${esc(p.last)}</span><span>Waiting on you</span><span>${live?`<button class="ql" data-go="replies" data-who="${p.wait}" style="padding:0;min-height:0">${esc(w.short)}</button>`:'Nothing'}</span></div>
+  <button class="ql" data-act="note" style="justify-self:start">${ic('note')}Note for Callsheet about ${esc(p.n.split(' ')[0])}</button></article>`}
+function people(m){const s=m.st,ph=m.kind==='phone';
+ const list=`<div class="card lst" style="padding:4px 0 8px"><div class="sec"><span class="lab">People · ${PEOPLE.length} you hear from most</span></div>${PEOPLE.map((p,k)=>`<button class="lrow" data-person="${k}" aria-selected="${!ph&&k===s.psel}"><i class="sel"></i><span style="display:grid;gap:1px;min-width:0"><b>${esc(p.n)}</b><span class="one">${esc(p.w)} · ${p.src.map(x=>x[1].split(' ·')[0]).join(', ')}</span></span><span>${s.vip[k]?'<span class="tag vip">Always counts</span>':''}</span></button>`).join('')}</div>`;
+ if(ph)return `<div class="pg">${subnav(m)}${s.pview==='detail'?personDetail(m):sameCard(m)+list}</div>`;
+ return `<div class="pg"><div class="top"><h2>People</h2>${subnav(m)}</div><div class="ppl3"><div style="display:grid;gap:16px">${sameCard(m)}${list}</div>${personDetail(m)}</div></div>`}
+function knowme(m){const s=m.st,ph=m.kind==='phone';const toCheck=s.facts.map((f,i)=>f?null:i).filter(x=>x!==null);
+ if(s.km==='check'&&toCheck.length){const i=toCheck[0],f=FACTS[i];const k=s.checked;
+  return `<div class="pg">${subnav(m)}<div class="kmc"><div class="rs" style="padding:0;min-height:0;gap:12px;max-width:none"><div class="bar"><span class="lab">Check ${k+1} of ${k+toCheck.length} · ${esc(f[0])}</span><span class="segs">${Array.from({length:k+toCheck.length},(_,j)=>`<i class="ind ${j<=k?'on':''}"></i>`).join('')}</span><button class="ib" data-act="kmx" aria-label="Close">${ic('x')}</button></div></div>
+   <h3>${esc(f[1])}</h3><span class="sm">${esc(f[2])}. Is it right?</span>
+   ${s.kmEdit?`<textarea class="fieldi" aria-label="What is right" placeholder="e.g. Drop-off is at 08:00 on Fridays."></textarea><div class="acts"><button class="btn pri" data-act="kmsave">Save${kh(m,'↵')}</button><button class="btn sec" data-act="kmedit">Cancel</button></div>`
+   :`<div class="acts"><button class="btn pri" data-act="kmright">${ic('check')}Right${kh(m,'↵')}</button><button class="btn sec" data-act="kmedit">Not quite</button><button class="ql" data-act="kmforget">Forget this</button></div>`}
+   <p class="sm" style="font-size:14px">Forgetting a fact doesn’t touch your mail. It stays on this box.</p></div></div>`}
+ if(s.km==='q'){const o=['Me','Co. B accounts','It depends'];
+  return `<div class="pg">${subnav(m)}<div class="kmc"><div class="bar" style="display:flex;gap:12px;align-items:center"><span class="lab" style="flex:1">Question ${s.qdone+1} of 3</span><button class="ib" data-act="kmx" aria-label="Close">${ic('x')}</button></div>
+   <h3>When Example Supplies emails about a delivery, who usually answers?</h3><span class="sm">So Callsheet knows whether to draft a reply or file it under For your info.</span>
+   <div class="opts" role="group" aria-label="Answer">${o.map((t,i)=>`<button class="key" data-qp="${i}" aria-pressed="${s.qpick===i}"><i class="ind sq ${s.qpick===i?'on':''}"></i>${t}</button>`).join('')}</div>
+   <div class="acts"><button class="btn pri" data-act="qnext" ${s.qpick===null?'disabled style="opacity:.5"':''}>Save and next${kh(m,'↵')}</button><button class="ql" data-act="kmx">Skip the rest</button></div></div></div>`}
+ const left=3-s.qdone;
+ const steps=`<div class="card" style="padding:4px 20px">
+  <div class="kst"><i class="ind slot ok on"></i><b>Read your history</b><span class="sm">41,200 messages from 4 Google accounts, Slack and 2 notes folders · up to date 06:30</span><button class="ql" data-act="reread">Read again</button></div>
+  <div class="kst"><i class="ind slot ${toCheck.length?'':'ok on'}"></i><b>Check what it wrote</b><span class="sm">${FACTS.length} things${toCheck.length?` · ${nw(toCheck.length).toLowerCase()} to check`:' · all checked'}</span>${toCheck.length?`<button class="btn pri" data-act="kmcheck">Check ${toCheck.length} thing${toCheck.length>1?'s':''}${kh(m,'↵')}</button>`:'<span></span>'}</div>
+  <div class="kst"><i class="ind slot ${left?'':'ok on'}"></i><b>A few questions</b><span class="sm">${left?`${nw(left)} left · about a minute`:'All answered'}</span>${left?`<button class="btn ${toCheck.length?'sec':'pri'}" data-act="kmq">Answer</button>`:'<span></span>'}</div></div>`;
+ const facts=`<div class="card" style="padding:4px 20px"><div class="rh" style="padding:12px 0 4px;display:flex;justify-content:space-between"><span class="lab">What it knows about you</span></div>${FACTS.map((f,i)=>s.facts[i]===2?'':`<div class="fact2"><span style="display:grid;gap:2px"><span class="lab">${esc(f[0])}${s.facts[i]?'':' · <span style="color:var(--warn-ink)">to check</span>'}</span><b>${esc(f[1])}</b><span class="sm" style="font-size:14px">${esc(f[2])}</span></span><button class="ql" data-act="forget" data-fi="${i}">Forget</button></div>`).join('')}</div>`;
+ return `<div class="pg km">${ph?subnav(m):`<div class="top"><h2>Know me</h2>${subnav(m)}</div>`}<p class="sm" style="color:var(--ink);font-size:17px">Callsheet uses this to sort replies and write drafts. Optional, and it all stays on this box.</p><div class="km2">${steps}${facts}</div></div>`}
+function palette(m){return `<div class="veil" data-act="palx"></div><div class="pal" role="dialog" aria-label="Find or ask">
+ <div class="in">${ic('search')}<input value="priya" aria-label="Find or ask">${m.kind==='phone'?`<button class="ib" data-act="palx" aria-label="Close">${ic('x')}</button>`:'<span class="kh">Esc</span>'}</div>
+ <div class="grp"><span class="lab">People and threads</span><div class="po sel" data-act="palperson" style="cursor:pointer">${ic('ask')}<span>Priya N. <span class="sm">· People · Co. B · always counts</span></span>${kh(m,'↵')}</div><div class="po">${ic('mail')}<span>Sign-off by Friday <span class="sm">· Reply waiting · 3 days</span></span><span></span></div></div>
+ <div class="grp" style="padding-top:0"><span class="lab">Ask</span><div class="po" data-act="palask" style="cursor:pointer">${ic('ask')}<span>Ask: “what did Priya send about the budget”</span><span></span></div></div>
+ ${m.kind==='phone'?'':'<div class="ft"><span>↑ ↓ move · ↵ open · Esc close</span><span>Only reads. Nothing is sent.</span></div>'}</div>`}
+/* ================= projects ================= */
+function projects(m){
+ return `<div class="pg"><div class="top"><h2>Projects</h2><span class="row" style="gap:8px"><i class="ind tri warn on"></i><span class="word warn">1 slipped</span></span></div>
+  <div class="pjl"><div class="card" style="padding:4px 20px">${PROJ.map(([k,n,t,w])=>`<div class="pj"><i class="ind ${k==='warn'?'tri warn on':k==='ok'?'led ok on':'led'}"></i><span style="display:grid;gap:2px;min-width:0"><b>${n}</b><span class="sm">${t}</span></span><span class="word ${k==='warn'?'warn':'ok'}">${w}</span></div>`).join('')}</div>
+  <div class="card" style="display:grid;gap:10px"><span class="lab">Weekly review</span><span style="font:500 22px var(--f)">3 projects to look at</span><p class="sm">About five minutes. Callsheet suggests what slipped and what’s next; you decide.</p><button class="btn pri" style="justify-self:start">Start the review${kh(m,'↵')}</button></div></div></div>`}
+/* ================= setup ================= */
+const PLACES=[['conn','Connections','4 Google · Slack · Signal off','ok'],['day','Your day','Briefs 06:30 · 12:30 · 17:00','ok'],['ai','AI','Swift writes · careful at every brief','ok'],['adv','Advanced','10 rare settings, all closed','']];
+const chev=()=>ic('chev').replace('<svg','<svg style="width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2"');
+function setup(m){const ph=m.kind==='phone',s=m.st,p=s.place;
+ const conn=s.conn!=='ok';
+ const nav=`<div class="pnav">${PLACES.map(([k,n,d,st])=>{const off=k==='conn'&&s.conn==='google';return `<button class="place" data-place="${k}" ${(p===k||(p==='rules'&&k==='day'))?'aria-current="page"':''}><i class="ind led ${off?'':st==='ok'?'ok on':''}"></i><b>${n}</b><span class="sm">${off?'Google offline since 06:30':d}</span>${ph?ic('chev'):''}</button>`}).join('')}</div>`;
+ const back=(t,to='home')=>ph?`<div class="row" style="justify-content:flex-start"><button class="ib" data-place="${to}" aria-label="Back" style="margin-left:-10px">${ic('back')}</button><h2 style="font:600 24px var(--f)">${t}</h2></div>`:'';
+ let body='';
+ if(p==='home'){body=`<div style="display:grid;gap:14px"><p class="sm" style="font-size:17px;color:var(--ink)">Callsheet works without touching any of this.</p><input class="fieldi" placeholder="Find a setting: quiet hours, people…" aria-label="Find a setting">${ph?nav:''}<span class="foot">Callsheet 0.9 · Nothing was sent</span></div>`}
+ else if(p==='day'){const b=s.briefs,ex=s.expand;
+  const brief=(k,n,t,d,w)=>`<div class="srow"><span class="swhit"><button class="sw" data-rock="${k}" aria-pressed="${!!b[k]}" aria-label="${n}"><span class="pad"></span></button></span><span style="display:grid;gap:1px;min-width:0"><b>${n}</b><span class="sm">${b[k]?`${t} · ${d} · ${w}`:'Off'}</span></span><button class="ql" data-expand="${k}">${ex===k?'Close':'Change'}</button>
+   ${ex===k?`<div class="more"><span class="lab">Time</span><input class="fieldi mono" value="${t}" aria-label="Time" style="max-width:140px"><span class="lab">Days</span><div class="dk">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((x,i)=>`<button class="key" data-dayk="${i}" aria-pressed="${!!s.days[i]}"><i class="ind sq ${s.days[i]?'on':''}"></i>${x}</button>`).join('')}</div><span class="lab">Writer</span><div class="kseg" style="justify-self:start"><button class="key" aria-pressed="true">Careful</button><button class="key" aria-pressed="false">Fast</button></div></div>`:''}</div>`;
+  body=`<div style="display:grid;gap:14px">${back('Your day')}
+   <div class="card" style="padding:4px 20px"><div class="rh" style="padding:12px 0 2px"><span class="lab">Briefs · Europe/London</span></div>${brief('m','Morning brief','06:30',s.days.every(Boolean)?'Every day':'Some days','Careful')}${brief('md','Midday check-in','12:30','Mon–Fri','Careful')}${brief('ev','Evening check-in','17:00','Mon–Fri','Careful')}</div>
+   <div class="card" style="padding:4px 20px">
+    <div class="srow"><span class="swhit"><button class="sw" data-rock="qh" aria-pressed="${!!b.qh}" aria-label="Quiet hours"><span class="pad"></span></button></span><span style="display:grid;gap:1px"><b>Quiet hours</b><span class="sm">${b.qh?'22:00 – 07:00 · no pushes, voice starts muted':'Off'}</span></span><button class="ql">Change</button></div>
+    <button class="srow no" data-sub-go="people" style="appearance:none;border:0;border-top:1px solid var(--rule);background:none;width:100%;text-align:left;color:inherit;cursor:pointer;font:inherit"><span style="display:grid;gap:1px;min-width:0"><b>People who always count</b><span class="sm">${PEOPLE.filter((_,k)=>s.vip[k]).map(p=>esc(p.n)).join(', ')} · in People</span></span>${chev()}</button>
+    <button class="srow no" data-place="rules" style="appearance:none;border:0;border-top:1px solid var(--rule);background:none;width:100%;text-align:left;color:inherit;cursor:pointer;font:inherit"><span style="display:grid;gap:1px;min-width:0"><b>Never needs a reply</b><span class="sm">${s.rules.length} rule${s.rules.length===1?'':'s'} · ${s.rules.map(r=>esc(r[0])).join(', ')}</span></span>${chev()}</button>
+    ${[['You','Sam · Europe/London · 24-hour'],['Look and sound','Bold · Auto · All clear tick off']].map(([a,b2])=>`<div class="srow no"><span style="display:grid;gap:1px;min-width:0"><b>${a}</b><span class="sm">${b2}</span></span>${chev()}</div>`).join('')}</div>
+   <span class="sm" style="font-size:14px">Changes save as you make them.</span></div>`}
+ else if(p==='rules'){body=`<div style="display:grid;gap:14px">${back('Never needs a reply','day')}${ph?'':'<span class="lab">Your day › Never needs a reply</span>'}<p class="sm" style="color:var(--ink)">Senders you took out of Replies for good. These rules never apply to people who always count, invites or security heads-ups.</p>
+   <div class="card" style="padding:4px 20px">${s.rules.length?s.rules.map((r,k)=>`<div class="rule"><span style="display:grid;gap:2px;min-width:0"><b>${esc(r[0])}</b><span class="sm">${esc(r[1])} · added ${esc(r[2])} · ${esc(r[3])}</span></span><button class="ql" data-act="unrule" data-ri="${k}">Remove</button></div>`).join(''):'<p class="sm" style="padding:16px 0">No rules. Not for me only takes one message out unless you choose the sender.</p>'}</div>
+   <span class="sm" style="font-size:14px">Removing a rule brings that sender’s next mail back into Replies. Undo is in the toast.</span></div>`}
+ else if(p==='adv'){const D=['Google sign-in key','Model server','Presets','Chat engine','Alerts','Writing instructions','Memory file','Writer evaluation','Signal import','Start over'];
+  body=`<div style="display:grid;gap:14px">${back('Advanced')}<p class="sm">Rare settings. Each one stays closed until you open it.</p>
+   <div class="card" style="padding:0 20px">${D.map(d=>`<div class="adv"><button data-adv="${d}" aria-expanded="${s.adv===d}">${d}${ic(s.adv===d?'minus':'plus')}</button>${s.adv===d?(d==='Start over'?`<div class="in"><p class="sm" style="color:var(--ink)">Deletes the local index, profile, notes and learned rules on this box. Your mail, calendars and chats aren’t touched.</p><button class="btn ink" data-act="startover" style="justify-self:start">Start over…</button></div>`:`<div class="in"><p class="sm">Sample content for ${d}.</p></div>`):''}</div>`).join('')}</div></div>`}
+ else {const t=p==='conn'?[['Google',s.conn==='google'?'Offline · last read 06:30 · Try again on Today':'4 accounts · reading mail and calendars',s.conn==='google'?'off':'ok'],['Slack','1 workspace · reading','ok'],['Signal','Not linked · optional',''],['Notes folders','2 folders','ok'],['GitHub','Not connected','']]:[['Who writes','Swift on this box · careful',''],['Chat','On this device',''],['Sorting','On · groups, never hides',''],['What it learned','12 rules · review','']];
+  body=`<div style="display:grid;gap:14px">${back(p==='conn'?'Connections':'AI')}<div class="card" style="padding:4px 20px">${t.map(([a,b2,st])=>`<div class="srow no"><span style="display:grid;gap:1px"><b>${a}</b><span class="sm">${st==='off'?'<span class="word ok">Offline</span> · ':''}${b2}</span></span>${chev()}</div>`).join('')}</div></div>`}
+ if(ph)return `<div class="pg">${p==='home'?`<div class="top"><h2>Setup</h2></div>`:''}${body}</div>`;
+ return `<div class="pg"><div class="top"><h2>Setup</h2></div><div class="su">${nav}${body}</div></div>`}
+/* ================= sheets (one pattern, D43) ================= */
+function sheet(m){const s=m.st,ph=m.kind==='phone';if(!s.sheet)return '';
+ const close=`<button class="ib sx" data-act="sheetx" aria-label="Close">${ic('x')}</button>`,grip=ph?'<i class="grip"></i>':'';let in_='';
+ if(s.sheet==='sec')in_=`<div class="row" style="justify-content:flex-start;gap:8px"><i class="ind led ring alert on"></i><span class="word alert">Alert</span><span class="lab">· Security heads-up</span></div><h3>New sign-in on your Google account</h3>
+   <div class="fl2"><span>Account</span><span>sam@example.com</span><span>When</span><span>Today, 07:58</span><span>Device</span><span>Linux · Firefox</span><span>Where</span><span>Near Leeds, UK (rough)</span></div>
+   <p class="sm">Callsheet can’t change your account. If it wasn’t you, Google’s page lets you sign it out.</p>
+   <div class="acts"><button class="btn al" data-act="secopen">${ic('ext')}Open Google security${kh(m,'↵')}</button><button class="btn sec" data-act="itwasme">It was me</button></div>`;
+ else if(s.sheet==='nfm'){const r=R[s.sheetIdx??s.order[0]];const o=['A promo or newsletter','Just for my info','Already handled','Something else'];const vip=r.tags.includes('VIP');
+  in_=`<span class="lab">Not for me</span><h3>Take ${esc(r.who)} out of Replies?</h3><p class="sm">“${esc(r.why)}” Tell Callsheet why, so it learns.</p>
+   <div class="opts" role="group" aria-label="Why">${o.map((t,i)=>`<button class="key" data-nfm="${i}" aria-pressed="${s.nfmPick===i}"><i class="ind sq ${s.nfmPick===i?'on':''}"></i>${t}</button>`).join('')}</div>
+   <span class="lab">Apply to</span><div class="kseg" role="group" aria-label="Apply to" style="justify-self:start;flex-wrap:wrap"><button class="key" data-scope="one" aria-pressed="${s.scope==='one'||vip}">Just this one</button><button class="key" data-scope="all" aria-pressed="${s.scope==='all'&&!vip}" ${vip?'disabled style="opacity:.45;cursor:not-allowed"':''}>Everything from ${esc(r.who)}</button></div>
+   <p class="sm" style="font-size:14px">${vip?`${esc(r.who)} always counts, so only this message moves.`:'A sender rule never applies to people who always count, invites or security heads-ups.'}</p>
+   <div class="acts"><button class="btn pri" data-act="nfmsave">Move out of Replies${kh(m,'↵')}</button><span class="sm" style="font-size:14px">Undo in the toast</span></div>`}
+ else if(s.sheet==='more'){const r=R[s.order[0]];in_=`<span class="lab">More for ${esc(r.who)}</span><h3>${esc(r.short[0].toUpperCase()+r.short.slice(1))}</h3>
+   <div style="display:grid;gap:8px"><button class="key" data-act="later" style="min-height:48px">${ic('later')}Later · back at the 12:30 check-in${kh(m,'L')}</button><button class="key" data-act="note" style="min-height:48px">${ic('note')}Note for Callsheet${kh(m,'N')}</button><button class="key" data-act="nfm" style="min-height:48px">${ic('x')}Not for me${kh(m,'X')}</button>${ph?`<button class="key" data-act="open" style="min-height:48px">${ic('ext')}Open in ${r.src==='Mail'?'Gmail':r.src}</button>`:''}<button class="key" data-go="replies" style="min-height:48px">${ic('mail')}Open in Replies</button></div>`}
+ else if(s.sheet==='note')in_=`<span class="lab">Note for Callsheet</span><h3>What should it know?</h3><textarea class="fieldi" aria-label="Note" placeholder="e.g. School emails about lunch menus never need a reply."></textarea><p class="sm">Read at the next brief. It never leaves this box.</p><div class="acts"><button class="btn pri" data-act="notesave">Save note${kh(m,'↵')}</button></div>`;
+ else if(s.sheet==='startover')in_=`<span class="lab">Advanced · Start over</span><h3>Start over?</h3><p style="font-size:17px">This deletes the local index, your profile, notes and the 12 rules Callsheet learned. You’ll go through the three setup steps again. Mail, calendars and chats aren’t touched.</p>
+   <div class="acts"><button class="btn sec" data-act="sheetx">Keep everything</button><button class="btn ink" data-act="startoverok">Delete and start over</button></div>`;
+ else if(s.sheet==='keys')in_=`<span class="lab">Keys</span><h3>Callsheet on a keyboard</h3><div class="keys">${[['↵','The loud button'],['R','Play the rundown'],['B','Full brief'],['A','Agenda'],['1–5','Tabs'],['/ ⌘K','Find or ask'],['C','Copy draft'],['D','Done'],['L','Later'],['O','Open in Gmail'],['N','Note'],['X','Not for me'],['J K','Move in a list'],['← →','Rundown steps'],['Esc','Close or back'],['?','This sheet']].map(([k,t])=>`<div><span class="kh">${k}</span>${t}</div>`).join('')}</div><p class="sm" style="font-size:14px">Letters work when no text field has focus. Space is left to the browser, so it presses whatever button has focus.</p>`;
+ return `<div class="veil" data-act="sheetx"></div><div class="sheet" role="dialog" aria-modal="true">${grip}${close}${in_}</div>`}
+/* ================= app ================= */
+function app(m){const ph=m.kind==='phone',s=m.st,r=s.route;
+ const night=(m.o.light||LIGHT)==='night';
+ if(r==='push')return `<div class="bh phn night">${lock()}</div>`;
+ const body={today,rundown,replies,clear:allclear,agenda,ask,projects,setup,brief,voice}[r](m);
+ const toast=s.toast?`<div class="toast" role="status">${s.bad?'<i class="ind tri warn on"></i>':''}<span>${esc(s.toast)}</span>${s.undo?'<button data-act="undo">Undo</button>':''}</div>`:'';
+ const imm=r==='rundown'||r==='voice';
+ const cls=[s.sheet||s.pal?'hush':'',s.conn==='box'?'boxoff':''].join(' ');
+ return `<div class="bh ${ph?'phn':''} ${night?'night':''} ${m.o.big?'big':''}"><div class="app ${cls}">${imm?'<div class="trim"></div>':header(m)}${imm?'':offbar(m)}<main class="body">${body}</main>${ph&&!imm?ptabs(m):''}${toast}${s.pal?palette(m):''}${sheet(m)}</div></div>`}
+function countIn(m){const fr=m.el.getBoundingClientRect();let n=0;m.el.querySelectorAll('[data-c]').forEach(e=>{const r=e.getBoundingClientRect();if(r.width>0&&r.height>0&&r.top<fr.bottom-2&&r.bottom>fr.top+2&&!e.closest('.veil,.sheet,.pal'))n++});return n}
+function render(m){const sc=m.el.querySelector('.body');const y=sc?sc.scrollTop:0,r0=m._r;m.el.innerHTML=app(m);const nb=m.el.querySelector('.body');if(nb&&r0===m.st.route)nb.scrollTop=y;m._r=m.st.route;if(m.kind==='phone')swipe(m);
+ clearTimeout(m.vt);const v=m.st.v;if(m.st.route==='voice'&&v.playing&&v.i<4)m.vt=setTimeout(()=>{v.i++;v.heard=null;if(v.i>=4)v.playing=false;render(m)},5200);
+ const cap=m.el.closest('figure')?.querySelector('[data-count]');if(cap){requestAnimationFrame(()=>{cap.textContent=m.st.route==='today'?`${countIn(m)} things in view`:'';cap.style.display=cap.textContent?'':'none'})}}
+function say(m,t,undo,bad){const s=m.st;s.toast=t;s.undo=undo||null;s.bad=!!bad;clearTimeout(m.tt);m.tt=setTimeout(()=>{s.toast=null;s.undo=null;s.bad=false;render(m)},4600)}
+const snap=s=>({order:[...s.order],alert:s.alert,route:s.route,sel:s.sel,rules:s.rules.map(r=>[...r])});
+function curIdx(m){const s=m.st;return s.route==='replies'?s.sel:0}
+function act(m,a,el){const s=m.st;
+ const doneLike=k=>{const u=snap(s),i=curIdx(m),x=s.order.splice(i,1)[0];if(k==='later')s.order.push(x);s.copied=false;
+  if(s.route==='replies'&&!s.order.length)s.route='clear';
+  if(k==='nfm'&&s.scope==='all'&&!R[x].tags.includes('VIP'))s.rules.unshift([R[x].who,['A promo or newsletter','Just for my info','Already handled','Something else'][s.nfmPick],'5 Nov','new']);
+  say(m,k==='later'?'Later: back at the 12:30 check-in.':k==='nfm'?(s.scope==='all'&&!R[x].tags.includes('VIP')?`Out of Replies. Rule saved: skip ${R[x].who}.`:`Out of Replies: just this one from ${R[x].who}.`):`Done: ${R[x].who}.`,u)};
+ switch(a){
+  case 'copy':s.copied=true;say(m,'Draft copied. Nothing was sent.');break;
+  case 'done':case 'later':s.sheet=null;if(s.order.length)doneLike(a);break;
+  case 'more':s.sheet='more';break;
+  case 'nfm':s.sheet='nfm';s.sheetIdx=s.order[curIdx(m)];s.nfmPick=0;s.scope='one';break;
+  case 'nfmsave':s.sheet=null;doneLike('nfm');break;
+  case 'note':s.sheet='note';break;
+  case 'notesave':s.sheet=null;say(m,'Note saved. Callsheet reads it at the next brief.');break;
+  case 'open':s.sheet=null;say(m,'Opens the thread in a new tab. Callsheet only reads.');break;
+  case 'sec':s.sheet='sec';break;
+  case 'secopen':say(m,'Opens Google’s security page in a new tab.');break;
+  case 'itwasme':{const u=snap(s);s.sheet=null;s.alert='seen';s.seenAt=TOD[To(m)].clock;say(m,`Marked as seen ${s.seenAt}. It stays in Worth knowing today.`,u);break}
+  case 'ack':s.acked=true;say(m,'Got it. The clash stays marked on the scale and in the agenda.');break;
+  case 'sheetx':s.sheet=null;break;
+  case 'undo':if(s.undo){Object.assign(s,s.undo)}s.toast=null;s.undo=null;break;
+  case 'pal':s.pal=true;break;case 'palx':s.pal=false;break;
+  case 'palask':s.pal=false;s.route='ask';s.sub='ask';s.ask=1;startThink(m);break;
+  case 'palperson':s.pal=false;s.route='ask';s.sub='people';s.psel=0;s.pview='detail';break;
+  case 'refresh':if(!s.refresh){s.refresh=1;s.refreshStill=false;setTimeout(()=>{s.refresh=0;if(s.conn==='google')say(m,'Refresh didn’t finish: Google didn’t answer. The 06:30 brief stays.',null,true);else say(m,'Brief updated 08:16. Nothing new since 06:30.');render(m)},2400)}break;
+  case 'retry':if(!s.retrying){s.retrying=1;setTimeout(()=>{s.retrying=0;if(s.tries<1){s.tries=1;say(m,s.conn==='box'?'Still can’t reach Callsheet.':'Google still isn’t answering.',null,true)}else{const w=s.conn;s.conn='ok';s.tries=0;say(m,w==='box'?'Back. Showing the latest brief.':'Google is back. Brief updated 12:42: nothing new.')}render(m)},1300)}break;
+  case 'copyans':say(m,'Answer copied.');break;
+  case 'stop':s.thinking=false;clearTimeout(m.th);say(m,'Stopped. Showing what it found so far.');break;
+  case 'play':s.route='rundown';s.rstep=el&&el.dataset.step?+el.dataset.step:0;break;
+  case 'rnext':s.rstep=Math.min(4,s.rstep+1);break;
+  case 'rprev':s.rstep=Math.max(0,s.rstep-1);break;
+  case 'rclose':s.route='today';break;
+  case 'openpush':s.route='rundown';s.rstep=0;break;
+  case 'voice':s.v.i=s.route==='rundown'?s.rstep:0;s.route='voice';s.v.playing=true;s.v.heard=null;break;
+  case 'vplay':s.v.playing=!s.v.playing;s.v.heard=null;break;
+  case 'vnext':s.v.i=Math.min(4,s.v.i+1);s.v.heard=null;if(s.v.i>=4)s.v.playing=false;break;
+  case 'vprev':s.v.i=Math.max(0,s.v.i-1);s.v.heard=null;break;
+  case 'vagain':s.v.i=0;s.v.playing=true;break;
+  case 'vsound':s.v.sound=!s.v.sound;break;
+  case 'vclose':s.route='today';s.v.playing=false;break;
+  case 'inv':s.invAll=!s.invAll;break;
+  case 'startover':s.sheet='startover';break;
+  case 'startoverok':s.sheet=null;say(m,'Mockup: nothing was deleted.');break;
+  case 'same':{const p=SAME[s.same];s.same++;say(m,`Merged: ${p.a[0]} and ${p.b[0]} are one person now.`,{same:s.same-1});break}
+  case 'notsame':s.same++;say(m,'Kept apart. Callsheet won’t ask about this pair again.',{same:s.same-1});break;
+  case 'unsure':s.same++;say(m,'Skipped. It may ask again later.');break;
+  case 'pback':s.pview='list';break;
+  case 'kmcheck':s.km='check';s.kmEdit=false;break;
+  case 'kmright':case 'kmsave':case 'kmforget':{const i=s.facts.findIndex(f=>!f);if(i>=0)s.facts[i]=a==='kmforget'?2:1;s.checked++;s.kmEdit=false;if(!s.facts.some(f=>!f)){s.km=null;say(m,a==='kmforget'?'Forgotten. All checked.':'Thanks. All checked.')}break}
+  case 'kmedit':s.kmEdit=!s.kmEdit;break;
+  case 'kmq':s.km='q';s.qpick=null;break;
+  case 'qnext':if(s.qpick!==null){s.qdone=Math.min(3,s.qdone+1);s.qpick=null;if(s.qdone>=3)s.km=null;say(m,'Saved.')}break;
+  case 'kmx':s.km=null;break;
+  case 'forget':{const i=+el.dataset.fi;say(m,`Forgotten: “${FACTS[i][1].slice(0,40)}…”`,{facts:[...s.facts]});s.facts[i]=2;break}
+  case 'reread':say(m,'Reading your history again. About 4 minutes; the brief keeps working.');break;
+  case 'unrule':{const u=snap(s),k=+el.dataset.ri,r=s.rules.splice(k,1)[0];say(m,`Removed. ${r[0]}’s next mail comes back to Replies.`,u);break}
+  case 'keys':s.sheet='keys';break}
+ render(m)}
+function startThink(m){const s=m.st;s.thinking=true;clearTimeout(m.th);m.th=setTimeout(()=>{s.thinking=false;render(m)},1700)}
+function go(m,r,el){const s=m.st;s.pal=false;s.sheet=null;
+ s.route=r;if(r==='agenda')s.agDay=el&&el.dataset.day?el.dataset.day:'today';
+ if(r==='replies'&&!s.order.length)s.route='clear';
+ if(r==='replies'&&el&&el.dataset.who){const i=s.order.indexOf(+el.dataset.who);if(i>=0){s.sel=i;s.view=m.kind==='phone'?'one':'list'}}
+ if(r==='setup')s.place=el?.dataset.place||'home';
+ if(r==='brief')s.fbk=0;
+ render(m)}
+function swipe(m){m.el.querySelectorAll('[data-swipe]').forEach(c=>{let x0=null,dx=0;const sc=()=>m.el.getBoundingClientRect().width/390;
+ c.addEventListener('pointerdown',e=>{if(e.target.closest('button,.draft,input'))return;x0=e.clientX;dx=0;c.setPointerCapture(e.pointerId);c.style.transition='none'});
+ c.addEventListener('pointermove',e=>{if(x0===null)return;dx=(e.clientX-x0)/sc();if(c.dataset.swipe==='card')c.style.transform=`translateX(${dx}px) rotate(${dx/40}deg)`});
+ const end=()=>{if(x0===null)return;x0=null;c.style.transition='';const k=c.dataset.swipe;
+  if(k==='card'){if(dx>90)act(m,'done');else if(dx<-90)act(m,'later');else c.style.transform=''}
+  else{if(dx<-60)act(m,'rnext');else if(dx>60)act(m,'rprev')}};
+ c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end)})}
+function wire(m){
+ m.el.addEventListener('click',e=>{const t=e.target.closest('[data-go],[data-act],[data-view],[data-day],[data-q],[data-pick],[data-place],[data-expand],[data-rock],[data-adv],[data-nfm],[data-dayk],[data-sub],[data-sub-go],[data-person],[data-vip],[data-scope],[data-qp],[data-fb]');if(!t||!m.el.contains(t)||t.disabled)return;const s=m.st,d=t.dataset;
+  if(d.go)return go(m,d.go,t);
+  if(d.act)return act(m,d.act,t);
+  if(d.view){s.view=d.view;return render(m)}
+  if(d.day){s.agDay=d.day;return render(m)}
+  if(d.q){s.ask=+d.q;startThink(m);return render(m)}
+  if(d.pick!==undefined){s.sel=+d.pick;s.copied=false;if(m.kind==='phone')s.view='one';return render(m)}
+  if(d.place){s.place=d.place;return render(m)}
+  if(d.expand){s.expand=s.expand===d.expand?null:d.expand;return render(m)}
+  if(d.rock){s.briefs[d.rock]=s.briefs[d.rock]?0:1;say(m,'Saved.');return render(m)}
+  if(d.dayk){s.days[+d.dayk]=s.days[+d.dayk]?0:1;return render(m)}
+  if(d.adv){s.adv=s.adv===d.adv?null:d.adv;return render(m)}
+  if(d.nfm!==undefined){s.nfmPick=+d.nfm;return render(m)}
+  if(d.scope){s.scope=d.scope;return render(m)}
+  if(d.sub){s.sub=d.sub;s.km=null;s.pview='list';return render(m)}
+  if(d.subGo){s.route='ask';s.sub=d.subGo;s.pview='list';return render(m)}
+  if(d.person!==undefined){s.psel=+d.person;if(m.kind==='phone')s.pview='detail';return render(m)}
+  if(d.vip!==undefined){const i=+d.vip;s.vip[i]=!s.vip[i];say(m,s.vip[i]?`${PEOPLE[i].n} always counts now.`:`${PEOPLE[i].n} is sorted like everyone else now.`);return render(m)}
+  if(d.qp!==undefined){s.qpick=+d.qp;return render(m)}
+  if(d.fb){s.fbk=['b1','b2','b3','b4','b5'].indexOf(d.fb);const b=m.el.querySelector('.body'),x=m.el.querySelector('#'+d.fb);render(m);const b2=m.el.querySelector('.body'),x2=m.el.querySelector('#'+d.fb);if(b2&&x2)b2.scrollTop=x2.offsetTop-12;return}});
+ if(m.kind!=='desk')return;
+ m.el.closest('.screen').addEventListener('keydown',e=>{const s=m.st;if(e.target.closest('input,textarea,.draft'))return;const k=e.key.toLowerCase();
+  const click=sel=>{const b=m.el.querySelector(sel);if(b){e.preventDefault();b.click();return true}};
+  if((e.metaKey||e.ctrlKey)&&k==='k'){e.preventDefault();s.pal=!s.pal;return render(m)}
+  if(s.pal){if(k==='escape'){s.pal=false;render(m)}else if(k==='enter')act(m,'palperson');e.preventDefault();return}
+  if(s.sheet){if(k==='escape'){s.sheet=null;render(m)}else if(k==='enter')click('.sheet .btn.pri,.sheet .btn.al');else if(s.sheet==='more'&&'lnx'.includes(k))act(m,{l:'later',n:'note',x:'nfm'}[k]);return}
+  if(k==='/'){e.preventDefault();s.pal=true;return render(m)}
+  if(k==='?'){return act(m,'keys')}
+  if(s.route==='voice'){if(k==='arrowright')act(m,'vnext');else if(k==='arrowleft')act(m,'vprev');else if(k===' '){e.preventDefault();act(m,'vplay')}else if(k==='escape')act(m,'vclose');return}
+  if(s.route==='rundown'){if(k==='arrowright'){e.preventDefault();act(m,'rnext')}else if(k==='arrowleft'){e.preventDefault();act(m,'rprev')}else if(k==='escape')act(m,'rclose');else if(k==='enter')click('.rs .btn.pri,.rs .btn.al');return}
+  if(k==='escape')return go(m,'today');
+  if(['1','2','3','4','5'].includes(k))return go(m,['today','replies','agenda','ask','projects'][+k-1]);
+  if(k==='b')return go(m,'brief');
+  if(s.route==='today'){if(k==='enter')return click('.nx .btn.pri,.nx .btn.al');if(k==='r'){e.preventDefault();return act(m,'play')}if(k==='a')return go(m,'agenda')}
+  const map={c:'copy',d:'done',l:'later',x:'nfm',o:'open',n:'note'};
+  if(s.route==='today'&&k==='c'&&firstReply(s)!==null){e.preventDefault();return act(m,'copy')}
+  if((s.route==='today'&&next(m)==='reply')||s.route==='replies'){if(map[k]){e.preventDefault();return act(m,map[k])}}
+  if(s.route==='replies'&&(k==='j'||k==='k')){s.sel=Math.max(0,Math.min(s.order.length-1,s.sel+(k==='j'?1:-1)));s.copied=false;return render(m)}
+  if(s.route==='ask'&&s.sub==='people'&&(k==='j'||k==='k')){s.psel=Math.max(0,Math.min(PEOPLE.length-1,s.psel+(k==='j'?1:-1)));return render(m)}
+  if(s.route==='ask'&&k==='enter')return click('.pg .btn.pri');
+  if(s.route==='clear'&&k==='enter')go(m,'today')})}
+/* ================= mounts ================= */
+document.querySelectorAll('[data-mount]').forEach(el=>{const d=el.dataset;const m={el,kind:d.kind,stage:'stage' in d,o:{route:d.route,light:d.light,load:d.load,tod:d.tod,step:d.step,place:d.place,sheet:d.sheet,who:d.who,conn:d.conn,sub:d.sub,vstep:d.vstep,vplay:d.vplay,big:d.big,km:d.km}};
+ el.style.width=d.w+'px';el.style.height=d.h+'px';el.parentElement.style.aspectRatio=d.w+'/'+d.h;fresh(m);wire(m);render(m);mounts.push(m)});
+function fit(){document.querySelectorAll('.scaler').forEach(sc=>{const w=sc.parentElement.clientWidth;sc.style.transform=`scale(${w/+sc.dataset.w})`})}
+addEventListener('resize',()=>{fit();mounts.forEach(render)});fit();mounts.forEach(render);
+function resetAll(keepRoute){mounts.forEach(m=>{const r=m.st.route,sub=m.st.sub;fresh(m);if(keepRoute&&m.stage){m.st.route=r==='push'?'today':r;m.st.sub=sub}if(m.st.route==='replies'&&!m.st.order.length)m.st.route='clear';render(m)})}
+function segInit(id,fn){document.querySelectorAll(`#${id} button`).forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll(`#${id} button`).forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.v)}))}
+function segSet(id,v){document.querySelectorAll(`#${id} button`).forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v))}
+segInit('seg-light',v=>{LIGHT=v;mounts.forEach(render)});
+segInit('seg-tod',v=>{TODK=v;resetAll(true)});
+segInit('seg-load',v=>{LOAD=v;resetAll(true)});
+segInit('seg-conn',v=>{CONN=v;resetAll(true)});
+segInit('seg-ac',v=>{AC=v;mounts.forEach(render)});
+/* ================= flow player ================= */
+const FL=[
+ {k:'A',n:'Morning, from the push',tod:'morning',steps:[
+  ['<b>06:34, phone.</b> One line: replies, the clash and the sign-in. Two actions: Open, or Read it to me (flow G).',(s,ph)=>{s.route=ph?'push':'rundown';s.rstep=0}],
+  ['<b>1 of 4 · Your day.</b> One sentence, then the scale. Two lanes show the clash as two amber windows.',s=>{s.route='rundown';s.rstep=0}],
+  ['<b>2 of 4 · Who needs an answer.</b> The number is said once, in words. Three names and why. "See them all" instead of "All 7".',s=>{s.route='rundown';s.rstep=1}],
+  ['<b>3 of 4 · Worth knowing.</b> The alert outranks replies, and its key is the red alert key (D84), not orange.',s=>{s.route='rundown';s.rstep=2}],
+  ['<b>4 of 4 · Coming up.</b> Three date tiles. Nothing to do, so there is no loud key.',s=>{s.route='rundown';s.rstep=3}],
+  ['<b>The end.</b> The next thing, plus Read the full brief and "Something missing?".',s=>{s.route='rundown';s.rstep=4}],
+  ['<b>The full brief</b> is the rundown expanded on one reading page, with By area and two months ahead. No loud key: it’s for reading.',s=>{s.route='brief'}],
+  ['<b>Today.</b> Fewer things than pass 2: no badges, no eyebrow, no band summary. The count is on the caption.',s=>{s.route='today'}]]},
+ {k:'B',n:'Busy morning: alert and Priya',tod:'morning',steps:[
+  ['<b>Today, 08:15.</b> The alert keeps the Next card. Under it, <b>Then</b> names Priya and copies her draft (C) without clearing the alert first. Zero orange: the red key is the loudest thing.',s=>{s.route='today'}],
+  ['<b>Copy from the Then line.</b> Her draft is on the clipboard; the alert stays where it is.',s=>{s.route='today';s.copied=true;s.toast='Draft copied. Nothing was sent.'}],
+  ['<b>Check the sign-in.</b> The same sheet everywhere (D43). The page behind loses its loud key (D97). Callsheet can’t change the account, so it says so.',s=>{s.route='today';s.copied=true;s.sheet='sec'}],
+  ['<b>It was me.</b> The alert goes quiet ("Seen 08:15", just the word on the rundown row), and Next becomes Priya’s reply.',s=>{s.route='today';s.copied=true;s.alert='seen';s.seenAt='08:15';s.toast='Marked as seen 08:15. It stays in Worth knowing today.'}],
+  ['<b>Done.</b> The next reply moves into the same card. Undo is in the toast.',s=>{s.route='today';s.alert='seen';s.order.shift();s.toast='Done: Priya N.';s.undo={order:[...ORD.normal.morning],alert:'seen',route:'today',sel:0}}],
+  ['<b>The last one.</b> All clear. Stripes draw in once. Back to Today is a quiet key: calm has no orange (D95).',s=>{s.route='clear';s.alert='seen';s.order=[]}],
+  ['<b>Calm Today.</b> No loud key at all. See tomorrow is there if you want it.',s=>{s.route='today';s.alert='seen';s.order=[];s.drawn.today=1}]]},
+ {k:'C',n:'Not for me, scoped',tod:'morning',steps:[
+  ['<b>Replies.</b> Northwind Store sits under For your info. It’s sorted there, never hidden.',(s,ph)=>{s.route='replies';s.sel=s.order.indexOf(5);if(ph)s.view='one'}],
+  ['<b>Not for me (X).</b> A reason, then <b>Apply to</b>: "Just this one" is the default.',(s,ph)=>{s.route='replies';s.sel=s.order.indexOf(5);if(ph)s.view='one';s.sheet='nfm';s.sheetIdx=5}],
+  ['<b>Everything from Northwind Store</b> is a deliberate second press. The line under it says what a rule never touches.',(s,ph)=>{s.route='replies';s.sel=s.order.indexOf(5);if(ph)s.view='one';s.sheet='nfm';s.sheetIdx=5;s.scope='all'}],
+  ['<b>On a VIP</b> (Priya), the sender key is locked and says why. Only this message can move.',(s,ph)=>{s.route='replies';s.sel=0;if(ph)s.view='one';s.sheet='nfm';s.sheetIdx=0}],
+  ['<b>The rules list.</b> Setup › Your day › Never needs a reply: sender, reason, when it was added, how much it caught, Remove with Undo.',s=>{s.route='setup';s.place='rules';s.rules.unshift(['Northwind Store','A promo or newsletter','5 Nov','new'])}]]},
+ {k:'D',n:'The clash, within the hour',tod:'soon',steps:[
+  ['<b>08:15.</b> The 11:00 clash is three hours away, so it rides the scale and the reply keeps the card.',s=>{s.route='today'},'morning'],
+  ['<b>10:05.</b> Now it’s within 60 minutes, so it takes the Next card: triangle window, "Clash", one orange See the clash. Priya waits on the Then line.',s=>{s.route='today'}],
+  ['<b>Agenda.</b> The clash group says "in 55 min", and Dev T.’s message sits inside it.',s=>{s.route='agenda'}],
+  ['<b>Got it.</b> The card goes back to the reply. The clash stays marked on the scale.',s=>{s.route='today';s.acked=true;s.toast='Got it. The clash stays marked on the scale and in the agenda.'}]]},
+ {k:'E',n:'People',tod:'morning',steps:[
+  ['<b>Find or ask, "priya".</b> People come first in the results.',s=>{s.route='today';s.pal=true}],
+  ['<b>Ask › People.</b> People sits beside Ask and Know me: three views of what Callsheet has read. The Same person? card is the one loud thing here.',(s,ph)=>{s.route='ask';s.sub='people';s.psel=0}],
+  ['<b>Same person.</b> Merged, with Undo. The card moves to the next pair (2 of 3).',(s,ph)=>{s.route='ask';s.sub='people';s.same=1;s.toast='Merged: Priya N. and Priya Nair are one person now.'}],
+  ['<b>A person.</b> Always counts is a quiet rocker, then where Callsheet sees them, and what’s waiting on you.',(s,ph)=>{s.route='ask';s.sub='people';s.same=1;s.psel=2;if(ph)s.pview='detail'}]]},
+ {k:'F',n:'Know me',tod:'morning',steps:[
+  ['<b>Know me.</b> Three steps, each one line with its state. The next step holds the one loud key: Check 2 things.',s=>{s.route='ask';s.sub='knowme'}],
+  ['<b>Check 1 of 2.</b> One fact, its source, and Right / Not quite / Forget this.',s=>{s.route='ask';s.sub='knowme';s.km='check'}],
+  ['<b>Not quite.</b> Say what’s right in your own words.',s=>{s.route='ask';s.sub='knowme';s.km='check';s.kmEdit=true}],
+  ['<b>A question.</b> Pick one answer; Save and next.',s=>{s.route='ask';s.sub='knowme';s.facts=FACTS.map(()=>1);s.km='q';s.qpick=1}]]},
+ {k:'G',n:'Read it to me (voice)',tod:'morning',steps:[
+  ['<b>From the push:</b> "Read it to me" starts the voice rundown without opening the app.',(s,ph)=>{s.route=ph?'push':'rundown';s.rstep=0}],
+  ['<b>Playing, step 1.</b> Captions show the current line, a slot fills as it’s read, and three big keys sit on the black band. Pause is the one orange (playing > idle).',s=>{s.route='voice';s.v.i=0;s.v.playing=true}],
+  ['<b>Step 2.</b> The last line stays above, dimmed. Nothing more on screen.',s=>{s.route='voice';s.v.i=1;s.v.playing=true}],
+  ['<b>"Later".</b> Heard and confirmed in words. Priya is kept for the desk. Voice can’t send, accept or delete.',s=>{s.route='voice';s.v.i=1;s.v.playing=false;s.v.heard='later'}],
+  ['<b>Captions only.</b> In quiet hours, or with Sound off, it reads silently and advances the same way.',s=>{s.route='voice';s.v.i=2;s.v.playing=false;s.v.sound=false}],
+  ['<b>The end.</b> No loud key: Back, Play again or Close.',s=>{s.route='voice';s.v.i=4;s.v.playing=false}]]},
+ {k:'H',n:'Something’s wrong',tod:'midday',steps:[
+  ['<b>Google stops answering.</b> Offline outranks replies (D23): a dashed Next card, one Try again, and the calendar windows go dashed. "Last read 06:30" appears once.',s=>{s.route='today';s.conn='google'}],
+  ['<b>Try again fails.</b> It says when it tried and what to check, and adds a Connections key.',s=>{s.route='today';s.conn='google';s.tries=1;s.toast='Google still isn’t answering.';s.bad=true}],
+  ['<b>Try again works.</b> Back to the reply. The toast says what changed.',s=>{s.route='today';s.toast='Google is back. Brief updated 12:42: nothing new.'}],
+  ['<b>The box can’t be reached</b> (phone away from home). The last brief stays, Copy still works, Refresh and Find go dim, and a dashed bar holds the one Try again.',s=>{s.route='today';s.conn='box'}],
+  ['<b>A refresh that fails</b> says so in a warn toast and keeps the brief you have.',s=>{s.route='today';s.conn='google';s.toast='Refresh didn’t finish: Google didn’t answer. The 06:30 brief stays.';s.bad=true}]]},
+ {k:'I',n:'Setup, quieter',tod:'morning',steps:[
+  ['<b>Setup home.</b> Four places, each one line. "Callsheet works without touching any of this."',s=>{s.route='setup';s.place='home'}],
+  ['<b>Your day.</b> Quiet paddles: up + a cream window. Pass 2 had four orange paddles here; now there are none, and nothing else is orange.',s=>{s.route='setup';s.place='day';s.expand='m'}],
+  ['<b>Never needs a reply.</b> Every rule Not for me saved, with Remove and Undo.',s=>{s.route='setup';s.place='rules'}],
+  ['<b>Start over.</b> A dark button in a confirm sheet that names the result (D24, D98).',s=>{s.route='setup';s.place='adv';s.adv='Start over';s.sheet='startover'}]]}];
+let FI=0,SI=0;
+const stage=()=>mounts.filter(m=>m.stage);
+function applyStep(){const f=FL[FI],[c,fn,tod]=f.steps[SI];const want=tod||f.tod||'morning';
+ if(TODK!==want||LOAD!=='normal'||CONN!=='ok'){TODK=want;LOAD='normal';CONN='ok';segSet('seg-tod',want);segSet('seg-load','normal');segSet('seg-conn','ok');resetAll(false)}
+ stage().forEach(m=>{clearTimeout(m.tt);fresh(m);fn(m.st,m.kind==='phone');render(m);if(m.st.toast)say(m,m.st.toast,m.st.undo,m.st.bad)});
+ document.getElementById('cap').innerHTML=`<span class="eyebrow">${f.k} · step ${SI+1} of ${f.steps.length}</span><br>${c}`;
+ document.getElementById('dots').innerHTML=f.steps.map((_,i)=>`<button aria-label="Step ${i+1}" ${i===SI?'aria-current="step"':''} data-i="${i}">${i+1}</button>`).join('');
+ document.querySelectorAll('#flows button').forEach((b,i)=>b.setAttribute('aria-pressed',i===FI));
+ document.getElementById('pprev').disabled=SI===0&&FI===0}
+document.getElementById('flows').innerHTML=FL.map((f,i)=>`<button class="pbtn" data-f="${i}" aria-pressed="${i===0}"><b>${f.k}</b>${f.n}</button>`).join('');
+document.getElementById('flows').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;FI=+b.dataset.f;SI=0;applyStep()});
+document.getElementById('dots').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;SI=+b.dataset.i;applyStep()});
+document.getElementById('pnext').addEventListener('click',()=>{if(SI<FL[FI].steps.length-1)SI++;else{FI=(FI+1)%FL.length;SI=0}applyStep()});
+document.getElementById('pprev').addEventListener('click',()=>{if(SI>0)SI--;else if(FI>0){FI--;SI=FL[FI].steps.length-1}applyStep()});
+applyStep();
+window.__cs={mounts,FL,setFlow:(f,s)=>{FI=f;SI=s;applyStep()},set:(k,v)=>{if(k==='light'){LIGHT=v;segSet('seg-light',v);mounts.forEach(render)}},count:countIn};
+</script>
