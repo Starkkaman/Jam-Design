@@ -238,3 +238,6 @@ Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopt
 - Speaker pop-up: needs a button to see other speakers, to group or separate them.
 - NerveOS card: messy, rework it.
 - Requested Jam Braun screenshots + tokens from the HA agent (projects/jam-home/screens/braun/).
+- Isaac shared screenshots of the live Jam Home in **Jam Braun** (desktop, dark): calm charcoal cards, soft corners, pill scene chips, HA toggles, 3x2 source tile grid, NerveOS row, speaker card with a Braun dot grille and one orange dot, orange primary actions.
+- Isaac: "Lets see it without the grain or the paper. Keep the ribs though."
+- Mockup 13 (Jam Home simplified = Hi-Fi on Jam Braun): no grain, no paper, no brushed metal, no glow; ribs only on black bands (house strip, TV screen, NV mark). Indicator windows always a dark recess, lit = flat solid colour. Sliders reveal warm cream (or the light's own colour) instead of orange. Selected scenes/sources press in (no orange). Orange left on: rocker paddles, Turn on, Play, Done. Seven-segment only on the air purifier (cream digits). Light pop-up: five white presets (2200K-5000K) each showing its colour; colour picks recolour the light's slot and sliders. TV sources: tile grid with coloured slots. Speaker: Braun grille card + Speakers button opening a group/split panel with rockers. NerveOS: one clean row.
