@@ -154,3 +154,17 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D89. Keys may carry a printed colour code for identification (never lit, never a state, never orange).
 - D90. A count only counts what it names ("Lights · 3 on" leaves out the Tree).
 - D91. Tab bars draw only the lit window (extends D12/D46).
+
+### Pass 2 · Jam-Dash
+- D92. Warn = amber **triangle** window + word; alert stays round, red, ringed (a new indicator shape; refines D21).
+- D93. State words come in three lengths: shared label, per-app short word (≤14 characters, e.g. "Crashed", "Partly up", "Almost full"), and a sentence.
+- D94. Dashboards shrink in a fixed, published order, with a named list of what never shrinks (headline, trouble cards, state words, Open).
+- D95. D23 precise: alerts → offline → warns → routine, only on screens that own an action; a calm overview has no orange.
+- D96. Trouble is said once: the reason and fix live on the card; the tile keeps its place with just the word (desktop) or leaves the grid (phone).
+- D97. One orange per frame: the page behind an open sheet loses its orange (agrees with D82).
+- D98. Data loss is opt-in inside the confirm sheet, and the button names the result (extends D24).
+- D99. Black bands at night get a hairline edge, a top highlight and stronger ribs.
+- D100. Live meters update text continuously but move the bar only on a real change (≥3 points), with one settle.
+- D101. A rolled-back update is warn, not alert; Try again can fail and must say what to check (refines D27).
+- D102. A phone overview with several servers starts with a strip of one row per server.
+- D103. Apps without art get a neutral category icon in a dark frame, never initials or a brand mark (extends D34).
