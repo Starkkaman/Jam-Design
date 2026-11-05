@@ -1,4 +1,4 @@
-# Jam Design Bible — working draft 0.4
+# Jam Design Bible — working draft 0.5
 
 > **Status: draft. Nothing here is approved for shipping, and nothing existing is being replaced or deleted.** Rollout comes later, one app or service at a time; existing looks and themes stay until that app's turn. The base look is still being designed with Isaac. Source of every decision: [`decisions.md`](decisions.md). Visual reference: [`mockups/`](mockups/), latest first.
 
@@ -43,6 +43,29 @@ The house as a piece of 1970s hi-fi equipment: brushed aluminium, a black ribbed
 - **Jost** for everything you read as words. Uppercase labels at 12 px with 0.16em tracking.
 - **IBM Plex Mono** for numbers in lists and labels; **seven-segment** for big live readouts, using the **DSEG** font (OFL 1.1) so every platform draws the same digits.
 - No serifs.
+
+### Texture (Rich)
+- Coarse grain, brushed metal on shutter halves, embossed ribs, light falloff, machined seams, recessed bezels with a glass highlight. All static.
+- **Paper texture on headlines only** (titles, hero titles, clocks). Small labels stay solid.
+- On TV, texture only on fixed surfaces (title card, tiles, fixed bands). Never behind scrolling rows.
+
+### Accents: a splash of colour
+One accent per screen, flat and static, always in a **clear zone** (top right on the launchers): never behind titles, buttons or tiles. Flat shapes are cheap on TV, so accents are allowed behind rows where texture isn't. Decorative oranges stay darker than the control orange so they never read as pressable.
+
+| Accent | From | Shape | Palette |
+|---|---|---|---|
+| **Stripes** | Atari 2600, 70s hi-fi | Three bands that drop in from the top and bend out to the right | chocolate `#6b3416`, burnt orange `#b04a1c`, gold `#d69a2e` |
+| **Session blocks** | Cowboy Bebop, Satoshi Kon | Tilted jazz-poster blocks: a blue slab, a yellow bar, one red square | blue `#21406c`, yellow `#e3b02f`, red `#c23a2b`, cream rules |
+| **Colour bars** | Atari 2600, 70s TV | Bars entering from the right edge, thinning as they go | `#6b3416` `#9a3f18` `#c45d22` `#d68a2c` `#e3b24a` `#efd58a` |
+
+Which screen gets which accent is decided per app at its rollout turn.
+
+**Saved palettes for later** (Isaac likes the colours; no use decided yet):
+- **Horizon** (McQuarrie / Mead sunset): `#2a1c38` `#45213f` `#6e2a42` `#9a3c3b` `#c25a30` `#d77d2d` `#e6a53a`
+- **Mission** (70s NASA patch): navy `#1d2944`, gold `#c9a24a`, rust `#b0451c`, cream `#e9e2d0`
+
+### TV title card
+**Shutter with the slatted bar** (mockup 09). The two halves of the band close over the screen; the title sits on the seam in paper-textured Jost capitals; the slatted bar under it shows real loading and only hands off when ready. Rich texture, the Stripes accent continuing across both halves (shifted clear of the centred title). Minimum hold about 1.6 s; it stays dark, so it's flash-safe.
 
 ## 3. Light
 
@@ -163,7 +186,7 @@ A look may have a full-screen film layer (scanlines, grain, colour fringe) if th
 ## 10. Still open
 
 - The project-by-project check: every project documents its current UI in `projects/` first.
-- TV title card in Hi-Fi (mockup 09: Shutter, Tape counter or Tuning dial), interface sounds, Callsheet's and HA's current Saul Bass defaults, LCARS II.
+- Interface sounds, Callsheet's and HA's current Saul Bass defaults, LCARS II.
 - The look shelf: which alternates survive and get rebuilt on these roles.
 - Token pipeline: one token file converted to CSS variables, HA `--jam-*` YAML, Compose `Palette.kt` and Godot `theme.json` (NervOS's dotted `tokens` block; role map in `projects/nervos/PROPOSALS.md` P6). The band and walnut trim need per-app layout code, not just tokens.
 - Kiosk glance size and "attention surfaces" (HA questions 3 and 7): not adopted for now.

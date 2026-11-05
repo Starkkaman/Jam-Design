@@ -1,5 +1,5 @@
 {
-  "$schema": "draft \u2014 Hi-Fi base look tokens, working draft 0.3. Not approved for shipping.",
+  "$schema": "draft \u2014 Hi-Fi base look tokens, working draft 0.5. Not approved for shipping.",
   "look": "hifi",
   "color": {
     "day": {
@@ -50,6 +50,44 @@
       "mid": "#f07432",
       "to": "#ff9b50",
       "hotSpot": "#fff1dc"
+    },
+    "accents": {
+      "stripes": [
+        "#6b3416",
+        "#b04a1c",
+        "#d69a2e"
+      ],
+      "sessionBlocks": {
+        "blue": "#21406c",
+        "yellow": "#e3b02f",
+        "red": "#c23a2b",
+        "rule": "#e9e2d0"
+      },
+      "colourBars": [
+        "#6b3416",
+        "#9a3f18",
+        "#c45d22",
+        "#d68a2c",
+        "#e3b24a",
+        "#efd58a"
+      ]
+    },
+    "savedPalettes": {
+      "horizon": [
+        "#2a1c38",
+        "#45213f",
+        "#6e2a42",
+        "#9a3c3b",
+        "#c25a30",
+        "#d77d2d",
+        "#e6a53a"
+      ],
+      "mission": {
+        "navy": "#1d2944",
+        "gold": "#c9a24a",
+        "rust": "#b0451c",
+        "cream": "#e9e2d0"
+      }
     }
   },
   "font": {
@@ -89,7 +127,9 @@
       "line": 1,
       "period": 10,
       "opacity": 0.07
-    }
+    },
+    "level": "rich",
+    "paperHeadlines": true
   },
   "motion": {
     "easing": {
@@ -127,5 +167,11 @@
     "ribs": "fixed surfaces only, cached bitmap per size",
     "glow": "pre-rendered sprites, opacity 0->1",
     "dayPalette": "optional, mid-light, never paper-white"
+  },
+  "titleCard": {
+    "style": "shutter",
+    "progress": "slatted",
+    "minHoldMs": 1600,
+    "accent": "stripes"
   }
 }

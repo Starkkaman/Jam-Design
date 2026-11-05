@@ -207,3 +207,6 @@ Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopt
 
 ## Splash of colour (2026-11-05)
 - Mockup 10: nine original colour accents from Isaac's influences, each in the clear zone (top right, never behind titles/buttons), flat + static: Stripes (chosen), Horizon (McQuarrie/Mead porthole sunset), Mission patch (70s NASA roundel), Atomic starburst (mid-century), Eames dots, Colour bars (Atari/70s TV), Session blocks (Bebop/Kon), Braun keys (Rams), Launch chevrons (NASA/Eva). No logos or emblems. Decorative oranges stay darker than control orange. Proposal: one splash per screen, different screens/apps may differ. Awaiting picks.
+- Isaac's picks: accents STRIPES, SESSION BLOCKS, COLOUR BARS. Saved for later: the HORIZON palette and the MISSION PATCH palette ("could be used later for something").
+- Title card recorded as final in the bible: Shutter + slatted bar, Rich texture, paper headlines, Stripes accent.
+-> BIBLE.md draft 0.5.
