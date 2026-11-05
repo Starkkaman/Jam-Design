@@ -2,6 +2,25 @@
 
 Everything is a proposal. Nothing in BIBLE.md, the tokens or any real app has changed.
 
+## Round 5: deeper bespoke designs, plus moving between apps
+Each app adopts the 15-item language from `notes/RULES-TIERS.md`, assumes the recommended fixes for the 12 open conflicts (marked "pending Isaac"), applies the hole rules, fixes its round 4 audit and carries its idea into every screen.
+
+| Mockup | Page | Notes |
+|---|---|---|
+| **Cross-app journeys** (six household journeys, 56 steps, 26 seams found) | https://claude.ai/artifact/PnNxQrCV7t8KBrrKFM2URD | `notes/pass5-journeys.md` |
+| TV launcher (Lobby) | https://claude.ai/artifact/KooNcUAp3chbWwTDBjFrMk | `notes/pass5-tv-launcher.md` |
+| Callsheet | https://claude.ai/artifact/1gLmqqqrDapXBARrtWio8i | `notes/pass5-callsheet.md` |
+| JamFin | https://claude.ai/artifact/QHmgx8EStk7VVVT1BAqpDX | `notes/pass5-jamfin.md` |
+| Jam-Dash | https://claude.ai/artifact/6oUMNMNzrAEePWTM99GpD9 | `notes/pass5-jam-dash.md` |
+| NervOS | https://claude.ai/artifact/MJSYoSXWmysnsG4zc5qrsK | `notes/pass5-nervos.md` |
+| Jam Home | https://claude.ai/artifact/NvuaucnUqjYRwepQ3fy8PY | `notes/pass5-home-assistant.md` |
+
+**What the journeys found:** the bespoke designs hand over well, because grounds, objects and layout can change at every step without jarring. What breaks are **facts that cross screens**: the same state gets different words, severity and clock format in different apps. Two High seams:
+- S7: one outage reads "offline" on the TV and in Jam-Dash but as a red alert in Callsheet. Fix: the app that owns the state sets it, and the others quote it.
+- S18: Lobby and Jam Home disagree about what's on HDMI 1. Fix: one device inventory, from Home Assistant.
+
+Proposed new language rules: one owner per fact, one household clock format, and one shared slatted load bar.
+
 ## Round 4: same language, bespoke designs (after Isaac's note)
 | App | Idea | Page | Notes |
 |---|---|---|---|
