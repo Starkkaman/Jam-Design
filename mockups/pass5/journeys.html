@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cross-app journeys</title>
+<meta name="description" content="Pass 5: six household journeys that cross Jam Home, Lobby, JamFin, NervOS, Callsheet and Jam-Dash, played step by step, with the handoff between each pair and the seams that jar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Pass 5 · journeys. Each app's frame borrows its own pass-4 look (tokens and CSS fragments copied from
+   mockups/pass4/*.html); nothing is unified here on purpose, so the seams show. Every frame is authored at its
+   device's native size in px (TV 1920x1080, kiosks 1024x768 and 961x601, phone 390x844, desk 1440x900) and scaled
+   to fit. Blue dashed outlines are review marks, not part of any design. All people, titles and data are samples. */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5b5e5d;--line:#cfccc5;--chip:#fff;--card:#efede8;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--decel:cubic-bezier(.16,1,.3,1);--leave:cubic-bezier(.4,0,1,1);
+  --hl:#1e8fff;--y:#3f8f2a;--p:#a86f00;--n:#c0392b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;--card:#18191a;--y:#8fd46b;--p:#f2c14e;--n:#ff8a7a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;--card:#18191a;--y:#8fd46b;--p:#f2c14e;--n:#ff8a7a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{color:var(--fg);font:400 16px/1.5 var(--f);overflow-x:hidden}
+.wrap{max-width:1500px;margin:0 auto;padding:28px 16px 72px;display:grid;gap:22px;min-width:0}
+@media (min-width:760px){.wrap{padding-inline:28px}}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(28px,4vw,40px)/1.1 var(--f);margin:6px 0 10px}
+h2{font:600 22px/1.25 var(--f);margin:0}
+h3{font:600 16px/1.3 var(--f);margin:0}
+p{margin:0;max-width:80ch}
+.muted{color:var(--muted)}
+blockquote{margin:0;padding:2px 0 2px 14px;border-left:3px solid #6b4428;max-width:80ch;font-size:17px}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:end}
+.ctl>div{display:grid;gap:6px;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 12px;border-radius:9px;cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}}
+button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.jpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.jpick button{display:grid;gap:2px;text-align:left;font:500 15px/1.25 var(--f);color:var(--fg);background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;min-height:44px}
+.jpick button small{font:400 13px var(--f);color:var(--muted)}
+.jpick button b{font:500 12px var(--mono);letter-spacing:.1em;color:var(--muted)}
+.jpick button[aria-pressed="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+/* player */
+.player{display:grid;gap:18px;align-items:start;min-width:0}
+@media (min-width:1180px){.player{grid-template-columns:minmax(0,1fr) 330px}}
+.stagebox{display:grid;gap:12px;min-width:0}
+.bar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.nb{font:600 15px var(--f);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:10px;padding:8px 16px;cursor:pointer;min-height:44px;min-width:44px}
+.nb.go{background:#ec7c22;border-color:#ec7c22;color:#1b1206}
+.nb:disabled{opacity:.4;cursor:default}
+.pos{font:500 13px var(--mono);color:var(--muted)}
+.kh{font:500 12px var(--mono);border:1px solid var(--line);border-radius:5px;padding:1px 6px;background:var(--chip);color:var(--fg)}
+.stage{display:flex;gap:18px;align-items:flex-end;justify-content:center;min-width:0;padding:14px 10px 6px;border-radius:16px;background:var(--card);border:1px solid var(--line);min-height:200px;position:relative}
+.stage .arrow{align-self:center;font:500 22px var(--mono);color:var(--muted);flex:none}
+@media (max-width:760px){.stage{flex-direction:column;align-items:center}.stage .arrow{transform:rotate(90deg)}}
+.dvw{margin:0;display:grid;gap:6px;justify-items:center;min-width:0;flex:var(--g,1) 1 0;width:100%}
+.dvw figcaption{font:500 12px var(--mono);color:var(--muted);text-align:center;letter-spacing:.04em}
+.dv{background:#0b0b0a;padding:7px;border-radius:12px;box-shadow:0 14px 34px #00000038;max-width:100%}
+.dv.phone{border-radius:26px;padding:7px}
+.dv.ipad,.dv.echo{border-radius:16px;padding:9px}
+.vp{position:relative;overflow:hidden;border-radius:6px}
+.dv.phone .vp{border-radius:20px}
+.scr{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden}
+.scr *{box-sizing:border-box}
+.fadein{animation:fi 220ms var(--decel) both}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.calm .fadein{animation:none}
+.cap{display:grid;gap:6px;min-width:0}
+.cap .meta{font:500 13px var(--mono);color:var(--muted);letter-spacing:.04em}
+.cap h2{font-size:21px}
+.cap p{font-size:16px}
+/* handoff panel */
+.ho{border:1px solid var(--line);border-radius:14px;background:var(--chip);padding:14px 16px;display:grid;gap:12px;min-width:0}
+.ho table{border-collapse:collapse;width:100%;font-size:14.5px}
+.ho td,.ho th{text-align:left;vertical-align:top;padding:7px 8px;border-top:1px solid var(--line)}
+.ho th{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tw{overflow-x:auto;max-width:100%}
+.pill{display:inline-block;font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1.5px solid currentColor;white-space:nowrap}
+.pill.y{color:var(--y)}.pill.p{color:var(--p)}.pill.n{color:var(--n)}.pill.x{color:var(--muted)}
+.thr{font:500 14.5px var(--f);border:0;background:none;color:var(--fg);padding:0;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.thr[aria-pressed="true"]{text-decoration-color:var(--hl);text-decoration-thickness:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 13px var(--f);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:99px;padding:6px 12px;cursor:pointer;min-height:36px}
+.chip[aria-pressed="true"]{border-color:var(--hl);box-shadow:inset 0 0 0 1px var(--hl)}
+.sref{font:600 12.5px var(--mono);color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.sref:hover{border-color:var(--fg)}
+.chg{font-size:14.5px}
+/* step list */
+.steps{border:1px solid var(--line);border-radius:14px;background:var(--chip);padding:10px;display:grid;gap:2px;max-height:none}
+@media (min-width:1180px){.steps{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}}
+.steps h3{padding:4px 6px 8px}
+.steps ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.steps button{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;align-items:start;width:100%;text-align:left;font:400 14.5px/1.3 var(--f);color:var(--fg);background:none;border:0;border-radius:8px;padding:7px 6px;cursor:pointer;min-height:40px}
+.steps button .n{font:500 12px var(--mono);color:var(--muted);padding-top:2px}
+.steps button .a{display:block;font:500 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.steps button.h{background:repeating-linear-gradient(135deg,transparent 0 6px,#8881 6px 12px)}
+.steps button[aria-current="step"]{background:#1d1c1a;color:#f2efe9}
+.steps button[aria-current="step"] .n,.steps button[aria-current="step"] .a{color:#cfc9bd}
+:root[data-theme="dark"] .steps button[aria-current="step"]{background:#e9e7e2;color:#1d1c1a}
+:root[data-theme="dark"] .steps button[aria-current="step"] .n,:root[data-theme="dark"] .steps button[aria-current="step"] .a{color:#55524b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .steps button[aria-current="step"]{background:#e9e7e2;color:#1d1c1a}:root:not([data-theme="light"]) .steps button[aria-current="step"] .n,:root:not([data-theme="light"]) .steps button[aria-current="step"] .a{color:#55524b}}
+/* notes */
+.notes2{display:grid;gap:18px}
+@media (min-width:900px){.notes2{grid-template-columns:1fr 1fr}}
+.notes2>div{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:8px;align-content:start}
+.notes2 ul{margin:0;padding-left:20px;display:grid;gap:6px;font-size:15px}
+.big{border-collapse:collapse;width:100%;font-size:14.5px;min-width:900px}
+.big th,.big td{text-align:left;vertical-align:top;padding:9px 10px;border-top:1px solid var(--line)}
+.big th{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);position:sticky;top:0;background:var(--bg)}
+.big td:first-child{font:600 13px var(--mono);white-space:nowrap}
+.big tr:target td{background:#1e8fff1f}
+.sev{font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.sev.High{color:var(--n)}.sev.Medium{color:var(--p)}.sev.Low{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted)}
+.legend b{color:var(--fg);font-weight:500}
+.thread-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.thread-grid div{border-top:2px solid var(--line);padding-top:8px;font-size:14.5px;display:grid;gap:3px}
+section{display:grid;gap:14px;min-width:0;scroll-margin-top:10px}
+
+/* review marks: what carries across, outlined in every frame on the stage */
+.stage[data-hl="focus"] [data-c~="focus"],.stage[data-hl="orange"] [data-c~="orange"],.stage[data-hl="words"] [data-c~="words"],
+.stage[data-hl="slats"] [data-c~="slats"],.stage[data-hl="walnut"] [data-c~="walnut"],.stage[data-hl="type"] [data-c~="type"]{outline:var(--hlw,10px) dashed var(--hl)!important;outline-offset:var(--hlo,6px)}
+.dv.tv .scr,.dv.desk .scr{--hlw:9px;--hlo:6px}.dv.ipad .scr,.dv.echo .scr{--hlw:5px;--hlo:3px}.dv.phone .scr{--hlw:3px;--hlo:2px}
+
+/* ============ shared indicator window (each app sets its own recess and sizes) ============ */
+.ind{position:relative;display:inline-block;flex:none;vertical-align:middle;background:var(--win,#0a0908);box-shadow:inset 0 1px 2px #000}
+.ind::after{content:"";position:absolute;inset:var(--ii,3px);border-radius:inherit;background:var(--c,#f3e6c8);opacity:0}
+.ind.on::after{opacity:1}
+.ind.led{width:var(--led,18px);height:var(--led,18px);border-radius:50%}
+.ind.sq{width:var(--led,18px);height:var(--led,18px);border-radius:3px}
+.ind.slot{width:var(--slw,40px);height:var(--slh,13px);border-radius:3px}
+.ind.ok{--c:#7bd651}.ind.wn{--c:#f2c14e}.ind.al{--c:#ff5a48}
+.ind.offl{background:transparent;box-shadow:inset 0 0 0 2px var(--offc,#a9a397)}
+.ind.offl::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--offc,#a9a397);transform:rotate(45deg)}
+
+/* ============ LOBBY (TV launcher, pass 4: the console under the window) ============ */
+.lb{position:absolute;inset:0;--cream:#f3e6c8;--ink:#f3ecdc;--ink2:#d4cab6;--ink3:#b3a993;--lac:#1b1612;--lac2:#241d18;--lac3:#2f2620;--glass:#0c0a08;--walnut:#6b4428;--walnutEdge:#3f2716;--orange:#f08a2c;--alert:#ff5a48;--win:#090706;
+  background:var(--lac);color:var(--ink);font-family:var(--f);overflow:hidden}
+.lb .ind{box-shadow:inset 0 1px 2px #000,0 0 0 1px #ffffff14}
+.lb-sky{position:absolute;left:0;right:0;top:0;height:596px;overflow:hidden}
+.lb-sky .b{position:absolute;left:0;right:0}
+.lb-sky .disc{position:absolute;border-radius:50%}
+.lb-sky .cloud{position:absolute;height:30px;border-radius:99px}
+.lb-sky .star{position:absolute;width:3px;height:3px;border-radius:50%;background:#cfc7b2;opacity:.55}
+.lb-sill{position:absolute;left:0;right:0;top:596px;height:68px;background:var(--walnut)}
+.lb-sill::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:8px;background:var(--walnutEdge)}
+.lb-hdr{position:absolute;left:96px;right:96px;top:58px;display:flex;align-items:flex-start;gap:24px}
+.lb-house{font:500 22px/1.2 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+.lb-clock{font:300 70px/1 var(--f);font-variant-numeric:tabular-nums;margin-top:4px}
+.lb-clock small{font-size:30px;font-weight:400;margin-left:8px;color:var(--ink2)}
+.lb-date{font:400 24px/1.2 var(--f);color:var(--ink2);margin-top:4px}
+.lb-hk{margin-left:auto;display:flex;gap:12px;margin-top:30px}
+.lb-hk>div{position:relative;display:flex;align-items:center;gap:12px;height:60px;padding:0 20px 6px;font:500 26px var(--f);color:var(--ink2);white-space:nowrap}
+.lb-hk .v{font-weight:400;color:var(--ink3)}
+.lb-hk .bw{position:absolute;left:20px;right:20px;bottom:0;height:6px;border-radius:3px;background:#00000059}
+.lb-sign{position:absolute;left:96px;top:216px;width:1180px;display:grid;gap:4px}
+.lb-sign .eb{font:500 22px/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.lb-sign .tt{font:500 58px/1.05 var(--f);white-space:nowrap;letter-spacing:-.005em}
+.lb-sign .ln{display:flex;gap:28px;align-items:center;font:400 26px/1.3 var(--f);color:var(--ink2);white-space:nowrap}
+.lb-sign .do{display:inline-flex;align-items:center;color:var(--ink);font-weight:500}
+.lb kbd,.nv kbd{display:inline-grid;place-items:center;min-width:38px;height:36px;padding:0 8px;border-radius:99px;border:2px solid currentColor;font:500 22px var(--mono);margin-right:10px;vertical-align:middle}
+.lb-grp{position:absolute;left:96px;top:370px;font:500 22px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.lb-grp b{letter-spacing:0;text-transform:none;color:var(--ink);font-weight:500;margin-left:12px}
+.lb-shelf{position:absolute;left:0;right:0;top:404px;height:260px;overflow:hidden}
+.lb-fr{position:absolute;top:0;width:316px;height:100%}
+.lb-fr .pic{position:absolute;left:0;right:0;top:7px;height:185px;padding:8px;background:#2a221c;border-radius:4px;box-shadow:0 6px 0 #00000040}
+.lb-fr .art{position:relative;width:100%;height:100%;overflow:hidden;border-radius:2px}
+.lb-fr .pg{position:absolute;left:0;right:0;bottom:0;height:8px;background:#0a0807}
+.lb-fr .pg i{display:block;height:100%;background:var(--cream);opacity:.85}
+.lb-fr .plq{position:absolute;left:0;right:0;top:210px;display:flex;align-items:center;gap:12px;font:500 24px var(--f);color:var(--ink2);white-space:nowrap;overflow:hidden}
+.lb-fr .plq .ind{background:#2b1909}
+.lb-fr.f .pic{transform:translateY(-12px);box-shadow:0 18px 0 #00000033}
+.lb-fr.f .plq{color:var(--ink)}
+.lb-end{position:absolute;top:7px;width:6px;height:185px;border-radius:3px;background:var(--walnutEdge)}
+.lb-face{position:absolute;left:0;right:0;top:672px;bottom:0;background:var(--lac)}
+.lb-dial{position:absolute;left:96px;width:1728px;top:12px;height:132px;border-radius:10px;background:var(--glass);box-shadow:inset 0 2px 8px #000,0 0 0 2px #2c241e}
+.lb-dial .band{position:absolute;top:8px;height:28px;display:flex;align-items:center;gap:10px;font:500 22px var(--mono);letter-spacing:.12em;color:var(--ink3);white-space:nowrap}
+.lb-dial .band::after{content:"";flex:1;height:2px;background:#3a3129}
+.lb-dial .dpos{position:absolute;right:30px;top:8px;height:28px;display:flex;align-items:center;font:500 22px var(--mono);color:var(--ink)}
+.lb-st{position:absolute;top:40px;transform:translateX(-50%);display:grid;justify-items:center;gap:4px;font:400 26px var(--f);color:var(--ink3);white-space:nowrap}
+.lb-st .code{width:28px;height:4px;border-radius:2px;background:var(--code);opacity:.75}
+.lb-st.f{color:var(--ink);font-weight:500}
+.lb-st.f .nm{transform:translateY(-2px)}
+.lb-ticks{position:absolute;left:26px;right:26px;top:92px;height:12px;background:repeating-linear-gradient(90deg,#4a3f35 0 2px,transparent 2px 16.8px)}
+.lb-major{position:absolute;top:92px;width:2px;height:26px;background:#6d6052;transform:translateX(-50%)}
+.lb-stop{position:absolute;top:86px;width:8px;height:38px;border-radius:3px;background:var(--walnut)}
+.lb-needle{position:absolute;left:0;top:84px;width:6px;height:42px;margin-left:-3px;border-radius:3px;background:#5c5246}
+.lb-needle.cur{background:var(--cream)}
+.lb-bay{position:absolute;left:96px;top:156px;height:160px;display:flex;gap:8px;padding:0 14px;border-radius:10px;background:var(--lac2)}
+.lb-sk{position:relative;display:grid;justify-items:center;align-content:start;gap:3px;padding-top:6px;line-height:1.15;min-width:96px}
+.lb-sk .lb2{font:500 22px var(--mono);color:var(--ink3);letter-spacing:.06em}
+.lb-sk .hole{position:relative;margin:5px 0;width:40px;height:40px;border-radius:50%;background:#0a0807;box-shadow:0 0 0 5px #3a3029}
+.lb-sk .hole::after{content:"";position:absolute;left:10px;right:10px;top:13px;height:13px;background:#1e1915;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%)}
+.lb-sk.plug .hole{background:var(--code)}
+.lb-sk.plug .hole::after{background:#0c0a08cc}
+.lb-sk .nm{font:500 24px var(--f);color:var(--ink2);white-space:nowrap}
+.lb-sk .s{display:flex;gap:8px;align-items:center;font:400 22px var(--f);color:var(--ink3);white-space:nowrap}
+.lb-sk.empty .nm{color:var(--ink3);font-weight:400}
+.lb-sk.apps .hole{background:none;box-shadow:none;display:grid;place-items:center}
+.lb-sk.apps .hole::after{display:none}
+.lb-sk.apps .ind.sq{width:28px;height:28px}
+.lb-sk.f .hole{box-shadow:0 0 0 5px var(--cream);transform:translateY(-4px)}
+.lb-sk.f .nm,.lb-sk.f .lb2{color:var(--ink)}
+.lb-bay .sep{width:2px;margin:18px 4px;background:#3a3129}
+.lb-plate{position:absolute;right:96px;top:156px;height:160px;display:grid;grid-template-rows:34px 1fr;padding:8px 18px 0;border-radius:10px;background:var(--lac2)}
+.lb-plate .lb2{font:500 22px var(--mono);color:var(--ink3);letter-spacing:.12em}
+.lb-plate .row{display:flex;gap:14px}
+.lb-sw{position:relative;display:flex;gap:16px;align-items:center;height:96px;padding:0 16px 10px 10px;border-radius:8px;min-width:222px}
+.lb-sw .bw{position:absolute;left:24px;right:24px;bottom:0;height:6px;border-radius:3px;background:#0a0807}
+.lb-sw.f .bw{background:var(--cream)}
+.lb-sw .nm{display:block;font:500 24px var(--f);color:var(--ink2);white-space:nowrap}
+.lb-sw .s{display:flex;align-items:center;gap:8px;font:400 22px var(--f);color:var(--ink3);white-space:nowrap}
+.lb-sw.f .nm{color:var(--ink)}
+.lb-pad{position:relative;width:44px;height:76px;border-radius:6px;background:#0f0c0a;box-shadow:inset 0 0 0 2px #3a3029;flex:none}
+.lb-pad i{position:absolute;left:6px;right:6px;top:6px;bottom:6px;border-radius:4px;background:linear-gradient(#4a3f36 0 50%,#2b241f 50% 100%)}
+.lb-pad.off i{background:linear-gradient(#2b241f 0 50%,#4a3f36 50% 100%)}
+.lb-pad .ind{position:absolute;left:50%;top:14px;width:20px;height:8px;margin-left:-10px;border-radius:2px;--ii:2px}
+.lb-pad.off .ind{top:auto;bottom:14px}
+.lb-turn{position:relative;width:64px;height:64px;border-radius:50%;background:#0f0c0a;box-shadow:inset 0 0 0 2px #3a3029;flex:none}
+.lb-turn i{position:absolute;left:12px;right:12px;top:27px;height:10px;border-radius:5px;background:#b9ad96}
+.lb-sw.unl{background:var(--alert)}
+.lb-sw.unl .nm,.lb-sw.unl .s{color:#1d1c1a}
+.lb-sw.unl .lb-turn{background:#7a1f15;box-shadow:none}.lb-sw.unl .lb-turn i{background:#1d1c1a;transform:rotate(90deg)}
+.lb-sw.unl .bw{background:#7a1f15}
+.lb-sw.unl.f .bw{background:#1d1c1a}
+.lb-hints{position:absolute;left:96px;right:96px;bottom:54px;display:flex;gap:32px;align-items:center;font:400 24px/1 var(--f);color:var(--ink3);white-space:nowrap;height:36px}
+.lb-hints kbd{height:34px;min-width:34px;font-size:24px}
+.lb-blind{position:absolute;inset:0;background:#16120f;background-image:repeating-linear-gradient(180deg,#ffffff0d 0 1px,#00000040 1px 3px,transparent 3px 18px)}
+.lb-blind::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24px;background:var(--walnut)}
+.lb-bc{position:absolute;left:160px;right:160px;top:300px;display:grid;gap:14px}
+.lb-bc .eb{font:500 24px var(--mono);letter-spacing:.14em;color:var(--ink2);text-transform:uppercase}
+.lb-bc .tt{font:500 84px/1.05 var(--f);letter-spacing:-.01em}
+.lb-bc .ln{font:400 28px/1.4 var(--f);color:var(--ink2);max-width:1100px}
+.lb-slats{display:flex;gap:10px;margin-top:20px}
+.lb-slats i{position:relative;width:56px;height:12px;border-radius:3px;background:#0a0807;box-shadow:inset 0 1px 2px #000,0 0 0 1px #ffffff14}
+.lb-slats i::after{content:"";position:absolute;inset:3px;border-radius:2px;background:var(--cream);opacity:0}
+.lb-slats i.on::after{opacity:1}
+.lb-key{position:relative;display:inline-flex;align-items:center;gap:12px;height:64px;padding:0 26px 4px;border-radius:8px;background:var(--lac3);color:var(--ink2);font:500 26px var(--f);white-space:nowrap;box-shadow:0 4px 0 #0a0807}
+.lb-key.f{color:var(--ink);background:#3b3029;transform:translateY(-4px);box-shadow:0 8px 0 #0a0807}
+.lb-key .bwk{position:absolute;left:30%;right:30%;bottom:0;height:6px;border-radius:3px 3px 0 0;background:#0a0807}
+.lb-key.f .bwk{background:var(--cream)}
+.lb-drawer{position:absolute;left:0;right:0;bottom:0;height:262px;background:var(--lac);border-top:8px solid var(--walnut)}
+.lb-dh{position:absolute;left:96px;right:96px;top:20px;height:44px;display:flex;align-items:center;gap:18px;font:400 26px var(--f);color:var(--ink3);white-space:nowrap}
+.lb-dh b{font:500 28px var(--f);color:var(--ink)}
+.lb-dh .r{margin-left:auto;display:flex;gap:26px;align-items:center}
+.lb-dh kbd{height:34px;min-width:34px;font-size:22px}
+.lb-dk{position:absolute;left:96px;top:96px;display:flex;gap:14px}
+.lb-dk .lb-key{height:84px;display:grid;align-content:center;gap:0;line-height:1.15;padding:0 26px 6px}
+.lb-dk .lb-key small{font:400 22px var(--f);color:var(--ink3)}
+
+/* ============ JAMFIN (pass 4: the cinema) ============ */
+.jf{position:absolute;inset:0;--ground:#161513;--ink:#ece6da;--lab:#d3ccbf;--dim:#a9a397;--foc:#f3e6c8;--board:#0e0d0c;--rail:#ffffff12;--cream:#f3e6c8;--orange:#f08a2c;--deep:#8f4510;--walnut:#6b4428;--win:#080807;--key:#22211e;--key-f:#33312c;--spill:#f3d9a64d;--ticket:#26241f;--stub:#1d1c19;--dash:#625e55;
+  background:var(--ground);color:var(--ink);font-family:var(--f);overflow:hidden}
+.jf .ind{--ii:3px}
+.jf-w{position:relative;height:12px;border-radius:3px;background:var(--win);box-shadow:inset 0 1px 2px #000}
+.jf-w::after{content:"";position:absolute;inset:3px 3px 0;border-radius:2px 2px 0 0;background:var(--cream);opacity:0}
+.f>.jf-w::after,.f .jf-w.me::after{opacity:1}
+.jf-top{position:absolute;left:96px;right:96px;top:52px;height:48px;display:flex;align-items:center;gap:28px}
+.jf-brand{font:600 26px var(--f);letter-spacing:.02em;margin-right:12px}
+.jf-tab{position:relative;font:500 24px var(--f);color:var(--dim);padding:4px 16px 10px}
+.jf-tab.cur{color:var(--ink)}
+.jf-tab.cur::after{content:"";position:absolute;left:50%;bottom:0;width:28px;margin-left:-14px;height:8px;border-radius:2px;background:var(--cream)}
+.jf-top .sp{flex:1}
+.jf-chip{display:flex;align-items:center;gap:12px;font:500 24px var(--f);color:var(--lab)}
+.jf-chip i{width:30px;height:22px;border-radius:4px;background:var(--pc);position:relative}
+.jf-chip i::after{content:"";position:absolute;right:7px;top:3px;bottom:3px;border-left:2px dotted #ffffff80}
+.jf-clock{font:500 26px var(--f);font-variant-numeric:tabular-nums}
+.jf-mq{position:absolute;left:96px;right:96px;top:112px;height:240px;background:var(--board);border-top:4px solid var(--walnut);border-bottom:4px solid var(--walnut);overflow:hidden}
+.jf-mq::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 9px,var(--rail) 9px 10px)}
+.jf-mq .blk{position:absolute;left:0;top:0;bottom:0;width:1180px;background:var(--hc);clip-path:polygon(0 0,100% 0,calc(100% - 84px) 100%,0 100%)}
+.jf-mq .eb{position:absolute;left:40px;top:24px;display:flex;gap:14px;align-items:center;font:500 22px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#d8ccb3;white-space:nowrap}
+.jf-mq .tt{position:absolute;left:40px;top:60px;width:1060px;font:600 76px/1 var(--f);letter-spacing:.05em;text-transform:uppercase;color:#f3e9d4;white-space:nowrap;overflow:hidden}
+.jf-mq .fx{position:absolute;left:40px;top:164px;font:400 26px var(--f);color:#d8ccb3;white-space:nowrap}
+.jf-mq .fx b{font-weight:500;color:#f3e9d4}
+.jf-seats{position:absolute;right:44px;bottom:30px;display:flex;gap:14px;align-items:center}
+.jf-seats .ind{width:20px;height:20px}
+.jf-acc{position:absolute;right:40px;top:30px;width:300px;height:110px}
+.jf-acc i{position:absolute;display:block}
+.jf-rows{position:absolute;left:0;right:0;top:384px;bottom:0;overflow:hidden}
+.jf-rl{margin-left:96px;font:500 26px/36px var(--f);color:var(--lab)}
+.jf-trk{display:flex;gap:28px;padding-left:96px;margin-top:14px;align-items:flex-start}
+.jf-cd{flex:none;position:relative;width:400px}
+.jf-cd.po{width:216px}
+.jf-cd .face{position:relative}
+.jf-cd.f .face{transform:translateY(-14px)}
+.jf-cd .art{position:relative;width:100%;height:225px;border-radius:10px;overflow:hidden;background:#000}
+.jf-cd.po .art{height:324px}
+.jf-cd .pg{position:absolute;left:0;right:0;bottom:0;height:8px;background:#000000a0}
+.jf-cd .pg i{display:block;height:100%;background:#f3e6c8b3}
+.jf-cd .jf-w{width:50%;margin:8px auto 0}
+.jf-spill{position:absolute;left:-8%;right:-8%;top:100%;height:44px;margin-top:-30px;background:radial-gradient(50% 60% at 50% 0,var(--spill),transparent 100%);opacity:0}
+.f .jf-spill{opacity:1}
+.jf-cap{margin-top:12px}
+.jf-cap b{display:block;font:500 26px/1.24 var(--f);color:var(--lab);white-space:nowrap}
+.jf-cap span{display:block;font:400 22px/1.3 var(--f);color:var(--dim);white-space:nowrap}
+.jf-cd.f .jf-cap b{color:var(--foc)}
+.jf-key{position:relative;height:60px;border-radius:10px;background:var(--key);display:inline-flex;align-items:center;gap:16px;padding:0 26px 0 36px;font:500 26px var(--f);color:var(--lab);white-space:nowrap}
+.jf-key .wl{position:absolute;left:0;top:12px;bottom:12px;width:10px;border-radius:0 3px 3px 0;background:var(--win)}
+.jf-key .wl::after{content:"";position:absolute;inset:3px 3px 3px 0;border-radius:0 2px 2px 0;background:var(--cream);opacity:0}
+.jf-key.f{background:var(--key-f);color:var(--foc)}
+.jf-key.f .wl::after{opacity:1}
+.jf-key.pri{background:var(--orange);color:#1d1206;box-shadow:0 4px 0 var(--deep)}
+.jf-key.pri .wl{background:#5a2c08}
+.jf-key.pri.f{transform:translateY(-6px);box-shadow:0 10px 0 var(--deep);color:#0c0702}
+.jf-off{position:absolute;left:96px;top:384px;display:flex;gap:16px}
+.jf-cached{position:absolute;left:96px;right:96px;top:500px;border:3px dashed var(--dash);border-radius:12px;padding:18px 24px;opacity:.55}
+.jf-cached .jf-trk{padding-left:0;margin-top:10px}
+.jf-who{position:absolute;left:0;right:0;top:140px;text-align:center;font:600 52px var(--f)}
+.jf-whos{position:absolute;left:0;right:0;top:214px;text-align:center;font:400 26px var(--f);color:var(--dim)}
+.jf-tix{position:absolute;left:0;right:0;top:290px;display:flex;justify-content:center;gap:56px}
+.jf-tk{position:relative;width:300px}
+.jf-tk.f .face{transform:translateY(-14px)}
+.jf-tk .tm{position:relative;height:330px;background:var(--ticket);border-radius:14px 14px 0 0;display:grid;justify-items:center;align-content:center;gap:22px}
+.jf-tk .tm b{font:500 34px var(--f);color:var(--lab)}
+.jf-tk.f .tm b{color:var(--foc)}
+.jf-tk .notch{position:absolute;top:330px;width:30px;height:30px;margin-top:-15px;border-radius:50%;background:var(--ground);z-index:2}
+.jf-tk .notch.l{left:-15px}.jf-tk .notch.r{right:-15px}
+.jf-tk .perf{height:4px;background-color:var(--stub);background-image:radial-gradient(circle,var(--ground) 2.4px,transparent 3px);background-size:16px 4px;background-position:8px 0}
+.jf-tk .stub{height:146px;background:var(--stub);border-radius:0 0 14px 14px;padding:22px 26px;font:500 22px/1.45 var(--mono);color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+.jf-tk .jf-w{width:50%;margin:10px auto 0}
+.jf-fig{width:170px;height:170px;border-radius:50%;background:var(--pc);position:relative;overflow:hidden;box-shadow:inset 0 0 0 8px #0000002e}
+.jf-fig::before{content:"";position:absolute;left:50%;top:30px;width:58px;height:58px;margin-left:-29px;border-radius:50%;background:#e9d9b6}
+.jf-fig::after{content:"";position:absolute;left:28px;right:28px;bottom:-10px;height:70px;border-radius:50% 50% 0 0;background:#1b1a17cc}
+.jf-tc{position:absolute;inset:0;background:#000}
+.jf-tc .b{position:absolute;left:0;top:356px;width:1300px;height:368px;background:var(--hc);clip-path:polygon(0 0,100% 0,calc(100% - 110px) 100%,0 100%)}
+.jf-tc .y{position:absolute;left:160px;top:330px;width:260px;height:14px;background:#e3b02f}
+.jf-tc .r{position:absolute;left:1236px;top:640px;width:56px;height:56px;background:#c23a2b}
+.jf-tc .eb{position:absolute;left:160px;top:400px;font:500 26px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#d8ccb3}
+.jf-tc .tt{position:absolute;left:160px;top:448px;width:1060px;font:600 96px/1 var(--f);letter-spacing:.05em;text-transform:uppercase;color:#f3e9d4;white-space:nowrap}
+.jf-tc .sub{position:absolute;left:160px;top:568px;font:400 32px var(--f);color:#e2d6bd}
+.jf-slats{position:absolute;left:160px;top:650px;display:flex;gap:8px}
+.jf-slats i{width:38px;height:14px;border-radius:2px;background:#ffffff1a}
+.jf-slats i.on{background:#f3e6c8}
+.jf-tc .l{position:absolute;left:920px;top:646px;font:500 22px var(--mono);color:#b8af9c;letter-spacing:.08em}
+.jf-pic{position:absolute;inset:0}
+.jf-pic.dim{filter:brightness(.4) saturate(.8)}
+.jf-inter{position:absolute;left:400px;top:262px;width:1120px;height:456px;border-radius:14px;overflow:hidden;background:#1a1916;display:grid;grid-template-columns:430px 1fr}
+.jf-inter .ib{position:relative;background:var(--hc);clip-path:polygon(0 0,100% 0,calc(100% - 60px) 100%,0 100%)}
+.jf-inter .ib .y{position:absolute;left:44px;top:56px;width:180px;height:12px;background:#e3b02f}
+.jf-inter .ib .r{position:absolute;right:76px;bottom:52px;width:40px;height:40px;background:#c23a2b}
+.jf-inter .ib b{position:absolute;left:44px;top:100px;font:600 34px/1.15 var(--f);letter-spacing:.05em;text-transform:uppercase;color:#f3e9d4}
+.jf-inter .ib span{position:absolute;left:44px;top:200px;font:500 22px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#d8ccb3}
+.jf-inter .ic{padding:52px 52px 0 34px;display:grid;align-content:start;gap:10px}
+.jf-inter .ic .eb{font:500 22px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#a9a397;display:flex;gap:14px;align-items:center}
+.jf-inter .ic h3{margin:4px 0 0;font:600 40px var(--f);color:#ece6da}
+.jf-inter .ic .l{font:400 26px/1.4 var(--f);color:#c9c2b4}
+.jf-inter .ik{display:flex;gap:16px;margin-top:22px}
+
+/* ============ NERVOS (pass 4: the shelf and the console) ============ */
+.nv{position:absolute;inset:0;--wall:#1d1a17;--ink:#efe9de;--dim:#b3ab9e;--track:#0e0d0c;--block:#3b3733;--blk-ink:#f3eee5;--key:#2c2926;--key-ink:#ece8df;--key-dim:#b3ab9e;--deck:#141312;--deck-ink:#ece8df;--deck-dim:#a8a397;--dkey:#2a2826;--cream:#f3e6c8;--orange:#f08a2c;--deep:#a9530f;--win:#0b0b0a;--unlit:#00000066;--walnut:#6b4428;--plank:#6b4428;--plank-f:#4f3019;
+  --ribs:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 2px,transparent 2px 9px);
+  background:var(--wall);color:var(--ink);font-family:var(--f);overflow:hidden}
+.nv .ind{box-shadow:inset 0 1px 2px #000,0 0 0 1px #ffffff17}
+.nv-wb{position:absolute;left:28%;right:28%;bottom:0;height:10px;border-radius:5px 5px 0 0;background:var(--unlit)}
+.nv-wb::after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--cream);box-shadow:inset 0 0 0 2px #0b0b0a;opacity:0}
+.f>.nv-wb::after{opacity:1}
+.nv-top{position:absolute;left:96px;right:96px;top:46px;height:70px;display:flex;justify-content:space-between;align-items:flex-start}
+.nv-slide{position:relative;display:flex;padding:6px;border-radius:16px;background:var(--track);box-shadow:inset 0 2px 4px #00000059}
+.nv-slide .sl{position:relative;padding:9px 26px 11px;font:500 28px/36px var(--f);color:var(--dim);white-space:nowrap}
+.nv-slide .sl.cur{color:var(--blk-ink);background:var(--block);border-radius:11px;box-shadow:0 2px 0 #00000040}
+.nv-stat{display:flex;gap:28px;align-items:center;font:500 24px var(--f);color:var(--dim);padding-top:12px}
+.nv-stat .clock{font:500 30px var(--f);font-variant-numeric:tabular-nums;color:var(--ink)}
+.nv-k{position:relative;display:inline-flex;align-items:center;gap:12px;height:76px;padding:0 30px;border-radius:14px;background:var(--key);color:var(--key-ink);font:500 28px var(--f);white-space:nowrap;box-shadow:0 3px 0 #00000055}
+.nv-k small{font:400 24px var(--f);color:var(--key-dim)}
+.nv-k.dk{background:var(--dkey);color:var(--deck-ink)}
+.nv-k.pri{background:var(--orange);color:#1d1c1a;font-weight:600;box-shadow:0 3px 0 var(--deep)}
+.nv-k.pri small{color:#1d1c1a}
+.nv-k.f{transform:translateY(-3px)}
+.nv-con{position:absolute;left:96px;top:168px;width:840px;height:470px}
+.nv-cart{position:absolute;left:270px;top:0;width:300px;height:230px;border-radius:16px 16px 6px 6px;background:#8f8b97;padding:16px 18px 0}
+.nv-cart .lab{position:relative;height:120px;border-radius:4px;overflow:hidden}
+.nv-deck{position:absolute;left:0;right:0;top:170px;height:240px;border-radius:20px 20px 0 0;background:var(--deck);background-image:var(--ribs);color:var(--deck-ink)}
+.nv-deck .slotr{position:absolute;left:210px;width:420px;top:0;height:14px;background:#050505;border-radius:0 0 6px 6px}
+.nv-deck .dt{position:absolute;left:34px;top:22px;display:grid}
+.nv-deck .dt .e{font:500 22px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--deck-dim)}
+.nv-deck .dt .t{font:600 42px/1.1 var(--f);white-space:nowrap}
+.nv-deck .dt .s{font:400 24px var(--f);color:var(--deck-dim);white-space:nowrap}
+.nv-deck .row{position:absolute;left:34px;bottom:20px;display:flex;gap:14px}
+.nv-deck .nv-k{height:68px}
+.nv-front{position:absolute;left:0;right:0;top:410px;height:60px;background:var(--walnut);border-radius:0 0 14px 14px;display:flex;align-items:center;padding:0 34px;gap:26px;color:#f3e6c8;font:500 22px var(--mono)}
+.nv-port{display:inline-flex;gap:8px;align-items:center;font:500 22px var(--mono)}
+.nv-port .sock{width:34px;height:26px;border-radius:6px 6px 12px 12px;background:#1a0f08;position:relative}
+.nv-port .sock.in::after{content:"";position:absolute;inset:5px;border-radius:3px 3px 8px 8px;background:#e9e0cc}
+.nv-bars{margin-left:auto;display:flex;align-items:flex-end;gap:5px;height:34px}
+.nv-bars i{width:13px;display:block}
+.nv-lately{position:absolute;left:1000px;top:175px;right:96px}
+.nv-lately .e{font:500 22px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.nv-lately .stand{position:absolute;left:0;right:0;top:300px;height:12px;background:var(--plank);border-radius:3px}
+.nv-li{position:absolute;bottom:-300px}
+.nv-cap{position:absolute;top:338px;display:grid;font:500 26px/1.25 var(--f);white-space:nowrap}
+.nv-cap span{font:400 22px var(--f);color:var(--dim)}
+.nv-shelf{position:absolute;left:96px;right:96px;top:680px;height:298px}
+.nv-sp{position:absolute;bottom:0;border-radius:4px 4px 0 0;overflow:hidden;display:grid;justify-items:center;padding-top:10px}
+.nv-sp b{writing-mode:vertical-rl;font:500 24px/1.1 var(--f);white-space:nowrap}
+.nv-plank{position:absolute;left:0;right:0;top:978px;height:46px;background:linear-gradient(var(--plank) 0 14px,var(--plank-f) 14px)}
+.nv-lip{position:absolute;left:96px;right:96px;top:992px;height:32px;display:flex;justify-content:space-between;align-items:center;font:500 24px var(--f);color:#f3e6c8;white-space:nowrap}
+.nv-lip kbd{height:30px;min-width:30px;border-width:2px;font-size:22px;margin-right:6px;border-radius:5px;padding:0 4px}
+.nv-end{position:absolute;bottom:0;width:22px;height:180px;border-radius:11px 11px 0 0;background:var(--walnut)}
+.nv-h1{position:absolute;left:96px;top:190px;font:600 66px/1.1 var(--f)}
+.nv-l1{position:absolute;left:96px;top:280px;font:400 28px/1.4 var(--f);color:var(--dim);max-width:1300px}
+.nv-ports{position:absolute;left:96px;right:96px;top:430px;height:330px;background:var(--walnut);border-radius:24px;display:grid;grid-template-columns:repeat(4,1fr);padding:30px;gap:30px}
+.nv-pp{position:relative;border-radius:16px;background:#00000026;display:grid;grid-template-rows:auto 1fr auto;padding:22px 26px;color:#f3e6c8}
+.nv-pp .num{font:500 84px/1 var(--mono)}
+.nv-pp .sk{justify-self:center;align-self:center;width:120px;height:84px;border-radius:14px 14px 34px 34px;background:#1a0f08;position:relative}
+.nv-pp .sk.in::after{content:"";position:absolute;inset:14px;border-radius:6px 6px 22px 22px;background:#e9e0cc}
+.nv-pp .pw{display:grid;font:500 26px/1.25 var(--f);white-space:nowrap}
+.nv-pp .pw small{font:400 22px var(--f);color:#e6d4b4}
+.nv-pp .led2{position:absolute;right:26px;top:30px}
+.nv-keys{position:absolute;left:96px;top:820px;display:flex;gap:16px}
+.nv-lc{position:absolute;inset:0;background:#0f0e0d}
+.nv-ld{position:absolute;left:0;right:0;top:400px;height:250px;background:#141312;background-image:var(--ribs);border-top:6px solid var(--walnut);z-index:2}
+.nv-ld .slotr{position:absolute;left:750px;width:420px;top:0;height:16px;background:#050505;border-radius:0 0 6px 6px}
+.nv-ld .stp{position:absolute;right:0;top:40px;display:grid;gap:10px}
+.nv-ld .stp i{display:block;height:16px;border-radius:8px 0 0 8px;justify-self:end}
+.nv-med{position:absolute;left:810px;z-index:1}
+.nv-lt{position:absolute;left:0;right:0;top:690px;text-align:center}
+.nv-lt .e{font:500 22px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.nv-lt .t{font:600 66px/1.1 var(--f);letter-spacing:.06em;text-transform:uppercase}
+.nv-lt .s{font:400 26px var(--f);color:var(--dim);margin-top:6px}
+.nv-slats{position:absolute;left:640px;top:880px;width:640px;display:grid;grid-template-columns:repeat(16,1fr);gap:8px}
+.nv-slats i{display:block;height:20px;border-radius:4px;background:var(--win);box-shadow:inset 0 1px 2px #000,0 0 0 1px #ffffff17;position:relative}
+.nv-slats i.on::after{content:"";position:absolute;inset:3px;border-radius:2px;background:var(--cream)}
+.nv-band{position:absolute;left:0;right:0;bottom:0;height:230px;background:#121211;background-image:var(--ribs);border-top:4px solid var(--walnut);color:#ece8df}
+.nv-band .gh{position:absolute;left:96px;right:96px;top:20px;height:44px;display:flex;align-items:center;gap:18px;font:400 26px var(--f);color:#a8a397;white-space:nowrap}
+.nv-band .gh b{font:500 28px var(--f);color:#ece8df}
+.nv-band .gh .r{margin-left:auto;display:flex;gap:26px;align-items:center}
+.nv-band .kr{position:absolute;left:96px;top:84px;display:flex;gap:14px}
+.nv-band .nv-k{height:84px;background:#2a2826;color:#ece8df}
+.nv-band .nv-k.pri{background:var(--orange);color:#1d1c1a}
+.nv-band kbd{height:34px;min-width:34px;font-size:22px}
+
+/* ============ JAM HOME (HA, pass 4: Jam Braun's own page) ============ */
+.ha{position:absolute;inset:0;--gd:#e7e3da;--pl:#f2efe8;--key:#e4e0d6;--key2:#d8d3c8;--ln:#d6d1c6;--ink:#262523;--dim:#5f5b53;--walnut:#6b4428;--cream:#f3e6c8;--orange:#ec7c22;--odeep:#b55a12;--alert:#ff5a48;--win:#151413;--groove:#cfcac1;--cap:#fbfaf7;--floor:#f6f3ec;--wall:#4a463f;--sun:#e8b12a;--pshadow:0 1px 0 #ffffffb3 inset,0 2px 8px #00000014;
+  --led:12px;--ii:2px;--slw:24px;--slh:9px;background:var(--gd);color:var(--ink);font-family:var(--f);overflow:hidden}
+.ha.nt{--gd:#1c1c1a;--pl:#2a2a27;--key:#34342f;--key2:#3d3d38;--ln:#3d3d38;--ink:#ece9e2;--dim:#aca89f;--orange:#f08a2c;--odeep:#9a4c10;--groove:#121211;--cap:#8d8981;--floor:#252422;--wall:#8f8a80;--sun:#f3e6c8;--pshadow:0 1px 0 #ffffff0d inset,0 2px 10px #00000059}
+.ha-plate{position:absolute;isolation:isolate;background:var(--pl);border-radius:18px;box-shadow:var(--pshadow);border:1px solid var(--ln)}
+.ha.nt .ha-plate{border-color:#ffffff0a}
+.ha-k{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:12px;background:var(--key);min-height:52px;padding:8px 18px;font:500 18px/1.15 var(--f);color:var(--ink);box-shadow:inset 0 1px 0 #ffffff80,0 2px 0 #0000001f;white-space:nowrap}
+.ha.nt .ha-k{box-shadow:inset 0 1px 0 #ffffff12,0 2px 0 #00000080}
+.ha-k.pr{background:var(--key2);box-shadow:inset 0 1px 4px #000000a0;transform:translateY(1px)}
+.ha:not(.nt) .ha-k.pr{box-shadow:inset 0 1px 3px #00000038}
+.ha-k.or{background:var(--orange);color:#1d1c1a;box-shadow:inset 0 1px 0 #ffffff59,0 2px 0 var(--odeep)}
+.ha-k.red{background:#ff5a48;color:#1d1c1a;box-shadow:inset 0 1px 0 #ffffff59,0 2px 0 #a3271b}
+.ha-k svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ha-clock{position:absolute;font:300 150px/1 var(--f);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.ha-clock sup{font:400 26px var(--f);vertical-align:top;margin-left:10px;position:relative;top:14px}
+.ha-date{position:absolute;font:600 24px var(--f)}
+.ha-date span{display:block;font:400 18px var(--f);color:var(--dim);margin-top:2px}
+.ha-arc{position:absolute}
+.ha-arc svg{display:block;width:100%;height:100%;overflow:visible}
+.ha-line{position:absolute;display:flex;gap:10px;align-items:center;font:400 18px var(--f)}
+.ha-plan{position:absolute}
+.ha-plan svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ha-rl{position:absolute;display:grid;gap:4px;padding:8px 10px}
+.ha-rl .rn{font:500 18px/1.1 var(--f)}
+.ha-rl .rm{display:flex;gap:8px;align-items:center;font:500 16px var(--mono);color:var(--dim)}
+.ha-rl.sm .rn{font-weight:400;color:var(--dim)}
+.ha-rl.lit .rn,.ha-rl.lit .rm{color:#1d1c1a}
+.ha-rl .here{display:inline-flex;gap:6px;align-items:center;font:500 14px var(--f);letter-spacing:.06em;text-transform:uppercase;color:#c99a73}
+.ha:not(.nt) .ha-rl .here{color:var(--walnut)}
+.ha-rl.lit .here{color:#5a3a22}
+.ha-rl .here i{width:10px;height:10px;border-radius:50%;background:currentColor}
+.ha-segs{display:inline-flex;gap:3px}
+.ha-segs i{width:12px;height:8px;border-radius:2px;background:var(--win);box-shadow:inset 0 1px 1px #000}
+.ha-door{display:grid;gap:10px;padding:16px 18px}
+.ha-door .t{display:flex;gap:14px;align-items:center}
+.ha-door .t b{display:block;font:600 21px var(--f)}
+.ha-door .t span{display:flex;gap:8px;align-items:center;font:500 16px var(--f);color:var(--dim)}
+.ha-rail .bar{height:8px;border-radius:4px;background:var(--walnut);margin:0 6px}
+.ha-hooks{display:flex;justify-content:space-around}
+.ha-hk{display:grid;justify-items:center;gap:2px;font:500 18px var(--f)}
+.ha-hk small{font:400 16px var(--f);color:var(--dim)}
+.ha-sbd{padding:14px 16px;display:grid;gap:10px}
+.ha-tv{height:76px;border-radius:6px;border:5px solid #2b2a27;background:repeating-linear-gradient(0deg,#ffffff0f 0 1px,transparent 1px 5px),#121211}
+.ha-cab{border-radius:4px 4px 8px 8px;border-top:7px solid var(--walnut);background:var(--key);height:22px}
+.ha-sheet{position:absolute;background:var(--pl);border-radius:22px;box-shadow:0 20px 60px #00000080;border:1px solid var(--ln)}
+.ha-veil{position:absolute;inset:0;background:#0000008c}
+.ha-sh-h{position:absolute;left:28px;right:28px;top:22px;display:flex;align-items:center;gap:16px}
+.ha-sh-h b{font:600 30px var(--f)}
+.ha-sh-h span{font:400 18px var(--f);color:var(--dim)}
+.ha-sh-h .x{margin-left:auto;width:52px;height:52px;border-radius:50%;background:var(--key);display:grid;place-items:center;font:400 30px/1 var(--f)}
+.ha-vf{position:relative;width:76px;height:300px;border-radius:14px;background:var(--groove);box-shadow:inset 0 1px 3px #000}
+.ha-vf .fl{position:absolute;left:4px;right:4px;bottom:4px;border-radius:10px}
+.ha-vf .cp{position:absolute;left:-4px;right:-4px;height:30px;border-radius:7px;background:var(--cap);box-shadow:0 1px 0 #ffffff33 inset,0 2px 3px #000000a0;display:grid;place-items:center;font:600 16px var(--mono);color:#1d1c1a}
+.ha-col{display:grid;justify-items:center;gap:10px;font:500 18px var(--f);text-align:center}
+.ha-col small{font:500 16px var(--f);color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+.ha-gn-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;min-height:62px;border-top:1px solid var(--ln);font:500 18px var(--f)}
+.ha-gn-row small{display:block;font:400 16px var(--f);color:var(--dim)}
+/* phone */
+.ha-ph{position:absolute;inset:0}
+.ha-status{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:600 15px var(--f)}
+.ha-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:4px 10px 8px;border-bottom:1px solid var(--ln)}
+.ha-strip>div{display:grid;justify-items:center;gap:5px;padding:6px 2px;border-radius:10px;font:500 13px/1 var(--f);color:var(--dim)}
+.ha-strip>div.pr{background:var(--key2);box-shadow:inset 0 1px 3px #00000038;color:var(--ink)}
+.ha-strip .rw{width:22px;height:16px;border-radius:3px;background:var(--win);display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:2px}
+.ha-strip .rw i{border-radius:1px;background:var(--c,transparent)}
+.ha-lab{font:500 13px var(--f);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+
+/* ============ CALLSHEET (pass 4: the day as a sheet you read) ============ */
+.cs{position:absolute;inset:0;--sheet:#f6f3ec;--ink:#19202e;--ink2:#343b4a;--dim:#5b606d;--rule:#d6cfbf;--hair:#e7e1d4;--shade:#eee9dd;--walnut:#6b4428;--orange:#ec7c22;--alert:#ff5a48;--alert-ink:#b3261b;--warn:#f2c14e;--warn-ink:#7a5300;--warn-line:#a87a12;--win:#151413;--lit:#f3e6c8;
+  display:flex;flex-direction:column;background:var(--sheet);color:var(--ink);font:400 16px/1.45 var(--f)}
+.cs.night{--sheet:#10141d;--ink:#ece5d3;--ink2:#d2cbb9;--dim:#9f9a8b;--rule:#2a3244;--hair:#1c2230;--shade:#161c28;--orange:#f08a2c;--alert-ink:#ff8a7a;--warn-line:#f2c14e;--warn-ink:#f2c14e;--win:#06080c}
+.cs-trim{height:6px;background:var(--walnut);flex:none}
+.cs-pg{flex:1;min-height:0;overflow:hidden;padding:14px 16px 20px}
+.cs-dl{display:flex;justify-content:space-between;align-items:center;gap:12px;font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.cs-dl u{text-transform:none;letter-spacing:0;font:500 15px var(--f);color:var(--ink);text-underline-offset:4px}
+.cs-hl{font:500 31px/1.05 var(--f);letter-spacing:-.012em;margin:8px 0 8px}
+.cs-lede{font:400 18px/1.42 var(--f);color:var(--ink2);margin:0}
+.cs-fn{font:500 12px/1 var(--mono);color:var(--dim);vertical-align:super;margin-left:2px}
+.cs-k{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:0 16px;border:1.5px solid var(--ink);border-radius:5px;font:500 16px/1.15 var(--f);color:var(--ink);white-space:nowrap}
+.cs-k.go{background:var(--orange);border-color:var(--orange);color:#1a1206}
+.cs-k.red{background:var(--alert);border-color:var(--alert);color:#1c0804}
+.cs-k.q{border-color:transparent;padding:0 10px;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px;text-decoration-color:var(--dim)}
+.cs-keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cs-led{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--win);flex:none;vertical-align:middle}
+.cs-led.al{background:var(--alert);box-shadow:0 0 0 2px var(--win),0 0 0 3.5px var(--alert)}
+.cs-led.wn{background:var(--warn);box-shadow:0 0 0 2px var(--win)}
+.cs.day .cs-led.un{background:transparent;box-shadow:inset 0 0 0 1px var(--dim)}
+.cs-slot{display:inline-block;width:18px;height:6px;border-radius:3px;background:var(--win);flex:none;vertical-align:middle}
+.cs-slot.on{background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.cs.day .cs-slot:not(.on){background:transparent;box-shadow:inset 0 0 0 1px var(--dim)}
+.cs.day .cs-slot.on{box-shadow:0 0 0 2px var(--win)}
+.cs-sh{display:flex;align-items:baseline;gap:10px;font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:22px 0 10px}
+.cs-sh .n{color:var(--dim)}
+.cs-sh .r{margin-left:auto;letter-spacing:0;text-transform:none;font:500 15px var(--f);text-decoration:underline;text-underline-offset:4px}
+.cs-cue{border-top:2px solid var(--ink);padding-top:12px;margin:18px 0 6px}
+.cs-cue.al{border-top-color:var(--alert)}
+.cs-cue.qu{border-top:1px solid var(--rule)}
+.cs-cue .lab{display:flex;align-items:center;gap:10px;font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.cs-cue.al .lab{color:var(--alert-ink)}
+.cs-cue .say{font:400 19px/1.35 var(--f);margin:8px 0 14px}
+.cs-ros{border-top:1px solid var(--rule)}
+.cs-rr{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start}
+.cs-idb{width:30px;height:30px;border:1.5px solid var(--ink);display:grid;place-items:center;font:500 13px var(--mono);border-radius:2px}
+.cs-rn{font:600 17px/1.25 var(--f)}
+.cs-rn span{font-weight:400;color:var(--dim)}
+.cs-ra{font:400 16px/1.35 var(--f);margin-top:2px}
+.cs-rw{font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:5px}
+.cs-age{font:400 13px var(--mono);color:var(--dim);padding-top:3px;white-space:nowrap}
+.cs-draft{margin:10px 0 12px;padding:2px 0 2px 14px;border-left:2px solid var(--ink);font:400 16px/1.45 var(--f);color:var(--ink2)}
+.cs-tabs{flex:none;height:64px;display:flex;border-top:1px solid var(--rule);background:var(--sheet)}
+.cs-tabs span{flex:1;display:grid;place-items:center;font:500 13px var(--f);color:var(--dim);position:relative}
+.cs-tabs span.cur{color:var(--ink)}
+.cs-tabs span.cur::before{content:"";position:absolute;top:9px;left:50%;width:18px;height:5px;margin-left:-9px;border-radius:3px;background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.cs-strip .labs{position:relative;height:20px;font:500 13px var(--f);white-space:nowrap}
+.cs-strip .labs span{position:absolute;top:0}
+.cs-strip .trk{position:relative;height:26px;margin-top:12px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.cs-strip .bl{position:absolute;top:4px;bottom:4px;background:var(--ink);border-radius:1px}
+.cs-strip .bl.past{background:transparent;border:1.5px solid var(--dim)}
+.cs-strip .nd{position:absolute;top:-7px;bottom:-7px;width:2px;margin-left:-1px;background:var(--ink)}
+.cs-strip .hrs{position:relative;height:18px;font:400 12px var(--mono);color:var(--dim);margin-top:5px}
+.cs-strip .hrs span{position:absolute;transform:translateX(-50%)}
+.cs-ro{position:relative}
+.cs-ro::before{content:"";position:absolute;left:65px;top:6px;bottom:6px;width:1px;background:var(--rule)}
+.cs-or{display:grid;grid-template-columns:52px 28px minmax(0,1fr);align-items:start;position:relative}
+.cs-or .ot{font:500 15px var(--mono);padding-top:9px}
+.cs-or .tick{position:absolute;left:60px;top:19px;width:12px;height:1.5px;background:var(--ink)}
+.cs-or .ob{padding:8px 0 12px}
+.cs-or .ob .tt{font:500 18px/1.3 var(--f)}
+.cs-or .ob .mm{font:400 14px/1.4 var(--f);color:var(--dim)}
+.cs-or.past{color:var(--dim)}
+.cs-or.past .tick{background:var(--dim)}
+.cs-now{display:grid;grid-template-columns:52px 28px minmax(0,1fr);align-items:center;margin:4px 0}
+.cs-now .ot{font:600 15px var(--mono)}
+.cs-now .rl{height:2px;background:var(--ink)}
+.cs-gap{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.cs-clash{border-left:2px solid var(--warn-line);padding-left:10px;margin-left:-12px}
+.cs-wk{display:grid;gap:10px;font:400 16px/1.4 var(--f)}
+.cs-wk div{border-top:1px solid var(--rule);padding-top:10px}
+/* phone OS lock screen (the phone's own look, as drawn in Callsheet pass 4) */
+.lk{position:absolute;inset:0;background:#0b0d12;color:#ece5d3;display:flex;flex-direction:column;align-items:center;padding:70px 16px 30px;font-family:var(--f)}
+.lk .tm{font:300 78px/1 var(--f)}
+.lk .dt{font:400 18px var(--f);margin-top:6px;opacity:.85}
+.lk .nt{margin-top:46px;width:100%;background:#1b1f29;border-radius:16px;padding:14px 16px}
+.lk .nt .h{display:flex;justify-content:space-between;font:500 13px var(--mono);letter-spacing:.1em;color:#a8a294}
+.lk .nt b{display:block;font:600 17px var(--f);margin-top:6px}
+.lk .nt p{font:400 15.5px/1.4 var(--f);margin:2px 0 0;color:#d9d2c0}
+.lk .ks{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:8px}
+.lk .ks span{background:#1b1f29;border-radius:12px;min-height:44px;display:grid;place-items:center;font:500 15px var(--f)}
+.lk .ft{margin-top:auto;font:400 13px var(--f);color:#8f8a7e}
+
+/* ============ JAM-DASH (pass 4: the equipment rack) ============ */
+.jd{position:absolute;inset:0;--ag:#d9d5cc;--panel:#f1eee8;--panel2:#e3dfd6;--ink:#1d1c1a;--ink2:#55514a;--ink3:#6a655d;--cab:#2b2a27;--cabin:#1c1b19;--rail:#3b3a36;--walnut:#6b4428;--recess:#1b1a18;--legend:#aaa498;--cream:#f3e6c8;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;--orange:#ec7c22;--warn-ink:#765400;--alert-ink:#ae2a1f;--key:#f8f6f2;--key-edge:#bdb8ae;--line:#c7c2b8;--band:#121211;--ghost:#6d6960;
+  background:var(--ag);color:var(--ink);font:400 15px/1.4 var(--f);overflow:hidden}
+.jd.nt{--ag:#181817;--panel:#2b2926;--panel2:#232220;--ink:#ece9e2;--ink2:#b0aba1;--ink3:#9b968c;--cab:#0e0e0d;--cabin:#060606;--rail:#1d1d1b;--walnut:#5a3a23;--recess:#0b0b0a;--legend:#9d988d;--orange:#f08a2c;--warn-ink:#f2c14e;--alert-ink:#ff7b6b;--key:#353330;--key-edge:#4b4945;--line:#3a3936;--band:#070706;--ghost:#5e5a53}
+.jd-led{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--recess);flex:none;vertical-align:middle}
+.jd-led.on{background:var(--ok);box-shadow:0 0 0 2px var(--recess)}
+.jd-led.al{background:var(--alert);box-shadow:0 0 0 2px var(--recess)}
+.jd-led.wn{background:var(--warn);box-shadow:0 0 0 2px var(--recess)}
+.jd-led.offl{background:transparent;border:2px dashed var(--ink3)}
+.jd-lip{height:52px;display:flex;align-items:center;gap:22px;padding:0 24px;border-bottom:1px solid var(--line)}
+.jd-lip .wm{font:600 20px var(--f)}
+.jd-lip .nav{position:relative;font:500 16px var(--f);color:var(--ink2)}
+.jd-lip .nav.cur{color:var(--ink)}
+.jd-lip .nav.cur::after{content:"";position:absolute;left:50%;bottom:-16px;width:40px;margin-left:-20px;height:8px;border-radius:4px 4px 0 0;background:var(--cream);box-shadow:inset 0 0 0 2px var(--ink)}
+.jd-lip .ck{margin-left:auto;font:500 16px var(--mono)}
+.jd-hl{font:500 28px/1.15 var(--f);letter-spacing:-.01em;margin:0}
+.jd-sub{font:400 15px/1.4 var(--f);color:var(--ink2);margin:4px 0 0}
+.jd-ann{display:grid;grid-template-columns:76px 1fr 1fr;gap:5px;background:var(--cab);padding:10px;border-radius:4px}
+.jd-ann .ch{font:500 13px var(--mono);color:var(--cream);padding:2px 4px 4px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.jd-ann .ch .sq{width:10px;height:10px;border-radius:2px;background:var(--recess);box-shadow:0 0 0 1px #ffffff26}
+.jd-ann .ch .sq.on{background:var(--cream)}
+.jd-ann .rh{font:500 13px var(--mono);letter-spacing:.06em;color:var(--legend);display:flex;align-items:center;padding-left:2px}
+.jd-lg{height:34px;border-radius:2px;background:var(--recess);color:var(--legend);font:500 14px/1 var(--f);display:flex;align-items:center;justify-content:center;gap:6px;padding:0 6px;white-space:nowrap}
+.jd-lg.al{background:var(--alert);color:#1d1c1a}
+.jd-lg.wn{background:var(--warn);color:#1d1c1a}
+.jd-lg.info{background:var(--cream);color:#1d1c1a}
+.jd-lg.offl{color:var(--cream);outline:2px dashed var(--cream);outline-offset:-5px}
+.jd-lg.unk{outline:1px dashed var(--ghost);outline-offset:-5px}
+.jd-tag{--stub:var(--recess);position:relative;background:linear-gradient(to right,var(--stub) 0 7px,var(--panel) 7px);padding:12px 16px 14px 40px;border-radius:2px 6px 6px 2px}
+.jd-tag::before{content:"";position:absolute;left:15px;top:17px;width:10px;height:10px;border-radius:50%;background:var(--ag);box-shadow:0 0 0 2px var(--ink3)}
+.jd-tag.al{--stub:var(--alert)}
+.jd-tag.offl{background:linear-gradient(to right,transparent 0 7px,var(--panel) 7px),repeating-linear-gradient(to bottom,var(--ink3) 0 7px,var(--ag) 7px 12px)}
+.jd-tag.fixed{--stub:var(--panel2);background:var(--panel2)}
+.jd-tag .h{display:flex;gap:8px;align-items:center;font:500 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.jd-tag .t{font:500 20px/1.2 var(--f);margin:4px 0 2px}
+.jd-tag p{margin:0;font:400 15px/1.4 var(--f);color:var(--ink2)}
+.jd-k{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-radius:4px;background:var(--key);border:1px solid var(--key-edge);box-shadow:0 2px 0 var(--key-edge);font:500 15px var(--f);color:var(--ink);white-space:nowrap}
+.jd-k.go{background:var(--orange);border-color:#b55a12;box-shadow:0 2px 0 #b55a12;color:#1d1c1a}
+.jd-k.red{background:var(--alert);border-color:#a3271b;box-shadow:0 2px 0 #a3271b;color:#1d1c1a}
+.jd-k.q{background:none;border:0;box-shadow:none;text-decoration:underline;text-underline-offset:3px;padding:0 4px}
+.jd-keys{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.jd-rack{position:relative;background:var(--cabin);padding:3px 0;display:flex;flex-direction:column;gap:2px;min-width:0}
+.jd-rack::before,.jd-rack::after{content:"";position:absolute;top:0;bottom:0;width:16px;background-color:var(--rail);background-image:radial-gradient(circle,#000 2px,transparent 2.5px);background-size:16px 12px;background-position:center}
+.jd-rack::before{left:0}.jd-rack::after{right:0}
+.jd-rack>*{position:relative;z-index:1}
+.jd-hu{margin:0 16px;background:var(--panel);display:flex;gap:12px;align-items:center;padding:10px 14px;min-height:70px}
+.jd-hu .n{font:500 21px var(--f)}
+.jd-hu .s{display:flex;gap:8px;align-items:center;font:400 14px var(--f);color:var(--ink2)}
+.jd-hu .disp{margin-left:auto;background:#121110;border-radius:3px;padding:6px 12px;display:flex;gap:18px;font:500 12px var(--mono);color:#bdb6a8}
+.jd-hu .disp b{display:block;font:500 16px var(--mono);color:var(--cream)}
+.jd-mod{margin:0 16px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--panel);min-height:34px;padding:0 10px;font:500 15px var(--f)}
+.jd-mod .mw{font:400 13px var(--f);color:var(--ink2);margin-left:6px}
+.jd-mod.wn .mw{color:var(--warn-ink);font-weight:500}
+.jd-mod.al .mw{color:var(--alert-ink);font-weight:500}
+.jd-mod .d{font:400 13px var(--mono);color:var(--ink3)}
+.jd-mod.ghost{background:transparent;outline:1.5px dashed var(--ghost);outline-offset:-2px;color:var(--ghost)}
+.jd-mod.plate{background:var(--panel2);color:var(--ink2)}
+.jd-tape{position:absolute;left:0;right:0;bottom:0;height:92px;background:var(--band);background-image:repeating-linear-gradient(0deg,#ffffff12 0 1px,transparent 1px 5px);color:#ece8df;display:grid;grid-template-columns:300px 1fr}
+.jd-tape .l{padding:18px 24px;border-right:1px solid #ffffff1f;display:grid;gap:6px;align-content:start}
+.jd-tape .l .e{font:500 13px var(--mono);letter-spacing:.1em;color:#bdb6a8}
+.jd-tape .l .r{font:400 15px var(--f)}
+.jd-tape .ln{position:relative}
+.jd-tabs{position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;border-top:1px solid var(--line);background:var(--ag)}
+.jd-tabs span{flex:1;position:relative;display:grid;place-items:center;font:500 13px var(--f);color:var(--ink2);padding-top:8px}
+.jd-tabs span::before{content:"";position:absolute;top:8px;left:50%;width:22px;height:6px;margin-left:-11px;border-radius:0 0 3px 3px;background:var(--recess)}
+.jd-tabs span.cur{color:var(--ink)}
+.jd-tabs span.cur::before{background:var(--cream);box-shadow:inset 0 0 0 1.5px var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap" id="top">
+  <header style="display:grid;gap:10px">
+    <div class="eyebrow">Jam design · pass 5 · cross-app journeys</div>
+    <h1>Moving between the apps</h1>
+    <blockquote>"The purpose of this exercise is to create a design system where each interface design is bespoke to it's purpose, but moving between them feels natural." <span class="muted">Isaac, 2026-11-05</span></blockquote>
+    <p class="muted">Six evenings and mornings in the house, each crossing two or more apps. Every frame is the app's own pass-4 design at its real device size: Lobby, JamFin and NervOS on the living-room TV, Jam Home on the iPad and Echo kiosks and the phone, Callsheet and Jam-Dash on the phone and desk. Step through with <span class="kh">→</span> and <span class="kh">←</span> (or the buttons). The striped steps are <b>handoffs</b>: both screens side by side, with what carries across, what changes, and where it jars. Nothing here is a new design: it's a test of the ones we have. All people, titles and data are samples.</p>
+  </header>
+
+  <div class="ctl" aria-label="Page controls">
+    <div><span class="eyebrow">Page theme</span><div class="seg" id="segTheme"><button data-v="auto" aria-pressed="true">Auto</button><button data-v="light" aria-pressed="false">Light</button><button data-v="dark" aria-pressed="false">Dark</button></div></div>
+    <div><span class="eyebrow">Motion</span><div class="seg" id="segMotion"><button data-v="full" aria-pressed="true">Full</button><button data-v="calm" aria-pressed="false">Calm</button></div></div>
+    <div><span class="eyebrow">Outline what carries (blue dashes, on every frame)</span><div class="chips" id="hlChips"></div></div>
+  </div>
+
+  <nav class="jpick" id="jpick" aria-label="Journeys"></nav>
+
+  <div class="player">
+    <div class="stagebox">
+      <div class="bar">
+        <button class="nb" id="bBack" aria-label="Back one step">‹ Back</button>
+        <button class="nb go" id="bNext" aria-label="Next step">Next ›</button>
+        <span class="pos" id="pos"></span>
+      </div>
+      <div class="stage" id="stage" aria-live="polite"></div>
+      <div class="cap" id="cap"></div>
+      <div id="hoPanel"></div>
+    </div>
+    <aside class="steps" id="steps" aria-label="Steps"></aside>
+  </div>
+
+  <section id="jnotes" aria-label="Journey notes"></section>
+
+  <section id="threads">
+    <h2>The six threads a handoff should carry</h2>
+    <p class="muted">From the 15-item language in <code>notes/RULES-TIERS.md</code>, these are the six you can actually see survive a move between two screens. Each handoff rates them: <span class="pill y">carries</span> <span class="pill p">partly</span> <span class="pill n">breaks</span> <span class="pill x">not in play</span>.</p>
+    <div class="thread-grid" id="threadGrid"></div>
+  </section>
+
+  <section id="seams">
+    <h2>Seams to fix</h2>
+    <p class="muted">Every jarring handoff noticed in the six journeys. Severity is about how much it costs someone moving between the screens, not how hard it is to build. "Tier" uses the tiers in <code>notes/RULES-TIERS.md</code>.</p>
+    <div class="tw"><table class="big" id="seamTable"></table></div>
+  </section>
+
+  <section>
+    <h2>How this was made</h2>
+    <p class="muted">Each frame copies its app's tokens and CSS fragments from <code>mockups/pass4/</code> and is redrawn in fewer parts, so the screens are recognisable but not complete. TV frames are authored at 1920 × 1080 and scaled; the smallest TV text is 22 px at that size. Kiosk plans are placeholders (Jam Home's plan still needs Isaac's sketch). Where two pass-4 mockups disagree about a fact, the frame follows one and the seam table says so.</p>
+  </section>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const DEV={tv:{w:1920,h:1080,g:3.2},desk:{w:1440,h:900,g:3},ipad:{w:1024,h:768,g:2.2},echo:{w:961,h:601,g:2.4},phone:{w:390,h:844,g:1}};
+
+/* ---------------- flat art (from Lobby pass 4) ---------------- */
+const ARTS={
+  copper:{sky:'#6b3a2a',sun:['#e8a25a',.72,.42,.16],hills:[['#3a2019','0 72%,18% 64%,40% 70%,62% 58%,100% 66%,100% 100%,0 100%']],city:'#2a1712'},
+  signal:{sky:'#1d2a44',hills:[['#2f3b57','0 58%,100% 50%,100% 100%,0 100%'],['#121827','30% 100%,46% 58%,54% 58%,70% 100%']],lamps:'#e9cf8a'},
+  velvet:{sky:'#3a1622',sun:['#d9c19a',.5,.78,.26],hills:[['#5a1f2f','0 0,16% 0,16% 100%,0 100%'],['#5a1f2f','84% 0,100% 0,100% 100%,84% 100%'],['#1a0b10','40% 60%,60% 60%,58% 100%,42% 100%']]},
+  duel:{sky:'#17213a',sun:['#e7dfc8',.7,.3,.14],hills:[['#25304c','0 70%,30% 62%,60% 72%,100% 60%,100% 100%,0 100%'],['#0f1424','22% 100%,24% 52%,27% 52%,29% 100%'],['#0f1424','70% 100%,72% 50%,75% 50%,77% 100%']]},
+  harbour:{sky:'#2f4a55',sun:['#e9d7b0',.36,.4,.13],hills:[['#26414b','0 62%,100% 62%,100% 100%,0 100%'],['#e9d7b0','74% 60%,80% 34%,82% 60%'],['#162a32','0 82%,100% 82%,100% 100%,0 100%']]},
+  orbit:{sky:'#2b2a3f',sun:['#d9874f',.3,.5,.2],hills:[['#3c3b58','0 76%,100% 60%,100% 100%,0 100%']]},
+  dragon:{sky:'#2b2550',sun:['#f0a24a',.5,.62,.26],hills:[['#f0a24a','0 0,100% 0,100% 14%,0 14%'],['#1b1838','0 64%,100% 64%,100% 100%,0 100%'],['#e9e0cc','49% 64%,51% 64%,70% 100%,30% 100%']]},
+  rally:{sky:'#2a2752',sun:['#f0a24a',.78,.3,.1],hills:[['#efe6d2','40% 100%,48% 40%,52% 40%,60% 100%']]},
+  game:{sky:'#3d6f8c',sun:['#f2d27a',.82,.22,.1],hills:[['#5b9a5e','0 66%,25% 58%,50% 66%,75% 56%,100% 64%,100% 100%,0 100%'],['#8a5a34','0 86%,100% 86%,100% 100%,0 100%']]}
+};
+function art(id){const a=ARTS[id];let h=`<div style="position:absolute;inset:0;background:${a.sky}"></div>`;
+  if(a.sun){const[c,x,y,r]=a.sun;h+=`<div style="position:absolute;left:${(x-r*.5625)*100}%;top:${(y-r)*100}%;width:${r*112.5}%;aspect-ratio:1;border-radius:50%;background:${c}"></div>`}
+  if(a.city){for(let i=0;i<9;i++){const w=6+((i*37)%5),hh=22+((i*53)%30),l=4+i*10.5;h+=`<div style="position:absolute;left:${l}%;bottom:18%;width:${w}%;height:${hh}%;background:${a.city}"></div>`}}
+  (a.hills||[]).forEach(([c,p])=>h+=`<div style="position:absolute;inset:0;background:${c};clip-path:polygon(${p})"></div>`);
+  if(a.lamps){[[18,46],[34,40],[66,40],[82,46]].forEach(([x,y])=>h+=`<div style="position:absolute;left:${x}%;top:${y}%;width:2.6%;aspect-ratio:1;border-radius:50%;background:${a.lamps}"></div>`)}
+  return h}
+const slots=(n,lit,cls)=>{let h='';for(let i=0;i<n;i++)h+=`<i class="${i<lit?'on':''}"></i>`;return h};
+
+/* ---------------- people (Jam Home's key tags own the colours; JamFin's tickets use pass 4's own) ---------------- */
+const PEOPLE={Isaac:{ha:'#3f6fb5',jf:'#2f4a6a'},Amber:{ha:'#2a8a7a',jf:'#3c5a33'},Marissa:{ha:'#c4497e',jf:'#5a3552'}};
+
+/* =============================== LOBBY =============================== */
+const SKY_NIGHT={b:['#0e1424','#121a2e','#172036','#1f2840','#283149'],disc:['#e6dcc4',34,1560,236],cloud:'#1a2236'};
+const SKY_GOLD={b:['#262b47','#3a3352','#573b55','#a5605a','#d99263'],disc:['#f4c784',56,1500,452],cloud:'#463757'};
+const STARS=[[1080,70],[1190,120],[1330,64],[1420,150],[1700,90],[1810,170],[1240,300],[1380,380],[1760,330],[1650,40],[1120,220],[1520,120],[1880,260],[1010,160]];
+const LB_CONT=[
+  {id:'copper',t:'The Copper City',p:.71},{id:'signal',t:'Signal Street',p:.34},{id:'velvet',t:'The Velvet Machine',p:.11},{id:'duel',t:'Moonlit Duel',p:0},{id:'harbour',t:'The Harbour Hour',p:.62},{id:'orbit',t:'Paper Orbit',p:.4}];
+const LB_APPS=[['Jamfin','#8f7bb3'],['YouTube','#b9534a'],['Netflix','#9b4a46'],['Prime Video','#4f86a6'],['Dropout','#b79d45'],['YouTube TV','#a85a50'],['Moonlight','#5f7fb0'],['Steam Link','#5c7489'],['Spotify','#5f9a64'],['All apps','#6b6052']];
+function lbSky(s,night){let h=s.b.map((c,i)=>{const t=[0,212,340,440,520][i],hh=[212,128,100,80,76][i];return `<div class="b" style="top:${t}px;height:${hh}px;background:${c}"></div>`}).join('');
+  if(night)h+=STARS.map(([x,y])=>`<i class="star" style="left:${x}px;top:${y}px"></i>`).join('');
+  const[c,r,x,y]=s.disc;h+=`<div class="disc" style="background:${c};width:${r*2}px;height:${r*2}px;left:${x-r}px;top:${y-r}px"></div>`;
+  [[1180,286,190],[1330,322,120],[1640,382,210],[1760,288,90]].forEach(([x,y,w])=>h+=`<div class="cloud" style="background:${s.cloud};left:${x}px;top:${y}px;width:${w}px"></div>`);
+  return `<div class="lb-sky">${h}</div>`}
+function lbHome(o){
+  o=Object.assign({sky:'night',clock:['8:31','PM'],date:'Tuesday, November 3 · 57° cloudy',focus:'dial:0',lamps:[['Floor lamp',1,'On · 40%','#f2c98a'],['Table lamp',0,'Off','#f3dcae'],['Mood lighting',1,'On','#c9a0e8']],door:'locked',h1:null,cont:LB_CONT,needle:0,hints:null,sign:null,src:'apps'},o);
+  const [fk,fv]=o.focus.split(':');
+  let h=lbSky(o.sky==='gold'?SKY_GOLD:SKY_NIGHT,o.sky!=='gold');
+  h+=`<div class="lb-sill" data-c="walnut"></div>`;
+  h+=`<div class="lb-hdr"><div><div class="lb-house" data-c="type">Bungalo</div><div class="lb-clock">${o.clock[0]}<small>${o.clock[1]}</small></div><div class="lb-date">${o.date}</div></div>
+    <div class="lb-hk"><div><span>TV</span><span class="v">Theater night · Optical</span><i class="bw"></i></div><div><span class="ind led"></span>Settings<i class="bw"></i></div></div></div>`;
+  const s=o.sign||{};
+  h+=`<div class="lb-sign"><div class="eb" data-c="type">${s.eb||''}</div><div class="tt">${s.tt||''}</div><div class="ln"><span>${s.ln||''}</span>${s.do?`<span class="do"><kbd>OK</kbd>${s.do}</span>`:''}</div></div>`;
+  h+=`<div class="lb-grp">Continue${fk==='shelf'?`<b>${+fv+1} of 6</b>`:''}</div>`;
+  h+=`<div class="lb-shelf">`+o.cont.map((c,i)=>{const f=fk==='shelf'&&+fv===i;return `<div class="lb-fr ${f?'f':''}" style="left:${96+i*352}px"><div class="pic"><div class="art">${art(c.id)}${c.p?`<div class="pg"><i style="width:${c.p*100}%"></i></div>`:''}</div></div><div class="plq"><span class="ind slot ${f?'on':''}" ${f?'data-c="focus"':''}></span><span>${c.t}</span></div></div>`}).join('')+`<i class="lb-end" style="left:${96+o.cont.length*352-30}px"></i></div>`;
+  // console face: dial
+  const x0=150,step=(1728-300)/9;let d='';
+  [['WATCH',0,5],['PLAY',6,7],['LISTEN',8,8]].forEach(([n,a,b])=>{const l=x0+a*step-60,r=x0+b*step+60;d+=`<div class="band" style="left:${l}px;width:${r-l}px">${n}</div>`});
+  if(fk==='dial')d+=`<div class="dpos">${+fv+1} of 10</div>`;
+  d+=`<div class="lb-ticks"></div>`;
+  LB_APPS.forEach(([n,c],i)=>{const x=x0+i*step;const f=fk==='dial'&&+fv===i;d+=`<i class="lb-major" style="left:${x}px"></i><div class="lb-st ${f?'f':''}" style="left:${x}px;--code:${c}"><span class="nm">${n}</span><span class="code"></span></div>`});
+  const nx=x0+(fk==='dial'?+fv:o.needle)*step;
+  d+=`<i class="lb-stop" style="left:14px" data-c="walnut"></i><i class="lb-stop" style="right:14px"></i><i class="lb-needle ${fk==='dial'?'cur':''}" style="left:${nx}px" ${fk==='dial'?'data-c="focus"':''}></i>`;
+  // patch bay
+  const ports=[{id:'apps',lb:'APPS',nm:'Apps',s:'on now',apps:1},{id:'h1',lb:'HDMI 1',nm:'empty',empty:1},{id:'h2',lb:'HDMI 2',nm:'Switch 2',code:'#a4483d',s:'<span class="ind led ok on"></span>Signal'},{id:'h3',lb:'HDMI 3',nm:'empty',empty:1},{id:'ant',lb:'ANT',nm:'Live TV',code:'#6a8a9a',s:'41 channels'}];
+  if(o.h1)ports[1]={id:'h1',lb:'HDMI 1',nm:o.h1.nm,code:o.h1.code,s:'<span class="ind led ok on"></span>Signal'};
+  let bay=ports.map((p,i)=>{const f=fk==='bay'&&fv===p.id;const appsOn=p.apps&&o.src==='apps';return (i===1?'<i class="sep"></i>':'')+`<div class="lb-sk ${p.empty?'empty':''} ${p.code?'plug':''} ${p.apps?'apps':''} ${f?'f':''}" style="--code:${p.code||'#000'}"><span class="lb2">${p.lb}</span><span class="hole" ${f?'data-c="focus"':''}>${p.apps?`<span class="ind sq ${appsOn?'on':''}"></span>`:''}</span><span class="nm">${p.nm}</span><span class="s" data-c="words">${p.apps?(appsOn?'on now':''):(p.s||'')}</span></div>`}).join('');
+  // house plate
+  let pl=o.lamps.map(([n,on,w,c],i)=>{const f=fk==='lamp'&&+fv===i;return `<div class="lb-sw ${f?'f':''}"><div class="lb-pad ${on?'':'off'}"><i></i><span class="ind ${on?'on':''}" style="--c:${c}"></span></div><div><span class="nm">${n}</span><span class="s" data-c="words">${w}</span></div><i class="bw" ${f?'data-c="focus"':''}></i></div>`}).join('');
+  const unl=o.door==='unlocked',df=fk==='door';
+  pl+=`<div class="lb-sw ${unl?'unl':''} ${df?'f':''}" ${unl?'data-c="orange"':''}><div class="lb-turn"><i></i></div><div><span class="nm">Front door</span><span class="s" data-c="words">${unl?'Unlocked · OK locks':'<span class="ind led ok on"></span>Locked'}</span></div><i class="bw" ${df?'data-c="focus"':''}></i></div>`;
+  const hints=o.hints||['<kbd>OK</kbd>Open','← → Tune','<kbd>G</kbd>TV menu'];
+  h+=`<div class="lb-face"><div class="lb-dial">${d}</div><div class="lb-bay">${bay}</div><div class="lb-plate"><span class="lb2">HOUSE</span><div class="row">${pl}</div></div><div class="lb-hints">${hints.map(x=>`<span>${x}</span>`).join('')}</div></div>`;
+  return `<div class="lb">${h}</div>`}
+function lbBlind(o){return `<div class="lb"><div class="lb-blind" data-c="walnut"><div class="lb-bc"><div class="eb" data-c="type">${o.eb}</div><div class="tt">${o.tt}</div><div class="ln">${o.ln}</div><div class="lb-slats" data-c="slats" data-fill="${o.lit}" data-n="12">${slots(12,o.lit)}</div></div></div></div>`}
+function lbDrawer(o){return `<div class="lb" style="background:#000"><div style="position:absolute;inset:0">${art('dragon')}</div>
+  <div class="lb-drawer" data-c="walnut"><div class="lb-dh"><span class="ind slot on"></span><b>TV menu</b><span>over NervOS · HDMI 1</span><span class="r"><span><kbd>OK</kbd>Open</span><span><kbd>⟲</kbd>Close</span><span style="color:var(--ink)">8:12 PM</span></span></div>
+  <div class="lb-dk">${[['Input','HDMI 1',1],['Picture','Game'],['Sound','Standard'],['Sound out','Optical'],['Sleep','Off'],['Front door','Locked'],['Settings','']].map(([k,v,f])=>`<div class="lb-key ${f?'f':''}"><span>${k}</span><small>${v}</small><i class="bwk" ${f?'data-c="focus"':''}></i></div>`).join('')}</div></div></div>`}
+
+/* =============================== JAMFIN =============================== */
+function jfTop(o){return `<div class="jf-top"><span class="jf-brand" data-c="type">JamFin</span>${['Home','Films','Shows','Search'].map((t,i)=>`<span class="jf-tab ${i===0?'cur':''}">${t}</span>`).join('')}<span class="sp"></span><span class="jf-chip" style="--pc:${PEOPLE[o.who].jf}"><i></i>${o.who}</span><span class="jf-clock">${o.clock}</span></div>`}
+function jfAcc(){return `<div class="jf-acc"><i style="left:16px;top:22px;width:200px;height:58px;background:#21406c;transform:skewX(-14deg)"></i><i style="left:118px;top:6px;width:168px;height:12px;background:#e3b02f"></i><i style="left:240px;top:48px;width:40px;height:40px;background:#c23a2b"></i><i style="left:30px;top:92px;width:220px;height:3px;background:#e9e2d0"></i></div>`}
+function jfHome(o){
+  const cont=[['velvet','The Velvet Machine','1 h 38 min left',.11],['signal','Signal Street','S2 E4 · 24 min left',.34],['copper','The Copper City','41 min left',.71],['harbour','The Harbour Hour','6 min left',.62]];
+  const fi=o.fi||0;const c=cont[fi];
+  let h=jfTop(o);
+  h+=`<div class="jf-mq" data-c="walnut"><div class="blk" style="--hc:${o.hc||'#4a1a26'}"></div><div class="eb" data-c="type">Continue watching · Film</div><div class="tt">${o.tt||c[1]}</div><div class="fx">${o.fx||'<b>1 h 38 min left</b> · Rated 12 · Ends at 10:21 PM'}</div>${jfAcc()}<div class="jf-seats">${cont.map((x,i)=>`<span class="ind led ${i===fi?'on':''}"></span>`).join('')}</div></div>`;
+  h+=`<div class="jf-rows"><div class="jf-rl">Continue watching</div><div class="jf-trk">${cont.map((x,i)=>`<div class="jf-cd ${i===fi?'f':''}"><div class="face"><div class="art">${art(x[0])}<div class="pg"><i style="width:${x[3]*100}%"></i></div></div><div class="jf-w" ${i===fi?'data-c="focus"':''}></div><div class="jf-spill"></div></div><div class="jf-cap"><b>${x[1]}</b><span>${x[2]}</span></div></div>`).join('')}</div></div>`;
+  return `<div class="jf">${h}</div>`}
+function jfOffline(o){
+  let h=jfTop(o);
+  h+=`<div class="jf-mq" data-c="walnut"><div class="blk" style="--hc:#2a2826"></div><div class="eb" data-c="words"><span class="ind led offl" style="width:22px;height:22px"></span>Server · Offline</div><div class="tt">Not answering</div><div class="fx">Last answered at <b>9:46 PM</b> · trying again in 30 seconds</div><div class="jf-seats">${'<span class="ind led"></span>'.repeat(4)}</div></div>`;
+  h+=`<div class="jf-off"><div class="jf-key pri f" data-c="orange focus"><span class="wl"></span>Try again</div><div class="jf-key"><span class="wl"></span>TV Home</div></div>`;
+  h+=`<div class="jf-cached"><div class="jf-rl" style="margin:0">Last synced · 9:40 PM · you can read these, not play them</div><div class="jf-trk">${[['signal','Signal Street'],['velvet','The Velvet Machine'],['copper','The Copper City']].map(x=>`<div class="jf-cd" style="width:300px"><div class="art" style="height:169px;border-radius:10px;overflow:hidden;position:relative">${art(x[0])}</div><div class="jf-cap"><b>${x[1]}</b></div></div>`).join('')}</div></div>`;
+  return `<div class="jf">${h}</div>`}
+function jfTickets(o){const names=['Isaac','Amber','Marissa'];const stubs=[['Night','Full colour','Full motion'],['Night','Toned','Calm motion'],['Night','Full colour','Full motion']];
+  return `<div class="jf"><div class="jf-top"><span class="jf-brand" data-c="type">JamFin</span><span class="sp"></span><span class="jf-clock">${o.clock}</span></div><div class="jf-who">Who's watching?</div><div class="jf-whos">Each ticket keeps its own look</div>
+  <div class="jf-tix">${names.map((n,i)=>`<div class="jf-tk ${i===0?'f':''}"><div class="face"><div class="tm"><div class="jf-fig" style="--pc:${PEOPLE[n].jf}"></div><b>${n}</b></div><i class="notch l"></i><i class="notch r"></i><div class="perf"></div><div class="stub">${stubs[i].join('<br>')}</div><div class="jf-w ${i===0?'me':''}" ${i===0?'data-c="focus"':''}></div><div class="jf-spill" style="top:auto;bottom:-30px"></div></div></div>`).join('')}</div></div>`}
+function jfCard(o){return `<div class="jf"><div class="jf-tc" style="--hc:${o.hc}"><div class="b"></div><div class="y"></div><div class="r"></div><div class="eb" data-c="type">${o.eb}</div><div class="tt">${o.tt}</div><div class="sub">${o.sub}</div><div class="jf-slats" data-c="slats" data-fill="${o.lit}" data-n="16">${slots(16,o.lit)}</div><div class="l">${o.lit>=16?'READY':'LOADING'}</div></div></div>`}
+function jfInter(o){return `<div class="jf" style="background:#000"><div class="jf-pic dim">${art('velvet')}</div><div class="jf-inter" style="--hc:#4a1a26"><div class="ib"><i class="y"></i><i class="r"></i><b>Intermission</b><span>Film · 1 h 52 min</span></div><div class="ic"><div class="eb" data-c="words"><span class="ind slot on"></span>Paused at 0:49:30</div><h3>The Velvet Machine</h3><div class="l">Resume now and it ends at 10:58 PM.</div><div class="ik"><div class="jf-key pri f" data-c="orange focus"><span class="wl"></span>Resume from 0:49:30</div><div class="jf-key"><span class="wl"></span>Stop for tonight</div></div></div></div></div>`}
+
+/* =============================== NERVOS =============================== */
+function nvTop(cur,clock){return `<div class="nv-top"><div class="nv-slide">${['Home','Archive','Hangar','Uplink','Theater'].map(s=>`<span class="sl ${s===cur?'cur':''}">${s}</span>`).join('')}</div><div class="nv-stat"><span class="clock">${clock}</span></div></div>`}
+function nvCart(){return `<div class="nv-cart"><div class="lab">${art('dragon')}</div></div>`}
+function nvPorts(n){let h='';for(let i=1;i<=4;i++)h+=`<span class="nv-port"><span class="sock ${i<=n?'in':''}"></span>${i}</span>`;return h}
+function nvBars(){return `<span class="nv-bars">${[['#6b3416',14],['#8f3f17',18],['#b04a1c',22],['#d0702a',26],['#d69a2e',30],['#e8c66a',34]].map(([c,h])=>`<i style="background:${c};height:${h}px"></i>`).join('')}</span>`}
+const NV_SPINES=[['Glass Dragon',56,230,'#8f8b97','#f0a24a'],['Moonlit Duel',58,240,'#1b1a1a','#ece8df'],['Skyline Rally',84,286,'#2a2752','#ece8df'],['Tidebreaker',54,250,'#1b1a1a','#ece8df'],['Cloud Kart',62,180,'#8f8b97','#e8c66a'],['Desert Relay',52,260,'#1b1a1a','#ece8df'],['Paper Tiger Turbo',56,250,'#8f8b97','#d9492c'],['Vault Runner',50,160,'#6b6378','#e8c66a'],['Rocket Picnic',86,286,'#7fb6e0','#1b1a1a'],['The Copper City',48,260,'#151414','#ece8df'],['Rally Hearts',54,180,'#8f8b97','#e9e0cc'],['Bolt Brothers',62,250,'#1b1a1a','#ece8df'],['Moon Golf',56,180,'#6b6378','#e9e0cc'],['Turbo Tortoise',50,250,'#1b1a1a','#ece8df']];
+function nvShelf(){let x=0;let h='';NV_SPINES.forEach(([t,w,hh,c,ink])=>{h+=`<div class="nv-sp" style="left:${x}px;width:${w}px;height:${hh}px;background:${c};color:${ink}"><b>${t}</b></div>`;x+=w+8});
+  h+=`<i class="nv-end" style="left:${x+10}px" data-c="walnut"></i>`;return `<div class="nv-shelf">${h}</div><div class="nv-plank"></div><div class="nv-lip"><span>Favourites · 14</span><span><kbd>A</kbd>Continue&nbsp;&nbsp;&nbsp;<kbd>B</kbd>Power</span></div>`}
+function nvHome(o){let h=nvTop('Home',o.clock);
+  h+=`<div class="nv-con">${nvCart()}<div class="nv-deck"><i class="slotr"></i><div class="dt"><span class="e" data-c="type">In the console</span><span class="t">Glass Dragon</span><span class="s">Super Nintendo · 42 min on Tuesday</span></div><div class="row"><div class="nv-k dk pri f" data-c="orange">Continue <small>· Tuesday 21:40</small><i class="nv-wb" data-c="focus"></i></div><div class="nv-k dk">Saves <small>2</small><i class="nv-wb"></i></div><div class="nv-k dk">Game page<i class="nv-wb"></i></div></div></div>
+  <div class="nv-front" data-c="walnut"><span>Players</span>${nvPorts(o.pads||1)}${nvBars()}</div></div>`;
+  const lately=[['duel',150,92,'Moonlit Duel','Arcade · yesterday'],['rally',190,250,'Skyline Rally','Steam · Sunday'],['copper',170,250,'The Copper City','Film · Sunday']];
+  let lx=0;h+=`<div class="nv-lately"><span class="e">Played lately</span>${lately.map(([a,w,hh,t,s])=>{const r=`<div style="position:absolute;left:${lx}px;top:${300-hh}px;width:${w}px;height:${hh}px;border-radius:6px;overflow:hidden;border:6px solid #111">${art(a)}</div><div class="nv-cap" style="left:${lx}px">${t}<span>${s}</span></div>`;lx+=w+50;return r}).join('')}
+    <div style="position:absolute;left:${lx}px;top:120px;width:190px;height:180px;border-radius:14px;background:#3a3633"><div style="margin:18px;height:70px;border-radius:6px;background:repeating-linear-gradient(0deg,#ffffff0f 0 1px,transparent 1px 7px),#1a1817"></div><span class="ind led ok on" style="position:absolute;left:24px;bottom:24px;--led:26px"></span></div><div class="nv-cap" style="left:${lx}px">Study PC<span>Uplink · stream</span></div>
+    <div class="stand"></div></div>`;
+  h+=nvShelf();
+  return `<div class="nv">${h}</div>`}
+function nvPlayers(){return `<div class="nv">${nvTop('Archive','19:44')}<div class="nv-h1">Pick up a controller</div><div class="nv-l1">Press A on the controller you'll play with. The first one is Player 1. Up to 2.</div>
+  <div class="nv-ports" data-c="walnut">${[['1','Player 1','Controller · 72%',1],['2','Player 2','Controller · 48%',1],['3','Not playing','Free',0],['4','Not playing','Free',0]].map(([n,a,b,on])=>`<div class="nv-pp"><span class="num">${n}</span><span class="sk ${on?'in':''}"></span><span class="pw" data-c="words">${a}<small>${b}</small></span><span class="ind led ok led2 ${on?'on':''}" style="--led:26px"></span></div>`).join('')}</div>
+  <div class="nv-keys"><div class="nv-k pri f" data-c="orange">Start with 2 players<i class="nv-wb" data-c="focus"></i></div><div class="nv-k">Swap 1 and 2<i class="nv-wb"></i></div><div class="nv-k">Back<i class="nv-wb"></i></div></div></div>`}
+function nvLaunch(o){const top=o.ret?120:262;const stripes=['#6b3416','#b04a1c','#d69a2e'].map((c,i)=>`<i style="background:${c};width:${300-i*40}px"></i>`).join('');
+  return `<div class="nv"><div class="nv-lc"><div class="nv-med" style="top:${top}px;width:300px;height:230px;border-radius:16px 16px 6px 6px;background:#8f8b97;padding:16px 18px 0"><div style="position:relative;height:120px;border-radius:4px;overflow:hidden">${art('dragon')}</div></div><div class="nv-ld" data-c="walnut"><i class="slotr"></i><div class="stp">${stripes}</div></div>
+  <div class="nv-lt"><div class="e" data-c="type">${o.eb}</div><div class="t">Glass Dragon</div><div class="s">${o.sub}</div></div>${o.ret?'':`<div class="nv-slats" data-c="slats" data-fill="${o.lit}" data-n="16">${slots(16,o.lit)}</div>`}</div></div>`}
+function nvBand(){return `<div class="nv" style="background:#000"><div style="position:absolute;inset:0">${art('dragon')}</div><div class="nv-band" data-c="walnut"><div class="gh"><span class="ind slot on"></span><b data-c="words">Paused</b><span>Glass Dragon · Super Nintendo · 2 players</span><span class="r"><span><kbd>A</kbd>Choose</span><span><kbd>B</kbd>Back to the game</span><span style="color:#ece8df">20:31</span></span></div>
+  <div class="kr"><div class="nv-k pri f" data-c="orange">Resume<i class="nv-wb" data-c="focus"></i></div><div class="nv-k">Save<i class="nv-wb"></i></div><div class="nv-k">Load<i class="nv-wb"></i></div><div class="nv-k">Picture <small>Sharp pixels</small><i class="nv-wb"></i></div><div class="nv-k">Reset<i class="nv-wb"></i></div><div class="nv-k">Quit game<i class="nv-wb"></i></div></div></div></div>`}
+
+/* =============================== JAM HOME =============================== */
+/* plan: a placeholder layout (pass 4's plan is invented too, pending Isaac's sketch) */
+const ROOMS=[['living','Living room',0,0,280,230],['kitchen','Kitchen',280,0,190,160],['bath','Bath',470,0,145,160,1],['hall','',280,160,335,70,1],['entry','Entry',0,230,100,200,1],['master','Master bedroom',100,230,260,200],['marissa',"Marissa's room",360,230,255,200]];
+function haPlan(o,W,H,x,y){const sx=W/615,sy=H/430;
+  const lit=o.lit||{};let svg=`<svg viewBox="0 0 615 430" preserveAspectRatio="none">`;
+  ROOMS.forEach(([id,n,rx,ry,rw,rh])=>{const c=lit[id];svg+=`<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="${c||'var(--floor)'}" ${c?`opacity="${o.op&&o.op[id]||.9}"`:''}/>`});
+  svg+=`<g fill="none" stroke="var(--wall)" stroke-width="3" vector-effect="non-scaling-stroke"><rect x="0" y="0" width="615" height="430"/><path d="M280 0V230M470 0V160M280 160H615M280 230H615M0 230H280M100 230V430M360 230V430" vector-effect="non-scaling-stroke"/></g>`;
+  svg+=`<g stroke="var(--floor)" stroke-width="6"><path d="M280 60V110M330 160H380M150 230H200M410 230H460M0 300V352"/></g>`;
+  if(o.win)svg+=`<rect x="330" y="-3" width="70" height="7" fill="#f2c14e"/>`;
+  // front door on the entry's outer wall
+  if(o.door==='unlocked')svg+=`<path d="M0 300 L52 286" stroke="#ff5a48" stroke-width="4"/><path d="M0 352 A52 52 0 0 1 52 300" fill="none" stroke="#ff5a48" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+  else svg+=`<path d="M0 300 L0 352" stroke="var(--ink)" stroke-width="4"/><path d="M0 352 A52 52 0 0 1 36 316" fill="none" stroke="var(--dim)" stroke-width="1" opacity=".5"/>`;
+  svg+=`</svg>`;
+  let labs=ROOMS.filter(r=>r[1]).map(([id,n,rx,ry,rw,rh,sm])=>{const l=!!lit[id]&&!(o.op&&o.op[id]<.5);const segs=(o.segs&&o.segs[id])||'';return `<div class="ha-rl ${sm?'sm':''} ${l?'lit':''}" style="left:${rx*sx}px;top:${ry*sy}px">${o.here===id?'<span class="here" data-c="walnut"><i></i>Here</span>':''}<span class="rn">${n}</span>${segs?`<span class="rm">${segs}</span>`:''}</div>`}).join('');
+  return `<div class="ha-plan" style="left:${x}px;top:${y}px;width:${W}px;height:${H}px">${svg}${labs}</div>`}
+const segs=(cs)=>`<span class="ha-segs">${cs.map(c=>`<i style="${c?`background:${c}`:''}"></i>`).join('')}</span>`;
+function haArc(o,W,H){const night=o.night;const p=o.p||.3;// 0..1 along the arc
+  const cx=W/2,r=Math.min(W/2-30,H-60),by=H-40;const ang=Math.PI*(1-p);const sx=cx+r*Math.cos(ang),sy=by-r*Math.sin(ang)*0.62;
+  const path=(a0,a1)=>{let d='';for(let i=0;i<=24;i++){const a=Math.PI*(1-(a0+(a1-a0)*i/24));d+=(i?'L':'M')+(cx+r*Math.cos(a)).toFixed(1)+' '+(by-r*Math.sin(a)*0.62).toFixed(1)}return d};
+  return `<svg viewBox="0 0 ${W} ${H}"><line x1="10" y1="${by}" x2="${W-10}" y2="${by}" stroke="var(--dim)" stroke-width="1.5"/><path d="${path(0,p)}" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="${path(p,1)}" fill="none" stroke="var(--dim)" stroke-width="2" stroke-dasharray="2 6"/>
+   <circle cx="${sx}" cy="${sy}" r="13" fill="${night?'var(--cream)':'var(--sun)'}" stroke="var(--ink)" stroke-width="1.5"/>
+   <text x="10" y="${by+26}" font-size="16" fill="var(--dim)" font-family="Jost" font-weight="500">${o.l}</text><text x="${W-10}" y="${by+26}" font-size="16" fill="var(--dim)" font-family="Jost" font-weight="500" text-anchor="end">${o.r}</text>
+   <text x="${p<.5?cx+r*.42:cx-r*.42}" y="${by-36}" font-size="${o.big||40}" fill="var(--ink)" font-family="Jost" font-weight="400" text-anchor="middle">${o.t}</text></svg>`}
+const KEYSVG=c=>`<svg width="26" height="54" viewBox="0 0 26 54"><circle cx="13" cy="9" r="6" fill="none" stroke="var(--dim)" stroke-width="2"/><path d="M13 15V44M13 36h6M13 42h5" stroke="var(--ink)" stroke-width="3" fill="none"/><rect x="2" y="22" width="11" height="13" rx="2" fill="${c}"/></svg>`;
+function haDoorGlyph(st,sz){return st==='unlocked'?`<svg width="${sz}" height="${sz*.7}" viewBox="0 0 60 42"><path d="M4 38H56" stroke="var(--dim)" stroke-width="2"/><path d="M8 38 L40 10" stroke="#ff5a48" stroke-width="5" stroke-linecap="round"/><path d="M48 38 A40 40 0 0 0 36 8" fill="none" stroke="#ff5a48" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="8" cy="38" r="3" fill="var(--ink)"/></svg>`:`<svg width="${sz}" height="${sz*.7}" viewBox="0 0 60 42"><path d="M4 38H56" stroke="var(--dim)" stroke-width="2"/><path d="M8 38 H48" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><path d="M48 38 A40 40 0 0 0 16 12" fill="none" stroke="var(--dim)" stroke-width="1" opacity=".5"/><circle cx="8" cy="38" r="3" fill="var(--ink)"/></svg>`}
+function haDoorPlate(o,x,y,w,h,big){const u=o.door==='unlocked';
+  return `<div class="ha-plate ha-door" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><div class="t">${haDoorGlyph(o.door,big?70:56)}<div><b>Front door</b><span data-c="words"><span class="ind led ${u?'al':'ok'} on"></span>${u?'Unlocked':'Locked'}</span></div>${u?`<span class="ha-k red" style="margin-left:auto" data-c="orange">Lock</span>`:''}</div>
+   <div class="ha-rail"><div class="bar" data-c="walnut"></div><div class="ha-hooks" style="margin-top:-8px">${['Isaac','Amber','Marissa'].map(n=>`<span class="ha-hk">${KEYSVG(PEOPLE[n].ha)}${n}<small>${o.away&&o.away.includes(n)?'Away':'Home'}</small></span>`).join('')}</div></div></div>`}
+function haKiosk(o){const E=o.dev==='echo';const W=E?961:1024,H=E?601:768;
+  o=Object.assign({lit:{},segs:{}},o);
+  let h=`<div class="ha-clock" style="left:${E?28:38}px;top:${E?18:28}px;font-size:${E?116:150}px">${o.clock}<sup>${o.ampm}</sup></div>`;
+  h+=`<div class="ha-date" style="left:${E?32:44}px;top:${E?140:186}px;font-size:${E?20:24}px">${o.date}<span>${o.sub}</span></div>`;
+  h+=`<div class="ha-arc" style="left:${E?440:430}px;top:${E?10:20}px;width:${E?490:560}px;height:${E?170:210}px">${haArc(o.arc,E?490:560,E?170:210)}</div>`;
+  const px=E?28:38,py=E?200:250,pw=E?520:620,ph=E?344:432;
+  h+=haPlan({lit:o.lit,op:o.op,segs:o.segs,here:E?'kitchen':'living',win:o.win,door:o.door},pw,ph,px,py);
+  if(o.line)h+=`<div class="ha-line" style="left:${px+4}px;top:${py+ph+10}px"><span class="ind led wn on"></span>${o.line}</div>`;
+  const rx=E?574:690,rw=E?360:296;
+  h+=haDoorPlate(o,rx,py,rw,E?196:216,!E);
+  if(E){h+=`<div class="ha-plate" style="left:${rx}px;top:${py+208}px;width:${rw}px;height:76px;display:flex;align-items:center;gap:14px;padding:0 16px"><span style="width:58px;height:40px;border-radius:8px;background:radial-gradient(circle,#00000080 2px,transparent 2.6px) 0 0/8px 8px,var(--key)"></span><span style="font:500 18px var(--f)">Kitchen radio<br><span class="dim" style="color:var(--dim);font-weight:400">Idle</span></span></div>`}
+  else{const pl=o.tv==='playing';h+=`<div class="ha-plate ha-sbd" style="left:${rx}px;top:${py+228}px;width:${rw}px;height:186px"><div style="display:flex;gap:10px;align-items:flex-end"><div class="ha-tv" style="flex:1;${pl?'':'opacity:.7'}"></div><span style="width:40px;height:60px;border-radius:6px;background:radial-gradient(circle,#00000080 2px,transparent 2.6px) 0 0/8px 8px,var(--key)"></span></div><div class="ha-cab" data-c="walnut"></div><div style="display:flex;align-items:center;gap:10px;font:500 18px var(--f)"><span class="ind slot ${pl?'on':''}"></span><span data-c="words">TV · ${pl?'playing':o.tv||'off'}</span>${o.orange==='pause'?`<span class="ha-k or" style="margin-left:auto" data-c="orange">❚❚ Pause</span>`:''}</div></div>`}
+  const gn=o.orange==='goodnight';const gy=E?py+296:py+428+(E?0:0);
+  h+=`<div class="ha-k ${gn?'or':''}" style="position:absolute;left:${rx}px;top:${E?py+296:py+430-2}px;width:${rw}px;height:${E?52:60}px" ${gn?'data-c="orange"':''}>${o.done?'Goodnight · done':'☾ Goodnight…'}</div>`;
+  if(o.sheet==='room')h+=haRoomSheet();
+  if(o.sheet==='goodnight')h+=haGnSheet(o);
+  return `<div class="ha ${o.night?'nt':''}">${h}</div>`}
+function haRoomSheet(){const col=(n,v,c,w)=>`<div class="ha-col"><div class="ha-vf"><div class="fl" style="height:${v?Math.max(12,v*2.9):0}px;background:${c}"></div><div class="cp" style="bottom:${v?Math.max(4,v*2.7):4}px">${v||'Off'}</div></div><span>${n}</span><small data-c="words">${w}</small></div>`;
+  return `<div class="ha-veil"></div><div class="ha-sheet" style="left:24px;top:24px;right:24px;bottom:24px"><div class="ha-sh-h"><b>Living room</b><span>3 lamps · 2 on · 72°</span><span class="x">×</span></div>
+  <div style="position:absolute;left:28px;top:96px;display:flex;gap:12px">${[['Bright',0],['Evening',0],['Movie',1],['All off',0]].map(([n,p])=>`<span class="ha-k ${p?'pr':''}" style="min-width:140px;flex-direction:column;gap:8px;min-height:74px">${n}<span class="ind sq ${p?'on':''}"></span></span>`).join('')}</div>
+  <div style="position:absolute;left:28px;top:200px;display:flex;gap:46px">${col('Floor lamp',20,'#f2c98a','On')}${col('Table lamp',0,'#f3dcae','Off')}${col('Mood lighting',10,'#c9a0e8','On')}</div>
+  <div class="ha-plate ha-sbd" style="left:640px;top:200px;width:284px;height:300px;position:absolute"><span class="ha-lab">Sideboard</span><div class="ha-tv" style="height:110px"></div><div class="ha-cab" data-c="walnut"></div><div style="display:flex;gap:10px;align-items:center;font:500 18px var(--f)"><span class="ind slot"></span><span data-c="words">TV · turning on</span></div><span style="font:400 16px var(--f);color:var(--dim)">The Movie scene turns the TV on.</span></div></div>`}
+function haGnSheet(o){const row=(ic,a,b,k)=>`<div class="ha-gn-row"><span>${ic}</span><span>${a}<small>${b}</small></span><span>${k}</span></div>`;
+  return `<div class="ha-veil"></div><div class="ha-sheet" style="left:24px;top:24px;right:24px;bottom:24px"><div class="ha-sh-h"><b>Goodnight</b><span>10:58 PM · what's still on and open</span><span class="x">×</span></div>
+  ${haPlan({lit:{marissa:'#e8c9a6',master:'#e9cf9d'},op:{marissa:.55,master:.5},here:'living',door:'locked'},400,280,28,100)}
+  <span class="ha-lab" style="position:absolute;left:28px;top:392px">After Goodnight</span>
+  <div style="position:absolute;left:460px;right:28px;top:96px">${row('<span class="ind led ok on"></span>','Front door','Locked','<span style="font:500 16px var(--f);color:var(--dim)">stays locked</span>')}${row('<span class="ind led wn on"></span>','Kitchen window ▲','Open · close it by hand','<span style="font:500 16px var(--f);color:var(--dim)">reminder</span>')}${row(segs(['#f2c98a','','#c9a0e8']),'Living room','2 lamps on','<span class="ha-k pr" style="min-height:44px">Turn off</span>')}${row(segs(['#e8c9a6','#d98ab0']),"Marissa's room",'2 lamps on','<span class="ha-k" style="min-height:44px">Leave on</span>')}${row('<span class="ind slot"></span>','TV','Off','<span style="font:500 16px var(--f);color:var(--dim)">turns off</span>')}</div>
+  <div style="position:absolute;left:460px;right:28px;bottom:28px;display:flex;gap:12px"><span class="ha-k or" style="flex:1;min-height:60px" data-c="orange">Goodnight</span><span class="ha-k" style="min-height:60px">Cancel</span></div></div>`}
+function haPhone(o){const u=o.door==='unlocked';
+  let h=`<div class="ha-status"><span>${o.time}</span><span>●●● ▮</span></div>`;
+  h+=`<div class="ha-strip">${[['House',''],['Living',''],['Kitchen',''],['Master',''],['Marissa','#d98ab0']].map(([n,c],i)=>`<div class="${i===0?'pr':''}"><span class="rw"><i style="--c:${c}"></i><i style="--c:${c}"></i></span>${n}</div>`).join('')}</div>`;
+  h+=`<div style="padding:8px 16px 0;display:grid;gap:10px"><div style="height:104px">${haArc({t:'62° sunny',l:'7:01 sunrise',r:'sunset 4:52',p:.28,big:26},358,104)}</div><div class="ha-lab">By the door</div>`;
+  h+=`<div class="ha-plate" style="position:relative;padding:14px 16px;display:grid;gap:10px"><div style="display:flex;gap:14px;align-items:center">${haDoorGlyph(o.door,56)}<div><b style="display:block;font:600 18px var(--f)">Front door</b><span data-c="words" style="display:flex;gap:8px;align-items:center;font:500 15px var(--f);color:var(--dim)"><span class="ind led ${u?'al':'ok'} on"></span>${u?'Unlocked · 10:07':'Locked'}</span></div>${u?`<span class="ha-k red" style="margin-left:auto;min-height:44px" data-c="orange">Lock</span>`:''}</div>
+    <div class="ha-rail"><div class="bar" data-c="walnut"></div><div class="ha-hooks" style="margin-top:-8px">${['Isaac','Amber','Marissa'].map(n=>`<span class="ha-hk" style="font-size:15px">${KEYSVG(PEOPLE[n].ha)}${n}<small style="font-size:13px">${n==='Amber'?'Away':'Home'}</small></span>`).join('')}</div></div></div>`;
+  h+=`<div class="ha-lab" style="margin-top:4px">The house</div><div style="position:relative;height:250px">${haPlan({lit:{},door:o.door},358,250,0,0)}</div></div>`;
+  if(o.sheet==='door')h+=`<div class="ha-veil"></div><div class="ha-sheet" style="left:0;right:0;bottom:0;height:380px;border-radius:22px 22px 0 0"><div style="width:40px;height:5px;border-radius:3px;background:var(--ln);margin:10px auto"></div><div class="ha-sh-h" style="top:26px;left:20px;right:20px"><b style="font-size:24px">Front door</b><span class="x" style="width:44px;height:44px">×</span></div>
+    <div style="position:absolute;left:20px;right:20px;top:92px;display:flex;gap:18px;align-items:center">${haDoorGlyph('locked',110)}<span data-c="words" style="display:flex;gap:8px;align-items:center;font:500 18px var(--f)"><span class="ind led ok on"></span>Locked · since 7:58</span></div>
+    <div style="position:absolute;left:20px;right:20px;top:200px;display:grid;gap:10px"><span class="ha-k or" style="min-height:56px" data-c="orange">Unlock</span><span style="font:400 15px var(--f);color:var(--dim);text-align:center">Lock it again here, on a kiosk or on the TV.</span></div></div>`;
+  return `<div class="ha"><div class="ha-ph">${h}</div></div>`}
+
+/* =============================== CALLSHEET =============================== */
+function lock(o){return `<div class="lk"><div class="tm">${o.time}</div><div class="dt">${o.date}</div><div class="nt"><div class="h"><span>${o.app}</span><span>NOW</span></div><b>${o.title}</b><p>${o.body}</p></div><div class="ks">${o.keys.map(k=>`<span>${k}</span>`).join('')}</div><div class="ft">${o.foot||''}</div></div>`}
+function csTabs(cur){return `<div class="cs-tabs">${['Today','Replies','Agenda','Ask','Projects'].map(t=>`<span class="${t===cur?'cur':''}" ${t===cur?'data-c="focus"':''}>${t}</span>`).join('')}</div>`}
+function csStrip(){return `<div class="cs-strip"><div class="labs"><span style="left:30%">Stand-up 09:30</span><span style="left:62%;color:var(--warn-ink)">▲ 11:00 clash</span></div><div class="trk"><i class="bl" style="left:30%;width:5%"></i><i class="bl" style="left:62%;width:9%;bottom:50%"></i><i class="bl" style="left:62%;width:5%;top:50%"></i><i class="bl" style="left:44%;width:6%"></i><i class="bl" style="left:78%;width:7%"></i><i class="nd" style="left:4%"></i></div><div class="hrs"><span style="left:5%">06</span><span style="left:30%">09</span><span style="left:55%">12</span><span style="left:80%">15</span></div></div>`}
+function csToday(o){let h=`<div class="cs-trim" data-c="walnut"></div><div class="cs-pg"><div class="cs-dl"><span data-c="type">Thu 5 Nov · sheet 06:30</span><u>Read it to me</u></div><div class="cs-hl">Good morning, Isaac.</div>
+  <p class="cs-lede">Six things today, and two of them land at 11:00.<span class="cs-fn">1</span> A parcel needs signing between 10 and 11.<span class="cs-fn">2</span></p>`;
+  if(o.worth)h+=`<div class="cs-sh"><span class="n">03</span>Worth knowing</div><div class="cs-wk"><div>Crafty stopped answering at 01:49 and you restarted it at 01:53. Nothing was lost.<span class="cs-fn">3</span></div></div>`;
+  h+=`<div class="cs-sh"><span class="n">01</span>Your day<span class="r">Agenda</span></div>${csStrip()}
+  <div class="cs-sh"><span class="n">02</span>Who needs you<span class="r">Work through them</span></div>
+  <div class="cs-ros"><div class="cs-rr"><span class="cs-idb">01</span><div><div class="cs-rn">Priya N. <span>· Co. A</span></div><div class="cs-ra">Needs the Q4 budget sign-off today.</div><div class="cs-rw">Always counts · due today</div><div class="cs-draft">Hi Priya, signed off with one change: the contractor line moves to Q1.</div><div class="cs-keys"><span class="cs-k go" data-c="orange">Copy draft</span><span class="cs-k">Done</span></div></div><span class="cs-age">07:40</span></div>
+  <div class="cs-rr"><span class="cs-idb">02</span><div><div class="cs-rn">School office <span>· Personal</span></div><div class="cs-ra">Trip form for Friday, due tonight.</div></div><span class="cs-age">Yest.</span></div></div></div>${csTabs('Today')}`;
+  return `<div class="cs day">${h}</div>`}
+function csAgenda(o){const done=o.done;
+  let h=`<div class="cs-trim" data-c="walnut"></div><div class="cs-pg"><div class="cs-dl"><span data-c="type">Thu 5 Nov · ${o.now}</span><u>Today</u></div><div class="cs-hl">Agenda</div>
+  <div class="cs-ro" style="margin-top:14px"><div class="cs-or past"><span class="ot">09:30</span><span><i class="tick"></i></span><div class="ob"><div class="tt">Done: Stand-up</div></div></div>
+  <div class="cs-now"><span class="ot">${o.now}</span><span class="cs-slot on" data-c="focus"></span><span class="rl"></span></div>
+  <div class="cs-or"><span class="ot">10:00</span><span><i class="tick"></i></span><div class="ob"><div class="tt">Parcel · Northwind Store</div><div class="mm" data-c="words">Needs a signature · 10:00 to 11:00</div><div style="margin-top:8px"><span class="cs-k" style="min-height:40px">Front door · Jam Home ↗</span></div></div></div>
+  <div class="cs-or"><span class="ot">11:00</span><span><i class="tick"></i></span><div class="ob cs-clash"><div class="cs-dl" style="color:var(--warn-ink);justify-content:flex-start;gap:8px"><span class="cs-led wn"></span>▲ Clash · pick one</div><div class="tt">Roadmap review</div><div class="mm">Co. A · Room 3 · 1 h</div><div class="tt" style="margin-top:6px">Supplier call</div><div class="mm">Co. B · phone · 30 min</div></div></div>
+  <div class="cs-or"><span class="ot">13:00</span><span><i class="tick"></i></span><div class="ob"><div class="tt">Lunch with Jo</div><div class="mm">Personal · 45 min</div></div></div></div></div>${csTabs('Agenda')}`;
+  return `<div class="cs day">${h}</div>`}
+function csNight(o){let h=`<div class="cs-trim" data-c="walnut"></div><div class="cs-pg"><div class="cs-dl"><span data-c="type">${o.dl}</span><u>Read it to me</u></div><div class="cs-hl">Evening, Isaac.</div>`;
+  if(o.cue)h+=`<div class="cs-cue al"><div class="lab" data-c="words"><span class="cs-led al"></span>${o.cue.lab}</div><div class="say">${o.cue.say}</div><div class="cs-keys"><span class="cs-k red" data-c="orange">${o.cue.key}</span><span class="cs-k q">${o.cue.q}</span></div></div>`;
+  if(o.past)h+=`<div class="cs-cue qu"><div class="lab" style="color:var(--dim)" data-c="words"><span class="cs-led"></span>${o.past}</div><div class="say" style="color:var(--ink2);font-size:17px">${o.pastSay}</div></div>`;
+  h+=`<div class="cs-sh"><span class="n">01</span>Tomorrow<span class="r">Agenda</span></div><div class="cs-wk"><div>First thing: Stand-up at 09:30.</div><div>Nothing else needs you tonight.</div></div>
+  <div style="margin:26px 0 10px;height:8px;border-top:3px solid var(--walnut);border-bottom:1px solid var(--walnut)" data-c="walnut"></div><div style="font:400 17px var(--f);color:var(--ink2)">That's the day.</div></div>${csTabs('Today')}`;
+  return `<div class="cs night">${h}</div>`}
+
+/* =============================== JAM-DASH =============================== */
+function jdBoard(st){// st: 'nas' | 'fixed' | 'crafty' | 'crafty-fixed'
+  const L=(c,t)=>`<span class="jd-lg ${c}">${t}</span>`;
+  const rows={nas:[['REACH',L('','Answering'),L('offl','Not answering')],['APPS',L('wn','5 waiting ▲'),L('unk','—')],['DISK',L('','Fine'),L('unk','—')],['MEMORY',L('','Fine'),L('unk','—')],['UPDATES',L('','Up to date'),L('unk','—')]],
+    fixed:[['REACH',L('','Answering'),L('','Answering')],['APPS',L('','All up'),L('','All up')],['DISK',L('','Fine'),L('','Fine')],['MEMORY',L('','Fine'),L('','Fine')],['UPDATES',L('','Up to date'),L('','Up to date')]],
+    crafty:[['REACH',L('','Answering'),L('','Answering')],['APPS',L('al','1 down'),L('','All up')],['DISK',L('','Fine'),L('','Fine')],['MEMORY',L('','Fine'),L('','Fine')],['UPDATES',L('','Up to date'),L('','Up to date')]]};
+  const r=rows[st==='crafty-fixed'?'fixed':st];
+  return `<div class="jd-ann" data-c="words"><span></span><span class="ch"><i class="sq on"></i>home-server</span><span class="ch"><i class="sq"></i>nas</span>${r.map(([a,b,c])=>`<span class="rh">${a}</span>${b}${c}`).join('')}</div>`}
+function jdPhone(o){const st=o.state;let h=`<div class="jd-lip"><span class="wm" data-c="type">Jam-Dash</span><span class="ck">${o.clock}</span></div><div style="padding:16px 16px 0;display:grid;gap:14px">`;
+  const hl={nas:["nas isn't answering.",'home-server is fine · checked 21:49'],crafty:['Crafty is down.','Everything else is up · checked 01:51'],'crafty-fixed':['Everything is up.','checked 01:54'],fixed:['Everything is up.','checked 21:58']}[st];
+  h+=`<div><p class="jd-hl" style="font-size:25px">${hl[0]}</p><p class="jd-sub">${hl[1]}</p></div>${jdBoard(st)}`;
+  if(st==='nas')h+=`<div class="jd-tag offl"><div class="h"><span class="jd-led offl"></span>Offline · nas · 21:46</div><div class="t">nas stopped answering</div><p>It went quiet at 21:46. Jellyfin, Immich, Radarr, SABnzbd and Sonarr read from it, so they're waiting.</p><div class="jd-keys"><span class="jd-k go" data-c="orange">Try nas again</span><span class="jd-k q">Why?</span></div></div>`;
+  if(st==='crafty')h+=`<div class="jd-tag al"><div class="h"><span class="jd-led al"></span>Alert · home-server · 01:49</div><div class="t">Crafty stopped responding</div><p>It stopped answering at 01:49 and failed its health check 3 times in a row.</p><div class="jd-keys"><span class="jd-k red" data-c="orange">Restart Crafty</span><span class="jd-k q">Why?</span></div></div>`;
+  if(st==='crafty-fixed')h+=`<div class="jd-tag fixed"><div class="h" data-c="words"><span class="jd-led"></span>Crafty · Fixed 01:53</div><div class="t" style="font-size:17px">Restarted by you. Your worlds are in its data folder.</div></div>`;
+  h+=`<div class="jd-rack" style="margin:0 -2px"><div class="jd-hu"><div><div class="n">home-server</div><div class="s"><span class="jd-led on"></span>On · up 12 days</div></div></div>${[['Crafty',st==='crafty'?'al':'',st==='crafty'?'Unhealthy':'Running'],['Immich',st==='nas'?'wn':'',st==='nas'?'Waiting on nas':'Running'],['Jellyfin',st==='nas'?'wn':'',st==='nas'?'Waiting on nas':'Running']].map(([n,c,w])=>`<div class="jd-mod ${c}"><span class="jd-led ${c==='al'?'al':c==='wn'?'wn':'on'}"></span><span>${n}<span class="mw">${w}</span></span><span class="d"></span></div>`).join('')}</div></div>`;
+  h+=`<div class="jd-tabs">${['Home','Apps','Store','Files','System'].map((t,i)=>`<span class="${i===0?'cur':''}">${t}</span>`).join('')}</div>`;
+  return `<div class="jd">${h}</div>`}
+const HS_MODS=[['Code Server','Running',12],['Crafty','Running',3],['CrowdSec','Running',12],['Home Box','Running',8],['Immich','Waiting on nas',''],['Jellyfin','Waiting on nas',''],['Music Assistant','Running',12],['Proxy Manager','Running',12],['Prowlarr','Running',4],['Radarr','Waiting on nas',''],['SABnzbd','Waiting on nas',''],['Sonarr','Waiting on nas',''],['Terraria','Running',1],['watchtower','Running',12]];
+const NAS_MODS=[['media','/volume1/media'],['photos','/volume1/photos'],['downloads','/volume1/downloads'],['Gitea','Running'],['Gitea Runner','Running'],['Kopia','Running'],['Nextcloud','Running'],['Syncthing','Running']];
+function jdDesk(o){const off=o.state==='nas';
+  let h=`<div class="jd-lip"><span class="wm" data-c="type">Jam-Dash</span>${['Home','Apps','Store','Files','Shares','System','Settings'].map((t,i)=>`<span class="nav ${i===0?'cur':''}">${t}</span>`).join('')}<span class="ck">${off?'21:51':'21:58'}</span></div>`;
+  h+=`<div style="position:absolute;left:24px;top:72px;width:340px;display:grid;gap:16px"><div><p class="jd-hl">${off?"nas isn't answering.":'Everything is up.'}</p><p class="jd-sub">${off?'home-server is fine · checked 21:51':'checked 21:58'}</p></div>${jdBoard(off?'nas':'fixed')}
+   ${off?`<div class="jd-tag offl"><div class="h"><span class="jd-led offl"></span>Offline · nas · 21:46</div><div class="t">nas stopped answering</div><p>Five apps read from it and are waiting. What's in its rack is how it was at 21:46.</p><div class="jd-keys"><span class="jd-k go" data-c="orange">Try nas again</span><span class="jd-k q">Why?</span></div></div>`:`<div class="jd-tag fixed"><div class="h" data-c="words"><span class="jd-led"></span>nas · Fixed 21:58</div><div class="t" style="font-size:17px">Answering again after you restarted its shares.</div></div>`}</div>`;
+  const cabL=392,cabT=64,cabW=1024,cabH=716;const rw=(cabW-28-64)/2;const ax=cabL+14,bx=ax+rw+64;
+  h+=`<div style="position:absolute;left:${cabL}px;top:${cabT}px;width:${cabW}px;height:${cabH}px;background:var(--cab);border-radius:6px"><i data-c="walnut" style="position:absolute;left:0;top:0;bottom:0;width:14px;background:var(--walnut);border-radius:6px 0 0 6px"></i><i style="position:absolute;right:0;top:0;bottom:0;width:14px;background:var(--walnut);border-radius:0 6px 6px 0"></i></div>`;
+  const modY=i=>cabT+10+3+74+4+i*36;
+  h+=`<div class="jd-rack" style="position:absolute;left:${ax}px;top:${cabT+10}px;width:${rw}px;height:${cabH-22}px"><div class="jd-hu"><div><div class="n">home-server</div><div class="s"><span class="jd-led on"></span>On · up 12 days</div></div><div class="disp"><span>CPU<b>9%</b></span><span>MEMORY<b>8.1 GB</b></span><span>DISK<b>61%</b></span></div></div>
+   ${HS_MODS.map(([n,w,d])=>{const wn=off&&w.startsWith('Wait');return `<div class="jd-mod ${wn?'wn':''}"><span class="jd-led ${wn?'wn':'on'}"></span><span>${n}<span class="mw">${wn?w:'Running'}</span></span><span class="d">${wn?'':d?d+' d':''}</span></div>`}).join('')}<div class="jd-mod plate"><span>||||</span><span>Stopped · 14 · Audiobookshelf, Bazarr and 12 more</span><span></span></div></div>`;
+  h+=`<div class="jd-rack" style="position:absolute;left:${bx}px;top:${cabT+10}px;width:${rw}px;height:${cabH-22}px">${off?`<div class="jd-hu" style="background:transparent;outline:1.5px dashed var(--ghost);outline-offset:-2px;color:var(--ghost)"><div><div class="n">nas</div><div class="s" style="color:var(--cream)"><span class="jd-led offl" style="border-color:var(--cream)"></span>Not answering · since 21:46</div></div><div class="disp"><span>CPU<b>—</b></span><span>MEMORY<b>—</b></span><span>POOL<b>—</b></span></div></div>`:`<div class="jd-hu"><div><div class="n">nas</div><div class="s"><span class="jd-led on"></span>On · up 2 min</div></div><div class="disp"><span>CPU<b>14%</b></span><span>MEMORY<b>4.8 GB</b></span><span>POOL<b>92%</b></span></div></div>`}
+   ${NAS_MODS.map(([n,w])=>`<div class="jd-mod ${off?'ghost':''}"><span class="jd-led ${off?'':'on'}" style="${off?'background:transparent':''}"></span><span>${n}<span class="mw">${off?'':w}</span></span><span></span></div>`).join('')}</div>`;
+  if(off){const fx0=ax+rw-10,fx1=bx+10;const tgt=[4,5,9,10,11];const src=[0,0,2,2,2];
+    h+=`<svg style="position:absolute;left:0;top:0;width:1440px;height:900px;pointer-events:none" viewBox="0 0 1440 900">${tgt.map((t,i)=>{const y0=modY(t)+17,y1=modY(src[i])+17;return `<path d="M${fx0} ${y0} C ${fx0+44} ${y0}, ${fx1-44} ${y1}, ${fx1} ${y1}" fill="none" stroke="#f2c14e" stroke-width="2.5" stroke-dasharray="7 5" data-c="words"/>`}).join('')}</svg>`}
+  h+=`<div class="jd-tape"><div class="l"><span class="e">LAST 24 HOURS</span><span class="r">${off?'21:46 · nas stopped answering':'21:58 · nas answering again'}</span></div><div class="ln"><span style="position:absolute;left:10px;top:22px;font:400 13px var(--mono);color:#bdb6a8">home-server</span><span style="position:absolute;left:10px;top:48px;font:400 13px var(--mono);color:#bdb6a8">nas</span><i style="position:absolute;left:200px;top:26px;width:2px;height:14px;background:#f3e6c8"></i><i style="position:absolute;left:1036px;top:50px;width:${off?60:44}px;height:14px;border:2px dashed #f3e6c8"></i>${off?'':'<i style="position:absolute;left:1082px;top:48px;width:3px;height:18px;background:#f3e6c8"></i>'}<i style="position:absolute;left:1092px;top:14px;width:2px;height:62px;background:#f3e6c8"></i></div></div>`;
+  return `<div class="jd">${h}</div>`}
+
+/* =============================== frame shortcuts =============================== */
+const F={
+ haRoom:()=>({dev:'ipad',app:'Jam Home',html:haKiosk({dev:'ipad',night:1,clock:'8:30',ampm:'PM',date:'Tuesday · November 3',sub:'67° inside · 48% humidity',arc:{night:1,t:'55° clear',l:'4:58 sunset',r:'sunrise 7:01',p:.15},lit:{living:'#f2c98a',kitchen:'#efe3c9',marissa:'#e8c9a6'},op:{living:.85,kitchen:.6,marissa:.55},segs:{living:segs(['#f2c98a','#f3dcae','#c9a0e8']),marissa:segs(['#e8c9a6','#d98ab0'])},door:'locked',tv:'off',line:'Kitchen window open · since 6:40',win:1,sheet:'room'})}),
+ haPlaying:()=>({dev:'ipad',app:'Jam Home',html:haKiosk({dev:'ipad',night:1,clock:'8:52',ampm:'PM',date:'Tuesday · November 3',sub:'67° inside · 48% humidity',arc:{night:1,t:'54° clear',l:'4:58 sunset',r:'sunrise 7:01',p:.22},lit:{living:'#f2c98a',marissa:'#e8c9a6'},op:{living:.35,marissa:.55},segs:{living:segs(['#f2c98a','','#c9a0e8']),marissa:segs(['#e8c9a6','#d98ab0'])},door:'locked',tv:'playing',orange:'pause',line:'Kitchen window open · since 6:40',win:1})}),
+ haGn:()=>({dev:'ipad',app:'Jam Home',html:haKiosk({dev:'ipad',night:1,clock:'10:58',ampm:'PM',date:'Tuesday · November 3',sub:'66° inside · 47% humidity',arc:{night:1,t:'51° clear',l:'4:58 sunset',r:'sunrise 7:01',p:.42},lit:{living:'#f2c98a',marissa:'#e8c9a6'},op:{living:.35,marissa:.55},door:'locked',tv:'off',orange:'goodnight',line:'Kitchen window open · since 6:40',win:1,sheet:'goodnight'})}),
+ haDone:()=>({dev:'ipad',app:'Jam Home',html:haKiosk({dev:'ipad',night:1,clock:'10:59',ampm:'PM',date:'Tuesday · November 3',sub:'66° inside · 47% humidity',arc:{night:1,t:'51° clear',l:'4:58 sunset',r:'sunrise 7:01',p:.42},lit:{marissa:'#e8c9a6',master:'#e9cf9d'},op:{marissa:.55,master:.5},segs:{marissa:segs(['#e8c9a6','#d98ab0'])},door:'locked',tv:'off',done:1,line:'Kitchen window open · since 6:40',win:1})}),
+ haEcho:(locked)=>({dev:'echo',app:'Jam Home',html:haKiosk({dev:'echo',night:1,clock:locked?'10:53':'10:52',ampm:'PM',date:'Tuesday · November 3',sub:'66° inside',arc:{night:1,t:'51° clear',l:'4:58 sunset',r:'sunrise 7:01',p:.43,big:32},lit:{kitchen:'#efe3c9'},op:{kitchen:.6},door:locked?'locked':'unlocked',orange:locked?'goodnight':null})}),
+ lbJamfin:()=>({dev:'tv',app:'Lobby',html:lbHome({clock:['8:31','PM'],focus:'dial:0',lamps:[['Floor lamp',1,'On · 20%','#f2c98a'],['Table lamp',0,'Off','#f3dcae'],['Mood lighting',1,'On · 10%','#c9a0e8']],sign:{eb:'App · Watch',tt:'Jamfin',ln:'Our films and shows.',do:'Open Jamfin'}})}),
+ lbBlindJF:()=>({dev:'tv',app:'Lobby',html:lbBlind({eb:'App · Watch',tt:'Jamfin',ln:'Opening',lit:8})}),
+ jfTix:()=>({dev:'tv',app:'JamFin',html:jfTickets({clock:'8:32 PM'})}),
+ jfHome:()=>({dev:'tv',app:'JamFin',html:jfHome({who:'Isaac',clock:'8:33 PM'})}),
+ jfCard:()=>({dev:'tv',app:'JamFin',html:jfCard({hc:'#4a1a26',eb:'Film · Resume from 0:12:10',tt:'The Velvet Machine',sub:'A stage magician builds the trick that ends magic.',lit:11})}),
+ jfInter:()=>({dev:'tv',app:'JamFin',html:jfInter()}),
+ jfOff:()=>({dev:'tv',app:'JamFin',html:jfOffline({who:'Marissa',clock:'9:47 PM'})}),
+ jfBack:()=>({dev:'tv',app:'JamFin',html:jfHome({who:'Marissa',clock:'9:59 PM',fi:1,hc:'#1f2c48',tt:'Signal Street',fx:'<b>S2 E4 · The Long Shift</b> · 24 min left · Ends at 10:23 PM'})}),
+ lockDash:()=>({dev:'phone',app:'Phone',html:lock({time:'21:48',date:'Tuesday 3 November',app:'JAM-DASH',title:"nas isn't answering",body:'Jellyfin, Immich and 3 more are waiting on it. Since 21:46.',keys:['Open','Seen'],foot:'Drawn as a Jam-Dash notice: no app owns this push yet'})}),
+ csNas:()=>({dev:'phone',app:'Callsheet',html:csNight({dl:'Tue 3 Nov · 21:48',cue:{lab:'Alert · 21:46',say:'nas stopped answering. Jellyfin, Immich and 3 more wait on it.',key:'Open Jam-Dash',q:'Seen'}})}),
+ jdNasPh:()=>({dev:'phone',app:'Jam-Dash',html:jdPhone({state:'nas',clock:'21:49'})}),
+ jdNasDesk:()=>({dev:'desk',app:'Jam-Dash',html:jdDesk({state:'nas'})}),
+ jdFixDesk:()=>({dev:'desk',app:'Jam-Dash',html:jdDesk({state:'fixed'})}),
+ lbMoon:()=>({dev:'tv',app:'Lobby',html:lbHome({sky:'gold',clock:['7:40','PM'],date:'Saturday, November 7 · 61° clear',focus:'dial:6',h1:{nm:'NervOS',code:'#6f8a5a'},sign:{eb:'App · Play',tt:'Moonlight',ln:'Games streamed from the PC.',do:'Open Moonlight'}})}),
+ lbH1:()=>({dev:'tv',app:'Lobby',html:lbHome({sky:'gold',clock:['7:41','PM'],date:'Saturday, November 7 · 61° clear',focus:'bay:h1',needle:6,h1:{nm:'NervOS',code:'#6f8a5a'},sign:{eb:'Input · HDMI 1',tt:'NervOS',ln:'Signal. The games PC is on.',do:'Switch to HDMI 1'},hints:['<kbd>OK</kbd>Switch','← → Inputs and house','<kbd>G</kbd>TV menu']})}),
+ lbBlindH1:()=>({dev:'tv',app:'Lobby',html:lbBlind({eb:'Input · HDMI 1',tt:'NervOS',ln:'Switching to HDMI 1',lit:9})}),
+ nvHome:()=>({dev:'tv',app:'NervOS',html:nvHome({clock:'19:41',pads:1})}),
+ nvPlayers:()=>({dev:'tv',app:'NervOS',html:nvPlayers()}),
+ nvLaunch:()=>({dev:'tv',app:'NervOS',html:nvLaunch({eb:'Super Nintendo · Continue from Tuesday 21:40 · 2 players',sub:'Starting the emulator · B cancels',lit:10})}),
+ nvBand:()=>({dev:'tv',app:'NervOS',html:nvBand()}),
+ lbDrawer:()=>({dev:'tv',app:'Lobby',html:lbDrawer()}),
+ nvRet:()=>({dev:'tv',app:'NervOS',html:nvLaunch({ret:1,eb:'Back from',sub:'Played 1 h 12 min · resume point saved'})}),
+ lbAfter:()=>({dev:'tv',app:'Lobby',html:lbHome({clock:['8:56','PM'],date:'Saturday, November 7 · 55° clear',focus:'shelf:0',h1:{nm:'NervOS',code:'#6f8a5a'},needle:6,sign:{eb:'Jamfin · Film · 41 min left · paused by Isaac',tt:'The Copper City',ln:'A railway town, and the night all its lights went out.',do:'Resume from 1:12:04'},hints:['<kbd>OK</kbd>Resume','← → Shelf','<kbd>G</kbd>TV menu']})}),
+ lockCs:()=>({dev:'phone',app:'Phone',html:lock({time:'06:34',date:'Thursday 5 November',app:'CALLSHEET',title:'Your sheet is ready',body:'Two things land at 11:00. A parcel needs signing between 10 and 11.',keys:['Open','Read it to me'],foot:'Tap the notification, or Read it to me in the car'})}),
+ csToday:()=>({dev:'phone',app:'Callsheet',html:csToday({})}),
+ csAgenda:()=>({dev:'phone',app:'Callsheet',html:csAgenda({now:'10:05'})}),
+ csAgenda2:()=>({dev:'phone',app:'Callsheet',html:csAgenda({now:'10:13'})}),
+ haPhHouse:()=>({dev:'phone',app:'Jam Home',html:haPhone({time:'10:06',door:'locked'})}),
+ haPhSheet:()=>({dev:'phone',app:'Jam Home',html:haPhone({time:'10:06',door:'locked',sheet:'door'})}),
+ haPhUnl:()=>({dev:'phone',app:'Jam Home',html:haPhone({time:'10:07',door:'unlocked'})}),
+ haPhLocked:()=>({dev:'phone',app:'Jam Home',html:haPhone({time:'10:12',door:'locked'})}),
+ lbDoor:(locked)=>({dev:'tv',app:'Lobby',html:lbHome({clock:locked?['10:53','PM']:['10:52','PM'],date:'Tuesday, November 3 · 51° clear',focus:locked?'shelf:0':'door',door:locked?'locked':'unlocked',lamps:[['Floor lamp',0,'Off','#f2c98a'],['Table lamp',0,'Off','#f3dcae'],['Mood lighting',0,'Off','#c9a0e8']],
+   sign:locked?{eb:'Jamfin · Film · 41 min left · paused by Isaac',tt:'The Copper City',ln:'A railway town, and the night all its lights went out.',do:'Resume from 1:12:04'}:{eb:'House · Alert',tt:'The front door is unlocked',ln:'Unlocked at 10:48 PM at the door.',do:'Lock it'},hints:locked?['<kbd>OK</kbd>Resume','← → Shelf','<kbd>G</kbd>TV menu']:['<kbd>OK</kbd>Lock','← → House']})}),
+ csDoor:(locked)=>({dev:'phone',app:'Callsheet',html:csNight(locked?{dl:'Tue 3 Nov · 22:53',past:'Fixed 22:53',pastSay:'The front door was locked from the kitchen.'}:{dl:'Tue 3 Nov · 22:52',cue:{lab:'Alert · 22:48',say:'The front door has been unlocked for 4 minutes.',key:'Lock it in Jam Home',q:"It's me"}})}),
+ lockCrafty:()=>({dev:'phone',app:'Phone',html:lock({time:'01:50',date:'Wednesday 4 November',app:'JAM-DASH',title:'Crafty stopped responding',body:'home-server · failed its health check 3 times since 01:49.',keys:['Open','Seen'],foot:'Drawn as a Jam-Dash notice: no app owns this push yet'})}),
+ jdCrafty:()=>({dev:'phone',app:'Jam-Dash',html:jdPhone({state:'crafty',clock:'01:51'})}),
+ jdCraftyFix:()=>({dev:'phone',app:'Jam-Dash',html:jdPhone({state:'crafty-fixed',clock:'01:54'})}),
+ csWorth:()=>({dev:'phone',app:'Callsheet',html:csToday({worth:1})})
+};
+const DEVNAME={tv:'Living-room TV · 1920 × 1080',desk:'Desk · 1440 × 900',ipad:'Living-room kiosk · 1024 × 768',echo:'Kitchen kiosk · 961 × 601',phone:'Phone · 390 × 844'};
+</script>
+<script>
+'use strict';
+/* =============================== the six threads =============================== */
+const THREADS=[
+ ['focus','Cream focus light','Language #4, #8: the thing you are on is lit warm cream, with a small lift. Its shape is the app\'s.'],
+ ['orange','Orange: one thing to do','Language #7: at most one orange per screen, none at rest. Red replaces it while an alert shows (#6).'],
+ ['words','State words','Language #5, CW2: on / off / offline / action / alert (+ warn), each app\'s short words and quiet past forms.'],
+ ['slats','Slatted load bar','MO9, TV4: every launch or title card shows the real load in a row of slats.'],
+ ['walnut','Walnut','Language #10, SM8: one colour, no grain; its shape is the app\'s (sill, frame, rail, fold, cheeks).'],
+ ['type','Jost + Plex Mono','Language #1, TY1: Jost for words, IBM Plex Mono for labels, times and numbers.']];
+const ST={y:['y','carries'],p:['p','partly'],n:['n','breaks'],x:['x','not in play']};
+
+/* =============================== journeys =============================== */
+const J=[
+{id:'movie',name:'Movie night',when:'Tuesday · 8:30–11:00 PM',who:'Isaac, Amber, Marissa · living room',apps:'Jam Home → Lobby → JamFin → Jam Home',
+ steps:[
+  {f:['haRoom'],t:'Amber taps Movie on the living-room kiosk',m:'Living-room kiosk · Jam Home · 8:30 PM',say:'Jam Home\'s room sheet. Movie presses in (its square window lights) and the lamps fade to the scene: floor lamp 20, mood lighting 10, table lamp off. The scene also turns the TV on. Nothing here is orange: picking a scene is a choice, not the one thing to do now.'},
+  {h:1,t:'Kiosk → TV',carry:{focus:['x','The kiosk is touch and has no focus. The TV wakes with the cream light already on something: the needle remembered Jamfin.'],orange:['y','None on either screen. A scene sheet and a launcher home are both calm.'],words:['p','Both say On and Off, but the level reads "20" on the kiosk\'s fader cap and "On · 20%" on Lobby\'s switch.'],slats:['x',''],walnut:['y','The kiosk\'s sideboard top and "Here" pin; Lobby\'s sill and dial stops.'],type:['y','']},
+   change:'Ground: Jam Braun anthracite → a night sky over a lacquer console. Objects: a dimmer column and a scene key → a wall-switch paddle on a house plate. Layout: a sheet over a plan → furniture.',jar:['S15']},
+  {f:['lbJamfin'],t:'Lobby wakes on the TV',m:'Living-room TV · Lobby · 8:31 PM',say:'The house plate already shows what the scene did, in Lobby\'s own drawing of a lamp. The needle sits on Jamfin, the sign names it, and OK opens it. Lobby\'s home has no orange.'},
+  {f:['lbBlindJF'],t:'OK: Lobby\'s blind drops',m:'Living-room TV · Lobby · 8:31 PM',say:'Lobby\'s launch cover: a ribbed blind with a walnut rail drops over the window, and its 12 slats fill with Jamfin\'s real start-up. It holds max(load, 600 ms).'},
+  {h:1,t:'Lobby → JamFin',carry:{focus:['p','Cream at the thing on both, but drawn differently: Lobby lights a slot on a plaque; JamFin lifts the ticket 14 px and lights a window with a baked warm spill under it, the one soft light left in the family.'],orange:['y','None on either screen.'],words:['x',''],slats:['n','Lobby\'s 12 recessed slats rise away. A minute later JamFin draws 16 flat, faint slats on its own card.'],walnut:['p','The blind ends in a walnut rail; the ticket screen has no walnut at all.'],type:['p','Same pair. The app is "Jamfin" on Lobby\'s dial and blind, and "JamFin" in its own top line.']},
+   change:'Ground: a ribbed blind → JamFin\'s plain dark ground. Objects: furniture → tickets. Layout: a cover lifting on a centred row.',jar:['S1','S3','S4','S6']},
+  {f:['jfTix'],t:'Who\'s watching? Isaac\'s ticket',m:'Living-room TV · JamFin · 8:32 PM',say:'Each ticket\'s stub states that profile\'s look, and OK tears it off. The household\'s names are on the tickets here, but the figure colours are JamFin\'s own, not the colours on Jam Home\'s key tags.'},
+  {f:['jfHome'],t:'JamFin Home: the marquee',m:'Living-room TV · JamFin · 8:33 PM',say:'The marquee sets the focused title in caps on a block of its own colour and says when it would end. Round seat windows show the position in the row. Home has no orange.'},
+  {f:['jfCard'],t:'Resume: JamFin\'s house lights go down',m:'Living-room TV · JamFin · 8:34 PM',say:'Play dims the screen in two steps, then the colour-block title card cuts in and 16 slats fill with the stream\'s real load. The second launch cover in three minutes, and it looks nothing like the first.'},
+  {h:1,t:'TV → kiosk, during the film',carry:{focus:['x','The film plays with no UI; the kiosk is touch.'],orange:['p','One orange in the room: Pause on the kiosk\'s sideboard. The TV shows none. Fine, but nobody is looking at the kiosk.'],words:['p','JamFin\'s "Ends at 10:21 PM" becomes "TV · playing" with no end time on the iPad (the sideboard is a silhouette there).'],slats:['x',''],walnut:['y','The sideboard\'s walnut top.'],type:['y','']},
+   change:'Ground: the picture → anthracite. Objects: a title card → the house plan and a sideboard with a little TV on it.',jar:['S19','S20']},
+  {f:['haPlaying'],t:'The kiosk while the film plays',m:'Living-room kiosk · Jam Home · 8:52 PM',say:'The plan shows the living room barely lit (the scene), the sideboard says TV · playing, and Pause is the screen\'s one orange. JamFin called its dimming "house lights"; here the house lights are real.'},
+  {f:['jfInter'],t:'9:20 PM: paused a minute, the intermission',m:'Living-room TV · JamFin · 9:20 PM',say:'JamFin\'s intermission card says when the film would end if you go back now. Resume is the one orange. On the kiosk, a paused TV isn\'t "playing", so Jam Home\'s rule doesn\'t say whether Pause becomes Play, disappears, or hands the orange to Goodnight.'},
+  {h:1,t:'Film over → the kiosk',carry:{focus:['x',''],orange:['y','The TV is off. The kiosk\'s orange is Goodnight: nothing plays and it\'s bedtime.'],words:['y','Locked, On, Off, Open: the words the TV used on its house plate.'],slats:['x',''],walnut:['y',''],type:['y','']},
+   change:'From one screen to the whole house at once: a sheet with a checklist and a preview plan.',jar:['S14','S20']},
+  {f:['haGn'],t:'The Goodnight round',m:'Living-room kiosk · Jam Home · 10:58 PM',say:'One sheet lists what\'s still on and open, previews the dark plan, then does it. Shared rooms off, bedrooms left on, the door stays locked, the open window is a reminder only.'},
+  {f:['haDone'],t:'Goodnight · done',m:'Living-room kiosk · Jam Home · 10:59 PM',say:'The rooms fade out on the plan once, and the key goes quiet. No orange anywhere: the house is at rest.'}],
+ family:['The type pair on every screen: Jost words, Plex Mono eyebrows ("APP · WATCH", "CONTINUE WATCHING · FILM", the ticket stubs).','Cream means "lit" and "here" all evening: lamp windows on the kiosk, the needle and plaque slots on Lobby, the window under the ticket, the slats on both covers.','Orange stays rare and moves to the next step: none on the scene, Lobby or JamFin Home; Pause on the kiosk while playing; Resume at the intermission; Goodnight at the end.','State words carry: On / Off / Locked / Playing / Paused.','Walnut is everywhere and never the same shape: the Here pin, the sill and dial stops, the blind\'s rail, the marquee frame, the sideboard top.','Both covers show a real load in slats, and neither has a spinner.'],
+ jars:[['S1','Two launch covers in three minutes: Lobby\'s blind, then JamFin\'s house lights and colour block.'],['S2','The slats are drawn two ways in those three minutes: 12 recessed, then 16 faint.'],['S3','Opening JamFin costs a full cover, and then Play costs another.'],['S4','"Jamfin" on Lobby, "JamFin" in JamFin.'],['S6','JamFin\'s focus has a warm baked spill; Lobby\'s doesn\'t.'],['S15','The same three lamps drawn as a dimmer column on the kiosk and a wall paddle on the TV, with different level words.'],['S19','"House lights" means the screen in JamFin and the lamps in Jam Home.'],['S20','Two screens in one room, and the paused state has no agreed orange.'],['S21','Isaac is blue on both, but Amber is green on her ticket and teal on her key tag, and Marissa purple and pink.']]},
+
+{id:'down',name:'"Jellyfin is down"',when:'Tuesday · 9:47–9:59 PM',who:'Marissa on the TV · Isaac on his phone, then at the desk',apps:'JamFin → phone → Callsheet → Jam-Dash → JamFin',
+ steps:[
+  {f:['jfOff'],t:'Marissa\'s film won\'t load',m:'Living-room TV · JamFin · 9:47 PM',say:'JamFin\'s marquee carries the outage: SERVER · OFFLINE with the broken ring, NOT ANSWERING as the title, the retry in words, every seat window dark. Try again is the one orange. The last-synced row stays readable.'},
+  {h:1,t:'TV → Isaac\'s phone (another room, another person)',carry:{focus:['x','The TV\'s focus is on Try again; the phone is touch.'],orange:['n','JamFin grades it offline: an orange Try again. The phone\'s first look at it (Callsheet) grades it alert: a red key.'],words:['n','"Offline · Not answering" on the TV; "Alert" on the phone.'],slats:['x',''],walnut:['p','The marquee\'s frame; Callsheet\'s trim and sign-off rule.'],type:['y','']},
+   change:'Different person, room and device. Ground: a dark cinema → a lock screen, then a navy sheet.',jar:['S7','S8','S9']},
+  {f:['lockDash'],t:'21:48: a push on Isaac\'s phone',m:'Phone · lock screen · 21:48',say:'Something has to tell Isaac. Jam-Dash has no push design yet, and Callsheet pushes its sheet three times a day. Drawn here as a Jam-Dash notice in the phone\'s own style. The phone shows 21:48 while the TV said 9:47 PM.'},
+  {f:['csNas'],t:'Or Callsheet carries it as a cue',m:'Phone · Callsheet · 21:48',say:'If Isaac opens Callsheet instead, the night sheet leads with the alert cue: a red rule, the ringed red light, one sentence and a solid red key. Callsheet can\'t fix a server, so its red key opens Jam-Dash.'},
+  {h:1,t:'Callsheet → Jam-Dash',carry:{focus:['x',''],orange:['n','Callsheet: a red key, no orange. Jam-Dash: an offline server is orange "Try nas again". Same phone, same fact, red then orange.'],words:['n','Alert → Offline / Not answering / Waiting on nas.'],slats:['x',''],walnut:['n','Callsheet\'s trim; none on Jam-Dash\'s phone (its walnut cheeks are desktop only).'],type:['y','']},
+   change:'Ground: navy sheet → machine-room grey with a dark board. Objects: a numbered sheet → legend windows and a rack.',jar:['S7','S11']},
+  {f:['jdNasPh'],t:'Jam-Dash: nas isn\'t answering',m:'Phone · Jam-Dash · 21:49',say:'The annunciator lights nas\'s Reach as a dashed cream legend ("Not answering"), the rest of nas is unknown, and home-server\'s Apps light amber: 5 waiting. The offline tag says what happened and what waits on it. Try nas again is the one orange.'},
+  {f:['jdNasDesk'],t:'At the desk: the cords',m:'Desk · Jam-Dash · 21:51',say:'On desktop, nas\'s rack is ghost modules ("how it was at 21:46") and five broken cords run dashed amber to the apps that read from it. Jellyfin\'s module says Waiting on nas.'},
+  {f:['jdFixDesk'],t:'21:58: nas answers again',m:'Desk · Jam-Dash · 21:58',say:'Isaac restarts the nas\'s shares. The board goes dark (all fine), the tag turns grey ("nas · Fixed 21:58"), and a cream tick lands on the tape.'},
+  {h:1,t:'Jam-Dash → back to Marissa\'s TV',carry:{focus:['x',''],orange:['y','None on either: both are calm again.'],words:['n','Jam-Dash says "Fixed 21:58". JamFin says nothing; Home simply comes back.'],slats:['x',''],walnut:['y','Cabinet cheeks; marquee frame.'],type:['y','']},
+   change:'Back to the TV and to Marissa. Rack → marquee.',jar:['S9','S10']},
+  {f:['jfBack'],t:'Marissa\'s Home is back',m:'Living-room TV · JamFin · 9:59 PM',say:'JamFin retried on its own and the marquee is a show again. Nothing tells Marissa that it was fixed, when, or that anyone knew while she was waiting.'}],
+ family:['Offline is a broken form everywhere it\'s drawn: the broken ring on JamFin, the dashed legend and dashed tag stub on Jam-Dash, the dashed cords.','Every failure ends the same way: say what happened, then Try again (orange) and a way out (TV Home, Why?).','One loud thing per screen: an orange Try again, or a red key, never both.','The type pair, and Plex Mono for every time and host name.'],
+ jars:[['S7','The same outage is offline (orange) on the TV and in Jam-Dash, but alert (red) in Callsheet.'],['S8','No app owns the urgent push.'],['S9','Marissa can\'t tell that Isaac has seen it.'],['S10','The fix is invisible on the TV.'],['S11','Callsheet\'s red key doesn\'t fix anything; it opens another app.'],['S5','9:46 PM on the TV, 21:46 on both phone apps.']]},
+
+{id:'game',name:'Game night',when:'Saturday · 7:40–8:56 PM',who:'Isaac and Amber · living room',apps:'Lobby → NervOS → Lobby',
+ steps:[
+  {f:['lbMoon'],t:'The PLAY band on Lobby\'s dial',m:'Living-room TV · Lobby · 7:40 PM',say:'Lobby\'s dial has two PLAY stations, Moonlight and Steam Link, both streaming games from a PC. NervOS isn\'t a station: it\'s the games PC itself, plugged in, so it belongs in the patch bay. Golden-hour sky.'},
+  {f:['lbH1'],t:'The patch bay: NervOS on HDMI 1 (assumed)',m:'Living-room TV · Lobby · 7:41 PM',say:'Drawn with the Aero on HDMI 1 because Jam Home\'s TV source sheet lists "Nerv//OS" as an input. Lobby\'s pass 4 and its README show HDMI 1 empty. The two apps disagree about what\'s plugged into the TV.'},
+  {f:['lbBlindH1'],t:'OK: Lobby\'s blind, switching inputs',m:'Living-room TV · Lobby · 7:41 PM',say:'The same blind, now for an input. 12 slats.'},
+  {h:1,t:'Lobby → NervOS',carry:{focus:['p','Cream at the thing on both: Lobby\'s socket ring; NervOS\'s base window under Continue. NervOS lands with focus on an orange key, which Lobby never does on Home.'],orange:['p','None on Lobby\'s home. On NervOS, Continue is orange the moment it appears.'],words:['y','Signal / On.'],slats:['n','Lobby\'s 12; NervOS\'s own deck uses 16 a minute later.'],walnut:['y','Lobby\'s sill → NervOS\'s console front and shelf planks.'],type:['p','Same pair. The clock jumps from 7:41 PM to 19:41 on the same TV.']},
+   change:'Ground: sky → a warm dark wall. Objects: furniture and a dial → a console with a cartridge and a shelf of spines. Layout: rows → one hero object.',jar:['S5','S18','S2']},
+  {f:['nvHome'],t:'NervOS: the game is still in the console',m:'Living-room TV · NervOS · 19:41',say:'Continue · Tuesday 21:40 is the one orange, and focused. One controller is in the ports on the walnut front. The hints switch from OK to A and B once the gamepad is used.'},
+  {f:['nvPlayers'],t:'Pick up a controller',m:'Living-room TV · NervOS · 19:44',say:'Amber presses A on the second pad. Ports by number, LEDs lit green, "Start with 2 players" the one orange.'},
+  {f:['nvLaunch'],t:'The cartridge goes in',m:'Living-room TV · NervOS · 19:44',say:'NervOS\'s launch cover: the cartridge drops into a slot in a ribbed deck, Stripes at the right end, and 16 recessed slats fill with the emulator\'s real load. The third launch cover of the evening that looks like neither of the others.'},
+  {f:['nvBand'],t:'Guide: the game\'s own menu',m:'Living-room TV · NervOS · 20:31',say:'The gamepad\'s Guide button raises NervOS\'s ribbed band: Paused, Resume (orange), Save, Load, Picture, Reset, Quit game.'},
+  {f:['lbDrawer'],t:'Someone presses the TV remote\'s menu key instead',m:'Living-room TV · Lobby over NervOS · 8:12 PM',say:'Lobby\'s TV menu is a drawer that rises over whatever is on screen, NervOS included. Two system menus can now appear on one screen, from two controllers, with two faces, two key rows and two clocks.'},
+  {f:['nvRet'],t:'Quit: the cartridge comes back up',m:'Living-room TV · NervOS · 20:54',say:'"Back from Glass Dragon · Played 1 h 12 min · resume point saved". The game goes back in the console for next time.'},
+  {h:1,t:'NervOS → Lobby (TV remote, Home)',carry:{focus:['y','Cream at the thing on both.'],orange:['y','NervOS\'s Continue was orange; Lobby\'s home has none. Both right.'],words:['p','"Signal" on the socket. Nothing on Lobby says what was just played.'],slats:['x',''],walnut:['y',''],type:['p','20:54 → 8:56 PM.']},
+   change:'Wall and console → sky and furniture. The game was the last thing on screen, and Lobby\'s shelf doesn\'t know it.',jar:['S17','S5']},
+  {f:['lbAfter'],t:'Back on Lobby: the shelf doesn\'t know',m:'Living-room TV · Lobby · 8:56 PM',say:'Continue still leads with the film Isaac paused on Tuesday. Glass Dragon, the game everyone just played for an hour, isn\'t on the shelf, because Lobby\'s Continue comes from the TV\'s apps, not from NervOS.'}],
+ family:['Cream focus all the way: socket ring, base window under the key, the lit port, the band\'s slot.','Orange is the one thing to do on every NervOS screen (Continue, Start, Resume) and absent on Lobby\'s home.','Walnut as furniture in both: Lobby\'s sill, NervOS\'s console front, ports panel, shelves and bookend.','Ribs only on dark surfaces: Lobby\'s blind, NervOS\'s deck and band.','Both covers fill slats with the real load and let B / Back cancel.'],
+ jars:[['S18','Lobby and Jam Home disagree about what\'s on HDMI 1.'],['S5','7:41 PM, then 19:41, on the same TV.'],['S1','Two more launch covers: the blind and the media drop.'],['S2','12 slats, then 16.'],['S16','Two menus on one screen from two controllers.'],['S17','Lobby\'s Continue doesn\'t show the game that was just played.']]},
+
+{id:'morning',name:'Morning and a parcel',when:'Thursday · 6:34–10:13 AM',who:'Isaac · phone',apps:'Callsheet → Jam Home → Callsheet',
+ steps:[
+  {f:['lockCs'],t:'06:34: the sheet is ready',m:'Phone · lock screen · 06:34',say:'Callsheet\'s morning push: one line on the day and one on the parcel.'},
+  {f:['csToday'],t:'Callsheet: the day as a sheet',m:'Phone · Callsheet · 06:35',say:'The printed sheet: dateline, headline, a summary with source footnotes, the day strip, and the roster with row 01 opened. Copy draft is the one orange.'},
+  {f:['csAgenda'],t:'10:05: the parcel in the running order',m:'Phone · Callsheet · 10:05',say:'In Agenda the parcel is a row under the NOW rule: "Needs a signature · 10:00 to 11:00". The courier is at the door, but a house action has no slot in Callsheet\'s cue order, so the row carries a plain link key to Jam Home. No orange on Agenda.'},
+  {h:1,t:'Callsheet → Jam Home',carry:{focus:['p','Both are touch. Callsheet\'s current tab has a lit cream slot; Jam Home\'s current tab presses in instead.'],orange:['y','None on Agenda; none on Jam Home at rest.'],words:['p','Callsheet says "needs a signature"; Jam Home says Locked. Nothing on Jam Home mentions the parcel.'],slats:['x',''],walnut:['y','Callsheet\'s trim → Jam Home\'s key rail.'],type:['y','']},
+   change:'Ground: a warm printed sheet → Jam Braun\'s warm white page. Both light, but the unlit windows change form: hollow outlines on the sheet, dark dots on the plates. Objects: a running order → a plan, a door and keys.',jar:['S24','S22','S11']},
+  {f:['haPhHouse'],t:'Jam Home, the House tab',m:'Phone · Jam Home · 10:06',say:'The room strip, the day arc, the "by the door" plate (door swing, key rail) and the plan. No orange at rest.'},
+  {f:['haPhSheet'],t:'Tap the door: Unlock',m:'Phone · Jam Home · 10:06',say:'The door\'s bottom sheet. Unlock is the one orange.'},
+  {f:['haPhUnl'],t:'10:07: unlocked, and the phone turns red',m:'Phone · Jam Home · 10:07',say:'As soon as the door is open, Jam Home treats it as the house\'s alert: a red swing, a red LED and a solid red Lock key. Isaac unlocked it on purpose, a second ago, for a courier, in daylight.'},
+  {f:['haPhLocked'],t:'10:12: locked again',m:'Phone · Jam Home · 10:12',say:'One tap on Lock. The plate says Locked. No past form ("Locked 10:12" or "Open 10:07–10:12") stays anywhere.'},
+  {h:1,t:'Jam Home → Callsheet',carry:{focus:['p',''],orange:['y','None on either.'],words:['n','Callsheet never hears that the parcel came: the row still says "needs a signature".'],slats:['x',''],walnut:['y',''],type:['y','']},
+   change:'Plan and door → running order.',jar:['S23','S25']},
+  {f:['csAgenda2'],t:'Back in Callsheet: the parcel row hasn\'t moved',m:'Phone · Callsheet · 10:13',say:'Callsheet reads calendars and mail, not the house, so the row has no past form. The running order still says the parcel is to come.'}],
+ family:['Both are light, calm, warm grounds with one ink and no texture.','The type pair, with Plex Mono for every time.','Orange is the one thing to do and moves on: Copy draft, then Unlock; none on Agenda or on Jam Home at rest.','Walnut: Callsheet\'s trim and sign-off rule, Jam Home\'s key rail.','Pressed-in for chosen in both (Callsheet\'s square windows, Jam Home\'s room strip).'],
+ jars:[['S24','A house action has no cue in Callsheet; the parcel row hands off with a plain link.'],['S11','The link key\'s form isn\'t defined anywhere: "Front door · Jam Home ↗".'],['S22','Unlit windows: hollow on Callsheet\'s light sheet, dark dots on Jam Home\'s light plates.'],['S12','A deliberate daytime unlock turns the phone red.'],['S25','No past form for the door, in either app.'],['S23','Callsheet doesn\'t hear that the parcel came.']]},
+
+{id:'door',name:'The front door at night',when:'Tuesday · 10:52–10:53 PM',who:'Everyone · three screens at once',apps:'Lobby · Jam Home (Echo) · Callsheet',
+ steps:[
+  {f:['lbDoor'],t:'On the TV: Lobby\'s thumb-turn turns red',m:'Living-room TV · Lobby · 10:52 PM',say:'The house plate\'s door unit becomes the solid red key ("Unlocked · OK locks") and the sign reads "The front door is unlocked · Unlocked at 10:48 PM at the door · OK Lock it". Nothing else on the screen is orange.'},
+  {f:['haEcho'],t:'On the kitchen kiosk: the door swings open in red',m:'Kitchen kiosk · Jam Home · 10:52 PM',say:'Jam Home\'s door swing opens in red on the plate and on the plan, with a red LED, "Unlocked", and a solid red Lock key.'},
+  {f:['csDoor'],t:'On Isaac\'s phone: Callsheet\'s alert cue',m:'Phone · Callsheet · 22:52',say:'Callsheet\'s night sheet leads with the alert: red rule, ringed red light, "The front door has been unlocked for 4 minutes", and a red key that opens Jam Home (Callsheet can\'t lock a door).'},
+  {h:1,t:'Same state, three designs',three:['lbDoor','haEcho','csDoor'],carry:{focus:['p','The TV focuses the red key; the kiosk and phone are touch.'],orange:['y','All three replace orange with one solid red key with dark text, and nothing else is orange. The language holds.'],words:['n','"Unlocked · OK locks" / "Unlocked" / "Alert · 22:48". The action is "Lock it", "Lock" and "Lock it in Jam Home".'],slats:['x',''],walnut:['y','Lobby\'s sill, Jam Home\'s key rail, Callsheet\'s trim.'],type:['p','10:48 PM on the TV, 22:48 on the phone.']},
+   cmp:[['Object','Thumb-turn, bar upright','Door swing, open in red','Ringed red LED and a red rule'],['Word','Unlocked · OK locks','Unlocked','Alert'],['Sentence','Unlocked at 10:48 PM at the door','—','Unlocked for 4 minutes'],['Key','Red unit, "OK locks" + sign "Lock it"','Red "Lock"','Red "Lock it in Jam Home" (opens the app)'],['Time','10:48 PM','—','22:48']],
+   change:'Three grounds (sky and lacquer, anthracite plan, navy sheet), three objects, one red key.',jar:['S13','S14','S11','S5']},
+  {h:1,t:'Locked from the kitchen: how each one says so',three:[['lbDoor',1],['haEcho',1],['csDoor',1]],carry:{focus:['x',''],orange:['p','The TV and phone go calm. The Echo\'s orange moves to Goodnight (nothing plays, it\'s bedtime).'],words:['n','Callsheet: "Fixed 22:53 · locked from the kitchen". Jam Home: "Locked". Lobby: the door unit just says Locked again; the sign goes back to the shelf.'],slats:['x',''],walnut:['y',''],type:['p','10:53 PM / 22:53']},
+   change:'Only one of the three keeps a past form.',jar:['S25','S12']}],
+ family:['The red key is the same idea on all three: solid red, dark text, and nothing else orange while it shows. This is the strongest shared thing in the family.','A round LED for status on all three, red when unlocked and green when locked.','The type pair, and walnut on every screen.','Each design draws the door its own way and is still readable as "the door, open" within a second.'],
+ jars:[['S13','Three words, three sentences and three action labels for one state.'],['S14','The door is drawn as a thumb-turn on the TV and a swing on the kiosk.'],['S11','Callsheet\'s red key only opens Jam Home.'],['S5','10:48 PM and 22:48.'],['S25','Only Callsheet keeps a past form after the fix.'],['S12','Red at 10:52 PM is right; the same red at 10:07 AM (journey 4) isn\'t.']]},
+
+{id:'crafty',name:'Overnight, in the past tense',when:'Wednesday · 1:50–6:35 AM',who:'Isaac · phone',apps:'phone → Jam-Dash → Callsheet',
+ steps:[
+  {f:['lockCrafty'],t:'01:50: Crafty stops responding',m:'Phone · lock screen · 01:50',say:'A push in the night. Again drawn as a Jam-Dash notice, because no app owns urgent pushes yet.'},
+  {f:['jdCrafty'],t:'Jam-Dash: the red key',m:'Phone · Jam-Dash · 01:51',say:'The board lights "1 down" in red, the alert tag says what happened, and Restart Crafty is the solid red key. No orange.'},
+  {f:['jdCraftyFix'],t:'01:53: fixed, in the past tense',m:'Phone · Jam-Dash · 01:54',say:'The board goes dark and the tag turns grey: "Crafty · Fixed 01:53 · restarted by you". The quiet past form stays on Home.'},
+  {h:1,t:'Jam-Dash at 01:54 → Callsheet at 06:35',carry:{focus:['p',''],orange:['p','No orange at 01:54. At 06:35 the sheet\'s orange is Copy draft, unrelated.'],words:['p','Jam-Dash says "Fixed 01:53"; Callsheet says it again in prose ("you restarted it at 01:53"), with a footnote. Same fact, two forms.'],slats:['x',''],walnut:['p','Callsheet\'s trim; none on Jam-Dash\'s phone.'],type:['y','Both 24-hour. The one pair of apps that agree on the clock.']},
+   change:'Machine-room grey → printed sheet. A tag → a sentence in "Worth knowing".',jar:['S25','S8']},
+  {f:['csWorth'],t:'06:35: the sheet tells the night',m:'Phone · Callsheet · 06:35',say:'"Worth knowing: Crafty stopped answering at 01:49 and you restarted it at 01:53. Nothing was lost.³" The footnote points at Jam-Dash. This is how a past form should travel: once, quietly, from the app that owns it.'}],
+ family:['Red alert, then grey "Fixed" with a time: the past form is quiet and stays put.','Both apps write times in Plex Mono, 24-hour.','The morning sheet quotes the owner with a footnote instead of re-grading it.'],
+ jars:[['S8','Who sends the 01:50 push.'],['S25','"Fixed 01:53" on a tag, prose in the sheet: fine here, but there\'s no shared vocabulary.']]}
+];
+
+/* =============================== seams =============================== */
+const SEAMS=[
+ ['S1','Launch covers differ within one evening: Lobby\'s blind, JamFin\'s house lights and colour block, NervOS\'s media drop.','Lobby, JamFin, NervOS','1, 3','Medium','Keep each cover (conflict 4, option B). Make everything around it identical: the opaque full-bleed layer, max(load, floor) hold, B cancels, Calm = a ≤ 150 ms fade, and the same slatted bar (S2). The cover is where the app speaks; the bar is where the family speaks.','TV4 → Device: TV (form App-local)'],
+ ['S2','The slatted bar is drawn three ways: Lobby 12 recessed slats with a cream fill; JamFin 16 flat faint slats and a "LOADING" word; NervOS 16 recessed slats, centred.','Lobby, JamFin, NervOS','1, 3','Medium','One component: 16 slats, each an indicator window (recess when unlit, flat cream when lit), left-aligned under the title, "Loading" → "Ready" in Plex Mono at its right end. Same on every TV cover and on any other app\'s load (Jam-Dash\'s bench download).','MO9 → Language (component)'],
+ ['S3','Two covers back to back: Lobby\'s blind (600 ms floor) to open JamFin, then JamFin\'s own title card on Play.','Lobby, JamFin','1','Low','When the target app has its own cover, Lobby\'s blind holds only until the app\'s first frame (no floor), and rises onto it.','TV4 → Device: TV'],
+ ['S4','Names drift: "Jamfin" (Lobby dial, Jam Home source tile) vs "JamFin"; "Nerv//OS" (Jam Home) vs "NerveOS" (HA cards) vs "NervOS".','Lobby, JamFin, Jam Home, NervOS','1, 3','Low','A glossary entry per product name, spelled as the product spells itself, used by every other app.','H18 → Language (glossary)'],
+ ['S5','Clock format changes between apps, even on one TV: Lobby, JamFin and Jam Home 12-hour ("7:41 PM"); NervOS, Callsheet and Jam-Dash 24-hour ("19:41").','All six','2, 3, 5','Medium','One household clock setting that every app follows on screen. Logs, tapes and seven-segment readouts may stay 24-hour.','New → Language (CW)'],
+ ['S6','JamFin\'s focus adds a baked warm spill under the window; Lobby and NervOS focus is flat.','JamFin vs Lobby, NervOS','1','Low','Decide once: drop the spill (IN3, no glow) or name it JamFin\'s one exception. Recommendation: drop it; the window and lift carry focus on their own.','IN3, TV1 → Language'],
+ ['S7','One outage, three severities: JamFin "Offline · Not answering" (orange Try again); Callsheet "Alert" (red key); Jam-Dash "Not answering" (offline, orange) with apps "Waiting on nas" (warn).','JamFin, Callsheet, Jam-Dash','2','High','The app that owns the thing sets its state, word and severity (servers: Jam-Dash). Every other app quotes the word and draws the same form. Callsheet uses its offline cue (dashed bar, orange "Open Jam-Dash ↗") for an offline server, never the red alert.','CW2, CL6 → Language (new: state has one owner)'],
+ ['S8','No app owns urgent pushes. Jam-Dash has none designed; Callsheet pushes its sheet at 06:30, 12:30 and 17:00.','Jam-Dash, Callsheet','2, 6','Medium','Pushes come from the app that owns the state, once, with the state word as the title. Callsheet never re-pushes them; it mentions them in the next sheet, in the past tense, with a footnote.','LY16 → Language (notices)'],
+ ['S9','A housemate can\'t tell that anyone knows: JamFin\'s offline marquee doesn\'t say Isaac has seen it.','JamFin, Jam-Dash, Callsheet','2','Medium','"Seen 21:49 · Isaac" travels to every app showing the state, as a quiet line under it (JamFin\'s marquee facts).','IN13 → Language (across apps)'],
+ ['S10','Recovery is silent on the TV: Jam-Dash says "Fixed 21:58", JamFin just returns to normal.','JamFin','2','Low','The first Home after an outage puts "Back since 21:58" in the marquee eyebrow, once.','App-local (JamFin), using the Language past form'],
+ ['S11','Red keys that only open another app: Callsheet\'s "Open Jam-Dash" and "Lock it in Jam Home", and the parcel row\'s link. No defined form for a cross-app link.','Callsheet → Jam Home, Jam-Dash','2, 4, 5','Medium','A link key names the destination app and ends in ↗ ("Lock it · Jam Home ↗"). It may be red only if one press lands on the fix with focus on it; otherwise it\'s neutral and the red stays on the cue\'s LED and rule.','CL6 amended → Language'],
+ ['S12','A deliberate daytime unlock turns the phone red ("alert") a second after Isaac tapped Unlock for a courier.','Jam Home (and Lobby)','4, 5','Medium','Conflict 12, option B: warn by day (amber + ▲ "Unlocked"), alert after sunset or when nobody is home, and never alert for the first 10 minutes after an unlock from a family device.','CW8 → Language (Isaac\'s call)'],
+ ['S13','The unlocked door is worded three ways: "Unlocked · OK locks" + "Lock it" (TV), "Unlocked" + "Lock" (kiosk), "Alert" + "Lock it in Jam Home" (phone).','Lobby, Jam Home, Callsheet','5','Medium','Jam Home owns the door\'s three lengths: short "Unlocked", sentence "Unlocked at 10:48 PM at the front door", action "Lock". Other apps quote them; Callsheet\'s cue label is the state word, not "Alert".','CW2 → Language (owner\'s words)'],
+ ['S14','The front door is drawn twice: a thumb-turn on Lobby, a door swing on Jam Home.','Lobby, Jam Home','1, 5','Medium','Conflict 9, option B: Jam Home owns the drawing of the house\'s objects; Lobby\'s house plate uses the door swing.','Conflict 9 → Language (shared objects)'],
+ ['S15','Lamps are drawn twice, with different level words: a wall paddle with a lit window and "On · 20%" on Lobby; a dimmer column with "20" on the cap on the kiosk.','Lobby, Jam Home','1','Medium','Same as S14 for lamps (Jam Home\'s lamp-shade window), and one level form: "On · 20%".','Conflict 9, CT4 → Language'],
+ ['S16','Two system menus on one screen: Lobby\'s TV menu drawer (TV remote) can rise over NervOS, which has its own Guide band (gamepad), with different faces, keys and clocks.','Lobby, NervOS','3','Medium','Each key row has one owner: Lobby\'s drawer over an input shows only TV keys and names what\'s under it ("over NervOS · HDMI 1"); NervOS\'s band only game keys. Same header grammar and key order (conflict 10, option B).','TV5 → Device: TV'],
+ ['S17','Continue lists don\'t talk: after an hour of Glass Dragon, Lobby\'s shelf still leads with a film from Tuesday.','Lobby, NervOS, JamFin','3','Medium','Each app publishes its one in-progress item; Lobby\'s shelf shows NervOS\'s console game as a frame ("Glass Dragon · NervOS · HDMI 1"), and OK switches input and lands on Continue.','New → Device: TV'],
+ ['S18','What\'s plugged into the TV is disputed: Lobby\'s bay (and README) show HDMI 1 empty; Jam Home\'s source sheet lists "Nerv//OS" as an input.','Lobby, Jam Home, NervOS','3','High','One inventory: inputs and devices come from Home Assistant\'s lists (through Control Freak), and every app draws from it. A drawing that states a fact about the house must come from real data.','H17 → Language'],
+ ['S19','"House lights" means the screen dimming in JamFin and the lamps in Jam Home.','JamFin, Jam Home','1','Low','Rename JamFin\'s moment in the glossary ("lights down"), or make it real: Play asks Jam Home to dim the room if no scene is on (question 6).','H18 → Language (glossary)'],
+ ['S20','Two screens in one room with no agreed orange while the film is paused: JamFin\'s Resume on the TV; on the kiosk, Jam Home\'s rule (orange only for playing media or bedtime) doesn\'t cover paused.','JamFin, Jam Home','1','Low','Paused counts as playing on the kiosk: Play stays its one orange. Goodnight takes the orange only once the TV is off.','CL5 → App-local (Jam Home)'],
+ ['S21','People\'s colours differ: Jam Home\'s key tags (Isaac blue, Amber teal, Marissa pink) vs JamFin\'s ticket figures (blue, green, purple).','Jam Home, JamFin','1','Low','One printed colour per person, owned by Jam Home\'s key tags, used by JamFin\'s tickets (and anything else that shows a person).','CL13, H15 → Language'],
+ ['S22','Unlit windows on light grounds change form between apps: hollow outlines on Callsheet\'s day sheet, dark dots on Jam Home\'s day plates.','Callsheet, Jam Home','4','Medium','Settle conflict 3 as recommended: by what the window sits on. On a light ground, hollow when unlit and a full window in a dark rim when lit, everywhere.','Conflict 3 → Language'],
+ ['S23','Callsheet doesn\'t hear the house: the parcel row still says "needs a signature" after the door opened and closed.','Callsheet, Jam Home','4','Low','Callsheet may read Jam Home\'s door log for rows it printed and give them a past form ("Door opened 10:07 · locked 10:12").','App-local (Callsheet)'],
+ ['S24','A house action has no place in Callsheet\'s cue order (alert → offline → clash → reply).','Callsheet','4','Low','Keep it a row in the running order with a link key (S11), never a cue and never orange in Callsheet: the orange belongs to the app that does it.','LY7 → Language'],
+ ['S25','Past forms differ or are missing: Jam-Dash "Fixed 01:53" tags, Callsheet "Seen 06:20" and prose, Jam Home only "Locked", Lobby and JamFin none.','All','2, 4, 5, 6','Medium','One vocabulary (Seen / Fixed / Locked / Back + time + who), shown by the owner app for at least 10 minutes and quoted by any app that showed the state.','IN13, CW2 → Language'],
+ ['S26','Key shapes change at every handoff: Callsheet outlined 5 px, Jam Home soft 12 px, Lobby lacquer with a hard drop, NervOS 14 px, Jam-Dash 2 px raised. The orange fill is the only constant.','All','all','Low','Accept. Bevels and radii are each app\'s (CT2); the fill, the press-in and the one-per-screen rule carry. Listed so nobody "fixes" it.','CT2 → App-local (accepted)']];
+
+/* =============================== rendering =============================== */
+const S={j:0,s:0,calm:false,hl:null};
+const sevOf=id=>(SEAMS.find(s=>s[0]===id)||[])[4]||'';
+function frame(spec){let key=spec,arg;if(Array.isArray(spec)){key=spec[0];arg=spec[1]}const fr=F[key](arg);const d=DEV[fr.dev];
+  return `<figure class="dvw" style="--g:${d.g}"><div class="dv ${fr.dev}" data-w="${d.w}" data-h="${d.h}"><div class="vp"><div class="scr" style="width:${d.w}px;height:${d.h}px">${fr.html}</div></div></div><figcaption>${DEVNAME[fr.dev]} · ${fr.app}</figcaption></figure>`}
+function nb(j,i,dir){const st=J[j].steps;for(let k=i+dir;k>=0&&k<st.length;k+=dir)if(!st[k].h)return st[k];return null}
+function render(focusList){const jj=J[S.j],st=jj.steps[S.s];
+  document.querySelectorAll('#jpick button').forEach((b,i)=>b.setAttribute('aria-pressed',i===S.j));
+  let frames=[];
+  if(st.h){if(st.three)frames=st.three;else{const a=nb(S.j,S.s,-1),b=nb(S.j,S.s,1);frames=[a.f[a.f.length-1],b.f[0]]}}
+  else frames=st.f;
+  $('stage').innerHTML=frames.map(frame).join(st.h&&!st.three?'<span class="arrow" aria-hidden="true">→</span>':'');
+  $('stage').classList.toggle('fadein',!S.calm);void $('stage').offsetWidth;
+  $('stage').dataset.hl=S.hl||'';
+  $('pos').textContent=`Journey ${S.j+1} of ${J.length} · step ${S.s+1} of ${jj.steps.length}`;
+  $('bBack').disabled=S.j===0&&S.s===0;$('bNext').disabled=S.j===J.length-1&&S.s===jj.steps.length-1;
+  $('bNext').textContent=S.s===jj.steps.length-1?'Next journey ›':'Next ›';
+  $('cap').innerHTML=`<span class="meta">${st.h?'Handoff':esc(st.m)}</span><h2>${st.h?'⇄ ':''}${esc(st.t)}</h2>${st.say?`<p>${esc(st.say)}</p>`:''}`;
+  if(st.h){let t=`<div class="ho"><h3>What carries across</h3><div class="tw"><table><thead><tr><th>Thread</th><th>Here</th><th>What happens</th></tr></thead><tbody>`;
+    THREADS.forEach(([k,n])=>{const c=st.carry[k]||['x',''];const p=ST[c[0]];t+=`<tr><td><button class="thr" data-hl="${k}" aria-pressed="${S.hl===k}">${n}</button></td><td><span class="pill ${p[0]}">${p[1]}</span></td><td>${esc(c[1])}</td></tr>`});
+    t+=`</tbody></table></div>`;
+    if(st.cmp)t+=`<h3>Side by side</h3><div class="tw"><table><thead><tr><th></th><th>TV · Lobby</th><th>Kitchen kiosk · Jam Home</th><th>Phone · Callsheet</th></tr></thead><tbody>${st.cmp.map(r=>`<tr>${r.map((c,i)=>i?`<td>${esc(c)}</td>`:`<th>${esc(c)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    t+=`<p class="chg"><b>What changes, on purpose:</b> ${esc(st.change)}</p><p class="chg"><b>Jars here:</b> ${st.jar.map(id=>`<a class="sref" href="#seam-${id}">${id}</a> <span class="sev ${sevOf(id)}">${sevOf(id)}</span>`).join(' · ')}</p></div>`;
+    $('hoPanel').innerHTML=t}else $('hoPanel').innerHTML='';
+  $('steps').innerHTML=`<h3>${S.j+1}. ${esc(jj.name)}</h3><ol>${jj.steps.map((x,i)=>`<li><button class="${x.h?'h':''}" data-i="${i}" ${i===S.s?'aria-current="step"':''}><span class="n">${String(i+1).padStart(2,'0')}</span><span>${x.h?'⇄ ':''}${esc(x.t)}<span class="a">${x.h?'handoff':esc(x.m.split(' · ')[1]||'')}</span></span></button></li>`).join('')}</ol>`;
+  $('jnotes').innerHTML=`<div><div class="eyebrow">Journey ${S.j+1} · ${esc(jj.when)} · ${esc(jj.who)}</div><h2 style="margin-top:4px">${esc(jj.name)}: ${esc(jj.apps)}</h2></div><div class="notes2"><div><h3>What tells you it's the same family</h3><ul>${jj.family.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div><h3>Where it jars</h3><ul>${jj.jars.map(([id,x])=>`<li><a class="sref" href="#seam-${id}">${id}</a> ${esc(x)}</li>`).join('')}</ul></div></div>`;
+  fit();fillSlats();
+  try{history.replaceState(null,'',`#j${S.j+1}-${S.s+1}`)}catch(e){}
+  if(focusList){const b=document.querySelector('#steps [aria-current]');b&&b.focus({preventScroll:true})}}
+function fit(){const st=$('stage');const maxH=Math.max(240,Math.min(560,innerHeight*.62));const n=st.querySelectorAll('.dv').length;
+  st.querySelectorAll('.dv').forEach(d=>{const w=+d.dataset.w,h=+d.dataset.h;const slot=d.parentElement;const pad=d.classList.contains('phone')?14:d.classList.contains('tv')||d.classList.contains('desk')?14:18;
+    const aw=Math.max(80,slot.clientWidth-pad);const mh=(n>2?maxH*.8:maxH)-pad;const s=Math.min(aw/w,mh/h);const vp=d.querySelector('.vp');vp.style.width=Math.floor(w*s)+'px';vp.style.height=Math.floor(h*s)+'px';d.querySelector('.scr').style.transform=`scale(${s})`})}
+let slatT=[];
+function fillSlats(){slatT.forEach(clearTimeout);slatT=[];if(S.calm)return;
+  document.querySelectorAll('#stage [data-fill]').forEach(el=>{const n=+el.dataset.fill;const sl=[...el.children];sl.forEach(s=>s.classList.remove('on'));
+    sl.slice(0,n).forEach((s,i)=>slatT.push(setTimeout(()=>s.classList.add('on'),120+i*70)))})}
+function go(j,s,f){S.j=j;S.s=s;render(f)}
+function next(){const jj=J[S.j];if(S.s<jj.steps.length-1)go(S.j,S.s+1);else if(S.j<J.length-1)go(S.j+1,0)}
+function back(){if(S.s>0)go(S.j,S.s-1);else if(S.j>0)go(S.j-1,J[S.j-1].steps.length-1)}
+
+/* page chrome */
+$('jpick').innerHTML=J.map((j,i)=>`<button data-j="${i}" aria-pressed="false"><b>${i+1}</b>${esc(j.name)}<small>${esc(j.apps)}</small></button>`).join('');
+$('jpick').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(+b.dataset.j,0)});
+$('steps').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)go(S.j,+b.dataset.i,true)});
+$('bNext').addEventListener('click',next);$('bBack').addEventListener('click',back);
+document.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey)return;const t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA')return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();next()}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();back()}
+  else if(/^[1-6]$/.test(e.key))go(+e.key-1,0)});
+$('hlChips').innerHTML=`<button class="chip" data-hl="" aria-pressed="true">None</button>`+THREADS.map(([k,n])=>`<button class="chip" data-hl="${k}" aria-pressed="false">${n}</button>`).join('');
+function setHl(k){S.hl=k||null;$('stage').dataset.hl=S.hl||'';document.querySelectorAll('#hlChips .chip').forEach(c=>c.setAttribute('aria-pressed',(c.dataset.hl||null)===S.hl));document.querySelectorAll('.thr').forEach(c=>c.setAttribute('aria-pressed',c.dataset.hl===S.hl))}
+$('hlChips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)setHl(b.dataset.hl)});
+$('hoPanel').addEventListener('click',e=>{const b=e.target.closest('.thr');if(b)setHl(S.hl===b.dataset.hl?null:b.dataset.hl)});
+function seg(id,fn){$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$(id).querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.v)})}
+seg('segTheme',v=>{if(v==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=v});
+seg('segMotion',v=>{S.calm=v==='calm';document.body.classList.toggle('calm',S.calm);fillSlats();if(S.calm)document.querySelectorAll('#stage [data-fill]').forEach(el=>[...el.children].forEach((s,i)=>s.classList.toggle('on',i<+el.dataset.fill)))});
+$('threadGrid').innerHTML=THREADS.map(([k,n,d])=>`<div><b>${n}</b><span class="muted">${esc(d)}</span></div>`).join('');
+$('seamTable').innerHTML=`<thead><tr><th>Seam</th><th>What jars</th><th>Apps</th><th>Journeys</th><th>Severity</th><th>Proposed fix</th><th>Rule / tier it implies</th></tr></thead><tbody>${SEAMS.map(s=>`<tr id="seam-${s[0]}"><td>${s[0]}</td><td>${esc(s[1])}</td><td>${esc(s[2])}</td><td>${esc(s[3])}</td><td><span class="sev ${s[4]}">${s[4]}</span></td><td>${esc(s[5])}</td><td>${esc(s[6])}</td></tr>`).join('')}</tbody>`;
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(fit,80)});
+let lastW=0;if(window.ResizeObserver)new ResizeObserver(en=>{const w=Math.round(en[0].contentRect.width);if(w!==lastW){lastW=w;requestAnimationFrame(fit)}}).observe($('stage'));
+try{if(matchMedia('(prefers-reduced-motion: reduce)').matches){S.calm=true;document.body.classList.add('calm');$('segMotion').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==='calm'))}}catch(e){}
+(function(){const m=/^#j(\d)-(\d+)$/.exec(location.hash);if(m){const j=Math.min(J.length,+m[1])-1,s=Math.min(J[j].steps.length,+m[2])-1;S.j=j;S.s=s}render()})();
+document.fonts&&document.fonts.ready.then(fit);
+window.JOURNEYS={J,SEAMS,go,S,render};
+</script>
+</body>
+</html>
