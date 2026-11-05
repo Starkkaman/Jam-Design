@@ -196,3 +196,6 @@ HA pushed profile + 44 screenshots. Correction: kitchen Echo Show 8 is ~961x601 
 Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopted without a visible change: P1 shared Calm/SAFE definition; P2 (already in 0.3); P3 "stepped" curve for decoration only; P5 per-look post layer, user-chosen, never over art/video, static in Calm, off in Hi-Fi; P6 Godot token shape + DSEG (OFL) for seven-segment. Open for Isaac: P4 group carousels in alternate looks (VHS consoles, CHOOSE YOUR HERO), which he approved on 2026-11-03.
 -> BIBLE.md draft 0.4.
 - NervOS P4 (Isaac): group carousels ALLOWED in every look, Hi-Fi included, when neighbours are named/visible at the edges and position is shown ("3 of 8"). Never for controls or settings.
+
+## TV title card (Isaac, 2026-11-05)
+- SHUTTER chosen. Isaac wants to see it with the slatted progress bar ("told you it would come back"): mockup 09 now has "Shutter · slatted" (unlit slats stay faintly visible, per the window rule). Pending his verdict on slatted vs the shutter-and-hot-spot strip inside the card.
