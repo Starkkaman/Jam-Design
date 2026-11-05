@@ -183,3 +183,40 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D114. When focus changes other content (season → episodes), it waits for a 280 ms dwell.
 - D115. TV safe area includes band text; slim bands 108 px with bottom-aligned text; a peeking next row isn't readable content.
 - D116. JamFin phone tabs: Home, Movies, Shows, Search, Downloads; Discover and Settings behind the profile chip.
+
+### Pass 3 · TV launcher (final form)
+- D117. The TV is always on one source; Lobby and its apps share "Apps". Home never marks an HDMI input current (replaces D61).
+- D118. One way in per job per screen (inputs are keys in Home's bottom row; the band window is gone).
+- D119. The alert fix on TV is D84's solid red key, focused like D18. No rings.
+- D120. Rows stop on every TV screen (D59 wins over D75 for the TV; NervOS's wrap needs Isaac's call).
+- D121. Windows by lighting: dark recess at night, shallow recess in Day, lit window in a dark rim.
+- D122. Real app banners: 6 px frame, colour-filter toning at night, never brighten on focus.
+- D123. Accents show only where no cover art is in view, and step back on trouble and overlays.
+- D124. Every failure screen ends with what happened, what to do, Try again (orange) and Home.
+- D125. OK acts on release; holds always have an on-screen press-twice path.
+- D126. Notices never pop up: an update is a light on Settings; a device turning on gets one prompt, never repeated. Changes that show in place get no toast.
+- D127. An empty Continue is a recess with one line; first run holds "Arrange Home". No suggested content.
+- D128. Feasibility: a TV menu over other apps needs an accessibility service + draw-over permission and a capturable remote key (Isaac decides).
+
+### Pass 3 · Home Assistant (final form)
+- D129. Orange per screen goes playing → on → idle; keys that lose it keep their place and size; music gets a place where Play is always primary (Music tab/sheet).
+- D130. Paddle window 18×7 (20×8 kiosk) lit in the device's colour; never orange (confirms D83).
+- D131. Small indicator windows are dark in both modes; long tracks are a light groove by day, dark at night.
+- D132. Lights are drawn in a display colour: whites on an amber-to-cream line, colours near orange drawn lighter, same value everywhere.
+- D133. A lit light's colour lives in its slot, paddle window and a 30% fader band, only while on (Band chosen over Wash/Edge).
+- D134. Kiosk sheets use kiosk sizes (keys ≥20 px text, 60 px tall) and never scroll.
+- D135. No control restyles another (adaptive paddles decided once per view open).
+- D136. HA built-ins are themed only by verified HA 2026.10 keys (`ha-switch-checked-*`, `ha-color-primary-*`, `state-*-active-color`); no card-mod.
+
+### Pass 3 · Callsheet (final form)
+- D137. The Next card order: alert → offline → warn within 60 min → routine → calm; every non-routine card ends with a "Then" line.
+- D138. Alert key form: solid red key with ink text and a ringed LED; nothing else on that screen is orange.
+- D139. Calm screens, reading pages and settings carry no orange.
+- D140. A count appears once per screen: no badges that repeat a meter.
+- D141. Bar group = one dark recess holding up to 10 segments, overflow number inside.
+- D142. Warn = amber triangle window + word; drop the ▲ glyph from words beside a window.
+- D143. Offline service: a dashed bar over cached content; read-only actions still work.
+- D144. Voice mode is a shared pattern: starts only from a tap, current line only, three big keys, Pause/Play the one orange, can never send, accept or delete.
+- D145. Step mode is reused for checks, weekly review and first-run setup; a reading page is the steps expanded, with no orange.
+- D146. "Hide this kind of thing" defaults to one item; wider scope is deliberate, locked for VIPs, listed with Remove and Undo. Every merge has Undo.
+- D147. Shortcuts are single letters; `?` always opens the key sheet.
