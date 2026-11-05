@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lobby Console</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Lobby pass 4: "the console under the window".
+   One 16:9 TV, 1920x1080 design units via cqw (--u = 1 design px). D-pad focus, OK on release.
+   Home is a piece of living-room furniture: a flat sky window whose colour follows the time of day,
+   a walnut sideboard top with Continue standing on it as picture frames, and a receiver-style console face
+   holding the app dial (a tuning scale with a needle), the patch bay (inputs as sockets) and the house plate
+   (wall-switch paddles and a thumb-turn for the front door). Title card = a slatted blind that drops over the window. */
+:root{--bg:#e6e3dd;--fg:#1f1d1a;--muted:#5f5a52;--line:#d0cbc2;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--decel:cubic-bezier(.16,1,.3,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#12110f;--fg:#ebe7df;--muted:#a49d91;--line:#2f2c28;--chip:#1d1b18;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12110f;--fg:#ebe7df;--muted:#a49d91;--line:#2f2c28;--chip:#1d1b18;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding:28px 16px 64px;display:grid;gap:18px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}
+p{margin:0;max-width:82ch}.muted{color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:end}
+.ctl>div{display:grid;gap:6px;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:7px 11px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}}
+.seg button:focus-visible,.kb:focus-visible,.tourb:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kb{font:500 13px var(--mono);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer;touch-action:manipulation;user-select:none}
+.tourbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--chip)}
+.tourb{font:600 15px var(--f);border:0;border-radius:9px;padding:9px 16px;cursor:pointer;background:#ec7c22;color:#1d1c1a}
+.tourb.sec{background:transparent;color:var(--fg);border:1px solid var(--line);font-weight:500}
+.tourcap{flex:1 1 300px;min-width:0;font-size:15px}
+.tourcap b{font:500 12px var(--mono);color:var(--muted);margin-right:8px;font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted)}
+.legend span{white-space:nowrap}.legend code{font:500 12px var(--mono);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-right:6px;background:var(--chip)}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px;align-content:start}
+.note h3{font:600 15px var(--f);margin:0}
+
+/* ================= TV ================= */
+.tv{--u:calc(100cqw / 1920);
+  --cream:#f3e6c8;--ink:#f3ecdc;--ink2:#d4cab6;--ink3:#b3a993;
+  --lac:#1b1612;--lac2:#241d18;--lac3:#2f2620;--glass:#0c0a08;--walnut:#6b4428;--walnut2:#5a3920;--walnutEdge:#3f2716;
+  --orange:#f08a2c;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;
+  position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;background:var(--lac);color:var(--ink);font-family:var(--f);
+  overflow:hidden;border-radius:12px;box-shadow:0 0 0 10px #0d0c0b,0 20px 50px #0000004d;outline:none;-webkit-tap-highlight-color:transparent}
+.tv:focus-visible{box-shadow:0 0 0 10px #0d0c0b,0 0 0 13px #f08a2c}
+.layer{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity 220ms var(--decel),visibility 0s 220ms}
+.layer.on{opacity:1;visibility:visible;transition:opacity 220ms var(--decel),visibility 0s}
+.calm .layer,.calm .layer.on{transition-duration:140ms}
+.mono{font-family:var(--mono)}
+kbd{display:inline-grid;place-items:center;min-width:calc(var(--u)*38);height:calc(var(--u)*36);padding:0 calc(var(--u)*8);border-radius:99px;border:calc(var(--u)*2) solid currentColor;font:500 calc(var(--u)*22) var(--mono);margin-right:calc(var(--u)*10);vertical-align:middle}
+
+/* indicator windows (the shared vocabulary): always a dark recess; lit = flat colour */
+.ind{position:relative;display:inline-block;flex:none;background:#090706;box-shadow:inset 0 calc(var(--u)*1) calc(var(--u)*2) #000,0 0 0 calc(var(--u)*1) #ffffff14}
+.ind::after{content:"";position:absolute;inset:calc(var(--u)*3);border-radius:inherit;background:var(--c,var(--cream));opacity:0}
+.ind.on::after{opacity:1}
+.ind.led{width:calc(var(--u)*18);height:calc(var(--u)*18);border-radius:50%}
+.ind.sq{width:calc(var(--u)*18);height:calc(var(--u)*18);border-radius:calc(var(--u)*3)}
+.ind.slot{width:calc(var(--u)*40);height:calc(var(--u)*13);border-radius:calc(var(--u)*3)}
+.ind.ok{--c:var(--ok)}.ind.warn{--c:var(--warn)}
+
+/* ---------- the window (sky) ---------- */
+.sky{position:absolute;left:0;right:0;top:0;height:calc(var(--u)*596);overflow:hidden}
+.skyl{position:absolute;inset:0;opacity:0;transition:opacity 1200ms linear}
+.skyl.on{opacity:1}
+.calm .skyl{transition:none}
+.skyl .b{position:absolute;left:0;right:0}
+.skyl .b1{top:0;height:calc(var(--u)*212)}.skyl .b2{top:calc(var(--u)*212);height:calc(var(--u)*128)}
+.skyl .b3{top:calc(var(--u)*340);height:calc(var(--u)*100)}.skyl .b4{top:calc(var(--u)*440);height:calc(var(--u)*80)}
+.skyl .b5{top:calc(var(--u)*520);height:calc(var(--u)*76)}
+.disc{position:absolute;border-radius:50%}
+.cloud{position:absolute;height:calc(var(--u)*30);border-radius:99px}
+.star{position:absolute;width:calc(var(--u)*3);height:calc(var(--u)*3);border-radius:50%;background:#cfc7b2;opacity:.55}
+/* the window's own frame: a thin sill shadow under it */
+.sill{position:absolute;left:0;right:0;top:calc(var(--u)*596);height:calc(var(--u)*68);background:var(--walnut)}
+.sill::after{content:"";position:absolute;left:0;right:0;bottom:calc(var(--u)*-8);height:calc(var(--u)*8);background:var(--walnutEdge)}
+
+/* header written on the glass */
+.hdr{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*58);display:flex;align-items:flex-start;gap:calc(var(--u)*24)}
+.house{font:500 calc(var(--u)*22)/1.2 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+.clock{font:300 calc(var(--u)*70)/1 var(--f);font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:calc(var(--u)*4)}
+.clock small{font-size:calc(var(--u)*30);font-weight:400;margin-left:calc(var(--u)*8);color:var(--ink2)}
+.date{font:400 calc(var(--u)*24)/1.2 var(--f);color:var(--ink2);margin-top:calc(var(--u)*4)}
+.hkeys{margin-left:auto;display:flex;gap:calc(var(--u)*12);margin-top:calc(var(--u)*30)}
+.hk{position:relative;display:flex;align-items:center;gap:calc(var(--u)*12);height:calc(var(--u)*60);padding:0 calc(var(--u)*20) calc(var(--u)*6);font:500 calc(var(--u)*26) var(--f);color:var(--ink2);white-space:nowrap}
+.hk .v{font-weight:400;color:var(--ink3)}
+.hk .in{display:flex;align-items:center;gap:calc(var(--u)*12);transition:transform 150ms var(--glide)}
+.hk .bw{position:absolute;left:calc(var(--u)*20);right:calc(var(--u)*20);bottom:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3);background:#00000059}
+.hk.f{color:var(--ink)}.hk.f .v{color:var(--ink2)}
+.hk.f .bw{background:var(--cream)}
+.hk.f .in{transform:translateY(calc(var(--u)*-3))}
+.calm .hk.f .in{transform:none}
+
+/* the sign: the focused thing, written on the glass */
+.sign{position:absolute;left:calc(var(--u)*96);top:calc(var(--u)*216);width:calc(var(--u)*1100);display:grid;gap:calc(var(--u)*4);transition:opacity 100ms linear}
+.sign.swap{opacity:0;transition-duration:50ms}
+.sign .eb{font:500 calc(var(--u)*22)/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.sign .tt{font:500 calc(var(--u)*58)/1.05 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.005em}
+.sign .ln{display:flex;gap:calc(var(--u)*28);align-items:center;font:400 calc(var(--u)*26)/1.3 var(--f);color:var(--ink2);white-space:nowrap;min-width:0}
+.sign .ln .t{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sign .ln .do{display:inline-flex;align-items:center;color:var(--ink);font-weight:500;flex:none}
+.sign.alert .tt{color:var(--ink)}
+.grp{position:absolute;left:calc(var(--u)*96);top:calc(var(--u)*370);font:500 calc(var(--u)*22) var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:flex;gap:calc(var(--u)*16)}
+.grp .n{letter-spacing:0;text-transform:none;color:var(--ink);opacity:0}
+.grp.cur .n{opacity:1}
+.first .grp .n{display:none}
+
+/* the shelf: Continue stands on the sideboard as picture frames */
+.shelf{position:absolute;left:0;right:0;top:calc(var(--u)*404);height:calc(var(--u)*260);overflow:hidden}
+.track{position:absolute;left:calc(var(--u)*96);top:0;bottom:0;display:flex;gap:calc(var(--u)*36);transition:transform 220ms var(--glide)}
+.calm .track{transition:none}
+.fr{position:relative;flex:none;width:calc(var(--u)*316);height:100%}
+.fr .pic{position:absolute;left:0;right:0;top:calc(var(--u)*7);height:calc(var(--u)*185);padding:calc(var(--u)*8);background:#2a221c;border-radius:calc(var(--u)*4);box-shadow:0 calc(var(--u)*6) 0 #00000040;transition:transform 150ms var(--glide)}
+.fr .art{position:relative;width:100%;height:100%;overflow:hidden;border-radius:calc(var(--u)*2)}
+.fr .pg{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*8);background:#0a0807}
+.fr .pg i{display:block;height:100%;background:var(--cream);opacity:.85}
+.fr .plq{position:absolute;left:0;right:0;top:calc(var(--u)*210);display:flex;align-items:center;gap:calc(var(--u)*12);font:500 calc(var(--u)*24) var(--f);color:var(--ink2);white-space:nowrap}
+.fr .plq .t{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.fr .plq .ind{background:#2b1909;box-shadow:inset 0 calc(var(--u)*1) calc(var(--u)*2) #000}
+.fr.f .pic{transform:translateY(calc(var(--u)*-12))}
+.fr.f .plq{color:var(--ink)}
+.fr.f .plq .ind::after{opacity:1}
+.calm .fr.f .pic{transform:none}
+.fr.f .pic{box-shadow:0 calc(var(--u)*18) 0 #00000033}
+.endstop{flex:none;width:calc(var(--u)*6);height:calc(var(--u)*185);margin-top:calc(var(--u)*7);border-radius:calc(var(--u)*3);background:var(--walnutEdge)}
+.empty{position:relative;flex:none;width:calc(var(--u)*1100);height:calc(var(--u)*185);margin-top:calc(var(--u)*7);border-radius:calc(var(--u)*6);background:#00000047;box-shadow:inset 0 calc(var(--u)*2) calc(var(--u)*6) #0000008c;display:flex;align-items:center;gap:calc(var(--u)*36);padding:0 calc(var(--u)*40);font:400 calc(var(--u)*26)/1.35 var(--f);color:var(--ink)}
+.empty p{max-width:none;flex:1}
+
+/* ---------- the console face ---------- */
+.face{position:absolute;left:0;right:0;top:calc(var(--u)*672);bottom:0;background:var(--lac)}
+/* the app dial: a tuning scale with stations and a needle */
+.dial{position:absolute;left:calc(var(--u)*96);width:calc(var(--u)*1728);top:calc(var(--u)*12);height:calc(var(--u)*132);border-radius:calc(var(--u)*10);background:var(--glass);box-shadow:inset 0 calc(var(--u)*2) calc(var(--u)*8) #000,0 0 0 calc(var(--u)*2) #2c241e}
+.dial .band{position:absolute;top:calc(var(--u)*8);height:calc(var(--u)*28);display:flex;align-items:center;gap:calc(var(--u)*10);font:500 calc(var(--u)*22) var(--mono);letter-spacing:.12em;color:var(--ink3);white-space:nowrap}
+.dial .band::after{content:"";flex:1;height:calc(var(--u)*2);background:#3a3129}
+.dial .pos{position:absolute;right:calc(var(--u)*30);top:calc(var(--u)*8);height:calc(var(--u)*28);display:flex;align-items:center;font:500 calc(var(--u)*22) var(--mono);color:var(--ink);opacity:0}
+.dial.cur .pos{opacity:1}
+.st{position:absolute;top:calc(var(--u)*40);transform:translateX(-50%);display:grid;justify-items:center;gap:calc(var(--u)*4);font:400 calc(var(--u)*26) var(--f);color:var(--ink3);white-space:nowrap}
+.st .code{width:calc(var(--u)*28);height:calc(var(--u)*4);border-radius:2px;background:var(--code);opacity:.75}
+.st .nm{transition:transform 150ms var(--glide)}
+.st.f{color:var(--ink);font-weight:500}
+.st.f .nm{transform:translateY(calc(var(--u)*-2))}
+.calm .st.f .nm{transform:none}
+.ticks{position:absolute;left:calc(var(--u)*26);right:calc(var(--u)*26);top:calc(var(--u)*92);height:calc(var(--u)*26);
+  background:repeating-linear-gradient(90deg,#4a3f35 0 calc(var(--u)*2),transparent calc(var(--u)*2) calc(var(--u)*16.8));
+  -webkit-mask:linear-gradient(#000 0 0) top/100% 45% no-repeat;mask:linear-gradient(#000 0 0) top/100% 45% no-repeat}
+.major{position:absolute;top:calc(var(--u)*92);width:calc(var(--u)*2);height:calc(var(--u)*26);background:#6d6052;transform:translateX(-50%)}
+.stop{position:absolute;top:calc(var(--u)*86);width:calc(var(--u)*8);height:calc(var(--u)*38);border-radius:calc(var(--u)*3);background:var(--walnut)}
+.needle{position:absolute;left:0;top:calc(var(--u)*84);width:calc(var(--u)*6);height:calc(var(--u)*42);margin-left:calc(var(--u)*-3);border-radius:calc(var(--u)*3);background:#5c5246;transition:transform 140ms var(--glide)}
+.calm .needle{transition:none}
+.dial.cur .needle{background:var(--cream)}
+
+/* the patch bay (inputs) and the house plate (switches) */
+.bay{position:absolute;left:calc(var(--u)*96);top:calc(var(--u)*156);height:calc(var(--u)*160);display:flex;gap:calc(var(--u)*8);padding:0 calc(var(--u)*14);border-radius:calc(var(--u)*10);background:var(--lac2)}
+.sk{position:relative;display:grid;justify-items:center;align-content:start;gap:calc(var(--u)*3);padding-top:calc(var(--u)*6);line-height:1.15;min-width:calc(var(--u)*96)}
+.sk .lb{font:500 calc(var(--u)*22) var(--mono);color:var(--ink3);letter-spacing:.06em}
+.sk .hole{position:relative;margin:calc(var(--u)*5) 0;width:calc(var(--u)*40);height:calc(var(--u)*40);border-radius:50%;background:#0a0807;box-shadow:0 0 0 calc(var(--u)*5) #3a3029;transition:transform 150ms var(--glide)}
+.sk .hole::after{content:"";position:absolute;left:calc(var(--u)*10);right:calc(var(--u)*10);top:calc(var(--u)*13);height:calc(var(--u)*13);background:#1e1915;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%)}
+.sk.plug .hole{background:var(--code)}
+.sk.plug .hole::after{background:#0c0a08cc}
+.sk .nm{font:500 calc(var(--u)*24) var(--f);color:var(--ink2);white-space:nowrap}
+.sk .s{display:flex;gap:calc(var(--u)*8);align-items:center;font:400 calc(var(--u)*22) var(--f);color:var(--ink3);white-space:nowrap}
+.sk.empty-port .nm{color:var(--ink3);font-weight:400}
+.sk.apps .hole{background:none;box-shadow:none;display:grid;place-items:center}
+.sk.apps .hole::after{display:none}
+.sk.apps .ind.sq{width:calc(var(--u)*28);height:calc(var(--u)*28)}
+.sk.f .hole{box-shadow:0 0 0 calc(var(--u)*5) var(--cream);transform:translateY(calc(var(--u)*-4))}
+.calm .sk.f .hole{transform:none}
+.sk.f .nm,.sk.f .lb{color:var(--ink)}
+.bay .sep{width:calc(var(--u)*2);margin:calc(var(--u)*18) calc(var(--u)*4);background:#3a3129}
+
+.plate{position:absolute;right:calc(var(--u)*96);top:calc(var(--u)*156);height:calc(var(--u)*160);display:grid;grid-template-rows:calc(var(--u)*34) 1fr;padding:calc(var(--u)*8) calc(var(--u)*18) 0;border-radius:calc(var(--u)*10);background:var(--lac2)}
+.plate .lb{font:500 calc(var(--u)*22) var(--mono);color:var(--ink3);letter-spacing:.12em}
+.plate .row{display:flex;gap:calc(var(--u)*14)}
+.swu{position:relative;display:flex;gap:calc(var(--u)*16);align-items:center;height:calc(var(--u)*96);padding:0 calc(var(--u)*16) calc(var(--u)*10) calc(var(--u)*10);border-radius:calc(var(--u)*8);min-width:calc(var(--u)*222)}
+.swu .bw{position:absolute;left:calc(var(--u)*24);right:calc(var(--u)*24);bottom:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3);background:#0a0807}
+.swu.f .bw{background:var(--cream)}
+.swu .txt{display:grid;gap:calc(var(--u)*2)}
+.swu .nm{font:500 calc(var(--u)*24) var(--f);color:var(--ink2);white-space:nowrap}
+.swu .s{display:flex;align-items:center;gap:calc(var(--u)*8);font:400 calc(var(--u)*22) var(--f);color:var(--ink3);white-space:nowrap}
+.swu.f .nm{color:var(--ink)}.swu.f .s{color:var(--ink2)}
+.swu .mv{display:flex;gap:calc(var(--u)*16);align-items:center;transition:transform 150ms var(--glide)}
+.swu.f .mv{transform:translateY(calc(var(--u)*-3))}
+.calm .swu.f .mv{transform:none}
+/* wall-switch paddle: up = on, a window on the paddle lit in the lamp's colour (never orange) */
+.paddle{position:relative;width:calc(var(--u)*44);height:calc(var(--u)*76);border-radius:calc(var(--u)*6);background:#0f0c0a;box-shadow:inset 0 0 0 calc(var(--u)*2) #3a3029}
+.paddle i{position:absolute;left:calc(var(--u)*6);right:calc(var(--u)*6);top:calc(var(--u)*6);bottom:calc(var(--u)*6);border-radius:calc(var(--u)*4);background:linear-gradient(#4a3f36 0 50%,#2b241f 50% 100%)}
+.paddle.off i{background:linear-gradient(#2b241f 0 50%,#4a3f36 50% 100%)}
+.paddle .ind{position:absolute;left:50%;top:calc(var(--u)*14);width:calc(var(--u)*20);height:calc(var(--u)*8);margin-left:calc(var(--u)*-10);border-radius:calc(var(--u)*2)}
+.paddle .ind::after{inset:calc(var(--u)*2)}
+.paddle.off .ind{top:auto;bottom:calc(var(--u)*14)}
+/* thumb-turn: the front door's lock as the house knows it; horizontal = locked */
+.turn{position:relative;width:calc(var(--u)*64);height:calc(var(--u)*64);border-radius:50%;background:#0f0c0a;box-shadow:inset 0 0 0 calc(var(--u)*2) #3a3029}
+.turn i{position:absolute;left:calc(var(--u)*12);right:calc(var(--u)*12);top:calc(var(--u)*27);height:calc(var(--u)*10);border-radius:calc(var(--u)*5);background:#b9ad96;transition:transform 220ms var(--glide)}
+.calm .turn i{transition:none}
+.door.unl .turn i{transform:rotate(90deg)}
+.hfill{position:absolute;left:calc(var(--u)*10);right:calc(var(--u)*10);top:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3);background:var(--cream);transform:scaleX(0);transform-origin:left;opacity:0}
+.holding .hfill{opacity:1}
+/* D84: the control that fixes an alert is a solid red key with dark text */
+.door.unl{background:var(--alert)}
+.door.unl .nm,.door.unl .s{color:#1d1c1a}
+.door.unl .turn{background:#7a1f15;box-shadow:none}.door.unl .turn i{background:#1d1c1a}
+.door.unl .bw{background:#7a1f15}
+.door.unl.f .bw{background:#1d1c1a}
+.door.unl.f .mv{transform:translateY(calc(var(--u)*-4))}
+
+.hints{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);bottom:calc(var(--u)*54);display:flex;gap:calc(var(--u)*32);align-items:center;font:400 calc(var(--u)*24)/1 var(--f);color:var(--ink3);white-space:nowrap;height:calc(var(--u)*36)}
+.hints span{display:inline-flex;align-items:center}
+.hints kbd{height:calc(var(--u)*34);min-width:calc(var(--u)*34);font-size:calc(var(--u)*24)}
+
+.bump-r{animation:bumpR 180ms var(--glide)}.bump-l{animation:bumpL 180ms var(--glide)}
+@keyframes bumpR{50%{translate:calc(var(--u)*-8) 0}}@keyframes bumpL{50%{translate:calc(var(--u)*8) 0}}
+.calm .bump-r,.calm .bump-l{animation:none}
+
+/* the note in the window (device turned on), and toasts */
+.note-card{position:absolute;right:calc(var(--u)*96);top:calc(var(--u)*196);width:calc(var(--u)*560);padding:calc(var(--u)*26) calc(var(--u)*30) calc(var(--u)*28);border-radius:calc(var(--u)*10);background:var(--lac);box-shadow:0 0 0 calc(var(--u)*2) #3a3029, 0 calc(var(--u)*-8) 0 var(--walnut) inset;display:grid;gap:calc(var(--u)*10);opacity:0;transform:translateY(calc(var(--u)*-16));transition:opacity 180ms var(--decel),transform 220ms var(--decel);visibility:hidden}
+.note-card.on{opacity:1;transform:none;visibility:visible}
+.calm .note-card{transform:none}
+.note-card .eb{font:500 calc(var(--u)*22) var(--mono);letter-spacing:.1em;color:var(--ink3)}
+.note-card .t{display:flex;gap:calc(var(--u)*14);align-items:center;font:500 calc(var(--u)*32) var(--f)}
+.note-card .ks{display:flex;gap:calc(var(--u)*14);margin-top:calc(var(--u)*8)}
+.key{position:relative;display:inline-flex;align-items:center;gap:calc(var(--u)*12);height:calc(var(--u)*64);padding:0 calc(var(--u)*26) calc(var(--u)*4);border-radius:calc(var(--u)*8);background:var(--lac3);color:var(--ink2);font:500 calc(var(--u)*26) var(--f);white-space:nowrap;box-shadow:0 calc(var(--u)*4) 0 #0a0807;transition:transform 150ms var(--glide)}
+.key.f{color:var(--ink);background:#3b3029;transform:translateY(calc(var(--u)*-4));box-shadow:0 calc(var(--u)*8) 0 #0a0807}
+.key.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 calc(var(--u)*4) 0 #8a4a12}
+.key.pri.f{background:var(--orange);color:#000;box-shadow:0 calc(var(--u)*10) 0 #6f3a0c}
+.calm .key.f{transform:none}
+.key .ind.slot{width:calc(var(--u)*30);height:calc(var(--u)*10)}
+.key.f .ind.slot::after{opacity:1}
+.key.pri .ind{background:#7a3d0c}
+.toast{position:absolute;right:calc(var(--u)*96);top:calc(var(--u)*196);max-width:calc(var(--u)*600);display:flex;align-items:center;gap:calc(var(--u)*14);padding:calc(var(--u)*16) calc(var(--u)*26);border-radius:calc(var(--u)*10);background:var(--lac);box-shadow:0 0 0 calc(var(--u)*2) #3a3029;font:400 calc(var(--u)*26) var(--f);opacity:0;transition:opacity 180ms linear;visibility:hidden}
+.toast.on{opacity:1;visibility:visible}
+
+/* ---------- TV menu: the console's drawer ---------- */
+.drawer{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*262);background:var(--lac);transform:translateY(105%);transition:transform 220ms var(--decel);z-index:20}
+.drawer::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(var(--u)*14);background:var(--walnut)}
+.drawer.on{transform:none}
+.calm .drawer{transition:opacity 140ms linear;transform:none;opacity:0;visibility:hidden}
+.calm .drawer.on{opacity:1;visibility:visible}
+.dh{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*30);display:flex;align-items:center;gap:calc(var(--u)*16);font:500 calc(var(--u)*26) var(--f)}
+.dh .over{color:var(--ink2);font-weight:400}
+.dh .hints{position:static;margin-left:auto;height:auto}
+.dk{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*90);display:flex;gap:calc(var(--u)*14)}
+.mk{position:relative;flex:1;display:grid;align-content:center;gap:calc(var(--u)*2);height:calc(var(--u)*110);padding:0 calc(var(--u)*20) calc(var(--u)*12);border-radius:calc(var(--u)*8);background:var(--lac2);transition:transform 150ms var(--glide)}
+.mk .n{font:500 calc(var(--u)*26) var(--f);color:var(--ink2);white-space:nowrap}
+.mk .v{font:400 calc(var(--u)*22) var(--f);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:calc(var(--u)*8)}
+.mk .bw{position:absolute;left:30%;right:30%;bottom:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3) calc(var(--u)*3) 0 0;background:#0a0807}
+.mk.f{background:var(--lac3);transform:translateY(calc(var(--u)*-4))}
+.mk.f .n{color:var(--ink)}.mk.f .v{color:var(--ink2)}
+.mk.f .bw{background:var(--cream)}
+.calm .mk.f{transform:none}
+.mk.unl{background:var(--alert)}.mk.unl .n,.mk.unl .v{color:#1d1c1a}.mk.unl .bw{background:#7a1f15}.mk.unl.f .bw{background:#1d1c1a}
+.chooser{position:absolute;bottom:calc(var(--u)*230);width:calc(var(--u)*440);padding:calc(var(--u)*14) 0 calc(var(--u)*10);border-radius:calc(var(--u)*10);background:var(--lac);box-shadow:0 0 0 calc(var(--u)*2) #3a3029;display:none;z-index:21}
+.chooser.on{display:block}
+.chooser .hd{padding:0 calc(var(--u)*24) calc(var(--u)*8);font:500 calc(var(--u)*22) var(--mono);color:var(--ink3);letter-spacing:.08em;display:flex;justify-content:space-between}
+.opt{position:relative;display:flex;align-items:center;gap:calc(var(--u)*16);height:calc(var(--u)*58);padding:0 calc(var(--u)*24) 0 calc(var(--u)*30);font:400 calc(var(--u)*26) var(--f);color:var(--ink2);white-space:nowrap}
+.opt .sub{color:var(--ink3);font-size:calc(var(--u)*22);margin-left:auto}
+.opt .lw{position:absolute;left:0;top:calc(var(--u)*12);bottom:calc(var(--u)*12);width:calc(var(--u)*6);border-radius:0 calc(var(--u)*3) calc(var(--u)*3) 0;background:#0a0807}
+.opt.f{color:var(--ink);background:var(--lac2)}.opt.f .lw{background:var(--cream)}
+.chooser .ft{padding:calc(var(--u)*8) calc(var(--u)*24) 0;font:400 calc(var(--u)*22) var(--f);color:var(--ink3);border-top:calc(var(--u)*2) solid #2c241e;margin-top:calc(var(--u)*6);white-space:nowrap}
+
+/* ---------- picture (what's playing) ---------- */
+.picture .art{position:absolute;inset:0}
+.picture .standin{position:absolute;left:calc(var(--u)*96);bottom:calc(var(--u)*96);font:400 calc(var(--u)*26) var(--f);color:#ffffffb3}
+
+/* ---------- the blind (title card) ---------- */
+.blind{position:absolute;inset:0;z-index:30;background:#16120f;
+  background-image:repeating-linear-gradient(180deg,#ffffff0d 0 calc(var(--u)*1),#00000040 calc(var(--u)*1) calc(var(--u)*3),transparent calc(var(--u)*3) calc(var(--u)*18));
+  transform:translateY(-101%);transition:transform 300ms var(--decel);visibility:hidden}
+.blind.down{transform:none;visibility:visible}
+.blind.up{transform:translateY(-101%);visibility:visible;transition:transform 300ms cubic-bezier(.5,0,.75,0)}
+.calm .blind{transform:none;opacity:0;transition:opacity 140ms linear}
+.calm .blind.down{opacity:1}
+.calm .blind.up{opacity:0;transform:none;transition:opacity 140ms linear}
+.blind::after{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*24);background:var(--walnut)}
+.bc{position:absolute;left:calc(var(--u)*160);right:calc(var(--u)*160);top:calc(var(--u)*300);display:grid;gap:calc(var(--u)*14)}
+.bc .eb{font:500 calc(var(--u)*24) var(--mono);letter-spacing:.14em;color:var(--ink2);text-transform:uppercase}
+.bc .tt{font:500 calc(var(--u)*84)/1.05 var(--f);letter-spacing:-.01em}
+.bc .ln{font:400 calc(var(--u)*28)/1.4 var(--f);color:var(--ink2);max-width:calc(var(--u)*1100)}
+.slats{display:flex;gap:calc(var(--u)*10);margin-top:calc(var(--u)*20)}
+.slats i{width:calc(var(--u)*56);height:calc(var(--u)*12);border-radius:calc(var(--u)*3);background:#0a0807;box-shadow:inset 0 calc(var(--u)*1) calc(var(--u)*2) #000,0 0 0 calc(var(--u)*1) #ffffff14;position:relative}
+.slats i::after{content:"";position:absolute;inset:calc(var(--u)*3);border-radius:2px;background:var(--cream);opacity:0}
+.slats i.l::after{opacity:1}
+.slats.dim i.l::after{opacity:.4}
+.bc .ks{display:flex;gap:calc(var(--u)*16);margin-top:calc(var(--u)*28)}
+.bc .big{display:flex;align-items:center;gap:calc(var(--u)*40)}
+.bigsock{flex:none;width:calc(var(--u)*150);height:calc(var(--u)*150);border-radius:50%;background:var(--code,#3a3029);box-shadow:0 0 0 calc(var(--u)*12) #3a3029;position:relative}
+.bigsock::after{content:"";position:absolute;left:calc(var(--u)*38);right:calc(var(--u)*38);top:calc(var(--u)*55);height:calc(var(--u)*40);background:#0c0a08cc;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%)}
+.bigsock.emptyp{background:#0a0807}
+
+/* ---------- full screens: All apps, Settings ---------- */
+.screen{background:var(--lac)}
+.screen::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(var(--u)*10);background:var(--walnut)}
+.sh{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*60);display:flex;align-items:baseline;gap:calc(var(--u)*24)}
+.sh .t{font:500 calc(var(--u)*48) var(--f)}
+.sh .s{font:400 calc(var(--u)*26) var(--f);color:var(--ink2)}
+.sh .c{margin-left:auto;font:400 calc(var(--u)*26) var(--f);color:var(--ink2)}
+.ag{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*170);display:grid;gap:calc(var(--u)*26)}
+.ag .gl{font:500 calc(var(--u)*22) var(--mono);letter-spacing:.12em;color:var(--ink3);text-transform:uppercase}
+.ag .gk{display:grid;grid-template-columns:repeat(5,1fr);gap:calc(var(--u)*16)}
+.ak{position:relative;display:grid;gap:calc(var(--u)*8);height:calc(var(--u)*108);padding:calc(var(--u)*18) calc(var(--u)*22);border-radius:calc(var(--u)*8);background:var(--lac2);transition:transform 150ms var(--glide)}
+.ak .code{width:calc(var(--u)*40);height:calc(var(--u)*5);border-radius:2px;background:var(--code)}
+.ak .n{font:500 calc(var(--u)*28) var(--f);color:var(--ink2)}
+.ak .g{font:400 calc(var(--u)*22) var(--f);color:var(--ink3)}
+.ak .bw{position:absolute;left:30%;right:30%;bottom:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3) calc(var(--u)*3) 0 0;background:#0a0807}
+.ak.f{background:var(--lac3);transform:translateY(calc(var(--u)*-4))}.ak.f .n{color:var(--ink)}.ak.f .bw{background:var(--cream)}
+.calm .ak.f{transform:none}
+.slist{position:absolute;left:calc(var(--u)*96);top:calc(var(--u)*170);width:calc(var(--u)*640);display:grid;gap:calc(var(--u)*6)}
+.srow{position:relative;display:flex;align-items:center;gap:calc(var(--u)*16);height:calc(var(--u)*72);padding:0 calc(var(--u)*24) 0 calc(var(--u)*34);border-radius:calc(var(--u)*8);font:500 calc(var(--u)*28) var(--f);color:var(--ink2)}
+.srow .v{margin-left:auto;font:400 calc(var(--u)*24) var(--f);color:var(--ink3);display:flex;align-items:center;gap:calc(var(--u)*10);white-space:nowrap}
+.srow .lw{position:absolute;left:0;top:calc(var(--u)*16);bottom:calc(var(--u)*16);width:calc(var(--u)*6);border-radius:0 calc(var(--u)*3) calc(var(--u)*3) 0;background:#0a0807}
+.srow.f{background:var(--lac2);color:var(--ink)}.srow.f .lw{background:var(--cream)}.srow.f .v{color:var(--ink2)}
+.srow.here:not(.f) .lw{background:#8d806c}
+.sdet{position:absolute;left:calc(var(--u)*800);right:calc(var(--u)*96);top:calc(var(--u)*170);display:grid;gap:calc(var(--u)*16);align-content:start}
+.sdet h3{margin:0;font:500 calc(var(--u)*36) var(--f)}
+.sdet p{margin:0;max-width:calc(var(--u)*900);font:400 calc(var(--u)*26)/1.45 var(--f);color:var(--ink2)}
+.sdet .rowk{display:flex;gap:calc(var(--u)*14);flex-wrap:wrap}
+.sdet .facts{display:grid;grid-template-columns:auto 1fr;gap:calc(var(--u)*8) calc(var(--u)*30);font:400 calc(var(--u)*26) var(--f);color:var(--ink2)}
+.sdet .facts b{font-weight:500;color:var(--ink)}
+.sdet .mini{font:400 calc(var(--u)*24) var(--f);color:var(--ink3)}
+.swatchsky{display:flex;gap:calc(var(--u)*6);height:calc(var(--u)*60);border-radius:calc(var(--u)*8);overflow:hidden;max-width:calc(var(--u)*720)}
+.swatchsky i{flex:1;display:grid}
+.swatchsky i b{display:block}
+
+/* picture-mode preview filters (applied to the layer under the menu, after a 500 ms rest) */
+.pm-film{filter:saturate(.94) brightness(.97)}.pm-std{filter:brightness(1.05)}.pm-vivid{filter:saturate(1.35) contrast(1.08)}
+.pm-sport{filter:brightness(1.08) contrast(1.05)}.pm-game{filter:contrast(1.04)}.pm-eco{filter:brightness(.82)}
+.pm-dyn{filter:saturate(1.25) brightness(1.1)}.pm-cal{filter:saturate(.9) sepia(.08)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="eyebrow">Jam Design · TV launcher (Lobby) · Pass 4</div>
+    <h1>Lobby: the console under the window</h1>
+    <p class="muted">The living-room Hisense's home screen, redrawn for what it's for: a calm piece of furniture three people walk past all day. The top is a flat window whose sky follows the time of day. Continue stands on the sideboard as picture frames. The console face holds an app dial with a needle, a patch bay for the inputs, and a house plate with wall switches and the front door's thumb-turn. Starting something drops a slatted blind over the window. Same functions as pass 3 (no ads, no suggestions, one way in per job, OK on release). Press <b>Tour</b> to watch it without a remote. All titles, art and names are made up.</p>
+  </div>
+  <div class="tourbar">
+    <button class="tourb" id="tourBtn">▶ Tour</button>
+    <button class="tourb sec" id="tourNext">Next step ›</button>
+    <div class="tourcap" id="tourCap"><b>TOUR</b>Steps through 25 states on its own, about 4 seconds each. Click the TV or press a key to take over.</div>
+  </div>
+  <div class="ctl">
+    <div><span class="eyebrow">Time of day (the window)</span><div class="seg" data-ctl="time">
+      <button data-v="dawn">Dawn</button><button data-v="morning">Morning</button><button data-v="afternoon">Afternoon</button><button data-v="golden">Golden hour</button><button data-v="dusk">Dusk</button><button data-v="night">Night</button><button data-v="live">Live clock</button></div></div>
+    <div><span class="eyebrow">Motion</span><div class="seg" data-ctl="motion"><button data-v="full">Full</button><button data-v="calm">Calm</button></div></div>
+    <div><span class="eyebrow">Home</span><div class="seg" data-ctl="home"><button data-v="lived">Lived-in</button><button data-v="first">First run</button></div></div>
+    <div><span class="eyebrow">Switch 2</span><div class="seg" data-ctl="sw"><button data-v="on">On</button><button data-v="asleep">Asleep</button></div></div>
+    <div><span class="eyebrow">Netflix</span><div class="seg" data-ctl="nf"><button data-v="opens">Opens</button><button data-v="fails">Won't open</button></div></div>
+    <div><span class="eyebrow">Lobby update</span><div class="seg" data-ctl="upd"><button data-v="no">Up to date</button><button data-v="yes">1.4 ready</button></div></div>
+    <div><span class="eyebrow">Page</span><div class="seg" data-ctl="theme"><button data-v="auto">Auto</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div></div>
+  </div>
+  <div class="ctl"><div><span class="eyebrow">Jump to</span><div class="seg" data-ctl="jump">
+    <button data-v="home">Home</button><button data-v="dial">App dial</button><button data-v="bay">Patch bay</button><button data-v="door">Door unlocked</button><button data-v="menu">TV menu over a film</button><button data-v="input">Input chooser</button><button data-v="nosig">No signal</button><button data-v="fail">App won't open</button><button data-v="cec">Device turned on</button><button data-v="first">First run</button><button data-v="apps">All apps</button><button data-v="settings">Settings</button></div></div></div>
+  <div class="legend">
+    <span><code>← ↑ → ↓</code>Move</span><span><code>Enter</code>OK (acts on release; hold to unlock)</span><span><code>Esc</code><code>Backspace</code>Back</span><span><code>H</code>Home</span><span><code>G</code><code>Q</code>TV menu</span><span><code>I</code>Inputs (TV menu › Input)</span>
+  </div>
+  <div class="keys" id="remote"><span class="eyebrow">Remote</span>
+    <button class="kb" data-k="ArrowUp">↑</button><button class="kb" data-k="ArrowDown">↓</button><button class="kb" data-k="ArrowLeft">←</button><button class="kb" data-k="ArrowRight">→</button>
+    <button class="kb" data-k="Enter">OK</button><button class="kb" data-k="hold">Hold OK</button><button class="kb" data-k="Escape">Back</button><button class="kb" data-k="h">⌂ Home</button><button class="kb" data-k="g">TV menu</button>
+  </div>
+
+  <div class="tv" id="tv" tabindex="0" aria-label="TV, 1920 by 1080. Click, then use the arrow keys and Enter.">
+    <!-- HOME -->
+    <section class="layer on" id="home" data-rows="top shelf dial bay">
+      <div class="sky" id="sky"><div class="skyl on" id="skyA"></div><div class="skyl" id="skyB"></div></div>
+      <div class="sill"></div>
+      <div class="hdr">
+        <div>
+          <div class="house">Bungalo</div>
+          <div class="clock" id="clock">8:24<small>PM</small></div>
+          <div class="date" id="date">Tuesday, November 3 · 57° cloudy</div>
+        </div>
+        <div class="hkeys">
+          <div class="hk" data-f data-row="top" data-act="tvmenu" id="kTV"><div class="in"><span>TV</span><span class="v" id="kTVv">Theater night · Optical</span></div><i class="bw"></i></div>
+          <div class="hk" data-f data-row="top" data-act="settings" id="kSet"><div class="in"><span class="ind led" id="updLed"></span><span>Settings</span></div><i class="bw"></i></div>
+        </div>
+      </div>
+      <div class="sign" id="sign"><div class="eb" id="sEb"></div><div class="tt" id="sTt"></div><div class="ln"><span class="t" id="sLn"></span><span class="do" id="sDo"></span></div></div>
+      <div class="grp" id="gShelf">Continue<span class="n" id="gShelfN">1 of 6</span></div>
+      <div class="shelf"><div class="track" id="track"></div></div>
+      <div class="face">
+        <div class="dial" id="dial"></div>
+        <div class="bay" id="bay"></div>
+        <div class="plate"><div class="lb">HOUSE</div><div class="row" id="plate"></div></div>
+        <div class="hints" id="hints"></div>
+      </div>
+      <div class="note-card" id="cec">
+        <div class="eb">HDMI 2 · JUST NOW</div>
+        <div class="t"><span class="ind led ok on"></span>Switch 2 turned on</div>
+        <div class="ks"><div class="key pri" data-f data-row="cec" data-act="cec-go"><span class="ind slot"></span>Switch to it</div><div class="key" data-f data-row="cec" data-act="cec-stay"><span class="ind slot"></span>Stay on Home</div></div>
+      </div>
+      <div class="toast" id="toast"></div>
+    </section>
+
+    <!-- PICTURE (what's on the TV: a film, an input, an app) -->
+    <section class="layer picture" id="pic"><div class="art" id="picArt"></div><div class="standin" id="picNote"></div></section>
+
+    <!-- ALL APPS -->
+    <section class="layer screen" id="apps" data-rows="a1 a1b a2">
+      <div class="sh"><span class="t">All apps</span><span class="s">The dial holds nine. The rest live here.</span><span class="c" id="clock2">8:24 PM</span></div>
+      <div class="ag" id="ag"></div>
+      <div class="hints" id="hintsA"><span><kbd>OK</kbd>Open</span><span><kbd>Back</kbd>Home</span></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="layer screen" id="settings" data-rows="sl sd" data-axis="y">
+      <div class="sh"><span class="t">Settings</span><span class="s">Lobby and the TV</span><span class="c" id="clock3">8:24 PM</span></div>
+      <div class="slist" id="slist"></div>
+      <div class="sdet" id="sdet"></div>
+      <div class="hints" id="hintsS"><span><kbd>OK</kbd>Choose</span><span><kbd>Back</kbd>Home</span></div>
+    </section>
+
+    <!-- TV MENU: the console's drawer -->
+    <div class="drawer" id="drawer" data-rows="mk">
+      <div class="dh"><span class="ind slot on"></span><span>TV menu</span><span class="over" id="dOver">over Home</span>
+        <span class="hints"><span><kbd>OK</kbd>Choose</span><span><kbd>Back</kbd>Close</span><span id="dClock">8:24 PM</span></span></div>
+      <div class="dk" id="dk"></div>
+    </div>
+    <div class="chooser" id="chooser" data-rows="opt" data-axis="y"></div>
+
+    <!-- BLIND (title card + failure layer) -->
+    <div class="blind" id="blind" data-rows="bk"><div class="bc" id="bc"></div></div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><h3>Purpose first</h3><span class="muted">Three people walk past this screen all day. It should be calm to look at when nobody's using it, get anyone to their thing in a few presses, say what the TV is doing, and never sell anything. So it's furniture: a window, a sideboard, a receiver.</span></div>
+    <div class="note"><h3>New elements</h3><span class="muted">Sky window (time of day) · picture frames on the sideboard · app dial with a needle that remembers · patch bay with every port shown · wall-switch paddles · thumb-turn lock · TV readout key · drawer TV menu · slatted blind title card · a note in the window.</span></div>
+    <div class="note"><h3>Read with</h3><span class="muted"><code>notes/pass4-tv-launcher.md</code>: what changed since pass 3, the rules this pass broke and where each one should live, the audit and questions for Isaac.</span></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const tv=$('tv');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* ---------------- data (all made up; household names from the Lobby README) ---------------- */
+const SKY={
+  night:{label:'Night',clock:['8:24','PM'],b:['#0e1424','#121a2e','#172036','#1f2840','#283149'],disc:['#e6dcc4',34,1560,236],cloud:'#1a2236',stars:true},
+  dawn:{label:'Dawn',clock:['6:42','AM'],b:['#151a33','#231f3d','#352446','#6a3c55','#a8625e'],disc:['#efb488',54,1690,414],cloud:'#2d2443'},
+  morning:{label:'Morning',clock:['9:15','AM'],b:['#1d3a52','#244561','#2c5170','#5d82a0','#8fadc0'],disc:['#f1e3c4',46,1600,300],cloud:'#335a7a'},
+  afternoon:{label:'Afternoon',clock:['2:30','PM'],b:['#1b4060','#214b6e','#28567c','#5f8db0','#9bbccd'],disc:['#f3e9d2',40,1060,128],cloud:'#2f5f86'},
+  golden:{label:'Golden hour',clock:['5:48','PM'],b:['#262b47','#3a3352','#573b55','#a5605a','#d99263'],disc:['#f4c784',56,1500,452],cloud:'#463757'},
+  dusk:{label:'Dusk',clock:['7:06','PM'],b:['#121628','#1d1c35','#2e2240','#5a3150','#8f4a4f'],disc:['#e8956a',60,1330,420],cloud:'#271f39'}
+};
+const STARS=[[1080,70],[1190,120],[1330,64],[1420,150],[1700,90],[1810,170],[1240,300],[1380,380],[1760,330],[1650,40],[1120,220],[1520,120],[1880,260],[1010,160]];
+const ARTS={
+  copper:{sky:'#6b3a2a',sun:['#e8a25a',.72,.42,.16],hills:[['#3a2019','0 72%,18% 64%,40% 70%,62% 58%,100% 66%,100% 100%,0 100%']],city:'#2a1712'},
+  signal:{sky:'#1d2a44',sun:null,hills:[['#2f3b57','0 58%,100% 50%,100% 100%,0 100%'],['#121827','30% 100%,46% 58%,54% 58%,70% 100%']],lamps:'#e9cf8a'},
+  velvet:{sky:'#3a1622',sun:['#d9c19a',.5,.78,.26],hills:[['#5a1f2f','0 0,16% 0,16% 100%,0 100%'],['#5a1f2f','84% 0,100% 0,100% 100%,84% 100%'],['#1a0b10','40% 60%,60% 60%,58% 100%,42% 100%']]},
+  duel:{sky:'#17213a',sun:['#e7dfc8',.7,.3,.14],hills:[['#25304c','0 70%,30% 62%,60% 72%,100% 60%,100% 100%,0 100%'],['#0f1424','22% 100%,24% 52%,27% 52%,29% 100%'],['#0f1424','70% 100%,72% 50%,75% 50%,77% 100%']]},
+  harbour:{sky:'#2f4a55',sun:['#e9d7b0',.36,.4,.13],hills:[['#26414b','0 62%,100% 62%,100% 100%,0 100%'],['#e9d7b0','74% 60%,80% 34%,82% 60%'],['#162a32','0 82%,100% 82%,100% 100%,0 100%']]},
+  orbit:{sky:'#2b2a3f',sun:['#d9874f',.3,.5,.2],hills:[['#3c3b58','0 76%,100% 60%,100% 100%,0 100%'],['#b9ad96','62% 30%,64% 30%,64% 32%,62% 32%']]},
+  game:{sky:'#3d6f8c',sun:['#f2d27a',.82,.22,.1],hills:[['#5b9a5e','0 66%,25% 58%,50% 66%,75% 56%,100% 64%,100% 100%,0 100%'],['#8a5a34','0 86%,100% 86%,100% 100%,0 100%'],['#e9c36a','40% 52%,44% 52%,44% 58%,40% 58%']]},
+  live:{sky:'#26323b',sun:null,hills:[['#34444f','0 60%,100% 60%,100% 100%,0 100%'],['#c7b79a','10% 20%,52% 20%,52% 26%,10% 26%']]},
+  app:{sky:'#1e1b18',sun:null,hills:[]}
+};
+const CONT=[
+  {id:'copper',t:'The Copper City',app:'Jamfin',kind:'Film',ln:'A railway town, and the night all its lights went out.',meta:'41 min left · paused by Isaac',act:'Resume from 1:12:04',p:.71},
+  {id:'signal',t:'Signal Street',app:'Jamfin',kind:'Show · S2 E4',ln:'The Long Shift · 24 min left.',meta:'',act:'Resume from 0:19:40',p:.34},
+  {id:'velvet',t:'The Velvet Machine',app:'Jamfin',kind:'Film',ln:'A stage magician builds the trick that ends magic.',meta:'1 h 38 min left',act:'Resume from 0:12:10',p:.11},
+  {id:'duel',t:'Moonlit Duel',app:'Moonlight',kind:'Game · on the PC',ln:'Played Tuesday. Two players, one controller each.',meta:'',act:'Continue',p:0},
+  {id:'harbour',t:'The Harbour Hour',app:'Dropout',kind:'Show · S1 E7',ln:'Fog Warning · 6 min left.',meta:'',act:'Resume from 0:18:02',p:.62},
+  {id:'orbit',t:'Paper Orbit',app:'YouTube',kind:'Video',ln:'Building a cardboard planetarium, part 2.',meta:'',act:'Resume from 0:08:44',p:.4}
+];
+const APPS=[
+  {n:'Jamfin',g:'Watch',code:'#8f7bb3',d:'Our films and shows.'},
+  {n:'YouTube',g:'Watch',code:'#b9534a',d:'Videos.'},
+  {n:'Netflix',g:'Watch',code:'#9b4a46',d:'Films and shows.'},
+  {n:'Prime Video',g:'Watch',code:'#4f86a6',d:'Films and shows.'},
+  {n:'Dropout',g:'Watch',code:'#b79d45',d:'Comedy shows.'},
+  {n:'YouTube TV',g:'Watch',code:'#a85a50',d:'Live channels.'},
+  {n:'Moonlight',g:'Play',code:'#5f7fb0',d:'Games streamed from the PC.'},
+  {n:'Steam Link',g:'Play',code:'#5c7489',d:'Steam from the PC.'},
+  {n:'Spotify',g:'Listen',code:'#5f9a64',d:'Music on the TV speakers or the stereo.'},
+  {n:'All apps',g:'',code:'#6b6052',d:'Every app on the TV, and the ones not on the dial.'}
+];
+const MORE=[{n:'RetroArch',g:'Play',code:'#8a6aa0'},{n:'YouTube Music',g:'Listen',code:'#b0584e'},{n:'Sendspin',g:'Listen',code:'#6a9a8a'},{n:'Play Store',g:'System',code:'#6a7f6a'},{n:'Android settings',g:'System',code:'#6b6052'}];
+const PORTS=[
+  {id:'apps',lb:'APPS',nm:'Apps',s:'on now',apps:true},
+  {id:'h1',lb:'HDMI 1',nm:'empty',empty:true},
+  {id:'h2',lb:'HDMI 2',nm:'Switch 2',code:'#a4483d',dev:true},
+  {id:'h3',lb:'HDMI 3',nm:'empty',empty:true},
+  {id:'ant',lb:'ANT',nm:'Live TV',s:'41 channels',code:'#6a8a9a',dev:true}
+];
+const PICMODES=[['Theater night',''],['Filmmaker','pm-film'],['Standard','pm-std'],['Calibrated','pm-cal'],['Vivid','pm-vivid'],['Sports','pm-sport'],['Game','pm-game'],['Energy saving','pm-eco'],['Dynamic','pm-dyn']];
+const SNDMODES=['Standard','Theater','Music','Speech','Late night','Sports','Stereo','Auto'];
+const SLEEPS=['Off','15 min','30 min','60 min','90 min'];
+
+const S={time:'night',calm:false,first:false,sw:true,nf:true,upd:false,screen:'home',under:null,
+  lamps:{floor:{n:'Floor lamp',on:true,lvl:40,c:'#f2c98a'},table:{n:'Table lamp',on:false,c:'#f3dcae'},mood:{n:'Mood lighting',on:true,c:'#c9a0e8'}},
+  door:'locked',armed:0,pic:'Theater night',snd:'Standard',out:'Optical',slp:'Off',cecPref:'Ask',skyPref:'Follow the time of day',
+  playing:null,src:'Apps',dialMem:0,shelfMem:0,ret:null};
+
+/* ---------------- drawing ---------------- */
+function artHTML(id){const a=ARTS[id];let h=`<div style="position:absolute;inset:0;background:${a.sky}"></div>`;
+  if(a.sun){const[c,x,y,r]=a.sun;h+=`<div style="position:absolute;left:${(x-r*.5625)*100}%;top:${(y-r)*100}%;width:${r*112.5}%;aspect-ratio:1;border-radius:50%;background:${c}"></div>`}
+  if(a.city){for(let i=0;i<9;i++){const w=6+((i*37)%5),hh=22+((i*53)%30),l=4+i*10.5;h+=`<div style="position:absolute;left:${l}%;bottom:18%;width:${w}%;height:${hh}%;background:${a.city}"></div>`}}
+  a.hills.forEach(([c,p])=>h+=`<div style="position:absolute;inset:0;background:${c};clip-path:polygon(${p})"></div>`);
+  if(a.lamps){[[18,46],[34,40],[66,40],[82,46]].forEach(([x,y])=>h+=`<div style="position:absolute;left:${x}%;top:${y}%;width:2.6%;aspect-ratio:1;border-radius:50%;background:${a.lamps}"></div>`)}
+  return h}
+function drawSky(el,k){const s=SKY[k];let h=s.b.map((c,i)=>`<div class="b b${i+1}" style="background:${c}"></div>`).join('');
+  if(s.stars)h+=STARS.map(([x,y])=>`<i class="star" style="left:calc(var(--u)*${x});top:calc(var(--u)*${y})"></i>`).join('');
+  const[c,r,x,y]=s.disc;h+=`<div class="disc" style="background:${c};width:calc(var(--u)*${r*2});height:calc(var(--u)*${r*2});left:calc(var(--u)*${x-r});top:calc(var(--u)*${y-r})"></div>`;
+  [[1180,286,190],[1330,322,120],[1640,382,210],[1760,288,90]].forEach(([x,y,w])=>h+=`<div class="cloud" style="background:${s.cloud};left:calc(var(--u)*${x});top:calc(var(--u)*${y});width:calc(var(--u)*${w})"></div>`);
+  el.innerHTML=h}
+let skyFront='skyA';
+function setTime(k,instant){if(k==='live'){const d=new Date(),hr=d.getHours()+d.getMinutes()/60;k=hr<5.5?'night':hr<8?'dawn':hr<12?'morning':hr<16.5?'afternoon':hr<18.5?'golden':hr<20?'dusk':'night';
+    const h12=((d.getHours()+11)%12)+1;SKY.live={...SKY[k],clock:[`${h12}:${String(d.getMinutes()).padStart(2,'0')}`,d.getHours()<12?'AM':'PM']};S.timeKey='live';k='live'}
+  S.time=k;const back=skyFront==='skyA'?'skyB':'skyA';drawSky($(back),k);
+  if(instant||S.calm){$(back).style.transition='none';$(skyFront).style.transition='none'}
+  $(back).classList.add('on');$(skyFront).classList.remove('on');skyFront=back;
+  requestAnimationFrame(()=>{$('skyA').style.transition='';$('skyB').style.transition=''});
+  const c=SKY[k].clock;$('clock').innerHTML=`${c[0]}<small>${c[1]}</small>`;['clock2','clock3','dClock'].forEach(i=>$(i).textContent=c.join(' '));
+  if(cur&&cur.closest('#home'))sign(cur)}
+
+function drawShelf(){const t=$('track');
+  if(S.first){t.innerHTML=`<div class="empty" id="emptyShelf"><p>Nothing on the shelf yet. Films, shows and games you start will stand here.</p><div class="key pri" data-f data-row="shelf" data-act="arrange" id="arrange"><span class="ind slot"></span>Arrange Home</div></div>`;$('gShelf').firstChild.textContent='Continue';return}
+  t.innerHTML=CONT.map((c,i)=>`<div class="fr" data-f data-row="shelf" data-act="launch" data-i="${i}"><div class="pic"><div class="art">${artHTML(c.id)}${c.p?`<div class="pg"><i style="width:${c.p*100}%"></i></div>`:''}</div></div><div class="plq"><span class="ind slot"></span><span class="t">${c.t}</span></div></div>`).join('')+'<div class="endstop"></div>'}
+function drawDial(){const d=$('dial');const x0=150,step=(1728-300)/9;let h='';
+  const bands=[['WATCH',0,5],['PLAY',6,7],['LISTEN',8,8]];
+  bands.forEach(([n,a,b])=>{const l=x0+a*step-60,r=x0+b*step+60;h+=`<div class="band" style="left:calc(var(--u)*${l});width:calc(var(--u)*${r-l})">${n}</div>`});
+  h+=`<div class="pos" id="dialPos">1 of 10</div><div class="ticks"></div>`;
+  APPS.forEach((a,i)=>{const x=x0+i*step;h+=`<i class="major" style="left:calc(var(--u)*${x})"></i><div class="st" data-f data-row="dial" data-act="app" data-i="${i}" style="left:calc(var(--u)*${x});--code:${a.code}"><span class="nm">${a.n}</span><span class="code"></span></div>`});
+  h+=`<i class="stop" style="left:calc(var(--u)*14)"></i><i class="stop" style="right:calc(var(--u)*14)"></i><i class="needle" id="needle"></i>`;
+  d.innerHTML=h;S.dialX=i=>x0+i*step;setNeedle(S.dialMem)}
+function setNeedle(i){$('needle').style.transform=`translateX(calc(var(--u)*${S.dialX(i)}))`}
+function drawBay(){$('bay').innerHTML=PORTS.map((p,i)=>{const sig=p.id==='h2'?(S.sw?'<span class="ind led ok on"></span>Signal':'<span class="ind led"></span>Asleep'):(p.s||'');
+  return (i===1?'<i class="sep"></i>':'')+`<div class="sk ${p.empty?'empty-port':''} ${p.dev?'plug':''} ${p.apps?'apps':''}" ${p.dev?`data-f data-row="bay" data-act="input" data-port="${p.id}"`:''} style="--code:${p.code||'#000'}"><span class="lb">${p.lb}</span><span class="hole">${p.apps?'<span class="ind sq on"></span>':''}</span><span class="nm">${p.nm}</span><span class="s">${sig}</span></div>`}).join('')}
+function drawPlate(){const L=S.lamps;$('plate').innerHTML=Object.entries(L).map(([k,l])=>`<div class="swu" data-f data-row="bay" data-act="lamp" data-k="${k}"><div class="mv"><div class="paddle ${l.on?'':'off'}"><i></i><span class="ind ${l.on?'on':''}" style="--c:${l.c}"></span></div><div class="txt"><span class="nm">${l.n}</span><span class="s">${l.on?(l.lvl?`On · ${l.lvl}%`:'On'):'Off'}</span></div></div><i class="bw"></i></div>`).join('')+
+  `<div class="swu door ${S.door==='unlocked'?'unl':''}" data-f data-row="bay" data-act="door" data-hold="1000" id="door"><i class="hfill" id="hfill"></i><div class="mv"><div class="turn"><i></i></div><div class="txt"><span class="nm">Front door</span><span class="s" id="doorS">${doorWord()}</span></div></div><i class="bw"></i></div>`}
+function doorWord(){if(S.door==='unlocked')return 'Unlocked · OK locks';if(S.armed)return 'Press OK again';return '<span class="ind led ok on"></span>Locked'}
+function redrawPlate(){const k=cur&&cur.closest('#plate')?(cur.dataset.k||'door'):null;drawPlate();if(k){const el=k==='door'?$('door'):$('plate').querySelector(`[data-k="${k}"]`);cur=null;focus(el,true)}}
+
+/* ---------------- sign + hints ---------------- */
+function setSign(eb,tt,ln,doTxt,alert){const sg=$('sign');const apply=()=>{$('sEb').textContent=eb;$('sTt').textContent=tt;$('sLn').textContent=ln||'';$('sDo').innerHTML=doTxt?`<kbd>OK</kbd>${doTxt}`:'';sg.classList.toggle('alert',!!alert);sg.classList.remove('swap')};
+  if(S.calm){apply();return}sg.classList.add('swap');clearTimeout(setSign.t);setSign.t=setTimeout(apply,50)}
+function sign(el){if(!el)return;const a=el.dataset.act;
+  if(S.door==='unlocked'&&a!=='door'){} // the door key itself carries the alert; the sign stays about focus
+  if(a==='launch'){const c=CONT[+el.dataset.i];setSign([c.app,c.kind,c.meta].filter(Boolean).join(' · '),c.t,c.ln,c.act)}
+  else if(a==='app'){const p=APPS[+el.dataset.i];setSign(p.g?`App · ${p.g}`:'Lobby',p.n,p.d,p.n==='All apps'?'Open the list':`Open ${p.n}`)}
+  else if(a==='input'){const p=PORTS.find(q=>q.id===el.dataset.port);if(p.id==='h2')setSign('Input · HDMI 2','Switch 2',S.sw?'Signal. The Switch 2 is on.':'Asleep. Turn it on, or OK and Lobby will tell you what it sees.','Switch to HDMI 2');else setSign('Input · Antenna','Live TV','41 channels from the roof antenna.','Watch Live TV')}
+  else if(a==='lamp'){const l=S.lamps[el.dataset.k];setSign('House · Living room',l.n,l.on?(l.lvl?`On at ${l.lvl}%. Warm white.`:'On.'):'Off.',l.on?'Turn off':'Turn on')}
+  else if(a==='door'){if(S.door==='unlocked')setSign('House · Alert','The front door is unlocked','Unlocked at 8:24 PM from this TV.','Lock it',true);else setSign('House · Front door','Front door','Locked. Hold OK for a second, or press it twice, to unlock.',S.armed?'Press OK again to unlock':'Unlock')}
+  else if(a==='tvmenu')setSign('The TV right now','TV menu',`Picture ${S.pic} · Sound ${S.snd} · Sound out ${S.out} · Sleep ${S.slp.toLowerCase()}`,'Open the TV menu');
+  else if(a==='settings')setSign('Lobby',S.upd?'Lobby 1.4 is ready':'Settings',S.upd?'It installs tonight, or now from About.':'Picture, sound, inputs, the window and About.','Open Settings');
+  else if(a==='arrange')setSign('Welcome','Hello. This is Lobby.','Your apps, inputs and lamps, and nothing else. Start with the dial.','');
+  /* the note in the window says it once; the sign keeps what was focused before */
+  hints(el)}
+function hints(el){const a=el&&el.dataset.act,row=el&&el.dataset.row;let h=[];
+  const ok=t=>`<span><kbd>OK</kbd>${t}</span>`;
+  if(row==='dial')h=[ok('Open'),'<span>← → Tune</span>','<span><kbd>G</kbd>TV menu</span>'];
+  else if(a==='door')h=S.door==='unlocked'?[ok('Lock')]:[ok('Hold to unlock, or press twice')];
+  else if(row==='shelf')h=[ok(S.first?'Arrange Home':'Resume'),'<span>← → Shelf</span>','<span><kbd>G</kbd>TV menu</span>'];
+  else if(a==='lamp')h=[ok('Switch'),'<span><kbd>G</kbd>TV menu</span>'];
+  else h=[ok('Choose'),'<span><kbd>G</kbd>TV menu</span>'];
+  $('hints').innerHTML=h.join('')}
+
+/* ---------------- focus engine ---------------- */
+let cur=null;
+const ctx=()=>{if($('blind').classList.contains('down')&&$('bc').querySelector('[data-f]'))return $('blind');if($('chooser').classList.contains('on'))return $('chooser');if($('drawer').classList.contains('on'))return $('drawer');
+  if($('cec').classList.contains('on'))return $('cec');return $(S.screen==='playing'?'pic':S.screen)};
+function rowsOf(c){const names=(c.dataset.rows||'').split(' ');const all=[...c.querySelectorAll('[data-f]')].filter(e=>e.getClientRects().length);
+  return names.map(n=>all.filter(e=>e.dataset.row===n)).filter(r=>r.length)}
+function focus(el,quiet){if(!el)return;tv.querySelectorAll('.f').forEach(e=>e!==el&&e.classList.remove('f'));cur=el;el.classList.add('f');onFocus(el,quiet)}
+function onFocus(el,quiet){const row=el.dataset.row;
+  if(el.closest('#home')){
+    $('dial').classList.toggle('cur',row==='dial');$('gShelf').classList.toggle('cur',row==='shelf');
+    if(row==='dial'){const i=+el.dataset.i;S.dialMem=i;setNeedle(i);$('dialPos').textContent=`${i+1} of ${APPS.length}`}
+    if(row==='shelf'&&!S.first){const i=+el.dataset.i;S.shelfMem=i;$('gShelfN').textContent=`${i+1} of ${CONT.length}`;
+      const vis=5;const off=Math.max(0,Math.min(i-(vis-1),CONT.length-vis));const first=Math.max(0,i-(vis-1));$('track').style.transform=`translateX(calc(var(--u)*${-first*352}))`}
+    if(el.closest('#cec')||row==='top'||row==='shelf'||row==='dial'||row==='bay')sign(el)}
+  if(el.classList.contains('opt'))previewDwell(el);
+  if(el.closest('#settings'))setDetail(el)}
+function move(dir){if($('blind').classList.contains('down')&&!$('bc').querySelector('[data-f]'))return;const c=ctx();if(!cur||!c.contains(cur)){const r=rowsOf(c);if(r.length)focus(r[0][0]);return}
+  const rows=rowsOf(c);const ri=rows.findIndex(r=>r.includes(cur));const row=rows[ri];const i=row.indexOf(cur);
+  const ax=c.dataset.axis==='y';const along=ax?(dir==='up'||dir==='down'):(dir==='left'||dir==='right');
+  if(along){const d=(dir==='right'||dir==='down')?1:-1;const n=row[i+d];if(n)return focus(n);
+    if(!S.calm){const cl=d>0?'bump-r':'bump-l';const t=cur.dataset.row==='dial'?$('needle'):cur;t.classList.remove('bump-r','bump-l');void t.offsetWidth;t.classList.add(cl);setTimeout(()=>t.classList.remove(cl),200)}return}
+  const d=(dir==='down'||dir==='right')?1:-1;const nr=rows[ri+d];if(!nr)return;
+  if(nr[0].dataset.row==='dial')return focus(nr[S.dialMem]||nr[0]);
+  if(nr[0].dataset.row==='shelf'&&!S.first)return focus(nr[S.shelfMem]||nr[0]);
+  const r0=cur.getBoundingClientRect();const cx=ax?r0.top+r0.height/2:r0.left+r0.width/2;
+  let best=nr[0],bd=1e9;nr.forEach(e=>{const r=e.getBoundingClientRect();const x=ax?r.top+r.height/2:r.left+r.width/2;const dd=Math.abs(x-cx);if(dd<bd){bd=dd;best=e}});focus(best)}
+
+/* ---------------- actions ---------------- */
+function toast(msg){const t=$('toast');t.innerHTML=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),3200)}
+function show(id){['home','pic','apps','settings'].forEach(s=>$(s).classList.toggle('on',s===id));S.screen=id==='pic'?'playing':id}
+function goHome(sel){closeDrawer(true);hideBlind();show('home');S.src='Apps';S.playing=null;$('picArt').className='art';
+  const el=sel||S.ret||$('track').querySelector('[data-f]');cur=null;focus(el)}
+function activate(el){const a=el.dataset.act;
+  if(a==='launch'){const c=CONT[+el.dataset.i];S.ret=el;launch({eb:c.app,tt:c.t,ln:c.act,art:c.id,note:''})}
+  else if(a==='app'){const p=APPS[+el.dataset.i];S.ret=el;if(p.n==='All apps')return openApps();
+    if(p.n==='Netflix'&&!S.nf)return launch({eb:'App',tt:'Netflix',ln:'Opening',fail:'app'});
+    launch({eb:'App',tt:p.n,ln:'Opening',art:'app',note:`Stand-in for ${p.n}. Lobby hands over to the app here.`})}
+  else if(a==='input'){S.ret=el;openInput(el.dataset.port)}
+  else if(a==='lamp'){const l=S.lamps[el.dataset.k];l.on=!l.on;redrawPlate()}
+  else if(a==='door')doorPress();
+  else if(a==='tvmenu')openDrawer();
+  else if(a==='settings'){S.ret=el;openSettings()}
+  else if(a==='arrange'){S.ret=el;openApps()}
+  else if(a==='cec-go'){closeCec();S.ret=$('bay').querySelector('[data-port="h2"]');openInput('h2')}
+  else if(a==='cec-stay'){closeCec()}
+  else if(a==='mk')menuKey(el);
+  else if(a==='opt')chooseOpt(el);
+  else if(a==='retry'){const L=S.lastLaunch;if(L.fail==='app'&&!S.nf)return launch(L);if(L.fail==='sig'){openInput('h2');return}launch({...L,fail:null})}
+  else if(a==='bhome')goHome();
+  else if(a==='aopen'){const n=el.dataset.n;S.ret=$('dial').querySelector('[data-i="9"]');launch({eb:'App',tt:n,ln:'Opening',art:'app',note:`Stand-in for ${n}.`})}
+  else if(a==='srow'){const k=el.dataset.k;if(k==='about'||k==='inputs'||k==='window'){const first=$('sdet').querySelector('[data-f]');if(first)focus(first)}}
+  else if(a==='upd'){S.upd=false;syncSegs();launch({eb:'Lobby · 1.4',tt:'Updating Lobby',ln:'Installing. Home comes back on its own.',home:true,after:()=>toast('<span class="ind led ok on"></span>Lobby is up to date · 1.4')})}
+  else if(a==='pref'){const g=el.dataset.g,v=el.dataset.v;S[g]=v;drawSettings();const row=$('slist').querySelector(`[data-k="${g==='cecPref'?'inputs':'window'}"]`);setDetail(row,true);cur=null;focus($('sdet').querySelector(`[data-v="${v}"]`))}
+}
+function doorPress(){if(S.door==='unlocked'){S.door='locked';S.armed=0;redrawPlate();sign(cur);refreshMenuDoor();return}
+  if(S.armed&&Date.now()-S.armed<3000){unlock();return}
+  S.armed=Date.now();redrawPlate();sign(cur);refreshMenuDoor();clearTimeout(doorPress.t);doorPress.t=setTimeout(()=>{S.armed=0;if(S.door==='locked'){redrawPlate();if(cur)sign(cur);refreshMenuDoor()}},3000)}
+function unlock(){S.door='unlocked';S.armed=0;redrawPlate();if(cur&&cur.closest('#home'))sign(cur);refreshMenuDoor()}
+
+/* launch: the slatted blind drops over the window, holds max(load, 600 ms), then rises on the picture */
+let launchGen=0;
+async function launch(L){S.lastLaunch=L;const g=++launchGen;const b=$('blind');closeDrawer(true);
+  $('bc').innerHTML=`<div class="eb">${L.eb}</div><div class="tt">${L.tt}</div><div class="ln">${L.ln||''}</div><div class="slats" id="slats">${'<i></i>'.repeat(12)}</div>`;
+  b.classList.remove('up');b.classList.add('down');if(cur)cur.classList.remove('f');cur=null;
+  const load=L.fail?2200:L.home?2400:900,hold=Math.max(load,600),sl=[...$('slats').children];
+  const stopAt=L.fail?4:12;
+  for(let i=0;i<stopAt;i++){await sleep(hold/12);if(g!==launchGen)return;sl[i].classList.add('l')}
+  if(L.fail){await sleep(500);if(g!==launchGen)return;failLayer(L);return}
+  if(L.home){await sleep(200);if(g!==launchGen)return;show('home');b.classList.replace('down','up');await sleep(320);b.classList.remove('up');goHome(S.ret);L.after&&L.after();return}
+  $('picArt').innerHTML=artHTML(L.art);$('picNote').textContent=L.note||'';show('pic');S.playing=L;
+  b.classList.replace('down','up');await sleep(320);if(g!==launchGen)return;b.classList.remove('up')}
+function hideBlind(){launchGen++;$('blind').classList.remove('down','up')}
+function failLayer(L){$('slats').classList.add('dim');const bc=$('bc');
+  if(L.fail==='app'){bc.querySelector('.eb').textContent='App · Netflix';bc.querySelector('.tt').textContent="Netflix didn't open";bc.querySelector('.ln').textContent='It stopped while starting. Try again. If it keeps happening, restart the TV from Settings › Sleep & power.'}
+  bc.insertAdjacentHTML('beforeend',`<div class="ks"><div class="key pri" data-f data-row="bk" data-act="retry"><span class="ind slot"></span>Try again</div><div class="key" data-f data-row="bk" data-act="bhome"><span class="ind slot"></span>Home</div></div>`);
+  focus(bc.querySelector('[data-act="retry"]'))}
+function openInput(port){const p=PORTS.find(q=>q.id===port);
+  if(port==='h2'&&!S.sw){const g=++launchGen;const b=$('blind');closeDrawer(true);S.lastLaunch={fail:'sig'};
+    $('bc').innerHTML=`<div class="big"><div class="bigsock" style="--code:${p.code}"></div><div style="display:grid;gap:calc(var(--u)*12)"><div class="eb">HDMI 2 · Switch 2</div><div class="tt">No signal on HDMI 2</div><div class="ln">The Switch 2 is plugged in but isn't sending a picture. Turn it on, then try again.</div><div class="slats dim" id="slats">${'<i class="l"></i>'.repeat(3)+'<i></i>'.repeat(9)}</div></div></div>`;
+    b.classList.remove('up');b.classList.add('down');if(cur)cur.classList.remove('f');cur=null;
+    setTimeout(()=>{if(g!==launchGen)return;$('bc').querySelector('.big>div:last-child').insertAdjacentHTML('beforeend',`<div class="ks"><div class="key pri" data-f data-row="bk" data-act="retry"><span class="ind slot"></span>Try again</div><div class="key" data-f data-row="bk" data-act="bhome"><span class="ind slot"></span>Home</div></div>`);focus($('bc').querySelector('[data-act="retry"]'))},700);return}
+  S.src=port==='h2'?'Switch 2':'Live TV';launch({eb:port==='h2'?'Input · HDMI 2':'Input · Antenna',tt:p.nm,ln:port==='h2'?'Switching to HDMI 2':'Tuning channel 4',art:port==='h2'?'game':'live',note:port==='h2'?'Stand-in for the Switch 2 picture.':'Stand-in for Live TV.'})}
+
+/* CEC: a note in the window, once */
+let cecT;
+function showCec(){if(S.screen!=='home'||$('drawer').classList.contains('on')||$('blind').classList.contains('down')){toast('<span class="ind led ok on"></span>Switch 2 turned on · HDMI 2');return}
+  S.cecRet=cur;$('toast').classList.remove('on');$('cec').classList.add('on');focus($('cec').querySelector('[data-act="cec-go"]'));clearTimeout(cecT);cecT=setTimeout(closeCec,15000)}
+function closeCec(){if(!$('cec').classList.contains('on'))return;clearTimeout(cecT);$('cec').classList.remove('on');const r=S.cecRet&&document.body.contains(S.cecRet)?S.cecRet:$('track').querySelector('[data-f]');cur&&cur.classList.remove('f');cur=null;if(S.screen==='home')focus(r)}
+
+/* TV menu: the drawer */
+function menuKeys(){const over=S.screen==='playing'?(S.playing&&S.playing.eb.startsWith('Input')?`over ${S.playing.tt} · ${S.src==='Switch 2'?'HDMI 2':'Antenna'}`:`over ${S.playing?S.playing.tt:''} · ${S.playing?S.playing.eb:''}`):'over Home';
+  $('dOver').textContent=over;const src=S.screen==='playing'&&S.src!=='Apps'?S.src:'Apps';
+  const K=[['input','Input',src],['pic','Picture',S.pic],['snd','Sound',S.snd],['out','Sound out',S.out],['slp','Sleep',S.slp],['door','Front door',S.door==='unlocked'?'Unlocked · OK locks':(S.armed?'Press OK again':'<span class="ind led ok on"></span>Locked')],['set','Settings','Lobby and the TV']];
+  $('dk').innerHTML=K.map(([k,n,v])=>`<div class="mk ${k==='door'&&S.door==='unlocked'?'unl':''}" data-f data-row="mk" data-act="mk" data-k="${k}" ${k==='door'?'data-hold="1000"':''}>${k==='door'?'<i class="hfill"></i>':''}<span class="n">${n}</span><span class="v">${v}</span><i class="bw"></i></div>`).join('')}
+function refreshMenuDoor(){if(!$('drawer').classList.contains('on'))return;const k=cur&&cur.dataset.k;menuKeys();if(k&&cur&&cur.closest('#drawer')){cur=null;focus($('dk').querySelector(`[data-k="${k}"]`))}}
+function openDrawer(k){if($('blind').classList.contains('down'))return;closeCec();S.drawerRet=cur;menuKeys();$('drawer').classList.add('on');$('kTVv').textContent='menu open ▼';
+  focus($('dk').querySelector(`[data-k="${k||'input'}"]`)||$('dk').firstChild);if(k)menuKey(cur);if(S.screen==='home')setSign('The TV right now','TV menu','Open below.','')}
+function closeDrawer(silent){closeChooser(true);if(!$('drawer').classList.contains('on'))return;$('drawer').classList.remove('on');$('kTVv').textContent=`${S.pic} · ${S.out}`;
+  if(!silent){cur&&cur.classList.remove('f');cur=null;const r=S.drawerRet&&document.body.contains(S.drawerRet)&&S.drawerRet.getClientRects().length?S.drawerRet:null;if(r)focus(r);else if(S.screen==='home')focus($('track').querySelector('[data-f]'))}}
+function menuKey(el){const k=el.dataset.k;
+  if(k==='out'){S.out=S.out==='Optical'?'TV speakers':'Optical';el.querySelector('.v').textContent=S.out;return}
+  if(k==='door'){doorPress();return}
+  if(k==='set'){closeDrawer(true);S.ret=S.screen==='home'?$('kSet'):null;openSettings();return}
+  const L={input:{h:'INPUT',o:[['Apps','Lobby and apps'],['Switch 2','HDMI 2'],['Live TV','Antenna'],['HDMI 1','empty'],['HDMI 3','empty']],v:S.screen==='playing'&&S.src!=='Apps'?S.src:'Apps'},
+    pic:{h:'PICTURE',o:PICMODES.map(m=>[m[0],'']),v:S.pic},snd:{h:'SOUND',o:SNDMODES.map(m=>[m,'']),v:S.snd},slp:{h:'SLEEP',o:SLEEPS.map(m=>[m,'']),v:S.slp}}[k];
+  openChooser(el,k,L)}
+let chooser=null;
+function openChooser(key,k,L){const c=$('chooser');chooser={k,key,L,start:0,orig:L.v};const r=key.getBoundingClientRect(),tr=tv.getBoundingClientRect(),u=tr.width/1920;
+  let left=(r.left-tr.left)/u;left=Math.min(left,1920-96-440);c.style.left=`calc(var(--u)*${left})`;
+  key.querySelector('.v').innerHTML='▲';c.classList.add('on');renderChooser(L.o.findIndex(o=>o[0]===L.v))}
+function renderChooser(fi){const c=$('chooser'),{L,k}=chooser;const n=L.o.length,vis=5;let st=Math.max(0,Math.min(fi-2,n-vis));chooser.start=st;
+  c.innerHTML=`<div class="hd"><span>${L.h}</span><span>${n>vis?`${fi+1} of ${n} ${st>0?'▲':''}${st+vis<n?'▼':''}`:''}</span></div>`+
+    L.o.slice(st,st+vis).map(([o,s],j)=>`<div class="opt" data-f data-row="opt" data-act="opt" data-v="${o}" data-ix="${st+j}"><i class="lw"></i><span class="ind sq ${o===L.v?'on':''}"></span>${o}<span class="sub">${s}</span></div>`).join('')+
+    `<div class="ft">${k==='pic'?`OK uses it · Back keeps ${L.v}`:'OK chooses · Back keeps it'}</div>`;
+  cur=null;focus(c.querySelector(`[data-ix="${fi}"]`))}
+function chooserMove(d){const ix=+cur.dataset.ix+d;if(ix<0||ix>=chooser.L.o.length){if(!S.calm){cur.classList.remove('bump-r','bump-l');void cur.offsetWidth;cur.classList.add(d>0?'bump-r':'bump-l')}return}
+  const st=chooser.start;if(ix<st||ix>=st+5)renderChooser(ix);else focus($('chooser').querySelector(`[data-ix="${ix}"]`))}
+let pvT;
+function previewDwell(el){clearTimeout(pvT);if(!chooser||chooser.k!=='pic')return;pvT=setTimeout(()=>{const m=PICMODES.find(p=>p[0]===el.dataset.v);applyPM(m[1])},500)}
+function applyPM(cls){const t=S.screen==='playing'?$('pic'):$('home');['pic','home'].forEach(i=>PICMODES.forEach(p=>p[1]&&$(i).classList.remove(p[1])));if(cls)t.classList.add(cls)}
+function curPMClass(){return PICMODES.find(p=>p[0]===S.pic)[1]}
+function chooseOpt(el){const {k,key}=chooser;const v=el.dataset.v;
+  if(k==='input'){closeChooser(true);if(v==='Apps'){goHome();return}if(v==='Switch 2'){openInput('h2');return}if(v==='Live TV'){openInput('ant');return}
+    toast(`Nothing is plugged into ${v}`);closeChooser();return}
+  if(k==='pic'){S.pic=v;applyPM(curPMClass())}if(k==='snd')S.snd=v;if(k==='slp')S.slp=v;
+  closeChooser();menuKeys();focus($('dk').querySelector(`[data-k="${k}"]`))}
+function closeChooser(silent){clearTimeout(pvT);if(!chooser)return;const {k,key}=chooser;$('chooser').classList.remove('on');chooser=null;applyPM(curPMClass());
+  if(!silent){menuKeys();cur=null;focus($('dk').querySelector(`[data-k="${k}"]`))}}
+
+/* All apps */
+function openApps(){const g=$('ag');const on=APPS.slice(0,9),off=MORE;
+  const k=(a,row)=>`<div class="ak" data-f data-row="${row}" data-act="aopen" data-n="${a.n}" style="--code:${a.code}"><span class="code"></span><span class="n">${a.n}</span><span class="g">${a.g}</span><i class="bw"></i></div>`;
+  g.innerHTML=`<div class="gl">On the dial · in order</div><div class="gk">${on.map((a,i)=>k(a,i<5?'a1':'a1b')).join('')}</div><div class="gl">Not on the dial</div><div class="gk">${off.map(a=>k(a,'a2')).join('')}</div>`;
+  show('apps');cur=null;focus(g.querySelector('[data-f]'))}
+
+/* Settings */
+const SROWS=[['picture','Picture',()=>S.pic],['sound','Sound',()=>S.snd],['out','Sound out',()=>S.out],['inputs','Inputs',()=>`When a device turns on: ${S.cecPref}`],['window','The window',()=>S.skyPref==='Follow the time of day'?'Follows the time':S.skyPref],['dial','The dial',()=>'9 apps'],['about','About',()=>S.upd?'<span class="ind led on"></span>Update ready':'Lobby 1.3']];
+function drawSettings(keep){const k=keep&&cur&&cur.closest('#slist')?cur.dataset.k:null;$('slist').innerHTML=SROWS.map(([k,n,v])=>`<div class="srow" data-f data-row="sl" data-act="srow" data-k="${k}"><i class="lw"></i>${n}<span class="v">${v()}</span></div>`).join('')}
+function openSettings(){drawSettings();show('settings');cur=null;const first=S.upd?$('slist').querySelector('[data-k="about"]'):$('slist').firstChild;focus(first)}
+function setDetail(el,force){if(!el.classList.contains('srow')&&!force)return;const k=el.dataset.k;$('slist').querySelectorAll('.srow').forEach(r=>r.classList.toggle('here',r===el));
+  const d=$('sdet');const keys=(g,arr)=>`<div class="rowk">${arr.map(v=>`<div class="key" data-f data-row="sd" data-act="pref" data-g="${g}" data-v="${v}"><span class="ind sq ${S[g]===v?'on':''}"></span>${v}</div>`).join('')}</div>`;
+  let h='';
+  if(k==='about')h=`<h3>About</h3><div class="facts"><span>Lobby</span><b>${S.upd?'1.3':'1.4'}</b><span>The TV</span><b>Hisense Google TV · Android 14</b><span>Apps</span><b>Update themselves through the Play Store</b><span>Install overnight</span><b>On</b></div>${S.upd?`<p>What's new in 1.4: the clock comes back right after a power cut, and the dial moves faster on a held key.</p><div class="rowk"><div class="key pri" data-f data-row="sd" data-act="upd"><span class="ind slot"></span>Update now</div></div>`:'<p class="mini">Up to date.</p>'}`;
+  else if(k==='inputs')h=`<h3>When a device turns on</h3><p>The Switch 2 can ask the TV to change to it when it wakes up. Lobby can ask you first, switch on its own, or stay where it is.</p>${keys('cecPref',['Ask','Switch to it','Stay here'])}<p class="mini">Ask shows one note in the window. It never repeats and leaves after 15 seconds.</p>`;
+  else if(k==='window'){h=`<h3>The window</h3><p>Home's sky follows the time of day: dawn, morning, afternoon, golden hour, dusk and night. It changes slowly, over a minute, and never brightens a dark room past the night glare cap.</p><div class="swatchsky">${['dawn','morning','afternoon','golden','dusk','night'].map(t=>`<i>${SKY[t].b.map(c=>`<b style="background:${c}"></b>`).join('')}</i>`).join('')}</div>${keys('skyPref',['Follow the time of day','Always night'])}`}
+  else if(k==='picture')h=`<h3>Picture</h3><p>${S.pic}. Change it from the TV menu, where you can see the picture while you choose.</p>`;
+  else if(k==='sound')h=`<h3>Sound</h3><p>${S.snd}. Change it from the TV menu.</p>`;
+  else if(k==='out')h=`<h3>Sound out</h3><p>${S.out}. Optical goes to the stereo; TV speakers are the set's own.</p>`;
+  else if(k==='dial')h=`<h3>The dial</h3><p>Nine apps in three bands: Watch, Play and Listen. Arrange them from All apps. The empty HDMI ports always show on the patch bay, but focus skips them.</p>`;
+  d.innerHTML=h}
+
+/* ---------------- keys ---------------- */
+let holdT=null,holdStart=0,held=false,okDown=false;
+function back(){const c=ctx();
+  if(c===$('chooser'))return closeChooser();
+  if(c===$('drawer'))return closeDrawer();
+  if(c===$('cec'))return closeCec();
+  if(c===$('blind'))return goHome();
+  if(S.screen==='settings'&&cur&&cur.closest('#sdet')){const k=$('slist').querySelector('.here')||$('slist').firstChild;cur.classList.remove('f');cur=null;focus(k);return}
+  if(S.screen!=='home')return goHome();
+  if(cur&&cur.dataset.row!=='shelf')focus($('track').querySelector('[data-f]'))}
+function okDownFn(){if(okDown)return;okDown=true;held=false;const el=cur;if(!el||!el.dataset.hold||S.door==='unlocked')return;
+  if(el.dataset.act==='mk'&&el.dataset.k!=='door')return;
+  const ms=+el.dataset.hold;holdStart=performance.now();const fill=el.querySelector('.hfill');if(fill){el.classList.add('holding')}
+  const tick=()=>{const p=Math.min(1,(performance.now()-holdStart)/ms);if(fill)fill.style.transform=`scaleX(${p})`;if(p>=1){held=true;holdT=null;el.classList.remove('holding');unlock();return}holdT=requestAnimationFrame(tick)};holdT=requestAnimationFrame(tick)}
+function okUpFn(){if(!okDown)return;okDown=false;if(holdT){cancelAnimationFrame(holdT);holdT=null;const f=cur&&cur.querySelector('.hfill');if(f){f.style.transform='scaleX(0)';cur.classList.remove('holding')}}
+  if(held){held=false;return}if(cur)activate(cur)}
+function key(k,type){
+  if(type==='down'){
+    if(k==='Enter'||k===' ')return okDownFn();
+    if(okDown&&holdT){cancelAnimationFrame(holdT);holdT=null;okDown=false;const f=cur&&cur.querySelector('.hfill');if(f){f.style.transform='scaleX(0)';cur.classList.remove('holding')}}
+    if(k.startsWith('Arrow')){const d=k.slice(5).toLowerCase();if(chooser&&(d==='up'||d==='down'))return chooserMove(d==='down'?1:-1);if(chooser)return;return move(d)}
+    if(k==='Escape'||k==='Backspace')return back();
+    if(k==='h'||k==='H')return goHome(S.screen==='home'?cur:null);
+    if(k==='g'||k==='G'||k==='q'||k==='Q'){if($('drawer').classList.contains('on'))return closeDrawer();return openDrawer()}
+    if(k==='i'||k==='I'){if(!$('drawer').classList.contains('on'))openDrawer('input');return}
+  }else if(type==='up'&&(k==='Enter'||k===' '))okUpFn()}
+tv.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Backspace','Enter','Escape'].includes(e.key))e.preventDefault();stopTour();if(e.repeat&&(e.key==='Enter'||e.key===' '))return;key(e.key,'down')});
+tv.addEventListener('keyup',e=>{key(e.key,'up')});
+tv.addEventListener('mousedown',()=>stopTour());
+document.querySelectorAll('#remote .kb').forEach(b=>{
+  if(b.dataset.k==='hold'){b.addEventListener('pointerdown',()=>{stopTour();okDownFn()});b.addEventListener('pointerup',()=>{okUpFn();tv.focus({preventScroll:true})});b.addEventListener('pointerleave',()=>{if(okDown)okUpFn()});return}
+  b.addEventListener('click',()=>{stopTour();const k=b.dataset.k;if(k==='Enter'){okDownFn();okUpFn()}else key(k,'down');tv.focus({preventScroll:true})})});
+
+/* ---------------- page controls ---------------- */
+function syncSegs(){const v={time:S.timeKey==='live'?'live':S.time,motion:S.calm?'calm':'full',home:S.first?'first':'lived',sw:S.sw?'on':'asleep',nf:S.nf?'opens':'fails',upd:S.upd?'yes':'no',theme:document.documentElement.dataset.theme||'auto'};
+  document.querySelectorAll('[data-ctl]').forEach(s=>{const n=s.dataset.ctl;s.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(v[n]===b.dataset.v)))})}
+function seg(name,fn){document.querySelector(`[data-ctl="${name}"]`).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{stopTour();fn(b.dataset.v);syncSegs();if(name!=='theme')tv.focus({preventScroll:true})}))}
+seg('time',v=>{S.timeKey=v==='live'?'live':null;setTime(v)});
+seg('motion',v=>{S.calm=v==='calm';tv.classList.toggle('calm',S.calm)});
+seg('home',v=>setFirst(v==='first'));
+seg('sw',v=>{const was=S.sw;S.sw=v==='on';drawBay();if(cur&&cur.closest('#bay'))focus($('bay').querySelector(`[data-port="${cur.dataset.port}"]`));if(!was&&S.sw&&S.cecPref==='Ask')showCec()});
+seg('nf',v=>{S.nf=v==='opens'});
+seg('upd',v=>{S.upd=v==='yes';$('updLed').classList.toggle('on',S.upd);if(cur&&cur.id==='kSet')sign(cur);if(S.screen==='settings'){drawSettings();focus($('slist').querySelector('[data-k="about"]'))}});
+seg('theme',v=>{if(v==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v});
+seg('jump',v=>jump(v));
+function setFirst(f){S.first=f;$('home').classList.toggle('first',f);drawShelf();$('track').style.transform='';goHome($('track').querySelector('[data-f]'))}
+function reset(){launchGen++;closeCec();closeDrawer(true);hideBlind();$('toast').classList.remove('on');S.door='locked';S.armed=0;drawPlate();show('home')}
+async function jump(v){reset();
+  if(v==='home'){goHome($('track').querySelector('[data-f]'))}
+  else if(v==='dial'){goHome($('dial').querySelector('[data-i="3"]'))}
+  else if(v==='bay'){goHome($('bay').querySelector('[data-port="h2"]'))}
+  else if(v==='door'){S.door='unlocked';drawPlate();goHome($('door'))}
+  else if(v==='menu'){goHome();activate($('track').querySelector('[data-f]'));await sleep(1500);openDrawer()}
+  else if(v==='input'){goHome();activate($('track').querySelector('[data-f]'));await sleep(1500);openDrawer('input')}
+  else if(v==='nosig'){S.sw=false;drawBay();syncSegs();goHome($('bay').querySelector('[data-port="h2"]'));openInput('h2')}
+  else if(v==='fail'){S.nf=false;syncSegs();goHome($('dial').querySelector('[data-i="2"]'));activate(cur)}
+  else if(v==='cec'){S.sw=false;drawBay();goHome();await sleep(300);S.sw=true;drawBay();syncSegs();showCec()}
+  else if(v==='first'){setFirst(true);syncSegs()}
+  else if(v==='apps'){goHome($('dial').querySelector('[data-i="9"]'));openApps()}
+  else if(v==='settings'){goHome($('kSet'));openSettings()}}
+
+/* ---------------- tour ---------------- */
+const press=async(k,n=1,gap=360)=>{for(let i=0;i<n;i++){key(k,'down');if(k==='Enter')key(k,'up');await sleep(gap)}};
+const STEPS=[
+  ['Home at night. Continue stands on the sideboard as picture frames; the sky is the room\'s window at 8:24 PM.',async()=>{setTime('night');goHome($('track').querySelector('[data-f]'))}],
+  ['Along the shelf. The focused frame lifts and its plaque light comes on. "3 of 6" shows only on the row you\'re in.',async()=>{goHome($('track').querySelector('[data-f]'));await press('ArrowRight',2)}],
+  ['The app dial. Apps are stations on a tuning scale in three bands: Watch, Play, Listen. The needle goes where focus is.',async()=>{goHome($('dial').querySelector('[data-i="0"]'));await press('ArrowRight',3,420)}],
+  ['The needle remembers. Go up to the shelf and back down: focus returns to the station the needle is on, not the one under your frame.',async()=>{goHome($('dial').querySelector('[data-i="3"]'));await press('ArrowUp');await sleep(700);await press('ArrowDown')}],
+  ['The dial\'s end stop. All apps is the last station; one more press nudges the needle against the walnut stop.',async()=>{goHome($('dial').querySelector('[data-i="8"]'));await press('ArrowRight',2,500)}],
+  ['The patch bay. Every port shows, plugged or empty; focus skips the empty ones. Apps (this screen) is the lit square: the TV\'s current source.',async()=>{goHome($('bay').querySelector('[data-port="h2"]'))}],
+  ['The house plate. Wall-switch paddles, up = on, with a window lit in the lamp\'s own colour. OK switches the floor lamp off in place.',async()=>{S.lamps.floor.on=true;drawPlate();goHome($('plate').querySelector('[data-k="floor"]'));await sleep(1000);await press('Enter')}],
+  ['The front door\'s thumb-turn. One press arms it: "Press OK again". Holding OK for 1 s fills the bar on the top edge.',async()=>{S.lamps.floor.on=true;drawPlate();goHome($('door'));await sleep(500);await press('Enter')}],
+  ['Unlocked. The thumb-turn turns upright and the whole unit becomes the solid red key with dark text. One press locks it.',async()=>{S.armed=Date.now();goHome($('door'));await press('Enter')}],
+  ['Dawn. The window follows the time of day in six flat skies. The text on the glass stays readable at every stop (checked ≥ 4.5:1).',async()=>{S.door='locked';drawPlate();goHome($('track').querySelector('[data-f]'));setTime('dawn')}],
+  ['Afternoon. The brightest sky stays mid-tone and flat: no gradients, no glow, no moving clouds.',async()=>{goHome($('track').querySelector('[data-f]'));setTime('afternoon')}],
+  ['Golden hour.',async()=>{setTime('golden')}],
+  ['Dusk. The sun sets behind the sideboard.',async()=>{setTime('dusk')}],
+  ['The TV readout (top right) says what the set is doing: picture mode and sound out. OK on it opens the TV menu.',async()=>{setTime('night');goHome($('kTV'))}],
+  ['The TV menu is the console\'s drawer. While it\'s open the readout says "menu open", so values show once.',async()=>{goHome($('kTV'));openDrawer()}],
+  ['Picture chooser over Home. Rest 500 ms on a mode and the screen previews it; Back keeps Theater night.',async()=>{goHome($('kTV'));openDrawer('pic');await sleep(400);await press('ArrowDown',2,600)}],
+  ['Starting a film: a slatted blind drops over the window, holds as long as the load (at least 600 ms), then rises on the picture.',async()=>{goHome($('track').querySelector('[data-f]'));await sleep(300);await press('Enter')}],
+  ['Over the film, the drawer\'s header says what\'s underneath, and Input lists the TV\'s real sources.',async()=>{if(S.screen!=='playing'){goHome($('track').querySelector('[data-f]'));activate(cur);await sleep(1500)}openDrawer('input')}],
+  ['No signal. The blind stays down and draws the port itself. Try again is the one orange; Home is beside it.',async()=>{jump('nosig')}],
+  ['An app that won\'t open: the slats stop at a third and dim. Same ending as every failure.',async()=>{jump('fail')}],
+  ['A device turned on: one note in the window, with Switch to it as the one orange. Back stays; it leaves after 15 s and never repeats.',async()=>{S.sw=true;syncSegs();jump('cec')}],
+  ['Update ready: a cream light on Settings, and nothing pops up.',async()=>{reset();S.sw=true;drawBay();S.upd=true;$('updLed').classList.add('on');syncSegs();goHome($('kSet'))}],
+  ['Settings › About holds the update and its one orange.',async()=>{S.upd=true;$('updLed').classList.add('on');syncSegs();goHome($('kSet'));openSettings();await sleep(500);await press('ArrowRight')}],
+  ['First run: an empty shelf with one line and Arrange Home. Nothing suggested, nothing to buy.',async()=>{S.upd=false;$('updLed').classList.remove('on');setFirst(true);syncSegs()}],
+  ['All apps: the nine on the dial in order, then the rest. Back returns to the All apps station.',async()=>{setFirst(false);syncSegs();goHome($('dial').querySelector('[data-i="9"]'));openApps()}]
+];
+let tourOn=false,tourGen=0,tourI=-1;
+async function runStep(i){tourI=i;$('tourCap').innerHTML=`<b>${i+1} / ${STEPS.length}</b>${STEPS[i][0]}`;await STEPS[i][1]();syncSegs()}
+async function playTour(){tourOn=true;$('tourBtn').textContent='■ Stop tour';const g=++tourGen;
+  for(let i=0;i<STEPS.length;i++){if(g!==tourGen)return;await runStep(i);await sleep(4000);if(g!==tourGen)return}
+  stopTour();$('tourCap').innerHTML='<b>TOUR</b>Done. Press Tour to watch again, or click the TV and use the keys.';tourI=-1}
+function stopTour(){if(!tourOn)return;tourOn=false;tourGen++;$('tourBtn').textContent='▶ Tour'}
+$('tourBtn').addEventListener('click',()=>{if(tourOn)return stopTour();tv.focus({preventScroll:true});playTour()});
+$('tourNext').addEventListener('click',()=>{stopTour();tv.focus({preventScroll:true});runStep((tourI+1)%STEPS.length)});
+
+/* ---------------- start ---------------- */
+drawSky($('skyA'),'night');drawShelf();drawDial();drawBay();drawPlate();setTime('night',true);syncSegs();
+focus($('track').querySelector('[data-f]'));
+window.LOBBY={S,STEPS,runStep,jump,key,setTime,SKY,focusEl:()=>cur};
+</script>
+</body>
+</html>
