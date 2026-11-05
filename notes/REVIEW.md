@@ -2,6 +2,18 @@
 
 Everything is a proposal. Nothing in BIBLE.md, the tokens or any real app has changed.
 
+## Round 4: same language, bespoke designs (after Isaac's note)
+| App | Idea | Page | Notes |
+|---|---|---|---|
+| TV launcher (Lobby) | Living-room furniture: sky window, app dial, input patch bay, wall switches | https://claude.ai/artifact/WFihqYboWryAxNVfbMfXr1 | `notes/pass4-tv-launcher.md` |
+| Callsheet | A printed call sheet: running order, gap cues, roster, wrap | https://claude.ai/artifact/7WpyAcfFVV4Fms2couaUHK | `notes/pass4-callsheet.md` |
+| JamFin | The cinema: marquee, ticket profiles, programme, house lights, intermission | https://claude.ai/artifact/Prt2ZtfBHKfbt9o8NQZwed | `notes/pass4-jamfin.md` |
+| Jam-Dash | Friendly equipment rack: status board, patch cords, maintenance tags, event tape | https://claude.ai/artifact/SqkHgYNCfNUFQshZcZyBuH | `notes/pass4-jam-dash.md` |
+| NervOS | The console and the game shelf: media spines, dividers, cart drops in on launch | https://claude.ai/artifact/RJrCngroAt39ki8hc7j47R | `notes/pass4-nervos.md` |
+| Jam Home | Lit floor plan, day arc, dimmer plates, sideboard, key rail, Goodnight round | https://claude.ai/artifact/CesuXUM87ARQR5AK87ujrJ | `notes/pass4-home-assistant.md` |
+
+Each pass-4 note has a "Rules I broke" table and a "Language check". **`notes/RULES-TIERS.md`** sorts every rule into Language / Device family / App-local / Drop. It also covers the 15-item shared language, 12 open conflicts, 18 holes and what each app owns.
+
 ## Round 3 mockups (private pages)
 | App | Page | Notes |
 |---|---|---|
