@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jam-Dash Trouble First</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one app template rendered into scaled frames: desktop 1440x900 and phone 390x844. Routes: Home (both servers, trouble first), App detail, Store (+ install sheet), stubs for the rest. Simplified Braun Hi-Fi: flat cards, ribs only on the black server faceplates, flat indicator windows, one orange action per screen that moves to the next thing. Sample data only; host names are the README's "home-server" and "nas". */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--settle:cubic-bezier(.16,1,.3,1);--bounce:cubic-bezier(.3,1.3,.5,1);--leave:cubic-bezier(.4,0,1,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:26px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}
+h2{font:600 20px var(--f);margin:0}
+p{margin:0;max-width:76ch}
+.muted{color:var(--muted)}
+.ctrls{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.ctrls>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line);flex-wrap:wrap}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 14px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+section.blk{display:grid;gap:14px}
+figure{margin:0;display:grid;gap:8px;min-width:0;width:100%;align-content:start}
+figcaption{font-size:13px;color:var(--muted)}
+.frame{position:relative;width:100%;border-radius:16px;background:#0d0d0c;padding:10px;box-shadow:0 20px 50px #0000004d}
+.screen{position:relative;overflow:hidden;border-radius:8px;outline:none}
+.screen:focus-visible{box-shadow:0 0 0 3px #ec7c22}
+.phone{max-width:414px;border-radius:44px;padding:12px;justify-self:center}.phone .screen{border-radius:34px}
+.scaler{position:absolute;top:0;left:0;transform-origin:0 0}
+.devices{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start}
+@media (max-width:1100px){.devices{grid-template-columns:1fr}}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px;align-content:start}
+table.tod{border-collapse:collapse;width:100%;font-size:14px;min-width:760px}
+table.tod th,table.tod td{text-align:left;vertical-align:top;padding:8px 10px;border-top:1px solid var(--line)}
+table.tod th{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tablebox{overflow-x:auto}
+
+/* ================= Braun Hi-Fi tokens ================= */
+.bh{--bg:#e3e1dc;--card:#f1efeb;--key:#e6e3de;--rule:#d4d1ca;--ink:#1d1c1a;--dim:#66635c;--band:#1d1c1a;--band-ink:#ece8df;--band-dim:#aaa598;
+  --orange:#ec7c22;--deep:#b55a12;--walnut:#6b4428;--field:#e9e6e0;
+  --win:#151413;--cream:#f3e6c8;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;--alert-ink:#b3261b;--warn-ink:#8a6100;--log:#121211;
+  --ribs:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 2px,transparent 2px 8px);
+  position:relative;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:var(--f);overflow:hidden}
+.night .bh{--bg:#1c1c1b;--card:#2a2a28;--key:#353533;--rule:#3a3a37;--ink:#ece9e2;--dim:#a3a097;--band:#121211;--orange:#f08a2c;--field:#20201f;--alert-ink:#ff7466;--warn-ink:#f2c14e;--log:#0d0d0c}
+.bh button,.bh input{font-family:var(--f)}
+.lab{font:500 13px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.card{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px #0000001a,0 4px 12px #0000000f;min-width:0}
+.night .card{box-shadow:0 1px 2px #00000059}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sm{font-size:15px;color:var(--dim);line-height:1.4}
+/* indicator windows: always a dark recess, lit = flat colour */
+.ind{position:relative;display:inline-block;flex:none;background:var(--win);box-shadow:inset 0 1px 2px #000}
+.ind::after{content:"";position:absolute;inset:1.5px;border-radius:inherit;background:var(--c,var(--cream));opacity:0;transition:opacity 300ms var(--settle)}
+.ind.on::after{opacity:1}
+.led{width:10px;height:10px;border-radius:50%}.sq{width:10px;height:10px;border-radius:2px}.slot{width:22px;height:7px;border-radius:2px}
+.ind.ok{--c:var(--ok)}.ind.alert{--c:var(--alert)}.ind.warn{--c:var(--warn)}
+.ind.gone{background:transparent;box-shadow:none;border:1.5px dashed var(--dim)}
+.ind.gone::after{display:none}
+.ind.act::after{opacity:1;animation:blink 700ms ease-in-out 3 alternate}
+@keyframes blink{from{opacity:1}to{opacity:.15}}
+/* buttons */
+.btn{appearance:none;border:0;cursor:pointer;font:500 16px var(--f);border-radius:12px;padding:10px 18px;min-height:44px;display:inline-flex;gap:10px;align-items:center;justify-content:center;transition:transform 100ms;white-space:nowrap;position:relative;overflow:hidden;color:var(--ink)}
+.btn.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 2px 0 var(--deep)}
+.btn.sec{background:var(--key);color:var(--ink);box-shadow:0 2px 0 #0000001f}
+.btn.ink{background:var(--ink);color:var(--bg);box-shadow:0 2px 0 #00000040}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{cursor:default;background:var(--key);color:var(--dim);box-shadow:inset 0 1px 3px #00000026}
+.btn .prog{position:absolute;left:8px;right:8px;bottom:5px;height:4px;border-radius:2px;background:var(--win)}
+.btn .prog::after{content:"";position:absolute;inset:1px;border-radius:1px;background:var(--cream);transform-origin:left;animation:fill var(--dur,1800ms) var(--settle) both}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.btn svg,.ql svg,.ib svg,.tab svg,.okey svg,.htab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.kh{font:500 12px var(--mono);padding:1px 6px;border-radius:5px;background:#00000014;color:inherit}
+.night .btn.sec .kh{background:#ffffff14}
+.ql{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);font:500 15px var(--f);padding:8px 0;min-height:40px;display:inline-flex;gap:6px;align-items:center;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:4px;text-decoration-thickness:2px}
+.ql:hover{text-decoration-color:var(--ink)}
+.ib{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);width:44px;height:44px;border-radius:12px;display:grid;place-items:center}
+.ib:hover{background:var(--key)}
+.ib svg{width:22px;height:22px}
+.key{appearance:none;border:0;cursor:pointer;font:500 15px var(--f);color:var(--ink);background:var(--key);border-radius:10px;padding:6px 14px;min-height:40px;display:inline-flex;gap:8px;align-items:center;box-shadow:0 2px 0 #0000001f;white-space:nowrap}
+.key[aria-pressed="true"]{background:var(--card);box-shadow:inset 0 1px 3px #00000033}
+.night .key[aria-pressed="true"]{background:#232321;box-shadow:inset 0 1px 3px #000}
+.bh :is(.btn,.ql,.ib,.key,.tab,.htab,.okey,.hit,.stoprow,.fieldi):focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.word{font:500 13px var(--f);letter-spacing:.1em;text-transform:uppercase}
+.word.alert{color:var(--alert-ink)}.word.warn{color:var(--warn-ink)}
+/* app frame */
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.trim{flex:none;height:4px;background:var(--walnut)}
+.hdr{flex:none;display:flex;align-items:center;gap:16px;padding:0 24px 0 28px;height:64px;background:var(--card);box-shadow:0 1px 0 var(--rule);position:relative;z-index:2}
+.wm{font:600 22px var(--f);letter-spacing:.01em;white-space:nowrap}
+.tabs{display:flex;gap:0;align-self:stretch;margin-left:6px}
+.htab{appearance:none;border:0;background:none;cursor:pointer;font:500 16px var(--f);color:var(--dim);padding:0 12px;position:relative;display:flex;gap:8px;align-items:center}
+.htab:hover{color:var(--ink)}
+.htab[aria-selected="true"]{color:var(--ink)}
+.htab[aria-selected="true"]::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:2px 2px 0 0;background:var(--ink)}
+.htab .n{font:500 13px var(--mono);border-radius:999px;padding:1px 7px;background:var(--key);color:var(--ink)}
+.htab .n.al{background:none;box-shadow:inset 0 0 0 1.5px var(--alert);color:var(--alert-ink)}
+.hr{margin-left:auto;display:flex;gap:10px;align-items:center}
+.srvk{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--key)}
+.srvk .key{box-shadow:none;background:transparent;min-height:36px;padding:4px 12px;font-size:15px}
+.srvk .key[aria-pressed="true"]{background:var(--card);box-shadow:inset 0 1px 3px #00000033}
+.night .srvk .key[aria-pressed="true"]{background:#232321;box-shadow:inset 0 1px 3px #000}
+.findb{appearance:none;border:0;cursor:pointer;display:flex;gap:10px;align-items:center;background:var(--field);border-radius:12px;padding:0 10px 0 12px;height:40px;color:var(--dim);font:400 15px var(--f);box-shadow:inset 0 1px 2px #00000026}
+.findb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.body{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;position:relative}
+.body::-webkit-scrollbar{display:none}
+.view.enter{animation:enter 260ms var(--glide) both}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* phone shell */
+.phn .hdr{height:56px;padding:0 6px 0 16px;gap:6px}
+.phn .wm{font-size:20px}
+.srvb{appearance:none;border:0;cursor:pointer;margin-left:auto;display:flex;gap:8px;align-items:center;background:var(--key);color:var(--ink);border-radius:10px;padding:0 12px;min-height:44px;font:500 15px var(--f)}
+.srvb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.ptabs{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--card);box-shadow:0 -1px 0 var(--rule);padding:4px 4px 20px;position:relative;z-index:2}
+.tab{appearance:none;border:0;background:none;cursor:pointer;color:var(--dim);display:grid;justify-items:center;gap:4px;padding:6px 0 4px;min-height:56px;font:500 13px var(--f);position:relative}
+.tab svg{width:22px;height:22px}
+.tab .win{width:22px;height:4px;border-radius:2px;background:var(--win);position:relative;margin-bottom:2px}
+.tab .win::after{content:"";position:absolute;inset:1px;border-radius:1px;background:var(--cream);opacity:0;transition:opacity 150ms}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab[aria-selected="true"] .win::after{opacity:1}
+.tab .n{position:absolute;top:8px;left:calc(50% + 8px);font:500 13px var(--mono);background:var(--card);color:var(--alert-ink);box-shadow:inset 0 0 0 1.5px var(--alert);border-radius:999px;padding:0 6px;line-height:18px}
+
+/* ===== Home ===== */
+.hm{max-width:1440px;margin:0 auto;padding:20px 36px 32px;display:grid;gap:16px}
+.hero{position:relative;display:grid;gap:4px;min-height:64px;align-content:center}
+.hero h2{font:600 36px/1.12 var(--f);margin:0;max-width:880px;text-wrap:balance}
+.hero .sub{font:500 14px var(--mono);color:var(--dim);letter-spacing:.02em}
+.accent{position:absolute;top:-6px;right:-36px;width:290px;height:82px;pointer-events:none}
+.accent svg{width:100%;height:100%;display:block}
+.accent path{stroke-dasharray:900;stroke-dashoffset:0}
+.accent.drop path{animation:draw 900ms var(--settle) both}
+.accent.drop path:nth-child(2){animation-delay:90ms}.accent.drop path:nth-child(3){animation-delay:180ms}
+@keyframes draw{from{stroke-dashoffset:900}to{stroke-dashoffset:0}}
+.trouble{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px}
+.trouble .tc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 20px;align-items:center}
+.trouble .tc>:not(.acts){grid-column:1}
+.trouble .tc .acts{grid-column:2;grid-row:1/4;margin:0;flex-direction:column;align-items:stretch;gap:4px}
+.trouble .tc .acts .ql{justify-content:center}
+.tc{display:flex;flex-direction:column;gap:6px;padding:16px 18px 16px}
+.tc[data-k="alert"]{box-shadow:inset 0 0 0 2px var(--alert),0 4px 12px #0000000f}
+.tc[data-k="warn"]{box-shadow:inset 0 0 0 2px var(--warn),0 4px 12px #0000000f}
+.tc[data-k="offline"]{background:transparent;box-shadow:none;outline:1.5px dashed var(--dim);outline-offset:-1.5px}
+.tc .top{display:flex;align-items:center;gap:8px}
+.tc .ttl{font:500 21px/1.25 var(--f)}
+.tc .acts{margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.srvs{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:22px;align-items:start}
+.srvs.one{grid-template-columns:minmax(0,1fr)}
+.sv{display:grid;gap:10px;align-content:start;min-width:0;container-type:inline-size}
+@container (max-width:560px){.face{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.mt .hd{flex-direction:column;align-items:flex-start;gap:0}}
+.mt .wn{font:500 13px var(--f);color:var(--warn)}
+.face.offline .mt .wn{color:var(--warn-ink)}
+.face{background:var(--band);background-image:var(--ribs);color:var(--band-ink);border-radius:14px;padding:12px 18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 28px;align-items:center}
+.face .id{display:grid;gap:2px;min-width:0}
+.face .nm{font:500 20px/1.2 var(--f);display:flex;gap:10px;align-items:center}
+.face .os{font:500 13px var(--f);letter-spacing:.06em;color:var(--band-dim);white-space:nowrap}
+.face .lab{color:var(--band-dim)}
+.face.offline{background:transparent;color:var(--ink);outline:1.5px dashed var(--dim);outline-offset:-1.5px}
+.face.offline .os,.face.offline .lab{color:var(--dim)}
+.meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.mt{display:grid;gap:5px;min-width:0}
+.mt .hd{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.mt .hd .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt .rd{font:500 15px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mt .tr{height:10px;border-radius:3px;background:var(--win);box-shadow:inset 0 1px 2px #000;position:relative;overflow:hidden}
+.mt .tr i{position:absolute;inset:2px;border-radius:2px;background:var(--cream);transform-origin:left;transform:scaleX(var(--v))}
+.arrive .mt .tr i{animation:mfill 900ms var(--settle) both}
+@keyframes mfill{from{transform:scaleX(0)}}
+.mt.warn .tr i{background:var(--warn)}
+.tgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:10px}
+.tl{position:relative;background:var(--card);color:var(--ink);border-radius:14px;padding:11px 14px 11px;display:grid;grid-template-columns:30px minmax(0,1fr);gap:4px 10px;align-content:start;box-shadow:0 1px 2px #0000001a,0 4px 12px #0000000f;min-height:80px;min-width:0;transition:transform 160ms var(--glide),box-shadow 160ms}
+.night .tl{box-shadow:0 1px 2px #00000059}
+.tl:hover{transform:translateY(-2px);box-shadow:0 2px 3px #0000001a,0 8px 18px #00000017}
+.tl .hit{position:absolute;inset:0;border-radius:14px;appearance:none;border:0;background:none;cursor:pointer;z-index:1}
+.gl{width:30px;height:30px;border-radius:8px;background:var(--band);color:var(--cream);display:grid;place-items:center;font:600 13px var(--mono);letter-spacing:.02em;flex:none}
+.tl .n{font:500 17px/30px var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:40px}
+.tl .s{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-size:15px;color:var(--dim);line-height:1.25;min-width:0}
+.tl .s span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl .q{grid-column:1/-1;font:400 13px var(--mono);color:var(--dim);font-variant-numeric:tabular-nums}
+.tl[data-alert]{box-shadow:inset 0 0 0 2px var(--alert),0 4px 12px #0000000f}
+.tl[data-alert] .s{color:var(--alert-ink)}
+.tl[data-state="off"] .gl{background:var(--key);color:var(--dim)}
+.tl[data-state="offline"]{background:transparent;box-shadow:none;outline:1.5px dashed var(--dim);outline-offset:-1.5px}
+.tl[data-state="offline"] .gl{background:transparent;color:var(--dim);box-shadow:inset 0 0 0 1.5px var(--dim)}
+.tl.wide{grid-column:span 2;grid-template-columns:30px minmax(0,.8fr) minmax(0,1.3fr)}
+.tl.wide .s,.tl.wide .q{grid-column:1/3}
+.tl.wide .n{grid-column:2;padding-right:0}
+.tl.wide .lv{grid-column:3;grid-row:1/4;margin:0;padding-right:44px;align-self:center}
+.phn .tl.wide{grid-template-columns:30px minmax(0,1fr)}
+.phn .tl.wide .s,.phn .tl.wide .q,.phn .tl.wide .lv{grid-column:1/-1}
+.phn .tl.wide .n{padding-right:42px}
+.phn .tl.wide .lv{grid-row:auto;padding-right:0}
+.okey{position:absolute;top:8px;right:8px;z-index:2;appearance:none;border:0;cursor:pointer;width:36px;height:36px;border-radius:10px;background:var(--key);color:var(--ink);display:grid;place-items:center;box-shadow:0 2px 0 #0000001f}
+.okey:hover{background:var(--ink);color:var(--bg)}
+.lv{grid-column:1/-1;display:grid;gap:6px;margin-top:2px}
+.big{font:500 24px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.big small{font:500 14px var(--mono);color:var(--dim);margin-left:4px}
+.qr{display:grid;grid-template-columns:minmax(0,1fr) 28%;gap:12px;align-items:center;font-size:14px;color:var(--ink)}
+.qr span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb{height:8px;border-radius:3px;background:var(--win);position:relative;overflow:hidden;box-shadow:inset 0 1px 2px #000}
+.pb i{position:absolute;top:1.5px;bottom:1.5px;left:1.5px;width:calc(var(--v) - 3px);border-radius:2px;background:var(--cream)}
+.np{display:grid;gap:0}
+.np b{font:500 19px/1.25 var(--f)}
+.week{display:flex;gap:4px}
+.week span{display:grid;justify-items:center;gap:3px;font:500 13px var(--mono);color:var(--dim);width:22px}
+.week .sq{width:14px;height:14px;border-radius:3px}
+.stl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.stl .lab{margin-right:4px}
+.chipk{appearance:none;border:0;cursor:pointer;display:inline-flex;gap:8px;align-items:center;background:transparent;color:var(--ink);border-radius:999px;padding:4px 12px;min-height:34px;font:400 15px var(--f);box-shadow:inset 0 0 0 1px var(--rule)}
+.chipk:hover{background:var(--key)}
+/* phone home */
+.phn .hm{padding:16px 16px 24px;gap:14px}
+.phn .hero{min-height:0}
+.phn .hero h2{font-size:26px}
+.phn .hero .sub{font-size:13px}
+.phn .accent{top:-4px;right:-16px;width:140px;height:40px}
+.phn .trouble{grid-template-columns:1fr;gap:0}
+.phn .tc .ttl{font-size:20px}
+.phn .tc .acts .btn{flex:1}
+.phn .srvs{grid-template-columns:1fr;gap:20px}
+.phn .face{grid-template-columns:1fr;padding:12px 14px;gap:10px}
+.phn .meters{gap:12px}
+.phn .mt .rd{font-size:14px}
+.phn .tl{min-height:0;padding:10px 12px}
+.phn .tl .n{font-size:16px;padding-right:42px}
+.phn .okey{width:44px;height:44px;top:4px;right:4px}
+.phn .chipk{min-height:44px}
+.slist{display:grid;margin-top:12px;border-radius:16px;background:var(--card);box-shadow:0 1px 2px #0000001a}
+.stoprow{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);text-align:left;display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px;min-height:64px;border-top:1px solid var(--rule);width:100%;font:inherit}
+.stoprow:first-child{border-top:0}
+.stoprow .t1{font:500 17px/1.25 var(--f)}
+.stoprow .t0{font:500 13px var(--f);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.stoprow>svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2}
+/* ===== Detail ===== */
+.dt{max-width:1360px;margin:0 auto;padding:16px 36px 32px;display:grid;gap:16px}
+.crumb{display:flex;gap:10px;align-items:center;color:var(--dim);font-size:15px}
+.crumb .ql{color:var(--ink)}
+.dhead{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 18px;align-items:center;padding:20px 24px}
+.dhead .gl{width:56px;height:56px;border-radius:14px;font-size:18px;grid-row:span 2}
+.dhead h2{font:600 34px/1.1 var(--f);margin:0;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.chip{font:500 13px var(--mono);border-radius:999px;padding:3px 10px;background:var(--key);color:var(--ink);letter-spacing:.02em}
+.stline{display:flex;gap:10px;align-items:center;font-size:17px;flex-wrap:wrap}
+.dhead .why{grid-column:1/-1;font:400 19px/1.4 var(--f);margin-top:6px;max-width:60em}
+.dhead .acts{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.dhead[data-alert]{box-shadow:inset 0 0 0 2px var(--alert),0 4px 12px #0000000f}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:16px;align-items:start}
+.dcol{display:grid;gap:16px;min-width:0}
+.logc{display:grid;gap:12px}
+.logbox{background:var(--log);border-radius:12px;padding:12px 14px;font:400 14px/1.65 var(--mono);color:#d9d4c9;box-shadow:inset 0 1px 3px #000;overflow:hidden;min-height:250px}
+.logbox div{white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.logbox .t{color:#9b968b}
+.logbox .bad{color:#ff8b7d}
+.logbox .bad::before{content:"▲ ";color:#ff8b7d}
+.logbox .nw{animation:lnew 500ms var(--settle) both}
+@keyframes lnew{from{opacity:0;transform:translateY(6px)}}
+.kgrp{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--key)}
+.kgrp .key{box-shadow:none;background:transparent;min-height:34px;font-size:14px;padding:4px 12px}
+.kgrp .key[aria-pressed="true"]{background:var(--card);box-shadow:inset 0 1px 3px #00000033}
+.night .kgrp .key[aria-pressed="true"]{background:#232321;box-shadow:inset 0 1px 3px #000}
+.res{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.rs{display:grid;gap:2px;min-width:0}
+.rs svg{width:100%;height:44px;display:block;margin-top:6px}
+.rs .ax{display:flex;justify-content:space-between;font:400 13px var(--mono);color:var(--dim)}
+.spk{fill:none;stroke:var(--ink);stroke-width:1.6;vector-effect:non-scaling-stroke}
+.spk-a{fill:var(--key);stroke:none}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 16px}
+.kv>*{padding:10px 0;border-top:1px solid var(--rule);min-width:0}
+.kv>:nth-child(1),.kv>:nth-child(2){border-top:0}
+.kv dt{color:var(--dim);font-size:15px}
+.kv dd{margin:0;font-size:15px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.kv dd .mono{font-size:14px;overflow-wrap:anywhere}
+.hc{display:inline-flex;gap:3px}
+.hc .sq{width:9px;height:14px;border-radius:2px}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--rule)}
+.prow:first-of-type{border-top:0}
+.prow .mono{font-size:15px}
+.prow.p3{grid-template-columns:minmax(0,1fr) auto auto}
+.phn .dt{padding:10px 16px 24px;gap:14px}
+.phn .dhead{padding:16px;gap:4px 14px}
+.phn .dhead .gl{width:44px;height:44px;font-size:14px;border-radius:12px}
+.phn .dhead h2{font-size:26px;gap:8px}
+.phn .stline{font-size:15px}
+.phn .dhead .why{font-size:17px}
+.phn .dhead .acts .btn.pri{flex:1 1 100%}
+.phn .dhead .acts .btn.sec{flex:1 1 calc(50% - 5px)}
+.phn .logbox div{white-space:pre-wrap}
+.phn .dgrid{grid-template-columns:1fr;gap:14px}
+.phn .logbox{font-size:13px;min-height:0;padding:10px 12px}
+.phn .res{gap:12px}
+/* ===== Store ===== */
+.stv{max-width:1360px;margin:0 auto;padding:22px 36px 32px;display:grid;gap:16px}
+.stv .top{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.stv .top h2{font:600 32px var(--f);margin:0}
+.fieldi{flex:1;max-width:420px;background:var(--field);border:0;border-radius:12px;box-shadow:inset 0 1px 3px #00000026;padding:0 16px;font:400 16px var(--f);color:var(--ink);min-height:44px;min-width:0;margin-left:auto}
+.fieldi::placeholder{color:var(--dim)}
+.cats{display:flex;gap:8px;flex-wrap:wrap}
+.upd{display:grid;gap:4px}
+.urow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--rule)}
+.urow:first-of-type{border-top:0}
+.urow .v{font:400 14px var(--mono);color:var(--dim)}
+.cgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.sc{display:grid;grid-template-rows:auto auto 1fr auto;gap:6px;padding:14px 16px;min-height:178px}
+.sc .gl{width:40px;height:40px;border-radius:11px;font-size:14px}
+.sc b{font:500 18px/1.2 var(--f)}
+.sc .ft{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
+.sc .ft .sm{font-size:14px}
+.phn .stv{padding:14px 16px 24px;gap:12px}
+.phn .stv .top h2{font-size:26px}
+.phn .fieldi{max-width:none;flex-basis:100%;margin-left:0}
+.phn .cats{gap:6px}
+.phn :is(.ql,.key,.kgrp .key){min-height:44px;min-width:44px;justify-content:center}
+.phn .cats .key{min-height:44px}
+.phn .cgrid{grid-template-columns:1fr;gap:10px}
+.phn .sc{grid-template-columns:40px minmax(0,1fr);grid-template-rows:auto;min-height:0;gap:4px 12px;align-items:start}
+.phn .sc .gl{grid-row:span 3}
+.phn .sc .ft{grid-column:2}
+.phn .urow .btn{min-height:44px}
+/* sheets */
+.veil{position:absolute;inset:0;background:#0000006b;z-index:4;animation:fadein 200ms both}
+@keyframes fadein{from{opacity:0}}
+.sheet{position:absolute;top:96px;left:50%;width:600px;margin-left:-300px;z-index:5;display:grid;gap:14px;padding:24px 26px;border-radius:18px;box-shadow:0 20px 60px #00000066;animation:rise 320ms var(--settle) both}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}}
+.sheet h3{font:600 26px/1.15 var(--f);margin:0}
+.checks{display:grid}
+.ck{display:grid;grid-template-columns:18px minmax(0,1fr);gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--rule);font-size:16px}
+.ck:first-child{border-top:0}
+.ck .sm{font-size:14px}
+.sheet .acts{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.jobl{display:grid;gap:8px}
+.jobl .pb{height:10px}
+.phn .sheet{top:auto;bottom:0;left:0;right:0;width:auto;margin:0;border-radius:22px 22px 0 0;padding:20px 16px 30px;animation-name:riseb}
+@keyframes riseb{from{transform:translateY(100%)}}
+.phn .sheet .acts .btn{flex:1}
+.toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:#1d1c1a;color:#ece8df;border-radius:12px;padding:6px 6px 6px 16px;display:flex;gap:12px;align-items:center;font-size:15px;box-shadow:0 6px 20px #0000004d;z-index:6;white-space:nowrap;animation:tin 260ms var(--settle) both}
+@keyframes tin{from{opacity:0;transform:translate(-50%,12px)}}
+.night .toast{background:#3a3a37}
+.toast .ind{margin-right:2px}
+.toast button{appearance:none;border:0;background:#ffffff1a;color:#ece8df;border-radius:9px;padding:0 14px;height:40px;font:500 15px var(--f);cursor:pointer}
+.phn .toast{bottom:96px;max-width:360px;white-space:normal}
+.stub{max-width:900px;margin:0 auto;padding:60px 36px;display:grid;gap:12px;justify-items:start}
+.stub h2{font:600 32px var(--f)}
+.calm .bh *,.calm .bh *::after,.calm .bh *::before{animation-duration:1ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:120ms!important}
+@media (prefers-reduced-motion:reduce){.bh *,.bh *::after,.bh *::before{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Jam Design · Overnight pass 1 · Jam-Dash</span>
+    <h1>Jam-Dash, trouble first</h1>
+    <p class="muted">Jam-Dash in the simplified Braun Hi-Fi look. Home shows both servers on one screen. Anything that needs you comes first, as a short row of trouble cards, and the one orange button sits on the first fix. Under that, each server gets a black faceplate with processor, memory and disk, then every running app as a tile with an Open key. Navigation is never hidden: all seven places sit in the top bar on desktop. The apps, numbers and log lines are made-up sample data. The host names are the README's "home-server" and "nas".</p>
+  </header>
+
+  <div class="ctrls">
+    <div><span class="eyebrow">Lighting</span><div class="seg" role="group" aria-label="Day or night" id="seg-light"><button data-v="day" aria-pressed="true">Day</button><button data-v="night" aria-pressed="false">Night</button></div></div>
+    <div><span class="eyebrow">Situation</span><div class="seg" role="group" aria-label="Situation" id="seg-scen"><button data-v="trouble" aria-pressed="true">Two apps down, disk filling</button><button data-v="calm" aria-pressed="false">Everything up</button><button data-v="offline" aria-pressed="false">nas not answering</button></div></div>
+    <div><span class="eyebrow">Motion</span><div class="seg" role="group" aria-label="Motion" id="seg-motion"><button data-v="full" aria-pressed="true">Full</button><button data-v="calm" aria-pressed="false">Calm</button></div></div>
+  </div>
+
+  <section class="blk">
+    <h2>1 · Who it's for and what they come to do</h2>
+    <p class="muted">This came before any screen. Isaac runs it, and the other people in the house open it when something they use stops working. Most visits are a glance. The rest are about one app.</p>
+    <div class="tablebox"><table class="tod">
+      <tr><th>Job</th><th>Who, how often</th><th>Where it lives today (Depth)</th><th>Where it lives here</th></tr>
+      <tr><td><b>Is everything up?</b></td><td>Isaac, many times a day. Housemates, when Jellyfin or a game server is down.</td><td>Home summary glass and alert pill. Both servers are visible only in Global (through the HA add-on).</td><td>One sentence, then trouble cards, then both servers. The Home tab shows a count when something needs you.</td></tr>
+      <tr><td><b>Open an app</b></td><td>Everyone, on most visits</td><td>Tile → App detail → the address in the facts panel</td><td>An Open key on every running tile, one click</td></tr>
+      <tr><td><b>Fix the broken one</b></td><td>Isaac, weekly</td><td>Front-terrace window: Restart / Show logs</td><td>The first trouble card has the orange button. "Why?" opens the detail with the failing log lines marked.</td></tr>
+      <tr><td><b>Install / update</b></td><td>Isaac, weekly</td><td>Store shelves. The README has no updates view (watchtower runs as an app).</td><td>Store opens on "Updates ready", then the catalog. Install checks run before you commit.</td></tr>
+      <tr><td><b>Check disk</b></td><td>Isaac, when something feels slow or full</td><td>System › Disks, and the server cards in Global</td><td>A disk meter on every faceplate. Over 90% becomes a warn trouble card (amber, never red).</td></tr>
+    </table></div>
+  </section>
+
+  <section class="blk">
+    <h2>2 · Home, both servers</h2>
+    <p class="muted">Click a tile to open its detail. Click a tile's ↗ key to "open" the app. <b>Restart Crafty</b> runs the job: the card's window blinks while it restarts, the card leaves, and the orange button moves on to the next fix. With everything up, the Stripes accent comes back. On desktop, Enter presses the orange button, 1–7 switch places, and Esc goes back.</p>
+    <div class="devices">
+      <figure><div class="frame desk"><div class="screen" tabindex="0" aria-label="Jam-Dash desktop mockup, keyboard enabled"><div class="scaler" data-mount data-kind="desk" data-route="home" data-w="1440" data-h="900"></div></div></div><figcaption>Desktop 1440 × 900 · Home across both servers.</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="home" data-w="390" data-h="844"></div></div></div><figcaption>Phone 390 × 844 · Home. The first fix is a card; the others are rows.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2>3 · App detail</h2>
+    <p class="muted">Crafty, which is unhealthy. The page reads top to bottom: what's wrong, the fix, why (failing log lines carry a ▲ as well as the colour), then resources, addresses and ports, and facts. On a healthy app, Open becomes the orange button.</p>
+    <div class="devices">
+      <figure><div class="frame desk"><div class="screen" tabindex="0" aria-label="App detail desktop mockup"><div class="scaler" data-mount data-kind="desk" data-route="detail" data-app="crafty" data-w="1440" data-h="900"></div></div></div><figcaption>Desktop · Crafty (unhealthy). Try Problems only, Stop (it asks first) and Update.</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="detail" data-app="crafty" data-w="390" data-h="844"></div></div></div><figcaption>Phone · Crafty</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2>4 · Store (optional this pass)</h2>
+    <p class="muted">The Store opens on updates, because updating is the weekly job and browsing isn't. The catalog follows, with search and every category visible as keys. Get opens the install sheet, where the checks (port, folder, disk, processor) run before you commit.</p>
+    <div class="devices">
+      <figure><div class="frame desk"><div class="screen" tabindex="0" aria-label="Store desktop mockup"><div class="scaler" data-mount data-kind="desk" data-route="store" data-w="1440" data-h="900"></div></div></div><figcaption>Desktop · Store. Press Get on Navidrome to see the install sheet.</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="store" data-w="390" data-h="844"></div></div></div><figcaption>Phone · Store</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2>5 · Rules this mockup follows</h2>
+    <div class="notes">
+      <div class="note"><b>Container states → shared words</b><span class="muted">Running = <b>on</b> (green round LED). Stopped by you = <b>off</b> (dark window). Server unreachable = <b>offline</b> (dashed outline, no face). Starting, restarting or updating = <b>action</b> (cream, blinks 3 times, then holds). Unhealthy, or stopped when it shouldn't be = <b>alert</b> (red LED, red ring, and the word). Disk over 90% = <b>warn</b> (amber). The tiles show readable words, such as "Running · 12 d", with the shared state on <code>data-state</code>.</span></div>
+      <div class="note"><b>Orange, once</b><span class="muted">One orange button per screen, and it sits on the next thing to do: the first fix on Home, Restart on a broken app, Open on a healthy one, and Update all in the Store. When a job finishes, it moves on, the same "moving primary" as Callsheet. Stop is dark ink and always asks first.</span></div>
+      <div class="note"><b>Motion on change only</b><span class="muted">Meters fill once when you arrive. Cards slide into place when one leaves. A job fills a cream slot in its button. New log lines rise in. Nothing moves on a metrics tick. Calm (or reduced motion) cuts all of it to short fades. When there's trouble, the accent steps back.</span></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const H='home-server',N='nas';
+let LIGHT='day',SCEN='trouble',MOTION='full';
+const mounts=[];
+const ic={
+  ext:'<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  chev:'<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  down:'<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+  back:'<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
+  find:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+  home:'<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>',
+  apps:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg>',
+  store:'<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+  files:'<svg viewBox="0 0 24 24"><path d="M4 6a1 1 0 0 1 1-1h5l2 2h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>',
+  system:'<svg viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></svg>',
+  gear:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+  copy:'<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>'
+};
+const PLACES=[['home','Home'],['apps','Apps'],['store','Store'],['files','Files'],['shares','Shares'],['system','System'],['settings','Settings']];
+const STUB={apps:'Every app on both servers: search, filters with counts, categories, group by server, and bulk restart.',files:'The file browser, with places, crumbs, a preview panel, and upload. On the phone, Shares lives here as a second tab.',shares:'SMB shares from here, and network shares mounted here. Shares made by CasaOS show as read only.',system:'Each server side by side: 10-minute processor and memory graphs, network, and every disk and pool.',settings:'Look, Light/Dark/Automatic, password, signed-in devices, Connections (keys you enter yourself), and Home Assistant access.'};
+function gl(n){const w=n.split(/[\s-]+/).filter(Boolean);return w.length>1?(w[0][0]+w[1][0]).toUpperCase():n[0].toUpperCase()+n[1]}
+function hash(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0}
+function rnd(seed){let x=seed||1;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)%1000)/1000}}
+
+function build(scen){
+  const A=[];const add=o=>A.push(Object.assign({state:'on',since:'',cpu:'',mem:'',port:null,cat:'',img:'',ver:'',upd:null,live:null,ports:[]},o));
+  // home-server, running
+  add({id:'sabnzbd',name:'SABnzbd',srv:H,since:'6 d',cpu:'11%',mem:'413 MB',port:8080,img:'sabnzbd',ver:'4.3.3',live:'sab'});
+  add({id:'music',name:'Music Assistant',srv:H,since:'3 d',cpu:'1.1%',mem:'376 MB',port:8095,img:'music-assistant',ver:'2.3.1',live:'music'});
+  add({id:'crafty',name:'Crafty',srv:H,since:'4 d',cpu:'29%',mem:'2.1 GB',port:8000,img:'crafty-4',ver:'4.4.4',upd:'4.4.5'});
+  add({id:'codeserver',name:'Code Server',srv:H,since:'2 h',cpu:'0.4%',mem:'610 MB',port:8443,img:'code-server',ver:'4.93.1'});
+  add({id:'crowdsec',name:'CrowdSec',srv:H,since:'12 d',cpu:'0.8%',mem:'123 MB',port:8081,img:'crowdsec',ver:'1.6.3'});
+  add({id:'homebox',name:'Home Box',srv:H,since:'8 d',cpu:'0.1%',mem:'61 MB',port:3100,img:'homebox',ver:'0.15.2'});
+  add({id:'immich',name:'Immich',srv:H,since:'2 d',cpu:'4.0%',mem:'1.6 GB',port:2283,img:'immich-server',ver:'1.119.0',upd:'1.120.1'});
+  add({id:'jellyfin',name:'Jellyfin',srv:H,since:'9 d',cpu:'6.3%',mem:'1.3 GB',port:8096,img:'jellyfin',ver:'10.10.1'});
+  add({id:'npm',name:'Nginx Proxy Manager',srv:H,since:'12 d',cpu:'0.4%',mem:'163 MB',port:81,img:'nginx-proxy-manager',ver:'2.12.1'});
+  add({id:'prowlarr',name:'Prowlarr',srv:H,since:'4 d',cpu:'0.2%',mem:'146 MB',port:9696,img:'prowlarr',ver:'1.25.4'});
+  add({id:'radarr',name:'Radarr',srv:H,since:'9 d',cpu:'0.3%',mem:'186 MB',port:7878,img:'radarr',ver:'5.14.0'});
+  add({id:'sonarr',name:'Sonarr',srv:H,since:'9 d',cpu:'0.4%',mem:'213 MB',port:8989,img:'sonarr',ver:'4.0.10',live:'week'});
+  add({id:'terraria',name:'Terraria',srv:H,since:'1 d',cpu:'2.8%',mem:'623 MB',port:7777,img:'terraria',ver:'1.4.4.9'});
+  add({id:'watchtower',name:'watchtower',srv:H,since:'12 d',cpu:'0.0%',mem:'18 MB',img:'watchtower',ver:'1.7.1'});
+  ['Audiobookshelf','Bazarr','Calibre-Web','Kavita','Lidarr','Ollama','Overseerr','Paperless-ngx','Readarr','RomM','Tautulli','Uptime Kuma','game (port 7790)','Whisper'].forEach(n=>add({id:n.toLowerCase().replace(/[^a-z]/g,''),name:n,srv:H,state:'off',since:'Oct 20'}));
+  // nas
+  [['Jam-Dash','0.2%','46 MB','18 d',8484],['Gitea','0.7%','243 MB','18 d',3000],['Gitea Runner','0.4%','90 MB','18 d',null],['Nextcloud','1.9%','512 MB','6 d',8080],['Syncthing','0.6%','88 MB','41 d',8384],['Kopia','3.1%','301 MB','41 d',51515]].forEach(([n,c,m,s,p])=>add({id:n.toLowerCase().replace(/[^a-z]/g,''),name:n,srv:N,cpu:c,mem:m,since:s,port:p,img:n.toLowerCase().replace(/ /g,'-'),ver:'latest'}));
+  add({id:'duplicati',name:'Duplicati',srv:N,state:'off',since:'Sep 2'});
+  const S={[H]:{id:H,os:'Debian 12 · Docker 27',up:'up 12 days',cpu:12,mem:28,memr:'9.5 GB',disk:61,diskn:'Disk',diskr:'61%',state:'on'},
+           [N]:{id:N,os:'TrueNAS SCALE · Docker',up:'up 41 days',cpu:4,mem:30,memr:'4.8 GB',disk:92,diskn:'Apps pool',diskr:'92%',state:'on'}};
+  const g=id=>A.find(a=>a.id===id);
+  if(scen!=='calm'){
+    Object.assign(g('crafty'),{state:'alert',word:'Unhealthy',title:'stopped responding',why:'Stopped responding 3 minutes ago. It failed its health check 3 times in a row.',fix:'restart'});
+    Object.assign(g('codeserver'),{state:'alert',word:'Stopped unexpectedly',title:'stopped unexpectedly',why:'It quit at 01:31 with exit code 137: it ran out of memory.',fix:'start',cpu:'',mem:'',q:'Exit 137 at 01:31'});
+  } else {S[N].disk=71;S[N].diskr='71%'}
+  if(scen==='offline'){S[N].state='offline';A.filter(a=>a.srv===N).forEach(a=>{a.state='offline';a.q='Last seen 01:40'});Object.assign(g('codeserver'),{state:'on',word:null,fix:null,cpu:'0.4%',mem:'610 MB',q:null})}
+  return {A,S,g};
+}
+const LOGS={
+  crafty:(ok)=>ok?[['01:52:40','healthcheck: ok (84 ms)'],['01:52:41','[Server] Done (6.2 s)! For help, type "help"'],['01:53:05','[Crafty] Backup of world "riverside" started'],['01:53:30','healthcheck: ok (91 ms)'],['01:53:55','[Server] Saving chunks for level \'riverside\''],['01:54:20','healthcheck: ok (77 ms)'],['01:54:45','[Crafty] Backup finished, 412 MB'],['01:55:10','healthcheck: ok (80 ms)']]
+    :[['01:48:20','[Crafty] Backup of world "riverside" skipped: server busy'],['01:48:45','[Server] Can\'t keep up! Running 82 ticks behind'],['01:49:10','healthcheck: GET /api/v2 timed out (10 s)',1],['01:49:35','[Server] Can\'t keep up! Running 82 ticks behind'],['01:50:00','healthcheck: unhealthy',1],['01:50:25','healthcheck: GET /api/v2 timed out (10 s)',1],['01:50:50','healthcheck: GET /api/v2 timed out (10 s)',1],['01:51:15','[Server] Saving chunks for level \'riverside\'']],
+  codeserver:(ok)=>ok?[['01:52:02','[main] Session started'],['01:52:03','HTTP server listening on 0.0.0.0:8443'],['01:52:10','[extension host] Started']]:[['01:30:12','[extension host] memory 3.6 GB'],['01:30:58','[extension host] memory 3.9 GB'],['01:31:02','Killed (out of memory)',1],['01:31:02','container exited with code 137',1]]
+};
+function logsFor(a){const ok=a.state==='on';if(LOGS[a.id])return LOGS[a.id](ok);if(a.state==='offline')return [['01:40:00','(no new lines: nas is not answering)']];if(a.state==='off')return [['Oct 20','Stopped by Isaac from Jam-Dash']];const r=rnd(hash(a.id));return Array.from({length:8},(_,i)=>[`01:${String(46+i).padStart(2,'0')}:${String(Math.floor(r()*59)).padStart(2,'0')}`,`[${a.name}] GET /api/${['status','queue','health','items','events'][Math.floor(r()*5)]} 200 (${Math.floor(r()*40)+3} ms)`])}
+function spark(seed,base,amp,n=40){const r=rnd(seed);let v=base,p=[];for(let i=0;i<n;i++){v=Math.max(2,Math.min(98,v+(r()-.5)*amp));p.push(v)}return p}
+function sparkSvg(p){const n=p.length;const pts=p.map((v,i)=>`${(i/(n-1)*200).toFixed(1)},${(44-v/100*40).toFixed(1)}`).join(' ');return `<svg viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><polygon class="spk-a" points="0,44 ${pts} 200,44"/><polyline class="spk" points="${pts}"/></svg>`}
+
+function fresh(m){m.d=build(SCEN);m.st={route:m.route0,app:m.app0,srv:'both',sheet:null,toast:null,logf:'all',q:'',cat:'All',updDone:false,installed:{},arrive:true,enter:false};m.accentDrop=false}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- troubles ---------- */
+function troubles(m){
+  const {A,S}=m.d,t=[],vis=s=>m.st.srv==='both'||m.st.srv===s;
+  A.filter(a=>vis(a.srv)&&(a.state==='alert'||a.job||a.done)).forEach(a=>{
+    if(a.job)t.push({key:a.id,k:'action',lab:`Action · ${a.srv}`,ttl:`${a.job==='start'?'Starting':'Restarting'} ${a.name}…`,body:'Waiting for its health check to pass.',acts:[{l:a.job==='start'?'Starting…':'Restarting…',busy:1}]});
+    else if(a.done)t.push({key:a.id,k:'ok',lab:`On · ${a.srv}`,ttl:`${a.name} is running again`,body:'Its health check passed at 01:53.',acts:[]});
+    else t.push({key:a.id,k:'alert',lab:`Alert · ${a.srv}`,ttl:`${a.name} ${a.title}`,body:a.why,acts:[{l:`${a.fix==='start'?'Start':'Restart'} ${a.name}`,act:'fix',arg:a.id},{l:'Why?',act:'detail',arg:a.id,ql:1}]});
+  });
+  Object.values(S).forEach(s=>{if(!vis(s.id))return;
+    if(s.state==='offline'||s.state==='action')t.push({key:'srv-'+s.id,k:s.state==='action'?'action':'offline',lab:`${s.state==='action'?'Action':'Offline'} · ${s.id}`,ttl:s.state==='action'?`Reaching ${s.id}…`:`${s.id} isn't answering`,body:'Last seen 01:40. Its apps may still be running; Jam-Dash just can\'t see them.',acts:s.state==='action'?[{l:'Trying…',busy:1}]:[{l:'Try again',act:'retry',arg:s.id}]});
+    else if(s.disk>=90)t.push({key:'disk-'+s.id,k:'warn',nocard:1,lab:`Warn · ${s.id}`,ttl:`The ${s.diskn.toLowerCase()} is almost full`,body:'310 GB left. Immich grew 40 GB this week.',acts:[{l:'See disks',act:'go',arg:'system'}]});
+  });
+  // the one orange button: first enabled action
+  let given=false;t.filter(x=>!x.nocard).forEach(x=>x.acts.forEach(a=>{if(!a.busy&&!a.ql&&!given){a.pri=1;given=true}}));
+  return t;
+}
+function ledFor(k){return k==='alert'?'<i class="ind led alert on"></i>':k==='warn'?'<i class="ind led warn on"></i>':k==='offline'?'<i class="ind led gone"></i>':k==='action'?'<i class="ind led act"></i>':k==='ok'?'<i class="ind led ok on"></i>':'<i class="ind led"></i>'}
+function actBtn(a,m,first){if(a.busy)return `<button class="btn" disabled>${a.l}<span class="prog" style="--dur:1700ms"></span></button>`;
+  if(a.ql)return `<button class="ql" data-act="${a.act}" data-arg="${a.arg||''}">${a.l}</button>`;
+  return `<button class="btn ${a.pri?'pri':'sec'}" data-act="${a.act}" data-arg="${a.arg||''}">${a.l}${a.pri&&m.kind==='desk'?' <span class="kh">↵</span>':''}</button>`}
+function heroText(m,t){
+  const al=t.filter(x=>x.k==='alert').length,off=t.filter(x=>x.k==='offline'),wn=t.filter(x=>x.k==='warn'),busy=t.filter(x=>x.k==='action').length;
+  const {A}=m.d,vis=a=>m.st.srv==='both'||m.st.srv===a.srv;
+  const run=A.filter(a=>vis(a)&&a.state==='on').length;
+  const parts=[];
+  if(al)parts.push(`${al===1?'One app needs':al+' apps need'} you`);
+  off.forEach(x=>parts.push(`${x.key.slice(4)} isn't answering`));
+  wn.forEach(x=>parts.push(`${x.key.slice(5)} is almost full`));
+  const where=m.st.srv==='both'?'2 servers':m.st.srv;
+  if(!parts.length)return busy?{h:'Fixing it now.',s:`${run} apps running on ${where} · checked 01:53`}:{h:'Everything is up.',s:`${run} apps running on ${where} · checked 01:53`,calm:1};
+  let h=parts.length>1?parts.slice(0,-1).join(', ')+', and '+parts.at(-1):parts[0];
+  h=h[0].toUpperCase()+h.slice(1)+'.';
+  return {h,s:`${run} apps running fine on ${where} · checked 01:52`};
+}
+const STRIPES='<svg viewBox="0 0 380 108" aria-hidden="true"><path d="M380 22 H230 Q200 22 186 0" stroke="#6b3416" stroke-width="12" fill="none"/><path d="M380 40 H222 Q184 40 166 0" stroke="#b04a1c" stroke-width="12" fill="none"/><path d="M380 58 H214 Q168 58 146 0" stroke="#d69a2e" stroke-width="12" fill="none"/></svg>';
+
+/* ---------- home ---------- */
+function tile(m,a){
+  const st=a.job?'action':a.state;
+  let s,q=a.q||(a.cpu?`${a.cpu} CPU · ${a.mem}`:'');
+  if(st==='action'){s=`${ledFor('action')}<span>${a.job==='start'?'Starting…':a.job==='update'?'Updating…':'Restarting…'}</span>`;q='—'}
+  else if(st==='alert')s=`${ledFor('alert')}<span>${a.word}</span>`;
+  else if(st==='offline')s=`${ledFor('offline')}<span>Offline</span>`;
+  else if(st==='off')s=`${ledFor('')}<span>Stopped</span>`;
+  else s=`${ledFor('ok')}<span>Running · ${a.since}</span>`;
+  let lv='';const wide=a.live&&a.live!=='week'&&st==='on';
+  if(wide&&a.live==='sab'){s=`<i class="ind slot on"></i><span>Downloading · 42 MB/s</span>`;q='About 10 min left';lv=`<div class="lv">
+      <div class="qr"><span>The Copper City (1982)</span><span class="pb" style="--v:62%"><i></i></span></div>
+      <div class="qr"><span>Signal Street S02E04</span><span class="pb" style="--v:20%"><i></i></span></div></div>`}
+  if(wide&&a.live==='music'){s=`<i class="ind slot on"></i><span>Playing in Living room</span>`;lv=`<div class="lv"><div class="np"><b>Saturn</b><span class="sm">The Olympians</span></div></div>`}
+  if(a.live==='week'&&st==='on'&&m.kind==='desk'){q=`<span class="week" aria-label="Episodes this week: Tuesday, Thursday, Saturday">${['M','T','W','T','F','S','S'].map((d,i)=>`<span><i class="ind sq ${[1,3,5].includes(i)?'on':''}"></i>${d}</span>`).join('')}</span>`;s=`${ledFor('ok')}<span>3 episodes this week</span>`}
+  const open=(st==='on'&&a.port)?`<button class="okey" data-act="open" data-arg="${a.id}" aria-label="Open ${esc(a.name)}" title="Open ${esc(a.name)}">${ic.ext}</button>`:'';
+  return `<div class="tl ${wide?'wide':''}" data-state="${st==='alert'?'on':st}" ${st==='alert'?'data-alert':''} data-flip="t-${a.id}">
+    <button class="hit" data-act="detail" data-arg="${a.id}" aria-label="${esc(a.name)}: details"></button>
+    <span class="gl">${gl(a.name)}</span><span class="n">${esc(a.name)}</span>
+    <span class="s">${s}</span>${lv}${q?`<span class="q">${q}</span>`:''}${open}</div>`;
+}
+function meter(lab,rd,v,warn){return `<div class="mt ${warn?'warn':''}"><div class="hd"><span class="lab">${lab}</span><span class="rd">${rd}</span></div><span class="tr"><i style="--v:${v/100}"></i></span>${warn?'<span class="wn">▲ Almost full</span>':''}</div>`}
+function serverCol(m,s){
+  const {A}=m.d,desk=m.kind==='desk';
+  const apps=A.filter(a=>a.srv===s.id);
+  const run=apps.filter(a=>a.state!=='off');
+  const order=a=>(a.live&&a.live!=='week'?0:1);
+  run.sort((x,y)=>order(x)-order(y)||x.name.localeCompare(y.name));
+  const stopped=apps.filter(a=>a.state==='off');
+  const cols=desk?(m.st.srv==='both'?(s.id===H?4:2):6):2;
+  let face;
+  if(s.state==='offline'||s.state==='action')face=`<div class="face offline"><div class="id"><span class="nm">${ledFor(s.state==='action'?'action':'offline')}${s.id}</span><span class="os">${s.state==='action'?'Reaching it…':'Offline · since 01:40'}</span></div><div class="row" style="justify-content:flex-end"><span class="sm">${s.os}</span></div></div>`;
+  else face=`<div class="face"><div class="id"><span class="nm">${ledFor('ok')}${s.id}</span><span class="os">On · ${s.up}</span></div>
+    <div class="meters">${meter('CPU',s.cpu+'%',s.cpu)}${meter('Memory',s.memr,s.mem)}${meter(s.diskn,s.diskr,s.disk,s.disk>=90)}</div></div>`;
+  const shown=desk?(m.st.srv==='both'&&s.id===H?6:9):3;
+  const st=stopped.length?`<div class="stl"><span class="lab">${stopped.length} stopped</span>${stopped.slice(0,shown).map(a=>`<button class="chipk" data-act="detail" data-arg="${a.id}">${ledFor('')}${esc(a.name)}</button>`).join('')}${stopped.length>shown?`<button class="ql" data-act="go" data-arg="apps">All ${stopped.length} in Apps</button>`:''}</div>`:'';
+  return `<div class="sv">${face}<div class="tgrid" style="--cols:${cols}">${run.map(a=>tile(m,a)).join('')}</div>${st}</div>`;
+}
+function vHome(m){
+  const t=troubles(m),hx=heroText(m,t),desk=m.kind==='desk';
+  const showAccent=hx.calm;
+  const acc=showAccent?`<div class="accent ${m.accentDrop?'drop':''}">${STRIPES}</div>`:'';
+  m.accentDrop=false;
+  let tr='';const tcards=t.filter(x=>!x.nocard);
+  if(tcards.length){
+    if(desk)tr=`<div class="trouble" role="region" aria-label="Needs you">${tcards.slice(0,4).map(x=>`<div class="card tc" data-k="${x.k}" data-flip="c-${x.key}"><div class="top">${ledFor(x.k)}<span class="lab">${x.lab}</span></div><div class="ttl">${esc(x.ttl)}</div><div class="sm">${esc(x.body)}</div>${x.acts.length?`<div class="acts">${x.acts.map(a=>actBtn(a,m)).join('')}</div>`:''}</div>`).join('')}</div>`;
+    else{const [f,...rest]=tcards;tr=`<div role="region" aria-label="Needs you"><div class="card tc" data-k="${f.k}" data-flip="c-${f.key}"><div class="top">${ledFor(f.k)}<span class="lab">${f.lab}</span></div><div class="ttl">${esc(f.ttl)}</div><div class="sm">${esc(f.body)}</div>${f.acts.length?`<div class="acts">${f.acts.map(a=>actBtn(a,m)).join('')}</div>`:''}</div>
+      ${rest.length?`<div class="slist">${rest.map(x=>`<button class="stoprow" data-flip="c-${x.key}" data-act="${x.key.startsWith('disk')?'go':x.key.startsWith('srv')?'retry':'detail'}" data-arg="${x.key.startsWith('disk')?'system':x.key.replace(/^(srv|disk)-/,'')}">${ledFor(x.k)}<span><span class="t0">${x.lab}</span><br><span class="t1">${esc(x.ttl)}</span></span>${ic.chev}</button>`).join('')}</div>`:''}</div>`}
+  }
+  const srvs=[H,N].filter(s=>m.st.srv==='both'||m.st.srv===s).map(s=>serverCol(m,m.d.S[s]));
+  return `<div class="hm view ${m.st.enter?'enter':''} ${m.st.arrive?'arrive':''}">
+    <div class="hero">${acc}<h2>${hx.h}</h2><span class="sub">${hx.s}</span></div>
+    ${tr}<div class="srvs ${srvs.length<2?'one':''}">${srvs.join('')}</div></div>`;
+}
+
+/* ---------- detail ---------- */
+function vDetail(m){
+  const a=m.d.g(m.st.app),desk=m.kind==='desk',st=a.job?'action':a.state;
+  let stl,why='';
+  if(st==='action')stl=`${ledFor('action')}<span>${a.job==='update'?`Updating to ${a.upd}…`:a.job==='start'?'Starting…':'Restarting…'}</span>`;
+  else if(st==='alert'){stl=`${ledFor('alert')}<span class="word alert">Alert</span><span>${a.word}</span>`;why=`<p class="why">${a.why}</p>`}
+  else if(st==='offline')stl=`${ledFor('offline')}<span class="word">Offline</span><span>nas isn't answering · last seen 01:40</span>`;
+  else if(st==='off')stl=`${ledFor('')}<span class="word">Off</span><span>Stopped since ${a.since}</span>`;
+  else stl=`${ledFor('ok')}<span class="word">On</span><span>Running for ${a.since==='just now'?'a moment':a.since.replace(' d',' days').replace(' h',' hours')}</span>`;
+  const acts=[];const busy=st==='action';
+  if(busy)acts.push(`<button class="btn" disabled>${a.job==='update'?'Updating…':a.job==='start'?'Starting…':'Restarting…'}<span class="prog" style="--dur:${a.job==='update'?2600:1700}ms"></span></button>`);
+  else if(st==='alert')acts.push(`<button class="btn pri" data-act="fix" data-arg="${a.id}">${a.fix==='start'?'Start':'Restart'} ${esc(a.name)}${desk?' <span class="kh">↵</span>':''}</button>`);
+  else if(st==='off')acts.push(`<button class="btn pri" data-act="fix" data-arg="${a.id}">Start ${esc(a.name)}${desk?' <span class="kh">↵</span>':''}</button>`);
+  else if(st==='on'&&a.port)acts.push(`<button class="btn pri" data-act="open" data-arg="${a.id}">Open ${esc(a.name)} ${ic.ext}</button>`);
+  if(st==='offline')acts.push(`<button class="btn sec" data-act="retry" data-arg="${N}">Try again</button>`);
+  if(!busy&&st==='alert'&&a.fix==='restart'&&a.port)acts.push(`<button class="btn sec" data-act="open" data-arg="${a.id}">Open ${ic.ext}</button>`);
+  if(!busy&&st==='on')acts.push(`<button class="btn sec" data-act="fix" data-arg="${a.id}">Restart</button>`);
+  if(!busy&&a.upd&&st!=='offline')acts.push(`<button class="btn sec" data-act="update" data-arg="${a.id}">Update to ${a.upd}</button>`);
+  if(!busy&&(st==='on'||(st==='alert'&&a.fix==='restart')))acts.push(`<button class="btn sec" data-act="stop" data-arg="${a.id}">Stop…</button>`);
+  if(!busy&&st!=='offline')acts.push(`<button class="ql" data-act="toast" data-arg="Edit setup opens the compose editor (not drawn in pass 1).">Edit setup</button>`);
+  let L=logsFor(a);if(m.st.logf==='bad')L=L.filter(l=>l[2]);
+  const newl=m.st.newlog||0;
+  const logs=L.map((l,i)=>`<div class="${l[2]?'bad':''} ${i>=L.length-newl?'nw':''}"><span class="t">${l[0]}</span> ${esc(l[1])}</div>`).join('')||'<div class="t">No problem lines in the last 10 minutes.</div>';
+  const live=st==='on'||st==='alert'&&a.fix==='restart';
+  const hc=a.id==='crafty'?(st==='alert'?[1,1,1,1,1,1,1,0,0,0]:[1,1,1,1,1,1,1,1,1,1]):null;
+  const r=hash(a.id),cpuN=parseFloat(a.cpu)||0;
+  const res=(st==='on'||st==='alert'&&a.cpu)?`<div class="card"><div class="row"><span class="lab">Resources · past 10 minutes</span></div><div class="res" style="margin-top:10px">
+      <div class="rs"><span class="big">${a.cpu}</span><span class="sm">processor, now</span>${sparkSvg(spark(r,Math.max(8,cpuN*1.6),18))}<span class="ax"><span>−10 min</span><span>now</span></span></div>
+      <div class="rs"><span class="big">${a.mem}</span><span class="sm">memory${a.id==='crafty'?', of a 4 GB limit':''}</span>${sparkSvg(spark(r+7,50,6))}<span class="ax"><span>−10 min</span><span>now</span></span></div></div></div>`:
+      `<div class="card"><span class="lab">Resources</span><p class="sm" style="margin-top:8px">${st==='offline'?'No readings while nas is offline.':'Not running, so nothing to measure.'}${a.id==='codeserver'?' At 01:31 it was using 3.9 GB, over its 4 GB limit with the extension host.':''}</p></div>`;
+  const addr=a.port?`http://${a.srv}:${a.port}`:null;
+  const ports=`<div class="card"><span class="lab">Address and ports</span><div style="margin-top:6px">
+      ${addr?`<div class="prow p3"><span class="mono">${addr}</span><span class="sm">web page</span><button class="ib" data-act="toast" data-arg="Copied ${addr}" aria-label="Copy address">${ic.copy}</button></div>`:'<p class="sm">No web page.</p>'}
+      ${a.port?`<div class="prow"><span class="mono">${a.port} → ${a.port}/tcp</span><span class="sm">web</span></div>`:''}
+      ${a.id==='crafty'?'<div class="prow"><span class="mono">25565 → 25565/tcp</span><span class="sm">game</span></div>':''}</div></div>`;
+  const facts=`<div class="card"><span class="lab">Facts</span><dl class="kv" style="margin:6px 0 0">
+      <dt>Image</dt><dd><span class="mono">${a.img||a.id}:${a.ver||'latest'}</span>${a.upd?`<span class="sm">${a.upd} is ready</span>`:''}</dd>
+      <dt>Data folder</dt><dd><span class="mono">/DATA/AppData/${a.id}</span></dd>
+      ${hc?`<dt>Health checks</dt><dd><span class="hc" aria-hidden="true">${hc.map(h=>`<i class="ind sq ${h?'ok':'alert'} on"></i>`).join('')}</span><span>${hc.includes(0)?'Last 3 failed':'Last 10 passed'}</span></dd>`:''}
+      <dt>Restarts</dt><dd>${a.restarted?'1 today, by you':'None'}</dd>
+      <dt>Server</dt><dd>${a.srv}</dd></dl></div>`;
+  const logc=`<div class="card logc"><div class="row" style="flex-wrap:wrap"><span class="lab" style="display:flex;gap:8px;align-items:center">${live?'<i class="ind slot on"></i>':'<i class="ind slot"></i>'}Log · ${live?'live':'last lines'}</span><span style="display:flex;gap:10px;align-items:center"><span class="kgrp" role="group" aria-label="Which lines"><button class="key" data-act="logf" data-arg="all" aria-pressed="${m.st.logf==='all'}">All lines</button><button class="key" data-act="logf" data-arg="bad" aria-pressed="${m.st.logf==='bad'}">Problems only</button></span><button class="ql" data-act="toast" data-arg="Full log opens as a sheet (not drawn in pass 1).">Full log</button></span></div><div class="logbox" aria-live="polite">${logs}</div></div>`;
+  return `<div class="dt view ${m.st.enter?'enter':''}">
+    <div class="crumb"><button class="ql" data-act="go" data-arg="home">${ic.back} Home</button><span>/ ${a.srv} / ${esc(a.name)}</span></div>
+    <div class="card dhead" ${st==='alert'?'data-alert':''}><span class="gl">${gl(a.name)}</span><h2>${esc(a.name)} <span class="chip">${a.srv}</span></h2><div class="stline">${stl}</div>${why}<div class="acts">${acts.join('')}</div></div>
+    <div class="dgrid"><div class="dcol">${logc}${desk?'':res}</div><div class="dcol">${desk?res:''}${ports}${facts}</div></div></div>`;
+}
+
+/* ---------- store ---------- */
+const CAT=[['navidrome','Navidrome','Media','Music streaming for every phone and speaker in the house.'],['audiobookshelf','Audiobookshelf','Books','Audiobooks and podcasts, with progress synced.'],['bazarr','Bazarr','Media','Subtitles for Sonarr and Radarr.'],['calibreweb','Calibre-Web','Books','Your ebook library in a browser.'],['kavita','Kavita','Books','Comics and manga reader.'],['qbittorrent','qBittorrent','Downloads','Torrents with a web page.'],['nzbget','NZBGet','Downloads','A small, quiet Usenet client.'],['paperlessngx','Paperless-ngx','Documents','Scan, tag and search your paper.'],['stirling','Stirling PDF','Documents','Merge, split and sign PDFs.'],['uptimekuma','Uptime Kuma','Network','Tells you when a site goes down.'],['pihole','Pi-hole','Network','Blocks ads for the whole house.'],['photoprism','PhotoPrism','Photos','Browse and tag a photo library.'],['romm','RomM','Games','A library for your game files.'],['vaultwarden','Vaultwarden','Security','Passwords for everyone in the house.'],['actual','Actual Budget','Money','Envelope budgeting, kept at home.']];
+function vStore(m){
+  const desk=m.kind==='desk',{A}=m.d,inst=id=>A.find(a=>a.id===id)||m.st.installed[id];
+  const ups=A.filter(a=>a.upd);const busyU=ups.some(a=>a.job==='update');
+  const cats=['All',...new Set(CAT.map(c=>c[2]))];
+  const q=m.st.q.toLowerCase();
+  const list=CAT.filter(c=>(m.st.cat==='All'||c[2]===m.st.cat)&&(!q||(c[1]+' '+c[3]).toLowerCase().includes(q)));
+  const hasPri=ups.length&&!busyU;
+  const upd=ups.length?`<div class="card upd" data-flip="upd"><div class="row" style="flex-wrap:wrap"><span class="lab" style="display:flex;gap:8px;align-items:center"><i class="ind sq on"></i>Updates ready · ${ups.length}</span>${busyU?`<button class="btn" disabled>Updating…<span class="prog" style="--dur:2600ms"></span></button>`:`<button class="btn pri" data-act="updall">Update ${ups.length===2?'both':'all'}${desk?' <span class="kh">↵</span>':''}</button>`}</div>
+      ${ups.map(a=>`<div class="urow" data-flip="u-${a.id}"><span class="gl">${gl(a.name)}</span><span><b style="font-weight:500">${esc(a.name)}</b> <span class="v">${a.ver} → ${a.upd}</span><br><span class="sm">${a.srv}${a.state==='alert'?' · it\'s unhealthy now; updating restarts it':''}</span></span>${a.job?`<span class="sm">Updating…</span>`:`<button class="btn sec" data-act="update" data-arg="${a.id}">Update</button>`}</div>`).join('')}</div>`
+    :`<div class="card" data-flip="upd"><span class="lab" style="display:flex;gap:8px;align-items:center"><i class="ind sq"></i>Updates</span><p class="sm" style="margin-top:6px">Everything is up to date. Checked 01:50.</p></div>`;
+  const cards=list.map(c=>{const i=inst(c[0]);const word=i?(i.state==='off'?`Installed · stopped`:`Installed · ${i.srv}`):'';return `<div class="card sc" data-flip="s-${c[0]}"><span class="gl">${gl(c[1])}</span><b>${c[1]}</b><span class="sm">${c[3]}</span><div class="ft"><span class="sm">${word||c[2]}</span>${i?(i.state==='off'?`<button class="key" data-act="detail" data-arg="${c[0]}">Details</button>`:`<button class="key" data-act="open" data-arg="${c[0]}">Open</button>`):`<button class="key" data-act="get" data-arg="${c[0]}">Get</button>`}</div></div>`}).join('')||'<p class="sm">No apps match. Try a shorter word, or <button class="ql" data-act="clearq">clear the search</button>.</p>';
+  return `<div class="stv view ${m.st.enter?'enter':''}">
+    <div class="top"><h2>Store</h2><span class="sm">64 apps from 5 catalogs</span><input class="fieldi" type="search" placeholder="Search 64 apps" value="${esc(m.st.q)}" data-input="q" aria-label="Search the store"></div>
+    ${upd}
+    <div class="cats" role="group" aria-label="Category">${cats.map(c=>`<button class="key" data-act="cat" data-arg="${c}" aria-pressed="${m.st.cat===c}">${c}</button>`).join('')}</div>
+    <div class="cgrid">${cards}</div></div>`;
+}
+function vSheet(m){
+  const sh=m.st.sheet;if(!sh)return '';
+  if(sh.t==='stop'){const a=m.d.g(sh.id);return `<div class="veil" data-act="close"></div><div class="card sheet" role="dialog" aria-modal="true" aria-label="Stop ${esc(a.name)}"><h3>Stop ${esc(a.name)}?</h3><p class="sm" style="font-size:17px">${a.id==='crafty'?'Anyone playing on the Minecraft server is disconnected. ':''}It stays stopped until someone starts it again. Its data stays where it is.</p><div class="acts"><button class="btn ink" data-act="dostop" data-arg="${a.id}">Stop ${esc(a.name)}</button><button class="btn sec" data-act="close">Keep it running</button></div></div>`}
+  if(sh.t==='install'){const c=CAT.find(x=>x[0]===sh.id);const S=m.d.S[sh.srv];const full=S.disk>=90;const off=S.state==='offline';
+    const checks=[[off?'offline':'ok',`Port 4533 is free on ${sh.srv}`,'Navidrome\'s web page'],[off?'offline':'ok','Folder /DATA/AppData/navidrome will be made','Music is read from /DATA/Media/Music'],[off?'offline':full?'warn':'ok',full?`${S.diskn} is ${S.disk}% full`:'Enough disk space',full?'310 GB left. Navidrome needs about 200 MB, plus its cache.':`${sh.srv==='nas'?'1.1 TB':'314 GB'} free`],[off?'offline':'ok','Runs on this processor','amd64']];
+    const prog=sh.job?`<div class="jobl"><div class="row"><span>${sh.job<3?['Pulling the image…','Starting…'][sh.job-1]:'Installed and running'}</span><span class="sm mono">${['','1 of 2','2 of 2','done'][sh.job]}</span></div><span class="pb"><i style="width:calc(${[0,45,85,100][sh.job]}% - 3px);transition:width 900ms var(--settle)"></i></span></div>`:'';
+    return `<div class="veil" data-act="close"></div><div class="card sheet" role="dialog" aria-modal="true" aria-label="Install ${c[1]}"><span class="lab">Install</span><h3>${c[1]}</h3><div class="row" style="justify-content:flex-start;flex-wrap:wrap"><span class="sm">Where</span><span class="kgrp" role="group" aria-label="Server">${[H,N].map(s=>`<button class="key" data-act="isrv" data-arg="${s}" aria-pressed="${sh.srv===s}" ${sh.job?'disabled':''}><i class="ind sq ${sh.srv===s?'on':''}"></i>${s}</button>`).join('')}</span></div>
+      <div class="checks">${checks.map(k=>`<div class="ck">${ledFor(k[0])}<span>${k[1]}<br><span class="sm">${k[2]}</span></span></div>`).join('')}</div>${prog}
+      <div class="acts">${sh.job===3?`<button class="btn pri" data-act="open" data-arg="navidrome">Open ${c[1]} ${ic.ext}</button><button class="btn sec" data-act="close">Done</button>`:sh.job?`<button class="btn" disabled>Installing…</button>`:off?`<button class="btn sec" data-act="close">Cancel</button><span class="sm">${sh.srv} isn't answering.</span>`:`<button class="btn pri" data-act="install">Install ${c[1]}</button><button class="btn sec" data-act="close">Cancel</button>`}</div></div>`}
+  return '';
+}
+
+/* ---------- shell ---------- */
+function shell(m,inner){
+  const desk=m.kind==='desk',r=m.st.route;
+  const nAl=m.d.A.filter(a=>a.state==='alert').length;
+  const place=r==='detail'?'home':r;
+  if(desk){
+    const tabs=PLACES.map(([k,l],i)=>`<button class="htab" role="tab" data-act="go" data-arg="${k}" aria-selected="${place===k}">${l}${k==='home'&&nAl?`<span class="n al" aria-label="${nAl} need you">${nAl}</span>`:''}</button>`).join('');
+    const sk=[['both','Both'],[H,H],[N,N]].map(([k,l])=>`<button class="key" data-act="srv" data-arg="${k}" aria-pressed="${m.st.srv===k}"><i class="ind sq ${m.st.srv===k?'on':''}"></i>${l}</button>`).join('');
+    return `<div class="app"><div class="trim"></div><div class="hdr"><span class="wm">Jam-Dash</span><nav class="tabs" role="tablist" aria-label="Places">${tabs}</nav><div class="hr"><span class="srvk" role="group" aria-label="Servers">${sk}</span><button class="findb" data-act="toast" data-arg="Find (⌘K) searches apps, files and settings on both servers. Not drawn in pass 1.">${ic.find}Find <span class="kh">⌘K</span></button></div></div><div class="body">${inner}</div>${vSheet(m)}${toast(m)}</div>`;
+  }
+  const ptabs=[['home','Home',ic.home],['apps','Apps',ic.apps],['store','Store',ic.store],['files','Files',ic.files],['system','System',ic.system]].map(([k,l,s])=>`<button class="tab" data-act="go" data-arg="${k}" aria-selected="${place===k}"><span class="win"></span>${s}<span>${l}</span>${k==='home'&&nAl?`<span class="n">${nAl}</span>`:''}</button>`).join('');
+  const sl={both:'Both servers',[H]:H,[N]:N}[m.st.srv];
+  return `<div class="app phn"><div class="trim"></div><div class="hdr"><span class="wm">Jam-Dash</span><button class="srvb" data-act="srvcycle" aria-label="Servers: ${sl}. Change">${sl}${ic.down}</button><button class="ib" data-act="go" data-arg="settings" aria-label="Settings">${ic.gear}</button></div><div class="body">${inner}</div><nav class="ptabs" aria-label="Places">${ptabs}</nav>${vSheet(m)}${toast(m)}</div>`;
+}
+function toast(m){const t=m.st.toast;if(!t)return '';return `<div class="toast" role="status">${t.led?ledFor(t.led):''}<span>${esc(t.text)}</span>${t.btn?`<button data-act="${t.btn[1]}" data-arg="${t.btn[2]||''}">${t.btn[0]}</button>`:''}</div>`}
+function vStub(m){const r=m.st.route;const l=PLACES.find(p=>p[0]===r)[1];return `<div class="stub view ${m.st.enter?'enter':''}"><span class="lab">${l}</span><h2>${l}</h2><p class="sm" style="font-size:18px">${STUB[r]}</p><p class="sm">Not drawn in pass 1. It keeps Jam-Dash's current behaviour and gets the same parts as Home.</p><button class="ql" data-act="go" data-arg="home">${ic.back} Back to Home</button></div>`}
+function render(m,keepScroll=true){
+  const b=m.el.querySelector('.body');const y=keepScroll&&b?b.scrollTop:0;
+  const r=m.st.route;
+  const inner=r==='home'?vHome(m):r==='detail'?vDetail(m):r==='store'?vStore(m):vStub(m);
+  m.el.innerHTML=`<div class="bh">${shell(m,inner)}</div>`;
+  const nb=m.el.querySelector('.body');if(nb)nb.scrollTop=y;
+  m.st.enter=false;m.st.arrive=false;m.st.newlog=0;
+}
+function flip(m,fn){
+  const before={};m.el.querySelectorAll('[data-flip]').forEach(e=>before[e.dataset.flip]=e.getBoundingClientRect());
+  fn();
+  if(MOTION==='calm'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const sc=m.el.getBoundingClientRect().width/+m.el.dataset.w;
+  m.el.querySelectorAll('[data-flip]').forEach(e=>{const b=before[e.dataset.flip];const a=e.getBoundingClientRect();
+    if(!b){e.animate([{opacity:0,transform:'scale(.97)'},{opacity:1,transform:'none'}],{duration:320,easing:'cubic-bezier(.16,1,.3,1)'});return}
+    const dx=(b.left-a.left)/sc,dy=(b.top-a.top)/sc;if(Math.abs(dx)<1&&Math.abs(dy)<1)return;
+    e.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:420,easing:'cubic-bezier(.16,1,.3,1)'})});
+}
+function leave(m,sel,then){const e=m.el.querySelector(sel);if(!e||MOTION==='calm'){flip(m,then);return}
+  e.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.96)'}],{duration:220,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'}).onfinish=()=>flip(m,then)}
+function go(m,r,app){m.st.route=r;if(app)m.st.app=app;m.st.enter=true;m.st.arrive=r==='home';m.st.sheet=null;m.st.logf='all';render(m,false)}
+function say(m,text,led,btn){m.st.toast={text,led,btn};render(m);clearTimeout(m.tt);m.tt=setTimeout(()=>{m.st.toast=null;render(m)},3600)}
+function fix(m,id){const a=m.d.g(id);if(a.job)return;const kind=(a.fix==='start'||a.state==='off')?'start':'restart';a.job=kind;
+  flip(m,()=>render(m));
+  setTimeout(()=>{const wasAlert=a.state==='alert';a.job=null;a.state='on';a.since='just now';a.cpu=a.cpu||'0.6%';a.mem=a.mem||'240 MB';a.q=null;a.restarted=true;a.done=wasAlert;m.st.newlog=3;flip(m,()=>render(m));
+    if(!wasAlert){say(m,`${a.name} is running`,'ok');return}
+    setTimeout(()=>{a.done=false;const t=troubles(m);const calmNow=!t.length;if(calmNow)m.accentDrop=true;
+      leave(m,`[data-flip="c-${a.id}"]`,()=>render(m));say(m,`${a.name} is running again`,'ok',['Show log','detail',a.id])},1300)},1700)}
+function update(m,ids){ids.forEach(id=>{const a=m.d.g(id);a.job='update'});flip(m,()=>render(m));
+  setTimeout(()=>{ids.forEach(id=>{const a=m.d.g(id);a.job=null;a.ver=a.upd;a.upd=null;if(a.state==='alert'){a.state='on';a.done=true;a.since='just now'}});flip(m,()=>render(m));
+    setTimeout(()=>{ids.forEach(id=>{m.d.g(id).done=false});if(!troubles(m).length)m.accentDrop=true;flip(m,()=>render(m));say(m,ids.length>1?'Both apps are up to date':`${m.d.g(ids[0]).name} is up to date`,'ok')},1100)},2600)}
+function act(m,k,arg){
+  const s=m.st;
+  if(k==='go'){if(arg==='home'&&s.route==='home')return;return go(m,arg)}
+  if(k==='detail')return go(m,'detail',arg);
+  if(k==='fix')return fix(m,arg);
+  if(k==='open'){const a=m.d.g(arg);return say(m,`Opens ${a?`http://${a.srv}:${a.port}`:'Navidrome'} in a new tab (mockup).`)}
+  if(k==='srv'){s.srv=arg;return flip(m,()=>render(m))}
+  if(k==='srvcycle'){s.srv={both:H,[H]:N,[N]:'both'}[s.srv];return flip(m,()=>render(m))}
+  if(k==='retry'){const S=m.d.S[arg];S.state='action';m.d.A.filter(a=>a.srv===arg).forEach(a=>a.state='offline');render(m);
+    return setTimeout(()=>{S.state='on';S.disk=92;m.d.A.filter(a=>a.srv===arg).forEach(a=>{a.state=a.id==='duplicati'?'off':'on';a.q=null});flip(m,()=>render(m));say(m,`${arg} is answering again`,'ok')},1600)}
+  if(k==='toast')return say(m,arg);
+  if(k==='logf'){s.logf=arg;return render(m)}
+  if(k==='stop'){s.sheet={t:'stop',id:arg};return render(m)}
+  if(k==='dostop'){const a=m.d.g(arg);a.state='off';a.since='just now';a.word=null;a.done=false;s.sheet=null;render(m);return say(m,`${a.name} is stopped`,'',['Start','fix',a.id])}
+  if(k==='close'){s.sheet=null;return render(m)}
+  if(k==='update')return update(m,[arg]);
+  if(k==='updall')return update(m,m.d.A.filter(a=>a.upd).map(a=>a.id));
+  if(k==='cat'){s.cat=arg;return flip(m,()=>render(m))}
+  if(k==='clearq'){s.q='';return render(m)}
+  if(k==='get'){s.sheet={t:'install',id:arg,srv:H,job:0};return render(m)}
+  if(k==='isrv'){s.sheet.srv=arg;return render(m)}
+  if(k==='install'){const sh=s.sheet;sh.job=1;render(m);setTimeout(()=>{sh.job=2;render(m)},1000);setTimeout(()=>{sh.job=3;s.installed[sh.id]={srv:sh.srv,state:'on'};render(m)},2000);return}
+}
+function wire(m){
+  m.el.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t||!m.el.contains(t)||t.disabled)return;act(m,t.dataset.act,t.dataset.arg)});
+  m.el.addEventListener('input',e=>{const t=e.target.closest('[data-input]');if(!t)return;m.st.q=t.value;const pos=t.selectionStart;render(m);const n=m.el.querySelector('[data-input]');n.focus();n.setSelectionRange(pos,pos)});
+  if(m.kind!=='desk')return;
+  m.el.closest('.screen').addEventListener('keydown',e=>{if(e.target.closest('input'))return;const s=m.st;
+    if(e.key==='Escape'){e.preventDefault();if(s.sheet){s.sheet=null;return render(m)}if(s.route!=='home')return go(m,'home');return}
+    if(e.key==='Enter'&&!e.target.closest('button')){const b=m.el.querySelector('.body .btn.pri');if(b){e.preventDefault();b.click()}return}
+    if(/^[1-7]$/.test(e.key))return go(m,PLACES[+e.key-1][0]);
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();say(m,'Find (⌘K) is not drawn in pass 1.')}});
+}
+document.querySelectorAll('[data-mount]').forEach(el=>{const m={el,kind:el.dataset.kind,route0:el.dataset.route,app0:el.dataset.app||'crafty'};el.style.width=el.dataset.w+'px';el.style.height=el.dataset.h+'px';el.parentElement.style.aspectRatio=el.dataset.w+'/'+el.dataset.h;fresh(m);wire(m);render(m);mounts.push(m)});
+function fit(){document.querySelectorAll('.scaler').forEach(sc=>{const w=sc.parentElement.clientWidth;sc.style.transform=`scale(${w/+sc.dataset.w})`})}
+addEventListener('resize',fit);fit();
+function seg(id,fn){document.querySelectorAll(`#${id} button`).forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll(`#${id} button`).forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.v)}))}
+function setLight(v){LIGHT=v;document.querySelectorAll('.frame').forEach(f=>f.classList.toggle('night',v==='night'))}
+seg('seg-light',setLight);
+seg('seg-scen',v=>{SCEN=v;mounts.forEach(m=>{fresh(m);m.st.arrive=true;render(m,false)})});
+seg('seg-motion',v=>{MOTION=v;document.querySelectorAll('.frame').forEach(f=>f.classList.toggle('calm',v==='calm'))});
+window.__jd={mounts,act,setLight,fresh,render,setScen:v=>document.querySelector(`#seg-scen [data-v="${v}"]`).click()};
+</script>
+</body>
+</html>
