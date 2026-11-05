@@ -168,3 +168,15 @@ NervOS (Aero 15) and Lobby (Hisense Google TV) overlap (both list Moonlight/Retr
 
 ## TV title card (2026-11-05)
 - Mockup 09: three Hi-Fi title cards that mask real loading and stay dark (flash-safe): Shutter (band halves close, lit strip = load), Tape counter (faceplate, 7-seg 000-100, punch label LOADING -> READY + LED), Tuning dial (backlit dial, red needle sweeps with load, "Tuned" LED). Min hold ~1.6 s; slow loads hold until ready. Awaiting Isaac's pick.
+
+## Project check 1: JamFin (2026-11-05)
+JamFin pushed its profile, 38 screenshots and 10 PROPOSALS against draft 0.2 (TV perf + invariants). Isaac's answers:
+- TV grounds behind scrolling rows are FLAT; ribs only on fixed surfaces (menu/player band, title card) as cached bitmaps.
+- Selector label: warm cream colour step (<=150 ms), no glyph glow; rib spill = pre-drawn bitmap per tile width faded by opacity.
+- Short-text rule (one title + one line) applies to home screens, launchers and focused cards only. Buttons/detail pages keep complete plain wording.
+- KEEP a TV Day option (dark default; mid-light, never paper-white) in every TV app.
+Adopted without needing a call (no visible change): glows/soft shadows as pre-rendered sprites; focus lights <=150 ms (<=80 ms/snap under repeat), slow reveal only for signature moments; lift drawn inside tile layer (focus rect never moves); card progress bars static, shutter animates once on focused/timeline/signature; one shared curve table with overshoot capped at 1.3; flash limit stays 2/s (JamFin can adopt).
+-> BIBLE.md draft 0.3.
+
+## Project check 2: Jam Home
+HA pushed profile + 44 screenshots. Correction: kitchen Echo Show 8 is ~961x601 CSS px; living-room iPad is 1024x768 (the interview had them swapped; mockup 08 labels the 1024x768 frame as the kitchen kiosk, which is wrong).
