@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NervOS Pass 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* NervOS pass 2. One 16:9 TV authored in 1080p px and converted to cqw (1px at 1080p = 1/19.2 cqw), with a D-pad focus
+   engine: Home, a section, a collection/system shelf, the game page, the launch title card, the running game and the
+   Guide band (retro, Steam, stream, film). Simplified Braun Hi-Fi: flat, ribs only on fixed black bands, art + plinth
+   cards with the base window on the plinth, the leading-edge window on lists and keys. */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--decel:cubic-bezier(.16,1,.3,1);--leave:cubic-bezier(.4,0,1,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}h2{font:600 20px var(--f);margin:0}
+p{margin:0;max-width:80ch}.muted{color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end}
+.ctl>div{display:grid;gap:6px;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 13px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}}
+.seg button:focus-visible,.kb:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.alt{border:1px dashed var(--line);border-radius:14px;padding:8px 10px 10px}
+.alt .tag{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kb{font:500 13px var(--mono);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer;touch-action:manipulation}
+.status{font:500 13px var(--mono);color:var(--muted);display:flex;gap:18px;flex-wrap:wrap}
+.status b{color:var(--fg);font-weight:500}
+.cap{font-size:14px;color:var(--muted)}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px;align-content:start}
+
+/* ================= TV ================= */
+.tv{--ground:#171716;--card:#262624;--face-f:#302f2c;--ink:#ece9e2;--lab:#cbc7be;--dim:#a3a097;--band:#121211;--band-ink:#ece8df;--band-dim:#a8a397;
+  --cream:#f3e6c8;--orange:#f08a2c;--deep:#a9530f;--win:#0b0b0a;--winedge:#ffffff17;--walnut:#6b4428;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;
+  --key:#242422;--key-f:#302f2c;--li-f:#2a2a27;
+  --ribs:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 2px,transparent 2px 0.469cqw);
+  position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;background:var(--ground);color:var(--ink);font-family:var(--f);
+  overflow:hidden;border-radius:12px;box-shadow:0 0 0 10px #0d0d0c,0 20px 50px #0000004d;outline:none}
+.tv:focus-visible{box-shadow:0 0 0 10px #0d0d0c,0 0 0 13px #f08a2c}
+.tv.day{--ground:#b9b5ac;--card:#d3cfc7;--face-f:#e8e4dc;--ink:#1d1c1a;--lab:#2e2c29;--dim:#46433d;--orange:#ec7c22;--deep:#b55a12;--winedge:#0000;--li-f:#d3cfc7}
+.scr{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateY(0.938cqw);transition:opacity 220ms var(--decel),transform 260ms var(--decel),visibility 0s 260ms}
+.scr.on{opacity:1;visibility:visible;transform:none;transition:opacity 220ms var(--decel),transform 260ms var(--decel),visibility 0s}
+.calm .scr,.calm .scr.on{transform:none;transition-duration:140ms}
+.trim{position:absolute;top:0;left:0;right:0;height:0.313cqw;background:var(--walnut);z-index:4}
+.clock{font:500 1.458cqw var(--f);font-variant-numeric:tabular-nums;color:var(--band-ink)}
+/* indicator windows: always a dark recess, lit = flat colour */
+.ind{position:relative;display:inline-block;flex:none;background:var(--win);box-shadow:inset 0 1px 2px #000,0 0 0 1px var(--winedge)}
+.ind::after{content:"";position:absolute;inset:0.156cqw;border-radius:inherit;background:var(--c,var(--cream));opacity:0}
+.ind.on::after{opacity:1}
+.ind.led{width:0.938cqw;height:0.938cqw;border-radius:50%}.ind.sq{width:0.938cqw;height:0.938cqw;border-radius:0.156cqw}.ind.slot{width:2.083cqw;height:0.677cqw;border-radius:0.156cqw}
+.ind.ok{--c:var(--ok)}.ind.act{--c:var(--warn)}
+.ind.offl{background:transparent;box-shadow:inset 0 0 0 0.104cqw var(--dim)}
+.ind.offl::before{content:"";position:absolute;left:50%;top:-0.104cqw;bottom:-0.104cqw;width:0.104cqw;background:var(--dim);transform:rotate(45deg)}
+/* the selector window */
+.w{position:absolute;background:var(--win);box-shadow:0 0 0 1px var(--winedge)}
+.w::after{content:"";position:absolute;inset:0.104cqw 0.104cqw 0;border-radius:inherit;background:var(--cream);opacity:0}
+.wl::after{inset:0.104cqw 0.104cqw 0.104cqw 0}
+.day .w{box-shadow:0 0 0 0.104cqw #1d1c1a55}
+.f>.w::after,.f .face .w::after,.f>.in>.w::after,.f>.w.wb::after{opacity:1}
+.wb{left:30%;right:30%;bottom:0;height:0.521cqw;border-radius:0.26cqw 0.26cqw 0 0}
+.wl{left:0;top:0.833cqw;bottom:0.833cqw;width:0.521cqw;border-radius:0 0.26cqw 0.26cqw 0}
+kbd{display:inline-grid;place-items:center;min-width:1.979cqw;height:1.979cqw;padding:0 0.417cqw;border-radius:5.156cqw;border:0.104cqw solid currentColor;font:500 1.146cqw var(--mono);margin-right:0.521cqw;vertical-align:middle}
+.hints{display:flex;gap:1.563cqw;font:500 1.25cqw var(--f);color:var(--dim);align-items:center;white-space:nowrap}
+.hints span{display:inline-flex;align-items:center}
+.eb{font:500 1.146cqw var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.ht{font:600 3.021cqw/1.08 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.005em}
+.line{font:400 1.354cqw/1.3 var(--f);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.line b{font-weight:500;color:var(--ink)}
+.facts{display:flex;gap:1.563cqw;font:400 1.354cqw var(--f);color:var(--dim);white-space:nowrap;align-items:center}
+.facts b{font-weight:500;color:var(--ink)}
+
+/* ---------- Home ---------- */
+.mband{position:absolute;left:0;right:0;top:0;height:6.146cqw;background:var(--band);background-image:var(--ribs);display:flex;justify-content:space-between;align-items:flex-end;padding:0 5cqw;z-index:3}
+.tabs{display:flex;height:3.229cqw;margin-left:-1.146cqw}
+.tab{position:relative;display:flex;align-items:center;padding:0 1.146cqw 0.625cqw;font:500 1.458cqw var(--f);color:var(--band-dim);letter-spacing:.01em}
+.tab.cur{color:var(--band-ink);font-weight:600}
+.tab.f{color:var(--cream)}
+.tab .w{background:#000}
+.mright{display:flex;gap:1.875cqw;align-items:center;height:3.229cqw;padding-bottom:0.625cqw;font:500 1.25cqw var(--f);color:var(--band-dim)}
+.mright .pad{display:flex;gap:0.625cqw;align-items:center}
+.accent{position:absolute;right:0;top:6.979cqw;width:24.479cqw;height:5cqw;pointer-events:none;transition:opacity 150ms}
+.accent svg{width:100%;height:100%;display:block}
+.tv.full .accent,.tv.toasting .accent{opacity:0}
+.sign{position:absolute;left:5cqw;top:6.979cqw;width:63.542cqw;display:grid;gap:0.208cqw;transition:opacity 100ms linear}
+.sign.swap{opacity:0;transition-duration:50ms}
+.rowsvp{position:absolute;left:0;right:0;top:13.021cqw;bottom:0;overflow:hidden}
+.rows{transition:transform 220ms var(--glide)}
+.row{position:relative;height:16.563cqw;padding-left:5cqw}
+.rowh{display:flex;gap:0.938cqw;align-items:baseline;height:2.083cqw;font:500 1.354cqw var(--f);color:var(--lab)}
+.rowh .n{font:500 1.146cqw var(--mono);color:var(--dim)}
+.rowh .n.bump{color:var(--ink)}
+.row.cur .rowh{color:var(--ink)}
+.strip{position:relative;display:flex;gap:1.25cqw;margin-top:0.521cqw;height:13.021cqw;transition:transform 200ms var(--glide)}
+.strip.car{display:block}
+.strip.car>*{position:absolute;top:0}
+.calm .strip,.calm .rows{transition-duration:0ms!important}
+.strip.nudge{animation:nudge 160ms var(--glide)}
+@keyframes nudge{50%{transform:translateX(-0.729cqw)}}
+/* card = art + plinth; the focus target never moves, the face lifts inside it */
+.cd{position:relative;flex:none;width:15cqw}
+.face{position:relative;z-index:1;border-radius:0.729cqw;background:var(--card);overflow:hidden;transition:transform 150ms var(--glide)}
+.cd.f .face{transform:translateY(-0.521cqw);background:var(--face-f)}
+.calm .cd.f .face{transform:none}
+.cd .sh{position:absolute;left:1.458cqw;right:1.458cqw;bottom:0.104cqw;height:0.521cqw;border-radius:0.521cqw;background:#000;opacity:0;transition:opacity 150ms}
+.cd.f .sh{opacity:.28}
+.day .cd.f .sh{opacity:.1}
+.art{position:relative;height:8.438cqw;overflow:hidden;background:#1e1e1d}
+.art svg,.big svg,.thumb svg,.game svg{display:block;width:100%;height:100%}
+.tv.toned .art svg,.tv.toned .big svg,.tv.toned .thumb svg{filter:saturate(.5) brightness(.8)}
+.pg{position:absolute;left:0;right:0;bottom:0;height:0.469cqw;background:var(--win)}
+.pg i{display:block;height:100%;background:var(--cream)}
+.pl{position:relative;height:4.375cqw;padding:0.625cqw 0.938cqw 0;display:grid;align-content:start;min-width:0}
+.pl .t{font:500 1.354cqw/1.667cqw var(--f);color:var(--lab);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl .s{font:400 1.146cqw/1.458cqw var(--f);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;gap:0.521cqw;align-items:center}
+.pl .mk{position:absolute;right:0.938cqw;top:0.99cqw}
+.cd.f .pl .t{color:var(--cream)}
+.day .cd.f .pl .t{color:#000}
+/* the wrap point of a group carousel: a bookend, never focusable */
+.wrapm{width:5.417cqw;height:12.813cqw;display:grid;grid-template-rows:8.438cqw 1fr;justify-items:center}
+.wrapm i{width:0.521cqw;height:8.438cqw;border-radius:0.26cqw;background:var(--walnut)}
+.wrapm span{font:500 1.146cqw var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding-top:0.833cqw}
+
+/* ---------- Shelf + game page ---------- */
+.sband{position:absolute;left:0;right:0;top:0;height:5.833cqw;background:var(--band);background-image:var(--ribs);display:flex;justify-content:space-between;align-items:flex-end;padding:0 5cqw 0.833cqw;z-index:3}
+.crumb{display:flex;gap:0.208cqw;align-items:center;font:500 1.25cqw var(--f);color:var(--band-dim)}
+.crumb kbd{color:var(--band-ink)}
+.shl{position:absolute;left:5cqw;top:7.083cqw;width:42.708cqw;display:grid;gap:0.313cqw}
+.shl .ht{font-size:2.708cqw}
+.lvp{position:absolute;left:5cqw;top:14.688cqw;width:42.708cqw;height:34.792cqw;overflow:hidden}
+.list{display:grid;gap:0.417cqw;transition:transform 180ms var(--glide)}
+.calm .list{transition-duration:0ms}
+.li{position:relative;height:3.958cqw;border-radius:0.729cqw;color:var(--lab);font:500 1.458cqw var(--f);overflow:hidden}
+.li>.in{position:absolute;inset:0;display:flex;align-items:center;gap:1.042cqw;padding:0 1.354cqw 0 1.563cqw;transition:transform 150ms var(--glide)}
+.li .thumb{width:5.208cqw;height:2.917cqw;border-radius:0.313cqw;overflow:hidden;flex:none;background:#1e1e1d}
+.li .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.li .r{margin-left:auto;font:400 1.146cqw var(--f);color:var(--dim);white-space:nowrap;display:flex;gap:0.625cqw;align-items:center}
+.li.f{background:var(--li-f);color:var(--cream)}
+.day .li.f{background:var(--face-f);color:#000}
+.li.f>.in{transform:translateX(0.417cqw)}
+.calm .li.f>.in{transform:none}
+.spv{position:absolute;left:51.042cqw;top:7.083cqw;width:43.958cqw;display:grid;gap:0.625cqw;align-content:start}
+.big{height:24.74cqw;border-radius:0.833cqw;overflow:hidden;background:#1e1e1d}
+.spv .ht{font-size:2.396cqw}
+.foot{position:absolute;left:5cqw;right:5cqw;bottom:2.813cqw;display:flex;justify-content:space-between;align-items:center}
+.gl{position:absolute;left:5cqw;top:7.083cqw;width:41.667cqw;display:grid;gap:0.521cqw;align-content:start}
+.gl .ht{font-size:3.333cqw;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.acts{display:grid;gap:0.521cqw;margin-top:1.146cqw;width:33.333cqw}
+.key{position:relative;height:3.75cqw;border-radius:0.729cqw;background:var(--card);color:var(--lab);font:500 1.458cqw var(--f);overflow:hidden}
+.key>.in{position:absolute;inset:0;display:flex;align-items:center;gap:0.833cqw;padding:0 1.354cqw 0 1.875cqw;transition:transform 150ms var(--glide)}
+.key .sp{flex:1}
+.key .v{color:var(--dim);display:flex;gap:0.625cqw;align-items:center}
+.key.f{color:var(--cream);background:var(--face-f)}
+.day .key.f{color:#000}
+.key.f>.in{transform:translateX(0.417cqw)}
+.calm .key.f>.in{transform:none}
+.key.pri{background:var(--orange);color:#1d1c1a;box-shadow:inset 0 -0.156cqw 0 var(--deep)}
+.key.pri .w{background:#3b1d06}
+/* focused primary: its own cue (D18): black label, deeper under-edge, the same leading window lit */
+.key.pri.f{color:#000;box-shadow:inset 0 -0.365cqw 0 var(--deep)}
+.gr{position:absolute;left:51.042cqw;top:7.083cqw;width:43.958cqw;display:grid;gap:0.625cqw;align-content:start}
+.gr .strip{gap:0.885cqw;height:12.5cqw;margin-top:0}
+.gr .cd{width:14.063cqw}
+.gr .cd .art{height:7.917cqw}
+.note2{font:400 1.354cqw/1.35 var(--f);color:var(--dim)}
+
+/* ---------- Running game + Guide band ---------- */
+.game{position:absolute;inset:0;background:#000}
+.vlabel{position:absolute;right:5cqw;top:3.125cqw;font:500 1.146cqw var(--mono);letter-spacing:.12em;color:#ffffffb0;text-transform:uppercase;background:#0009;padding:0.208cqw 0.625cqw;border-radius:0.313cqw}
+.qm{position:absolute;inset:0;z-index:10;visibility:hidden;transition:visibility 0s 220ms}
+.qm.on{visibility:visible;transition:visibility 0s}
+.qveil{position:absolute;inset:0;background:#000;opacity:0;transition:opacity 200ms}
+.qm.on .qveil{opacity:.45}
+.qm.live.on .qveil{opacity:.2}
+.qband{position:absolute;left:0;right:0;bottom:0;height:12.292cqw;transform:translateY(100%);transition:transform 220ms var(--decel)}
+.qm.on .qband{transform:none}
+.calm .qband{transform:none;opacity:0;transition:opacity 140ms linear}.calm .qm.on .qband{opacity:1}
+.qbar{position:absolute;inset:0;z-index:2;background:var(--band);background-image:var(--ribs);color:var(--band-ink);padding:1.458cqw 5cqw 0}
+.qbar::before{content:"";position:absolute;left:0;right:0;top:0;height:0.208cqw;background:var(--walnut)}
+.qa{display:flex;align-items:center;gap:1.146cqw;height:2.083cqw;white-space:nowrap}
+.qa .st{display:flex;gap:0.625cqw;align-items:center;font:500 1.25cqw var(--f)}
+.qa .tt{font:500 1.458cqw var(--f)}
+.qa .ss{font:400 1.25cqw var(--f);color:var(--band-dim);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.qa .hints{color:var(--band-dim)}.qa .hints kbd{color:var(--band-ink)}
+.qkeys{display:flex;gap:0.729cqw;margin-top:1.042cqw;align-items:stretch;height:4.583cqw}
+.qk{position:relative;padding:0 1.458cqw;border-radius:0.729cqw;background:var(--key);display:flex;align-items:center;font:500 1.458cqw var(--f);color:#cbc7be;white-space:nowrap;overflow:hidden;flex:none}
+.qk>.in{display:flex;gap:0.729cqw;align-items:center;transition:transform 150ms var(--glide)}
+.qk .v{color:#ece8df}
+.qk .v.hid{visibility:hidden}
+.qk.f{background:var(--key-f);color:var(--cream)}
+.qk.f>.in{transform:translateY(-0.208cqw)}
+.calm .qk.f>.in{transform:none}
+.qk.pri{background:var(--orange);color:#1d1c1a;box-shadow:inset 0 -0.156cqw 0 var(--deep)}
+.qk.pri .w{background:#3b1d06}
+.qk.pri.f{color:#000;box-shadow:inset 0 -0.365cqw 0 var(--deep)}
+.qk .hold{position:absolute;left:0;right:0;top:0;height:0.365cqw;background:var(--cream);transform-origin:0 50%;transform:scaleX(0)}
+.qk.holding .hold{transform:scaleX(1);transition:transform 1000ms linear}
+.qk.armed .hold{transform:scaleX(1)}
+.qk.armed{color:var(--cream)}
+/* Save + Load share one tray that names the slot once */
+.tray{display:flex;gap:0.313cqw;padding:0.313cqw;border-radius:0.938cqw;background:#0c0c0b;box-shadow:inset 0 0.104cqw 0.208cqw #000;align-items:stretch;flex:none}
+.tray .qk{border-radius:0.625cqw}
+.tray .tv-l{display:flex;align-items:center;gap:0.521cqw;padding:0 0.938cqw 0 0.625cqw;font:500 1.25cqw var(--f);color:#a8a397}
+.tray .tv-l b{font-weight:500;color:#ece8df}
+.tray .tv-l.hid{visibility:hidden}
+.qshelf{position:absolute;left:0;right:0;bottom:100%;height:16.563cqw;background:var(--band);padding:1.146cqw 0 0 5cqw;overflow:hidden;z-index:1;opacity:0;transform:translateY(2.083cqw);pointer-events:none;transition:opacity 150ms var(--leave),transform 150ms var(--leave)}
+.qshelf.on{opacity:1;transform:none;transition:opacity 200ms var(--glide),transform 200ms var(--glide)}
+.qshelf .eb{color:var(--band-dim);margin-bottom:0.729cqw;display:block}
+.qshelf .strip{gap:1.146cqw;height:12.5cqw;margin:0}
+.qshelf .cd{width:13.542cqw}
+.qshelf .art{height:7.604cqw}
+.qshelf .face{background:#232321}
+.qshelf .cd.f .face{background:#2e2e2b}
+.qshelf .pl .t{color:#cbc7be}.qshelf .pl .s{color:#a8a397}
+.qshelf .cd.f .pl .t{color:var(--cream)}
+.qshelf .cd.armed .pl .s{color:var(--cream)}
+.empty{position:absolute;inset:0;display:grid;place-items:center;font:500 1.25cqw var(--f);color:#8f8b82;background:#0f0f0e;box-shadow:inset 0 0.104cqw 0.417cqw #000}
+.qlist{position:absolute;bottom:calc(100% + 0.729cqw);width:21.875cqw;background:#232321;border-radius:0.833cqw;padding:0.833cqw 0 0.625cqw;z-index:4;color:#ece8df;opacity:0;transform:translateY(0.833cqw);pointer-events:none;transition:opacity 150ms var(--leave),transform 150ms var(--leave)}
+.qlist.on{opacity:1;transform:none;transition:opacity 200ms var(--glide),transform 200ms var(--glide)}
+.qlist .eb{color:#a8a397;padding:0 1.354cqw 0.417cqw;display:block}
+.qlist .li{border-radius:0;color:#cbc7be;height:3.333cqw;font-size:1.354cqw}
+.qlist .li.f{background:#2e2e2b;color:var(--cream)}
+.toast{position:absolute;right:5cqw;top:6.875cqw;max-width:42.708cqw;background:#262624;color:#ece9e2;border-radius:0.625cqw;padding:0.729cqw 1.146cqw;font:500 1.354cqw var(--f);display:flex;gap:0.729cqw;align-items:center;opacity:0;transition:opacity 150ms;z-index:30;pointer-events:none;box-shadow:0 0.313cqw 1.042cqw #0006}
+.toast.on{opacity:1}
+
+/* ---------- Title card (shutter + slatted bar, flat) ---------- */
+.tcard{position:absolute;inset:0;z-index:20;visibility:hidden;pointer-events:none}
+.tcard.show{visibility:visible}
+.half{position:absolute;left:0;right:0;height:50.5%;background:#151514;background-image:var(--ribs);overflow:hidden;transition:transform 460ms var(--decel)}
+.half svg{position:absolute;left:0;width:100cqw;height:56.25cqw}
+.half.a{top:0;transform:translateX(-101%);box-shadow:inset 0 -0.104cqw 0 #ffffff14}
+.half.b{bottom:0;transform:translateX(101%);box-shadow:inset 0 0.104cqw 0 #ffffff1f}
+.half.a svg{top:0}.half.b svg{bottom:0}
+.tcard.in .half{transform:none}
+.tcard.out .half{transition:transform 300ms var(--leave)}
+.tcard.out .half.a{transform:translateX(101%)}.tcard.out .half.b{transform:translateX(-101%)}
+.calm .half{transform:none!important;opacity:0;transition:opacity 140ms linear!important}
+.calm .tcard.in .half{opacity:1}.calm .tcard.out .half{opacity:0}
+.tmid{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1.354cqw;opacity:0;transition:opacity 200ms}
+.tcard.in .tmid{opacity:1;transition-delay:180ms}.tcard.out .tmid{opacity:0;transition-delay:0ms;transition-duration:120ms}
+.calm .tcard.in .tmid{transition-delay:0ms}
+.tmid .eb{color:#a8a397;letter-spacing:.24em}
+.ttl{font:600 4.792cqw/1 var(--f);letter-spacing:.06em;text-transform:uppercase;color:#ece8df;max-width:63.542cqw;text-align:center}
+.slat{position:relative;width:29.167cqw;height:1.042cqw;border-radius:0.156cqw;overflow:hidden;background:var(--cream)}
+.slat::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 0.521cqw,#151514 0.521cqw 0.781cqw)}
+.slat .run{position:absolute;inset:0;background:#34312c;transform:translateX(calc(var(--p,0)*100%));transition:transform 120ms linear}
+.tsub{font:500 1.146cqw var(--mono);color:#a8a397;letter-spacing:.14em;text-transform:uppercase}
+@media (prefers-reduced-motion:reduce){.tv *{transition-duration:1ms!important;transition-delay:0ms!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Jam Design · Overnight pass 2 · NervOS</span>
+    <h1>NervOS in Braun Hi-Fi, pass 2: Archive, Hangar, Uplink, Theater</h1>
+    <p class="muted">The 10-ft games launcher on the Aero 15 under the 65" TV: retro games in emulators (Archive), Steam games (Hangar), streams and netplay (Uplink) and films (Theater). Pass 2 keeps NervOS's approved section names, fits more of Home on screen, marks where the systems carousel wraps, shows each value once in the Guide band, gives Reset and Quit a press-twice path, opens the same Guide band in Steam games and streams, and tests the layout against busy, varied covers. Click the TV, then use the arrow keys, Enter (A), Esc (B), G (Guide) and [ ] (L1 / R1), or the pad buttons. All games, covers, computers and films are made up.</p>
+  </header>
+
+  <div class="ctl">
+    <div><span class="eyebrow">Lighting</span><div class="seg" data-g="light"><button data-v="night" aria-pressed="true">Night</button><button data-v="day" aria-pressed="false">Day</button></div></div>
+    <div><span class="eyebrow">Motion</span><div class="seg" data-g="motion"><button data-v="full" aria-pressed="true">Full</button><button data-v="calm" aria-pressed="false">Calm</button></div></div>
+    <div><span class="eyebrow">Covers</span><div class="seg" data-g="covers"><button data-v="full" aria-pressed="true">Full colour</button><button data-v="toned" aria-pressed="false">Toned</button></div></div>
+    <div class="alt"><span class="tag">Alternative for Isaac to judge · section names</span><div class="seg" data-g="names"><button data-v="nervos" aria-pressed="true">NervOS names (approved)</button><button data-v="plain" aria-pressed="false">Plain words</button></div></div>
+  </div>
+  <div class="ctl">
+    <div><span class="eyebrow">Jump to</span><div class="seg" data-g="jump"><button data-v="home">Home</button><button data-v="archive">Archive</button><button data-v="coll">Favourites shelf</button><button data-v="game">Game page</button><button data-v="card">Title card (held)</button><button data-v="quick">Guide · retro</button><button data-v="steam">Guide · Steam</button></div></div>
+  </div>
+  <div class="keys"><span class="eyebrow">Pad</span><button class="kb" data-key="ArrowUp">↑</button><button class="kb" data-key="ArrowDown">↓</button><button class="kb" data-key="ArrowLeft">←</button><button class="kb" data-key="ArrowRight">→</button><button class="kb" data-key="Enter">A · OK (tap)</button><button class="kb" data-hold="1">Hold A 1 s</button><button class="kb" data-key="Escape">B · Back</button><button class="kb" data-key="g">Guide</button><button class="kb" data-key="[">L1</button><button class="kb" data-key="]">R1</button><button class="kb" data-run="1">Hold → (key repeat)</button></div>
+  <div class="status" id="status"></div>
+
+  <div class="tv full" id="tv" tabindex="0" aria-label="NervOS TV mockup. Arrow keys move, Enter selects, Escape goes back, G opens the Guide band in a game, [ and ] change sections.">
+    <i class="trim"></i>
+    <!-- Home and sections -->
+    <section class="scr on" id="s-home">
+      <div class="mband"><div class="tabs" id="tabs"></div><div class="mright"><span class="pad"><i class="ind led ok on"></i>Controller 72%</span><span class="clock">21:12</span></div></div>
+      <div class="accent" aria-hidden="true"><svg viewBox="0 0 470 120" preserveAspectRatio="xMaxYMid meet"><rect x="70" y="6" width="400" height="26" fill="#6b3416"/><rect x="150" y="42" width="320" height="20" fill="#9a3f18"/><rect x="226" y="72" width="244" height="15" fill="#a8461a"/><rect x="294" y="96" width="176" height="10" fill="#b9862e"/><rect x="352" y="113" width="118" height="6" fill="#8a6a3a"/></svg></div>
+      <div class="sign" id="sign"></div>
+      <div class="rowsvp"><div class="rows" id="rows"></div></div>
+    </section>
+    <!-- Shelf: one collection or system -->
+    <section class="scr" id="s-shelf">
+      <div class="sband"><span class="crumb"><kbd>B</kbd><span id="sh-back">Home</span></span><span class="clock">21:12</span></div>
+      <div class="shl" id="sh-head"></div>
+      <div class="lvp"><div class="list" id="sh-list"></div></div>
+      <div class="spv" id="sh-prev"></div>
+      <div class="foot"><div class="hints"><span><kbd>A</kbd>Open</span><span><kbd>B</kbd>Back</span><span><kbd>L1</kbd><kbd>R1</kbd>Jump a letter</span></div></div>
+    </section>
+    <!-- Game page -->
+    <section class="scr" id="s-game">
+      <div class="sband"><span class="crumb"><kbd>B</kbd><span id="g-back">Home</span></span><span class="clock">21:12</span></div>
+      <div class="gl" id="g-left"></div>
+      <div class="gr" id="g-right"></div>
+      <div class="foot"><div class="hints" id="g-hints"></div></div>
+    </section>
+    <!-- Running game -->
+    <section class="scr s-play" id="s-play"><div class="game" id="game"></div><span class="vlabel" id="vlabel">Sample game picture</span></section>
+    <!-- Guide band -->
+    <div class="qm" id="qm">
+      <div class="qveil"></div>
+      <div class="qband" id="qband">
+        <div class="qshelf" id="qshelf"><span class="eb" id="qs-eb"></span><div class="strip" id="qs-strip"></div></div>
+        <div class="qlist" id="qlist"></div>
+        <div class="qbar">
+          <div class="qa"><span class="st" id="qa-st"></span><span class="tt" id="qa-t"></span><span class="ss" id="qa-s"></span><span class="hints" id="qa-h"></span><span class="clock">21:12</span></div>
+          <div class="qkeys" id="qkeys"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Title card -->
+    <div class="tcard" id="tcard" aria-hidden="true">
+      <div class="half a"><svg viewBox="0 0 1920 1080" preserveAspectRatio="none"><g fill="none" stroke-width="44"><path d="M1640 -40 V760 A200 200 0 0 0 1840 960 H1960" stroke="#6b3416"/><path d="M1700 -40 V760 A140 140 0 0 0 1840 900 H1960" stroke="#b04a1c"/><path d="M1760 -40 V760 A80 80 0 0 0 1840 840 H1960" stroke="#d69a2e"/></g></svg></div>
+      <div class="half b"><svg viewBox="0 0 1920 1080" preserveAspectRatio="none"><g fill="none" stroke-width="44"><path d="M1640 -40 V760 A200 200 0 0 0 1840 960 H1960" stroke="#6b3416"/><path d="M1700 -40 V760 A140 140 0 0 0 1840 900 H1960" stroke="#b04a1c"/><path d="M1760 -40 V760 A80 80 0 0 0 1840 840 H1960" stroke="#d69a2e"/></g></svg></div>
+      <div class="tmid"><span class="eb" id="tc-eb"></span><span class="ttl" id="tc-t"></span><div class="slat" id="slat"><i class="run"></i></div><span class="tsub" id="tc-s"></span></div>
+    </div>
+    <div class="toast" id="toast"><i class="ind led ok on"></i><span id="toast-t"></span></div>
+  </div>
+  <p class="cap" id="cap">Section names on the band: NervOS's approved names, in Jost sentence case with no numbers or kanji. The page switch above shows plain words as an alternative only.</p>
+
+  <section style="display:grid;gap:12px">
+    <h2>What changed since pass 1</h2>
+    <div class="notes">
+      <div class="note"><b>Approved names kept</b><span class="muted">Archive, Hangar, Uplink and Theater stay on the band. They're set like VHS's tabs: friendly Jost, sentence case, no 01–04 codes, no kanji. Each section's sign says in one plain line what's inside. Plain words are a labelled page switch, not the design.</span></div>
+      <div class="note"><b>More of Home on screen</b><span class="muted">Smaller cards (288 px, almost six across, labels still 26 / 22 px) and a sign that's just title + one line: about 2.6 rows are visible instead of 1.8, and the next row always peeks.</span></div>
+      <div class="note"><b>The carousel shows its wrap</b><span class="muted">A walnut bookend marked "Start" sits where the last system meets the first. A held → stops at the bookend; a fresh press goes round.</span></div>
+      <div class="note"><b>Each value once in the Guide band</b><span class="muted">Save and Load share one tray that names the slot once. While a chooser (slots, picture) is open, its key hides its value and the chooser's lit square carries it.</span></div>
+      <div class="note"><b>Hold, or press twice</b><span class="muted">Reset, Quit and replacing a save state: hold A for a second, or press A, read "Press A again", and press again. The HA remote can't hold, so it uses the second path.</span></div>
+      <div class="note"><b>One Guide band everywhere</b><span class="muted">In a Steam game, a stream or a film, Guide opens the same band with fewer keys: Resume, the content's own menu, Quit. The covers are now eight kinds of made-up art, from bright paper to saturated red, to test busy real covers.</span></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const tv=$('tv');
+const U=px=>(px/19.2).toFixed(3)+'cqw';
+/* ---------- sample data (all made up) ---------- */
+const SYS={snes:{n:'Super Nintendo',m:'cart',bg:'#2e2a3a',lb:'#7a6a9a',d:'Cartridges from the early nineties.'},
+  md:{n:'Mega Drive',m:'cartb',bg:'#26262a',lb:'#b04a3a',d:'Black cartridges, fast games.'},
+  n64:{n:'Nintendo 64',m:'cartw',bg:'#2a3326',lb:'#6a8a4a',d:'Four controllers, party games.'},
+  gba:{n:'Game Boy Advance',m:'carts',bg:'#252c3a',lb:'#4a6a9a',d:'Small games for short sessions.'},
+  ps1:{n:'PlayStation',m:'disc',bg:'#2a2a30',lb:'#8a8a9a',d:'Discs from the late nineties.'},
+  dc:{n:'Dreamcast',m:'disc',bg:'#33281f',lb:'#c0703a',d:'Discs, bright arcade ports.'},
+  neo:{n:'Neo Geo',m:'cartt',bg:'#24221f',lb:'#c9a24a',d:'Big cartridges, fighting games.'},
+  arc:{n:'Arcade',m:'board',bg:'#1f2a25',lb:'#4a8a6a',d:'Arcade boards, coin-op classics.'},
+  steam:{n:'Steam'}};
+const SYSO=['snes','md','n64','gba','ps1','dc','neo','arc'];
+// st = cover style: pixel, type, bright, red, halftone, neon, painted, collage
+const G=[
+ {n:'Glass Dragon',sys:'snes',st:'neon',y:1994,pl:'1–2 players',hrs:'6 h played',d:'Fly a glass dragon through seven sky castles.',last:'Tuesday',save:'Tuesday 21:40',fav:true,slots:['Sunday 17:05','Monday 20:30','Last week',null]},
+ {n:'Moonlit Duel',sys:'neo',st:'red',y:1996,pl:'1–2 players',hrs:'3 h played',d:'One-on-one sword fights under a paper moon.',last:'Monday',save:'Monday 19:02',fav:true,slots:['Monday 18:40',null,null,null]},
+ {n:'Tidebreaker',sys:'ps1',st:'painted',y:1998,pl:'1 player',hrs:'11 h played',d:'Sail a salvage boat across a flooded city.',last:'Last week',save:'Thursday 22:10',slots:['Wednesday 21:00','Thursday 20:15',null,null]},
+ {n:'Vault Runner',sys:'gba',st:'type',y:2002,pl:'1 player',hrs:'40 min played',d:'Short heists, one floor at a time.',last:'Last week',short:true},
+ {n:'Paper Tiger Turbo',sys:'md',st:'bright',y:1992,pl:'1–2 players',d:'Arcade racing on folded-paper tracks.',short:true,fav:true},
+ {n:'Signal Ninja',sys:'n64',st:'halftone',y:1999,pl:'1–4 players',d:'Sneak, climb and race the clock.'},
+ {n:'Metal Gull',sys:'dc',st:'collage',y:2000,pl:'1 player',d:'A seabird robot patrols the harbour.'},
+ {n:'Harbor Brawl Alpha',sys:'arc',st:'pixel',y:1995,pl:'1–2 players',d:'Dockside fighting with eight crews.',short:true,added:true},
+ {n:'Cinder Fist',sys:'arc',st:'red',y:1993,pl:'1–2 players',d:'A side-scrolling brawler with a fire fist.',short:true},
+ {n:'Night Market Fighters',sys:'neo',st:'neon',y:1997,pl:'1–2 players',d:'Street fights between the noodle stalls.',added:true},
+ {n:'Rust Knuckle',sys:'md',st:'type',y:1993,pl:'1–2 players',d:'Robots box in a scrapyard league.'},
+ {n:'Neon Saint',sys:'snes',st:'painted',y:1995,pl:'1 player',d:'A quiet detective story in a rainy city.'},
+ {n:'Kite Patrol',sys:'snes',st:'pixel',y:1993,pl:'1–2 players',d:'Fly kites, rescue cats, beat the wind.',short:true,fav:true},
+ {n:'Copper Golem',sys:'snes',st:'halftone',y:1996,pl:'1 player',d:'Build a golem and explore its valley.',added:true},
+ {n:'Lumen Kart',sys:'n64',st:'collage',y:1998,pl:'1–4 players',d:'Kart racing on glowing tracks.',fav:true,short:true},
+ {n:'Puzzle Bakery',sys:'gba',st:'bright',y:2003,pl:'1–2 players',d:'Match pastries before the oven pings.',short:true,fav:true},
+ {n:'Owl Post Panic',sys:'gba',st:'type',y:2004,pl:'1 player',d:'Deliver letters across a windy town.'},
+ {n:'Star Ferry',sys:'ps1',st:'neon',y:1999,pl:'1 player',d:'Run a ferry between three small moons.'},
+ {n:'Iron Lantern',sys:'ps1',st:'bright',y:1997,pl:'1 player',d:'A lighthouse that goes down, not up.'},
+ {n:'Velvet Racer',sys:'dc',st:'type',y:2001,pl:'1–2 players',d:'Night racing along a coast road.',fav:true},
+ {n:'Bubble Pilot',sys:'arc',st:'halftone',y:1991,pl:'1–2 players',d:'Pop bubbles, save the reef.',short:true},
+ {n:'Sky Atlas',sys:'n64',st:'pixel',y:2000,pl:'1 player',d:'Fly mail planes over a hand-drawn map.'},
+ {n:'Moss Harbour',sys:'dc',st:'painted',y:2000,pl:'1–4 players',d:'Party games in a fishing village.',fav:true,added:true},
+ {n:'Twin Comet',sys:'neo',st:'collage',y:1994,pl:'1–2 players',d:'A side-scrolling shooter for two.',short:true},
+ {n:'Orbit Kitchen',sys:'steam',st:'collage',y:2024,pl:'1–4 players',hrs:'14 h played',d:'Cook together on a spinning space station.',last:'Sunday',fav:true},
+ {n:'Lantern Valley',sys:'steam',st:'pixel',y:2023,pl:'1 player',hrs:'22 h played',d:'Farm a valley lit only by lanterns.',last:'Saturday'},
+ {n:'Pocket Rally',sys:'steam',st:'bright',y:2022,pl:'1–4 players',d:'Tiny cars, living-room tracks.',short:true},
+ {n:'Hollow Tide',sys:'steam',st:'neon',y:2021,pl:'1 player',d:'A slow, foggy island mystery.'},
+ {n:'Deep Shelf',sys:'steam',st:'halftone',y:2024,pl:'1–2 players',d:'Two librarians, one bottomless library.',added:true},
+ {n:'Quiet Harbour',sys:'steam',st:'type',y:2020,pl:'1 player',d:'Fish, mend nets, watch the weather.'}];
+const byN=n=>G.find(g=>g.n===n);
+const retro=G.filter(g=>g.sys!=='steam');
+const two=g=>!g.pl.startsWith('1 player');
+const COLL=[
+ {n:'Favourites',d:'The games you starred.',f:g=>g.fav},
+ {n:'Play together',d:'Two players or more on the couch.',f:two},
+ {n:'Quick games',d:'Good for twenty minutes or less.',f:g=>g.short},
+ {n:'Recently added',d:'New on the shelf this month.',f:g=>g.added},
+ {n:'All games',d:'Everything, A to Z.',f:()=>true}];
+COLL.forEach(c=>c.items=G.filter(c.f).sort((a,b)=>a.n.localeCompare(b.n)));
+const CONT=['Glass Dragon','Orbit Kitchen','Moonlit Duel','Lantern Valley','Tidebreaker','Vault Runner','Paper Tiger Turbo'].map(byN);
+const HOSTS=[{n:'Study PC',st:'on',w:'On',d:'Ready to stream. Plays at 1080p, 120 fps.'},{n:'Laptop',st:'offline',w:'Offline',d:'Asleep. Wake it from Jam Home, then try again.'}];
+const ROOMS=[{n:'Moonlit Duel room',g:'Moonlit Duel',st:'action',w:'Waiting',d:'One player in. Join to make it two.'},{n:'Lumen Kart room',g:'Lumen Kart',st:'on',w:'Open',d:'Three players in, one seat left.'}];
+const FILMS=[{n:'The Copper City',st:'painted',p:62,end:'Ends at 22:41',y:2019,d:'A city built on a copper mine starts to sink.'},{n:'Signal Street',st:'neon',p:24,end:'Ends at 23:20',y:2021,d:'One night on a street of radio repair shops.'},{n:'The Harbour Hour',st:'bright',p:0,end:'Ends at 23:05',y:2017,d:'A ferry crew waits out a storm.'}];
+const FILMS2=[{n:'The Velvet Machine',st:'red',p:0,end:'Ends at 23:14',y:2022,d:'A tailor builds a loom that sews by itself.'},{n:'North of the Pier',st:'halftone',p:0,end:'Ends at 22:58',y:2018,d:'Two sisters reopen an amusement arcade.'},{n:'Low Tide',st:'type',p:0,end:'Ends at 22:50',y:2020,d:'A quiet film about a lighthouse keeper.'},{n:'Paper Lanterns',st:'collage',p:0,end:'Ends at 23:31',y:2016,d:'A festival town loses its lights.'}];
+const NAMESETS={nervos:['Home','Archive','Hangar','Uplink','Theater'],plain:['Home','Retro','Steam','Streaming','Films']};
+let names='nervos';
+const sec=i=>NAMESETS[names][i];
+const TABD=['Continue where you left off, your collections and every system.','Classic consoles and arcade games, played here.','Your installed Steam games.','Play from another computer, or join a netplay room.','Films from the house library, played here.'];
+const ROWS=[
+ [{h:'Continue',k:'game',it:CONT},{h:'Collections',k:'coll',it:COLL},{h:'Systems',k:'sys',car:true,it:SYSO}],
+ [{h:'Systems',k:'sys',car:true,it:SYSO},{h:'Recently played',k:'game',it:CONT.filter(g=>g.sys!=='steam')},{h:'Favourites',k:'game',it:retro.filter(g=>g.fav)},{h:'Play together',k:'game',it:retro.filter(two)}],
+ [{h:'Installed',k:'game',it:G.filter(g=>g.sys==='steam')},{h:'Play together',k:'game',it:G.filter(g=>g.sys==='steam'&&two(g))}],
+ [{h:'Computers',k:'host',it:HOSTS},{h:'Netplay rooms',k:'host',it:ROOMS}],
+ [{h:'Continue watching',k:'film',it:FILMS},{h:'Latest films',k:'film',it:FILMS2}]];
+const PIC=['Sharp pixels','Smooth','Scanlines','Original frame'];
+
+/* ---------- art: original, generated, deliberately varied (busy, bright, red, text-heavy) ---------- */
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const pick=(r,a)=>a[Math.floor(r()*a.length)];
+const ri=(r,a,b)=>a+Math.floor(r()*(b-a+1));
+let uid=0;
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function artInner(name,style){const h=hash(name),r=rng(h);let o='';const id='a'+(uid++);
+ if(style==='pixel'){const sky=pick(r,['#5ec8f2','#7a5cf0','#f2a65e','#3a8ee6','#62d6b8']);
+   o+=`<rect width="400" height="225" fill="${sky}"/><rect y="0" width="400" height="40" fill="#ffffff22"/>`;
+   for(let i=0;i<4;i++){const x=ri(r,0,340),y=ri(r,22,70);o+=`<rect x="${x}" y="${y}" width="44" height="12" fill="#fff"/><rect x="${x+12}" y="${y-10}" width="20" height="10" fill="#fff"/>`}
+   const hc=pick(r,['#2e9e44','#1f7a6a','#8c5a2a','#6a3aa8']);let x=-10;
+   while(x<400){const w=ri(r,50,100),ht=ri(r,40,95);o+=`<rect x="${x}" y="${185-ht}" width="${w}" height="${ht}" fill="${hc}"/><rect x="${x+12}" y="${175-ht}" width="${Math.max(10,w-24)}" height="10" fill="${hc}"/><rect x="${x+20}" y="${195-ht}" width="8" height="8" fill="#0002"/>`;x+=w}
+   for(let gx=0;gx<400;gx+=20){o+=`<rect x="${gx}" y="185" width="20" height="20" fill="${(gx/20)%2?'#d07a30':'#a85a20'}"/><rect x="${gx}" y="205" width="20" height="20" fill="${(gx/20)%2?'#7a3a14':'#8c4818'}"/>`}
+   for(let i=0;i<4;i++){const bx=ri(r,40,340);o+=`<rect x="${bx}" y="${ri(r,96,124)}" width="20" height="20" fill="#f5c518" stroke="#7a4a00" stroke-width="3"/>`}
+   const sx=ri(r,40,330);o+=`<rect x="${sx}" y="153" width="20" height="32" fill="${pick(r,['#e8302a','#2a6ae8','#f2f2f2'])}"/><rect x="${sx+4}" y="141" width="12" height="12" fill="#f6c89a"/><rect x="${sx+40}" y="165" width="16" height="20" fill="#3a2a1a"/><rect x="${sx+38}" y="160" width="20" height="8" fill="#e8302a"/>`;
+ }else if(style==='type'){const bg=pick(r,['#f5c518','#3ec6e0','#ff4f8b','#a6e22e','#ff8a1f']);const ink=pick(r,['#111','#1b1464']);
+   const words=name.toUpperCase().split(' ');const fs=words.length>2?58:72;
+   o+=`<rect width="400" height="225" fill="${bg}"/><circle cx="${ri(r,280,370)}" cy="${ri(r,40,80)}" r="${ri(r,40,70)}" fill="#fff" opacity=".85"/><rect x="0" y="${ri(r,168,186)}" width="400" height="22" fill="${ink}"/><rect x="0" y="${ri(r,196,210)}" width="400" height="6" fill="${ink}"/>`;
+   o+=`<g transform="rotate(-6 200 112)">`+words.map((w,i)=>`<text x="18" y="${70+i*(fs-6)}" font-family="Jost,sans-serif" font-weight="700" font-size="${fs}" fill="${ink}" letter-spacing="-1">${esc(w)}</text>`).join('')+`</g>`;
+ }else if(style==='bright'){const acc=pick(r,['#e8302a','#2a6ae8','#1f9e5a','#111']);
+   o+=`<rect width="400" height="225" fill="#f6f3ec"/><rect y="150" width="400" height="75" fill="#ebe6dc"/><line x1="0" y1="150" x2="400" y2="150" stroke="#222" stroke-width="2"/>`;
+   o+=`<circle cx="${ri(r,60,340)}" cy="${ri(r,46,80)}" r="${ri(r,14,26)}" fill="${acc}"/>`;
+   for(let i=0;i<3;i++){const x=ri(r,20,360),w=ri(r,20,70);o+=`<rect x="${x}" y="${150-ri(r,20,60)}" width="${w}" height="${ri(r,20,60)}" fill="#d9d3c6"/>`}
+   const fx=ri(r,120,280);o+=`<rect x="${fx}" y="118" width="10" height="32" fill="#222"/><circle cx="${fx+5}" cy="112" r="7" fill="#222"/><path d="M${fx+10} 150 L${fx+90} 172 L${fx+80} 176 L${fx} 152Z" fill="#0000001a"/>`;
+   o+=`<text x="20" y="206" font-family="Jost,sans-serif" font-weight="500" font-size="18" fill="#222" letter-spacing="3">${esc(name.toUpperCase())}</text>`;
+ }else if(style==='red'){
+   o+=`<rect width="400" height="225" fill="#d8231c"/><circle cx="200" cy="96" r="${ri(r,62,80)}" fill="#f4e7c8"/><rect y="168" width="400" height="57" fill="#140606"/>`;
+   const a=ri(r,70,120),b=ri(r,250,300);
+   o+=`<path d="M${a} 168 L${a+18} 96 L${a+40} 90 L${a+52} 120 L${a+90} 108 L${a+60} 132 L${a+46} 168Z" fill="#140606"/><path d="M${b} 168 L${b+8} 104 L${b+30} 92 L${b+44} 168Z" fill="#140606"/><path d="M${b-20} 110 L${b-110} 80" stroke="#140606" stroke-width="6"/>`;
+   o+=`<path d="M${ri(r,180,220)} 20 l-16 36 h14 l-12 34 32-46 h-14 l12-24z" fill="#ffd21f"/>`;
+ }else if(style==='halftone'){const bg=pick(r,['#2ab3c4','#f2c14e','#7a5cf0','#ff7a5c']),fg=pick(r,['#ff4f8b','#1b1464','#fff6d8']);
+   o+=`<defs><pattern id="${id}" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="3.2" fill="#0000002e"/></pattern></defs><rect width="400" height="225" fill="${bg}"/><rect width="400" height="225" fill="url(#${id})"/>`;
+   const cx=ri(r,120,280);
+   o+=`<polygon points="${[...Array(16)].map((_,i)=>{const a=i/16*Math.PI*2,R=i%2?60:104;return (cx+60+Math.cos(a)*R).toFixed(0)+','+(100+Math.sin(a)*R*.7).toFixed(0)}).join(' ')}" fill="#fff36a" stroke="#111" stroke-width="4"/>`;
+   o+=`<circle cx="${cx}" cy="120" r="54" fill="${fg}" stroke="#111" stroke-width="5"/><circle cx="${cx-18}" cy="110" r="9" fill="#111"/><circle cx="${cx+18}" cy="110" r="9" fill="#111"/><path d="M${cx-24} 140 Q${cx} 160 ${cx+24} 140" stroke="#111" stroke-width="5" fill="none"/><rect x="${cx-70}" y="176" width="140" height="49" fill="${fg}" stroke="#111" stroke-width="5"/>`;
+ }else if(style==='neon'){const c1=pick(r,['#ff4f8b','#f08a2c','#ffd21f']),c2=pick(r,['#38d3f2','#7a5cf0','#52f28c']);
+   o+=`<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="#ff2e63"/></linearGradient></defs><rect width="400" height="225" fill="#120a2a"/>`;
+   for(let i=0;i<30;i++)o+=`<rect x="${ri(r,0,398)}" y="${ri(r,0,110)}" width="2" height="2" fill="#fff" opacity="${(r()*.8+.2).toFixed(2)}"/>`;
+   const sx=ri(r,140,260);o+=`<circle cx="${sx}" cy="118" r="64" fill="url(#${id})"/>`+[0,1,2,3,4].map(i=>`<rect x="${sx-70}" y="${100+i*9}" width="140" height="${2+i}" fill="#120a2a"/>`).join('');
+   o+=`<rect y="140" width="400" height="85" fill="#1d0b3a"/>`+[...Array(9)].map((_,i)=>`<line x1="${200+(i-4)*12}" y1="140" x2="${200+(i-4)*120}" y2="225" stroke="${c2}" stroke-width="2"/>`).join('')+[150,162,178,198,222].map(y=>`<line x1="0" y1="${y}" x2="400" y2="${y}" stroke="${c2}" stroke-width="2"/>`).join('');
+   o+=`<path d="M${ri(r,20,80)} 140 l30-50 30 50z" fill="#0a0518"/><path d="M${ri(r,300,350)} 140 l24-36 24 36z" fill="#0a0518"/>`;
+ }else if(style==='painted'){const pal=pick(r,[['#2f4a5a','#5f8794','#e3b24a','#142630','#9ac0c8'],['#5a2a3a','#8f4a5e','#f0a07a','#1e1016','#e8c4b0'],['#2d4a3a','#5c8a6a','#d8c46a','#112018','#b8d0a0'],['#463a66','#76689a','#e8a35e','#17122a','#c8b8e8']]);
+   o+=`<rect width="400" height="225" fill="${pal[0]}"/>`;
+   for(let i=0;i<7;i++)o+=`<ellipse cx="${ri(r,0,400)}" cy="${ri(r,10,150)}" rx="${ri(r,50,130)}" ry="${ri(r,20,60)}" fill="${pick(r,pal)}" opacity="${(.3+r()*.5).toFixed(2)}"/>`;
+   o+=`<circle cx="${ri(r,60,340)}" cy="${ri(r,40,80)}" r="${ri(r,18,34)}" fill="${pal[2]}"/><path d="M0 ${ri(r,120,150)} Q100 ${ri(r,90,130)} 200 ${ri(r,130,150)} T400 ${ri(r,110,140)} V225 H0Z" fill="${pal[3]}"/>`;
+   const fx=ri(r,80,320);o+=`<path d="M${fx} 200 l8-46 h10 l8 46z" fill="${pal[4]}"/><circle cx="${fx+13}" cy="146" r="9" fill="${pal[4]}"/>`;
+ }else{ // collage
+   const pal=pick(r,[['#ff4f8b','#f5c518','#38d3f2','#7bd651','#f08a2c','#fff'],['#e8302a','#2a6ae8','#f5c518','#111','#f6f3ec','#1f9e5a']]);
+   o+=`<rect width="400" height="225" fill="${pick(r,['#1b1464','#f6f3ec','#111'])}"/>`;
+   for(let i=0;i<16;i++){const c=pick(r,pal),x=ri(r,-20,380),y=ri(r,-20,200);
+     o+=r()<.5?`<rect x="${x}" y="${y}" width="${ri(r,30,120)}" height="${ri(r,20,90)}" fill="${c}" transform="rotate(${ri(r,-30,30)} ${x} ${y})"/>`:`<circle cx="${x}" cy="${y}" r="${ri(r,12,48)}" fill="${c}"/>`}
+   o+=`<text x="16" y="212" font-family="Jost,sans-serif" font-weight="700" font-size="30" fill="#fff" stroke="#111" stroke-width="1.5">${esc(name.toUpperCase())}</text>`;
+ }
+ return o}
+function art(name,style){return `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">${artInner(name,style||'painted')}</svg>`}
+// a "screenshot" of play: a save-state picture or the running game (pixel scene + a HUD strip)
+function shot(name){const r=rng(hash(name+'hud'));let hud=`<rect width="400" height="20" fill="#000000aa"/>`;for(let i=0;i<3;i++)hud+=`<rect x="${10+i*16}" y="5" width="11" height="10" fill="#e8302a"/>`;hud+=`<rect x="${ri(r,250,300)}" y="6" width="${ri(r,60,90)}" height="8" fill="#fff"/>`;
+  return `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">${artInner(name,'pixel')}${hud}</svg>`}
+function media(id){const s=SYS[id],L=s.lb;let o='';
+  if(s.m==='cart')o=`<rect x="128" y="44" width="144" height="146" rx="12" fill="#8f8b84"/><rect x="146" y="54" width="108" height="5" fill="#0003"/><rect x="146" y="64" width="108" height="5" fill="#0003"/><rect x="146" y="80" width="108" height="86" rx="4" fill="${L}"/>`;
+  if(s.m==='cartb')o=`<rect x="136" y="36" width="128" height="158" rx="8" fill="#2b2b2b"/><rect x="148" y="48" width="104" height="96" rx="3" fill="${L}"/><g fill="#ffffff14"><rect x="148" y="156" width="104" height="4"/><rect x="148" y="166" width="104" height="4"/><rect x="148" y="176" width="104" height="4"/></g>`;
+  if(s.m==='cartw')o=`<path d="M118 66 L140 40 H260 L282 66 V190 H118Z" fill="#5c5b58"/><rect x="146" y="76" width="108" height="92" rx="4" fill="${L}"/>`;
+  if(s.m==='carts')o=`<path d="M150 66 H250 V164 H236 V156 H164 V164 H150Z" fill="#7c7c86"/><rect x="162" y="78" width="76" height="62" rx="4" fill="${L}"/>`;
+  if(s.m==='disc')o=`<circle cx="200" cy="114" r="82" fill="#cfcac0"/><path d="M118 114 A82 82 0 0 1 282 114 Z" fill="${L}"/><circle cx="200" cy="114" r="28" fill="#dedad2"/><circle cx="200" cy="114" r="9" fill="${s.bg}"/>`;
+  if(s.m==='cartt')o=`<rect x="142" y="26" width="116" height="174" rx="6" fill="#1b1b1b"/><rect x="154" y="40" width="92" height="118" rx="3" fill="${L}"/>`;
+  if(s.m==='board')o=`<rect x="92" y="52" width="216" height="124" rx="6" fill="#2f5a46"/><g fill="#141414"><rect x="112" y="70" width="44" height="26"/><rect x="168" y="70" width="64" height="26"/><rect x="244" y="70" width="44" height="40"/><rect x="112" y="108" width="30" height="44"/><rect x="154" y="112" width="78" height="20"/></g><rect x="110" y="168" width="180" height="8" fill="#b9965a"/>`;
+  return `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="${s.bg}"/><rect x="0" y="198" width="400" height="27" fill="#0000002e"/>${o}</svg>`}
+// a collection: three of its own covers fanned on a shelf, so two collections never look alike
+function collArt(items,cn){const pick3=[...items].sort((a,b)=>hash(cn+a.n)-hash(cn+b.n)).slice(0,3);let o='<rect width="400" height="225" fill="#1f1e1c"/><rect x="0" y="196" width="400" height="10" fill="#6b4428"/>';
+  pick3.forEach((g,i)=>{const x=34+i*92,y=20+i*22;o+=`<rect x="${x+6}" y="${y+8}" width="232" height="131" fill="#0006"/><svg x="${x}" y="${y}" width="232" height="131" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">${artInner(g.n,g.st)}</svg>`});
+  return `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">${o}</svg>`}
+function hostArt(x){const on=x.st!=='offline';return `<svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice"><rect width="400" height="225" fill="#202625"/><rect x="104" y="38" width="192" height="120" rx="8" fill="#0d0f0f"/><rect x="114" y="48" width="172" height="100" rx="3" fill="${on?'#2f4a5a':'#151716'}"/>${on?'<rect x="130" y="64" width="60" height="34" fill="#f3e6c840"/><rect x="200" y="64" width="70" height="8" fill="#ffffff22"/><rect x="200" y="80" width="50" height="8" fill="#ffffff18"/>':''}<rect x="186" y="158" width="28" height="22" fill="#0d0f0f"/><rect x="150" y="180" width="100" height="8" rx="3" fill="#0d0f0f"/></svg>`}
+const sysN=g=>SYS[g.sys].n;
+const artOf=g=>art(g.n,g.st);
+
+/* ---------- state ---------- */
+const S={scr:'home',tab:0,zone:'rows',r:0,c:{},stack:[],presses:0,busy:false,shift:0,bump:-1};
+const SH={items:[],i:0,title:'',eb:'',sys:null};
+const GM={g:null,zone:'acts',a:0,s:0};
+const Q={on:false,kind:'retro',zone:'keys',k:0,slot:1,mode:'save',si:0,li:0,pic:0,hold:null,holdT:0,armed:null,armT:null};
+const PLAY={on:false,kind:null,g:null};
+const ck=(t,r)=>t+':'+r;
+const getC=r=>S.c[ck(S.tab,r)]||0;
+const setC=(r,v)=>S.c[ck(S.tab,r)]=v;
+
+/* ---------- Home ---------- */
+const CW=288,GAP=24,DW=104;
+function cardHTML(row,it,f,style=''){
+  const open=`<div class="cd ${f}" ${style}><i class="sh"></i><div class="face">`,close=`<i class="w wb"></i></div></div></div>`;
+  if(row.k==='game')return `${open}<div class="art">${artOf(it)}</div><div class="pl"><span class="t">${it.n}</span><span class="s">${it.sys==='steam'?'Steam':sysN(it)}</span>${close}`;
+  if(row.k==='coll')return `${open}<div class="art">${collArt(it.items,it.n)}</div><div class="pl"><span class="t">${it.n}</span><span class="s">${it.items.length} games</span>${close}`;
+  if(row.k==='sys'){const n=G.filter(g=>g.sys===it).length;return `${open}<div class="art">${media(it)}</div><div class="pl"><span class="t">${SYS[it].n}</span><span class="s">${n} games</span>${close}`}
+  if(row.k==='host'){const cls=it.st==='offline'?'offl':it.st==='action'?'act on':'ok on';return `${open}<div class="art">${it.g?art(it.g,byN(it.g).st):hostArt(it)}</div><div class="pl"><span class="t">${it.n}</span><span class="s"><i class="ind led ${cls}"></i>${it.w}</span>${close}`}
+  if(row.k==='film')return `${open}<div class="art">${art(it.n,it.st)}${it.p?`<div class="pg"><i style="width:${it.p}%"></i></div>`:''}</div><div class="pl"><span class="t">${it.n}</span><span class="s">${it.p?'Resume':'Film'}</span>${close}`;
+}
+function stateOf(g){if(g.save)return `<b>Continue from ${g.save}</b>`;if(g.last)return `<b>Played ${g.last}</b>`;return 'Not played yet'}
+function signFor(){
+  if(S.zone==='tabs')return {eb:'Section',t:sec(S.tab),line:`<b>Section</b> · ${TABD[S.tab]}`};
+  const row=ROWS[S.tab][S.r],it=row.it[getC(S.r)];
+  if(row.k==='game')return {eb:row.h,t:it.n,line:`${stateOf(it)} · ${it.pl} · ${it.d}`};
+  if(row.k==='coll')return {eb:'Collection',t:it.n,line:it.d};
+  if(row.k==='sys')return {eb:'System',t:SYS[it].n,line:SYS[it].d};
+  if(row.k==='host')return {eb:row.h==='Computers'?'Stream from':'Netplay',t:it.n,line:it.d};
+  if(row.k==='film')return {eb:row.h,t:it.n,line:`<b>${it.end}</b> · ${it.y} · ${it.d}`};
+}
+function carHTML(row,ri,cur){const n=row.it.length,c=getC(ri),seq=[...row.it.map((it,i)=>({it,i})),{div:true}],m=seq.length;
+  const els=[];let x=CW+GAP; // the focused card sits in slot 2; the previous one peeks in slot 1
+  for(let j=0,xx=x;j<9&&xx<1920;j++){const e=seq[(c+j)%m];els.push({e,x:xx});xx+=(e.div?DW:CW)+GAP}
+  for(let j=1,xx=x;j<=3;j++){const e=seq[((c-j)%m+m)%m];xx-=(e.div?DW:CW)+GAP;els.unshift({e,x:xx})}
+  return els.map(({e,x})=>e.div?`<div class="wrapm" style="left:${U(x)}"><i></i><span>Start</span></div>`:cardHTML(row,e.it,cur&&e.i===c&&x===CW+GAP?'f':'',`style="left:${U(x)}"`)).join('')}
+let signKey='';
+function renderHome(){
+  $('tabs').innerHTML=NAMESETS[names].map((t,i)=>`<div class="tab ${i===S.tab?'cur':''} ${S.zone==='tabs'&&i===S.tab?'f':''}">${t}<i class="w wb"></i></div>`).join('');
+  const rows=ROWS[S.tab];
+  $('rows').innerHTML=rows.map((row,ri)=>{const c=getC(ri),n=row.it.length,cur=S.zone==='rows'&&S.r===ri;
+    const pos=S.bump===ri?`<span class="n bump">End of the list · let go, then press again to go round</span>`:`<span class="n">${cur?`${c+1} of ${n}`:n}</span>`;
+    return `<div class="row ${cur?'cur':''}"><div class="rowh">${row.h}${pos}</div><div class="strip ${row.car?'car':''}">${row.car?carHTML(row,ri,cur):row.it.map((it,i)=>cardHTML(row,it,cur&&i===c?'f':'')).join('')}</div></div>`}).join('');
+  const rowEls=[...$('rows').children];
+  rows.forEach((row,ri)=>{const st=rowEls[ri].querySelector('.strip'),c=getC(ri),n=row.it.length;
+    if(row.car){if(S.shift&&S.zone==='rows'&&S.r===ri&&!tv.classList.contains('calm')){st.style.transition='none';st.style.transform=`translateX(${U(S.shift)})`;st.offsetWidth;st.style.transition='';}
+      st.style.transform='translateX(0)';
+      if(S.bump===ri){st.classList.remove('nudge');st.offsetWidth;st.classList.add('nudge')}
+    }else{const vis=5;const sh=Math.min(Math.max(0,c-1),Math.max(0,n-vis))*(CW+GAP);st.style.transform=`translateX(-${U(sh)})`}});
+  S.shift=0;
+  const first=S.zone==='rows'?Math.min(S.r,Math.max(0,rows.length-2)):0;$('rows').style.transform=`translateY(-${U(first*318)})`;
+  const s=signFor(),k=s.eb+s.t;
+  const draw=()=>{$('sign').innerHTML=`<span class="ht">${s.t}</span><span class="line">${s.line}</span>`};
+  if(k!==signKey&&signKey&&!tv.classList.contains('calm')){$('sign').classList.add('swap');setTimeout(()=>{draw();$('sign').classList.remove('swap')},50)}else draw();
+  signKey=k;
+}
+function homeKey(k,rep){const rows=ROWS[S.tab];S.bump=-1;
+  if(k==='['||k===']'){S.tab=(S.tab+(k===']'?1:-1)+5)%5;S.r=0;if(S.zone!=='tabs')S.zone='rows';return renderHome()}
+  if(S.zone==='tabs'){
+    if(k==='ArrowLeft')S.tab=Math.max(0,S.tab-1);
+    if(k==='ArrowRight')S.tab=Math.min(4,S.tab+1);
+    if(k==='ArrowDown'||k==='Enter'){S.zone='rows';S.r=0}
+    return renderHome()}
+  const row=rows[S.r],n=row.it.length,c=getC(S.r);
+  if(k==='ArrowUp'){if(S.r===0)S.zone='tabs';else S.r--}
+  if(k==='ArrowDown')S.r=Math.min(rows.length-1,S.r+1);
+  if(k==='ArrowRight'){if(row.car){if(c===n-1&&rep){S.bump=S.r}else{S.shift=CW+GAP+(c===n-1?DW+GAP:0);setC(S.r,(c+1)%n)}}else setC(S.r,Math.min(n-1,c+1))}
+  if(k==='ArrowLeft'){if(row.car){if(c===0&&rep){S.bump=S.r}else{S.shift=-(CW+GAP+(c===0?DW+GAP:0));setC(S.r,(c-1+n)%n)}}else setC(S.r,Math.max(0,c-1))}
+  if(k==='Escape'){S.zone='tabs'}
+  if(k==='Enter'){const it=row.it[c];
+    if(row.k==='game')return openGame(it,sec(S.tab));
+    if(row.k==='coll')return openShelf(it.n,'Collection',it.items,null,sec(S.tab));
+    if(row.k==='sys')return openShelf(SYS[it].n,'System',G.filter(g=>g.sys===it).sort((a,b)=>a.n.localeCompare(b.n)),it,sec(S.tab));
+    if(row.k==='host'){if(it.st==='offline')return toast(`${it.n} is offline. Wake it from Jam Home, then try again.`,'offl');
+      return launch({kind:'stream',t:it.n,host:it.n,eb:row.h==='Computers'?'Streaming from '+it.n:'Netplay · joining the room',sub:'Connecting',ms:1400})}
+    if(row.k==='film')return launch({kind:'film',t:it.n,film:it,eb:it.p?'Film · Resume':'Film · Play',sub:'Loading',ms:900})}
+  renderHome()}
+
+/* ---------- Shelf ---------- */
+function openShelf(title,eb,items,sys,back){Object.assign(SH,{title,eb,items,i:0,sys,back});go('shelf');renderShelf()}
+// the big preview never swaps under key repeat: it waits until focus has rested 450 ms (flash rule: a held key
+// through bright and dark covers would otherwise flip a 844x475 area many times a second)
+let prevT=null;
+function renderShelf(rep){
+  $('sh-back').textContent=SH.back;
+  $('sh-head').innerHTML=`<span class="eb">${SH.eb}</span><span class="ht">${SH.title}</span><span class="facts"><span>${SH.items.length} games</span><span>A to Z</span></span>`;
+  $('sh-list').innerHTML=SH.items.map((g,i)=>`<div class="li ${i===SH.i?'f':''}"><i class="w wl"></i><div class="in"><span class="thumb">${artOf(g)}</span><span class="t">${g.n}</span><span class="r">${SH.sys?g.y:(g.sys==='steam'?'Steam':sysN(g))}</span></div></div>`).join('');
+  const vis=8,first=Math.min(Math.max(0,SH.i-3),Math.max(0,SH.items.length-vis));$('sh-list').style.transform=`translateY(-${U(first*84)})`;
+  const g=SH.items[SH.i];clearTimeout(prevT);
+  if(rep){prevT=setTimeout(()=>renderShelf(false),450);return}
+  $('sh-prev').innerHTML=`<div class="big">${artOf(g)}</div><span class="ht">${g.n}</span><span class="line">${stateOf(g)} · ${g.pl} · ${g.y}</span><span class="line">${g.d}</span>`;
+}
+function shelfKey(k,rep){const n=SH.items.length;
+  if(k==='ArrowDown')SH.i=Math.min(n-1,SH.i+1);
+  if(k==='ArrowUp')SH.i=Math.max(0,SH.i-1);
+  if(k===']'||k==='['){const L=SH.items[SH.i].n[0];let j=SH.i;if(k===']'){while(j<n-1&&SH.items[j].n[0]===L)j++}else{while(j>0&&SH.items[j].n[0]===L)j--;const L2=SH.items[j].n[0];while(j>0&&SH.items[j-1].n[0]===L2)j--}SH.i=j}
+  if(k==='Enter')return openGame(SH.items[SH.i],SH.title);
+  if(k==='Escape')return back();
+  renderShelf(rep&&(k==='ArrowDown'||k==='ArrowUp'))}
+
+/* ---------- Game page ---------- */
+function acts(g){const a=[];
+  if(g.save)a.push({k:'cont',t:`Continue from ${g.save}`,pri:1});
+  a.push({k:'start',t:g.save?'Play from the start':'Play',pri:!g.save});
+  a.push({k:'fav',t:'Favourite'});
+  return a}
+function slotsList(g){return (g.slots||[]).map((t,i)=>({t,i})).filter(x=>x.t)}
+function openGame(g,backTo){Object.assign(GM,{g,zone:'acts',a:0,s:0,back:backTo});go('game');renderGame()}
+function renderGame(){const g=GM.g,A=acts(g),steam=g.sys==='steam';
+  $('g-back').textContent=GM.back;
+  // the resume point lives on the key, so the facts say how long, not when (never twice)
+  const when=g.save?g.hrs:(g.last?`<b>Played ${g.last}</b>`:'Not played yet');
+  $('g-left').innerHTML=`<span class="eb">${steam?sec(2)+' · Steam':sec(1)+' · '+sysN(g)}</span><span class="ht">${g.n}</span><span class="facts"><span>${g.pl}</span><span>${g.y}</span><span>${when}</span></span><span class="line">${g.d}</span>
+   <div class="acts">${A.map((x,i)=>`<div class="key ${x.pri?'pri':''} ${GM.zone==='acts'&&GM.a===i?'f':''}"><div class="in"><i class="w wl"></i><span>${x.t}</span>${x.k==='fav'?`<span class="sp"></span><span class="v"><i class="ind sq ${g.fav?'on':''}"></i>${g.fav?'On':'Off'}</span>`:''}</div></div>`).join('')}</div>`;
+  const slots=slotsList(g);
+  $('g-right').innerHTML=`<div class="big">${artOf(g)}</div>`+(steam?`<span class="note2">Steam keeps this game's saves. Guide during the game opens the same band as every other game, with Steam's own menu one press away.</span>`:
+    slots.length?`<div class="rowh" style="color:var(--lab)">Save states<span class="n">${GM.zone==='saves'?`${GM.s+1} of ${slots.length}`:slots.length}</span></div><div class="strip">${slots.map((x,i)=>`<div class="cd ${GM.zone==='saves'&&GM.s===i?'f':''}"><i class="sh"></i><div class="face"><div class="art">${shot(g.n+x.i)}</div><div class="pl"><span class="t">Slot ${x.i+1}</span><span class="s">${x.t}</span><i class="w wb"></i></div></div></div>`).join('')}</div>`:
+    `<span class="note2">No save states yet. Press Guide during the game to save one.</span>`);
+  const pri=A[GM.a];
+  $('g-hints').innerHTML=GM.zone==='saves'?`<span><kbd>A</kbd>Load this save</span><span><kbd>←</kbd>Back to the buttons</span><span><kbd>B</kbd>${GM.back}</span>`:`<span><kbd>A</kbd>${pri.k==='fav'?(g.fav?'Remove from favourites':'Add to favourites'):'Play'}</span>${slots.length&&!steam?'<span><kbd>→</kbd>Save states</span>':''}<span><kbd>B</kbd>${GM.back}</span>`;
+}
+function gameKey(k){const g=GM.g,A=acts(g),slots=g.sys==='steam'?[]:slotsList(g);
+  if(GM.zone==='acts'){
+    if(k==='ArrowDown')GM.a=Math.min(A.length-1,GM.a+1);
+    if(k==='ArrowUp')GM.a=Math.max(0,GM.a-1);
+    if(k==='ArrowRight'&&slots.length){GM.zone='saves';GM.s=0}
+    if(k==='Enter'){const x=A[GM.a];
+      if(x.k==='fav'){g.fav=!g.fav;toast(g.fav?`${g.n} is in Favourites`:`${g.n} left Favourites`)}
+      else{const emu=g.sys!=='steam';return launch({kind:emu?'retro':'steam',g,t:g.n,eb:(emu?sysN(g):'Steam')+' · '+(x.k==='cont'?x.t:(g.save?'From the start':'Play')),sub:emu?'Starting the emulator':'Starting Steam',ms:emu?900:2000})}}
+  }else{
+    if(k==='ArrowLeft'){if(GM.s===0)GM.zone='acts';else GM.s--}
+    if(k==='ArrowRight')GM.s=Math.min(slots.length-1,GM.s+1);
+    if(k==='Enter'){const x=slots[GM.s];return launch({kind:'retro',g,t:g.n,eb:`${sysN(g)} · Load slot ${x.i+1}`,sub:'Starting the emulator',ms:900})}
+  }
+  if(k==='Escape')return back();
+  renderGame()}
+
+/* ---------- screens ---------- */
+function go(id,push=true){if(push)S.stack.push(S.scr);S.scr=id;document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==='s-'+id));status()}
+function back(){const p=S.stack.pop()||'home';S.scr=p;document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==='s-'+p));if(p==='home'){S.presses=0;renderHome()}if(p==='shelf')renderShelf();if(p==='game')renderGame();status()}
+let tt;function toast(t,cls){$('toast-t').textContent=t;$('toast').querySelector('.ind').className='ind led '+(cls==='offl'?'offl':'ok on');$('toast').classList.add('on');tv.classList.add('toasting');clearTimeout(tt);tt=setTimeout(hideToast,3500)}
+function hideToast(){$('toast').classList.remove('on');tv.classList.remove('toasting')}
+
+/* ---------- launch: the shutter holds only as long as the load (600 ms floor) ---------- */
+let freeze=null;
+function launch(o){S.busy=true;const card=$('tcard'),slat=$('slat'),t0=performance.now();hideToast();
+  $('tc-eb').textContent=o.eb;$('tc-t').textContent=o.t;$('tc-s').textContent=o.sub;
+  slat.style.setProperty('--p',0);card.classList.remove('out');card.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('in')));
+  const done=S.presses+1;let held=0;
+  const iv=setInterval(()=>{if(o.freeze&&freeze){slat.style.setProperty('--p',.55);held=performance.now();return}
+    const p=Math.min(1,(performance.now()-t0-(held?0:0))/o.ms);slat.style.setProperty('--p',o.freeze?Math.max(.55,p):p);
+    if(p>=1&&performance.now()-t0>=600){clearInterval(iv);$('tc-s').textContent='Ready';
+      startPlay(o); // composed behind the opaque card, then the shutter opens
+      setTimeout(()=>{card.classList.add('out');card.classList.remove('in');setTimeout(()=>{card.classList.remove('show','out');S.busy=false;status(`Playing after ${done} presses`);
+        toast('Guide opens the band. B does nothing here, so a game never quits by accident.')},320)},120)}},60);
+  if(o.freeze)freeze=()=>{freeze=null};}
+function startPlay(o){Object.assign(PLAY,{on:true,kind:o.kind,g:o.g||null,name:o.t,host:o.host,film:o.film});
+  $('game').innerHTML=o.kind==='stream'?hostArt({st:'on'}):o.kind==='retro'?shot(o.t+'play'):art(o.t,o.film?o.film.st:(o.g&&o.g.st));
+  $('vlabel').textContent=o.kind==='retro'?'Sample game picture · '+sysN(o.g):o.kind==='steam'?'Sample game picture · Steam':o.kind==='film'?'Sample film picture':'Sample stream picture';
+  go('play')}
+function playKey(k){
+  if(k==='g')return openQuick();
+  if(k==='Escape')return toast('B goes to the game. Guide opens the band.')}
+
+/* ---------- Guide band: one band for every kind of content ---------- */
+function QK(){const kd=PLAY.kind;
+  if(kd==='retro')return [{k:'resume',t:'Resume',pri:1},{k:'save',t:'Save',tray:1},{k:'load',t:'Load',tray:1},{k:'pic',t:'Picture',v:PIC[Q.pic].split(' ')[0]},{k:'reset',t:'Reset',hold:1,arm:'Press A again to reset'},{k:'quit',t:'Quit game',hold:1,arm:'Press A again to quit'}];
+  if(kd==='steam')return [{k:'resume',t:'Resume',pri:1},{k:'steam',t:'Steam menu'},{k:'quit',t:'Quit game',hold:1,arm:'Press A again to quit'}];
+  if(kd==='stream')return [{k:'resume',t:'Resume',pri:1},{k:'smenu',t:'Stream menu'},{k:'quit',t:'Disconnect',hold:1,arm:'Press A again to disconnect'}];
+  return [{k:'resume',t:'Resume',pri:1},{k:'fmenu',t:'Player controls'},{k:'quit',t:'Stop film',hold:1,arm:'Press A again to stop'}]}
+function slotsOf(){const g=PLAY.g;if(!g.slots)g.slots=[null,null,null,null];return g.slots}
+function openQuick(){Object.assign(Q,{on:true,zone:'keys',k:0,armed:null});hideToast();$('qm').classList.add('on');$('qm').classList.toggle('live',PLAY.kind==='steam'||PLAY.kind==='stream');renderQuick();status()}
+function closeQuick(msg){Q.on=false;cancelHold();disarm();$('qm').classList.remove('on');$('qshelf').classList.remove('on');$('qlist').classList.remove('on');if(msg)toast(msg);status()}
+function disarm(){clearTimeout(Q.armT);Q.armed=null}
+function arm(id){Q.armed=id;clearTimeout(Q.armT);Q.armT=setTimeout(()=>{Q.armed=null;if(Q.on)renderQuick()},3000)}
+function headFor(){const kd=PLAY.kind,g=PLAY.g;
+  if(kd==='retro')return {st:'<i class="ind slot"></i>Paused',t:g.n,s:`${sysN(g)} · playing 42 min`};
+  if(kd==='steam')return {st:'<i class="ind slot on"></i>Running',t:g.n,s:'Steam · the game keeps running behind the band'};
+  if(kd==='stream')return {st:'<i class="ind slot on"></i>Streaming',t:PLAY.host,s:'1080p · 120 fps'};
+  return {st:'<i class="ind slot"></i>Paused',t:PLAY.name,s:PLAY.film?PLAY.film.end:''}}
+function renderQuick(){const K=QK(),h=headFor(),cur=K[Q.k];
+  $('qa-st').innerHTML=h.st;$('qa-t').textContent=h.t;$('qa-s').textContent=h.s;
+  $('qa-h').innerHTML=Q.zone==='slots'?`<span><kbd>A</kbd>${Q.mode==='load'?'Load':'Save here'}</span><span><kbd>B</kbd>Close</span>`:Q.zone==='list'?`<span><kbd>A</kbd>Choose</span><span><kbd>B</kbd>Close</span>`:
+    (cur.hold?`<span><kbd>A</kbd>Hold, or press twice</span>`:`<span><kbd>A</kbd>Choose</span>`)+(cur.tray?`<span><kbd>↑</kbd>Slots</span>`:'')+`<span><kbd>B</kbd>Resume</span>`;
+  const shelfOpen=Q.zone==='slots',listOpen=Q.zone==='list';
+  const keyHTML=(x,i)=>`<div class="qk ${x.pri?'pri':''} ${Q.zone==='keys'&&Q.k===i?'f':''} ${Q.armed===x.k?'armed':''}" data-k="${x.k}">${x.hold?'<i class="hold"></i>':''}<div class="in">${Q.armed===x.k?x.arm:x.t}${x.v?`<span class="v ${listOpen&&x.k==='pic'?'hid':''}">${x.v}</span>`:''}</div><i class="w wb"></i></div>`;
+  let out='',i=0;
+  while(i<K.length){const x=K[i];
+    if(x.tray){const a=i;out+=`<div class="tray">`;while(i<K.length&&K[i].tray){out+=keyHTML(K[i],i);i++}out+=`<span class="tv-l ${shelfOpen?'hid':''}">Slot <b>${Q.slot+1}</b></span></div>`}
+    else{out+=keyHTML(x,i);i++}}
+  $('qkeys').innerHTML=out;
+  // slot shelf pops above the band; the tray hides its slot while it's open (each value once)
+  const qs=$('qshelf');qs.classList.toggle('on',shelfOpen);
+  if(shelfOpen){const sl=slotsOf(),g=PLAY.g;$('qs-eb').textContent=Q.mode==='save'?'Save to a slot':'Load a slot';
+    $('qs-strip').innerHTML=sl.map((t,i)=>`<div class="cd ${Q.si===i?'f':''} ${Q.armed==='slot'+i?'armed':''}"><i class="sh"></i><div class="face"><div class="art">${t?shot(g.n+i):'<span class="empty">Empty</span>'}</div><div class="pl"><span class="t">Slot ${i+1}</span><span class="s">${Q.armed==='slot'+i?'Press A again to replace':(t||'Nothing saved')}</span>${i===Q.slot?'<i class="ind sq on mk"></i>':''}<i class="w wb"></i></div></div></div>`).join('')}
+  const ql=$('qlist');ql.classList.toggle('on',listOpen);
+  if(listOpen){ql.innerHTML=`<span class="eb">Picture</span>`+PIC.map((p,i)=>`<div class="li ${Q.li===i?'f':''}"><i class="w wl"></i><div class="in"><span class="t">${p}</span><span class="r"><i class="ind sq ${i===Q.pic?'on':''}"></i></span></div></div>`).join('');
+    const kEl=$('qkeys').querySelector('[data-k="pic"]');const tvW=tv.clientWidth;ql.style.left=(kEl.getBoundingClientRect().left-tv.getBoundingClientRect().left)/tvW*100+'cqw'}
+}
+function doHoldAction(id){const n=PLAY.g?PLAY.g.n:PLAY.name;
+  if(id==='reset')return closeQuick(`Reset ${n}`);
+  closeQuick();PLAY.on=false;back();
+  toast(PLAY.kind==='stream'?`Disconnected from ${PLAY.host}`:PLAY.kind==='film'?`Stopped ${n}. It resumes from here next time.`:`Quit ${n} · played 42 min`)}
+function startHold(){const K=QK(),x=K[Q.k];const el=$('qkeys').querySelector(`[data-k="${x.k}"]`);el.classList.add('holding');Q.holdT=performance.now();
+  Q.hold=setTimeout(()=>{Q.hold=null;el.classList.remove('holding');disarm();doHoldAction(x.k)},1000)}
+function cancelHold(){if(Q.hold){clearTimeout(Q.hold);Q.hold=null}document.querySelectorAll('.qk.holding').forEach(e=>e.classList.remove('holding'))}
+function quickKey(k){const K=QK();
+  if(Q.zone==='keys'){
+    if(k==='ArrowRight'){Q.k=Math.min(K.length-1,Q.k+1);cancelHold();disarm()}
+    if(k==='ArrowLeft'){Q.k=Math.max(0,Q.k-1);cancelHold();disarm()}
+    if(k==='ArrowUp'&&K[Q.k].tray){Q.zone='slots';Q.mode=K[Q.k].k;Q.si=Q.slot;disarm()}
+    if(k==='Enter'){const x=K[Q.k].k,sl=PLAY.kind==='retro'?slotsOf():null;
+      if(x==='resume')return closeQuick();
+      if(x==='save'){sl[Q.slot]='Today 21:12';return closeQuick(`Saved to slot ${Q.slot+1}`)}
+      if(x==='load'){if(!sl[Q.slot])return toast(`Slot ${Q.slot+1} is empty`,'offl');return closeQuick(`Loaded slot ${Q.slot+1} · ${sl[Q.slot]}`)}
+      if(x==='pic'){Q.zone='list';Q.li=Q.pic}
+      if(x==='steam')return closeQuick('Steam\'s own menu opens here (mockup)');
+      if(x==='smenu')return closeQuick('The streaming app\'s own menu opens here (mockup)');
+      if(x==='fmenu')return closeQuick('The film player band opens here (see JamFin)');}
+    if(k==='Escape'||k==='g')return closeQuick();
+  }else if(Q.zone==='slots'){const sl=slotsOf();
+    if(k==='ArrowRight'){Q.si=Math.min(3,Q.si+1);disarm()}
+    if(k==='ArrowLeft'){Q.si=Math.max(0,Q.si-1);disarm()}
+    if(k==='ArrowDown'||k==='Escape'){Q.zone='keys';disarm()}
+    if(k==='g')return closeQuick();
+    if(k==='Enter'){
+      if(Q.mode==='save'){ // replacing a save is the same press-twice path (no hold needed)
+        if(sl[Q.si]&&Q.armed!=='slot'+Q.si){arm('slot'+Q.si);return renderQuick()}
+        disarm();Q.slot=Q.si;sl[Q.si]='Today 21:12';return closeQuick(`Saved to slot ${Q.si+1}`)}
+      if(!sl[Q.si])return toast(`Slot ${Q.si+1} is empty`,'offl');Q.slot=Q.si;return closeQuick(`Loaded slot ${Q.si+1} · ${sl[Q.si]}`)}
+  }else{
+    if(k==='ArrowDown')Q.li=Math.min(PIC.length-1,Q.li+1);
+    if(k==='ArrowUp')Q.li=Math.max(0,Q.li-1);
+    if(k==='Enter'){Q.pic=Q.li;Q.zone='keys';toast(`Picture: ${PIC[Q.pic]}`)}
+    if(k==='Escape')Q.zone='keys';
+    if(k==='g')return closeQuick();
+  }
+  renderQuick()}
+
+/* ---------- input: A has a down and an up, so a key can tell a tap from a hold ---------- */
+function key(k,rep){if(freeze){freeze();return}if(S.busy)return;S.presses++;
+  if(Q.on)quickKey(k);
+  else if(S.scr==='home')homeKey(k,rep);
+  else if(S.scr==='shelf')shelfKey(k,rep);
+  else if(S.scr==='game')gameKey(k);
+  else if(S.scr==='play')playKey(k);
+  if(!S.busy)status()}
+function aDown(){if(freeze){freeze();return}if(S.busy)return;
+  if(Q.on&&Q.zone==='keys'){const x=QK()[Q.k];
+    if(x.hold){S.presses++;if(Q.armed===x.k){disarm();return doHoldAction(x.k)}startHold();return}}
+  key('Enter')}
+function aUp(){if(!Q.hold)return;const dt=performance.now()-Q.holdT,x=QK()[Q.k];cancelHold();
+  if(dt<350){arm(x.k);renderQuick()}else toast('Hold A for a second, or press A twice')}
+const NAMES={home:'Home',shelf:'Shelf',game:'Game page',play:'Playing'};
+function status(extra){$('status').innerHTML=`<span>Screen <b>${Q.on?'Guide band':NAMES[S.scr]}</b></span><span>Section <b>${sec(S.tab)}</b></span><span>Presses since Home <b>${S.presses}</b></span>${extra?`<span><b>${extra}</b></span>`:''}`}
+const KEYS=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Escape','g','[',']'];
+tv.addEventListener('keydown',e=>{let k=e.key;if(k==='Backspace')k='Escape';if(k==='G')k='g';
+  if(k==='Enter'){e.preventDefault();if(!e.repeat)aDown();return}
+  if(!KEYS.includes(k))return;e.preventDefault();key(k,e.repeat)});
+tv.addEventListener('keyup',e=>{if(e.key==='Enter')aUp()});
+document.querySelectorAll('.kb').forEach(b=>{
+  if(b.dataset.hold){b.addEventListener('click',()=>{tv.focus();aDown();setTimeout(aUp,1100)});return}
+  if(b.dataset.run){b.addEventListener('click',()=>{tv.focus();key('ArrowRight',false);let n=0;const iv=setInterval(()=>{key('ArrowRight',true);if(++n>=10)clearInterval(iv)},90)});return}
+  b.addEventListener('click',()=>{tv.focus();if(b.dataset.key==='Enter'){aDown();setTimeout(aUp,80)}else key(b.dataset.key,false)})});
+document.querySelectorAll('.seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const g=seg.dataset.g,v=b.dataset.v;
+  if(g!=='jump')seg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  if(g==='light')tv.classList.toggle('day',v==='day');
+  if(g==='motion')tv.classList.toggle('calm',v==='calm');
+  if(g==='covers'){tv.classList.toggle('toned',v==='toned');tv.classList.toggle('full',v==='full')}
+  if(g==='names'){names=v;$('cap').textContent=v==='plain'?'Alternative shown: plain words on the band (Retro, Steam, Streaming, Films). For Isaac to judge; the approved names are Archive, Hangar, Uplink and Theater.':'Section names on the band: NervOS\'s approved names, in Jost sentence case with no numbers or kanji. The page switch above shows plain words as an alternative only.';rerender()}
+  if(g==='jump')jump(v);
+  tv.focus()}));
+function rerender(){if(Q.on)renderQuick();if(S.scr==='home')renderHome();if(S.scr==='shelf')renderShelf();if(S.scr==='game')renderGame();status()}
+function jump(v){if(S.busy&&!freeze)return;if(freeze)freeze();closeQuick();hideToast();S.stack=[];S.presses=0;
+  S.scr='home';S.tab=0;S.zone='rows';S.r=0;go('home',false);renderHome();
+  if(v==='home')return;
+  if(v==='archive'){S.tab=1;return renderHome()}
+  if(v==='coll'){const c=COLL[0];return openShelf(c.n,'Collection',c.items,null,sec(0))}
+  if(v==='steam'){openGame(byN('Orbit Kitchen'),sec(0));startPlay({kind:'steam',g:byN('Orbit Kitchen'),t:'Orbit Kitchen'});return openQuick()}
+  openGame(byN('Glass Dragon'),sec(0));
+  if(v==='card')return launch({kind:'retro',g:byN('Glass Dragon'),t:'Glass Dragon',eb:'Super Nintendo · Continue from Tuesday 21:40',sub:'Starting the emulator',ms:900,freeze:true});
+  if(v==='quick'){startPlay({kind:'retro',g:byN('Glass Dragon'),t:'Glass Dragon'});openQuick()}
+}
+window.addEventListener('resize',()=>{if(S.scr==='home')renderHome()});
+renderHome();status();
+</script>
+</body>
+</html>
