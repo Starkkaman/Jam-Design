@@ -122,6 +122,36 @@ p{margin:0;max-width:70ch}
 .playing .t{font:600 3cqw var(--f)}
 
 @media (prefers-reduced-motion:reduce){.tv *{transition-duration:1ms!important;transition-delay:0ms!important}}
+
+/* ===== Texture levels (static; only on fixed surfaces: shutter halves, tiles, bar bezel) ===== */
+.tv{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");--brush:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='200'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");--g:0;--b:0;--v:0}
+.tv.tx1{--g:.10;--b:.10;--v:.35}
+.tv.tx2{--g:.17;--b:.2;--v:.6}
+/* shutter halves: brushed metal + grain + light falloff + embossed ribs */
+.t1 .bar{overflow:hidden}
+.t1 .bar::before,.t1 .bar::after{content:"";position:absolute;inset:0;pointer-events:none}
+.t1 .bar::before{background-image:var(--brush),var(--grain);background-size:600px 200px,240px 240px;mix-blend-mode:overlay;opacity:calc(var(--b) * 2.4)}
+.t1 .bar::after{background:radial-gradient(120% 140% at 50% 100%,transparent 40%,rgba(0,0,0,var(--v)) 100%)}
+.t1 .bar.b::after{background:radial-gradient(120% 140% at 50% 0%,transparent 40%,rgba(0,0,0,var(--v)) 100%)}
+.tv.tx1 .t1 .bar,.tv.tx2 .t1 .bar{background-color:#171614;background-image:repeating-linear-gradient(0deg,#ffffff0d 0 1px,#0000004d 1px 2px,transparent 2px 10px),linear-gradient(180deg,#1d1c1a,#121110)}
+/* the seam: a machined lip where the halves meet */
+.tv.tx1 .t1 .bar.a,.tv.tx2 .t1 .bar.a{box-shadow:inset 0 -.12cqw 0 #ffffff1c,inset 0 -.35cqw .3cqw #00000066,0 1cqw 3cqw #00000080}
+.tv.tx1 .t1 .bar.b,.tv.tx2 .t1 .bar.b{box-shadow:inset 0 .12cqw 0 #ffffff24,inset 0 .35cqw .3cqw #00000066,0 -1cqw 3cqw #00000080}
+/* title: printed, not stickered */
+.tv.tx1 .t1 .ttl,.tv.tx2 .t1 .ttl{color:#e6dfd0;text-shadow:0 .12cqw 0 #000000b3,0 -.05cqw 0 #ffffff12}
+.tv.tx2 .t1 .ttl{color:#e2dacb}
+.tv.tx1 .t1 .eb,.tv.tx2 .t1 .eb,.tv.tx1 .t1 .verb,.tv.tx2 .t1 .verb{text-shadow:0 .1cqw 0 #000000a0}
+/* slatted bar sits in a recessed bezel behind glass */
+.tv.tx1 .t1.slatted .lit,.tv.tx2 .t1.slatted .lit{box-shadow:0 0 0 .3cqw #0c0b0a,0 0 0 .38cqw #ffffff0f,inset 0 .1cqw .2cqw #000c}
+.tv.tx2 .t1.slatted .lit::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(180deg,#ffffff26 0,#ffffff08 40%,transparent 41%,#00000026 100%)}
+.tv.tx1 .t1.slatted .lit::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(180deg,#ffffff14 0,transparent 45%,#0000001f 100%)}
+/* tiles: moulded, not flat */
+.tile{overflow:visible}
+.tile::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background-image:var(--grain),linear-gradient(180deg,rgba(255,255,255,calc(var(--v)*.12)),transparent 45%,rgba(0,0,0,calc(var(--v)*.35)));background-size:240px 240px,100% 100%;mix-blend-mode:overlay;opacity:calc(var(--g) * 4)}
+.tv.tx1 .tile,.tv.tx2 .tile{background:linear-gradient(180deg,#2e2d2a,#252422)}
+.tv.tx2 .tile{box-shadow:inset 0 .1cqw 0 #ffffff24,inset 0 -.15cqw 0 #00000059,0 .6cqw 1.4cqw #00000080}
+/* walnut trim gets grain */
+.tv.tx1 .trim,.tv.tx2 .trim{background-image:var(--brush);background-color:#5b3a22;background-blend-mode:overlay;background-size:600px 200px}
 </style>
 
 <div class="wrap">
@@ -133,11 +163,12 @@ p{margin:0;max-width:70ch}
 
   <div class="controls">
     <div class="ctl"><span class="eyebrow">Style</span><div class="seg" id="sty" role="group" aria-label="Title card style"><button id="s1" data-v="t1s" aria-pressed="true">Shutter · slatted</button><button id="s1b" data-v="t1" aria-pressed="false">Shutter</button><button id="s2" data-v="t2" aria-pressed="false">Tape counter</button><button id="s3" data-v="t3" aria-pressed="false">Tuning dial</button></div></div>
+    <div class="ctl"><span class="eyebrow">Texture</span><div class="seg" id="tex" role="group" aria-label="Texture"><button id="x0" data-v="tx0" aria-pressed="false">Current</button><button id="x1" data-v="tx1" aria-pressed="false">Subtle</button><button id="x2" data-v="tx2" aria-pressed="true">Rich</button></div></div>
     <div class="ctl"><span class="eyebrow">Load</span><div class="seg" id="spd" role="group" aria-label="Load speed"><button id="l1" data-v="fast" aria-pressed="true">Fast</button><button id="l2" data-v="slow" aria-pressed="false">Slow, with a stall</button></div></div>
     <button class="play" id="go">Play</button>
   </div>
 
-  <div class="tv" id="tv" tabindex="0" aria-label="TV mock. Left and right move, Enter plays.">
+  <div class="tv tx2" id="tv" tabindex="0" aria-label="TV mock. Left and right move, Enter plays.">
     <div class="trim"></div>
     <div class="home" id="home">
       <div class="top"><span class="clock">9:12</span><span class="st"><i class="led on"></i>21.5°</span></div>
@@ -214,7 +245,7 @@ addEventListener('resize',place);requestAnimationFrame(place);
 // ---------- controls
 let style='t1s',speed='fast';
 function seg(id,cb){const b=[...document.querySelectorAll('#'+id+' button')];b.forEach(x=>x.addEventListener('click',()=>{b.forEach(y=>y.setAttribute('aria-pressed',y===x));cb(x.dataset.v)}))}
-seg('sty',v=>style=v);seg('spd',v=>speed=v);
+seg('sty',v=>style=v);seg('spd',v=>speed=v);seg('tex',v=>{tv.classList.remove('tx0','tx1','tx2');tv.classList.add(v)});
 document.getElementById('go').addEventListener('click',()=>{tv.focus();launch()});
 
 // ---------- loading simulation (real progress drives every card)

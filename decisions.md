@@ -199,3 +199,5 @@ Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopt
 
 ## TV title card (Isaac, 2026-11-05)
 - SHUTTER chosen. Isaac wants to see it with the slatted progress bar ("told you it would come back"): mockup 09 now has "Shutter · slatted" (unlit slats stay faintly visible, per the window rule). Pending his verdict on slatted vs the shutter-and-hot-spot strip inside the card.
+- Title card: SHUTTER + SLATTED bar chosen ("I really like the shutter with the slatted bar").
+- Isaac wants the UI "less cartoony" with more texture. Mockup 09 adds Texture: Current / Subtle / Rich (default Rich): brushed-metal + grain on the shutter halves, embossed ribs, light falloff, a machined lip at the seam, a recessed bezel + glass highlight on the slatted bar, printed (letterpress) title text, moulded tiles with grain, grained walnut trim. Static textures, fixed surfaces only (TV rule): no texture on the ground behind scrolling rows. Awaiting verdict.
