@@ -167,6 +167,8 @@ p{margin:0;max-width:70ch}
 .tv>.geo{z-index:0}
 .t1 .bar .geo{position:absolute;left:0;right:0;height:198%;z-index:0}
 .t1 .bar.a .geo{top:0}.t1 .bar.b .geo{top:auto;bottom:0}
+/* on the card the title is centred, so the geometry sits further right to keep clear of it */
+.t1 .bar .geo svg{transform:translateX(9%)}
 </style>
 
 <div class="wrap">
@@ -178,7 +180,7 @@ p{margin:0;max-width:70ch}
 
   <div class="controls">
     <div class="ctl"><span class="eyebrow">Style</span><div class="seg" id="sty" role="group" aria-label="Title card style"><button id="s1" data-v="t1s" aria-pressed="true">Shutter · slatted</button><button id="s1b" data-v="t1" aria-pressed="false">Shutter</button><button id="s2" data-v="t2" aria-pressed="false">Tape counter</button><button id="s3" data-v="t3" aria-pressed="false">Tuning dial</button></div></div>
-    <div class="ctl"><span class="eyebrow">Geometry</span><div class="seg" id="geo" role="group" aria-label="Background geometry"><button id="g0" data-v="none" aria-pressed="false">None</button><button id="g1" data-v="orbit" aria-pressed="true">Orbit</button><button id="g2" data-v="panels" aria-pressed="false">Panels</button><button id="g3" data-v="stripes" aria-pressed="false">Stripes</button></div></div>
+    <div class="ctl"><span class="eyebrow">Geometry</span><div class="seg" id="geo" role="group" aria-label="Background geometry"><button id="g0" data-v="none" aria-pressed="false">None</button><button id="g1" data-v="orbit" aria-pressed="false">Orbit</button><button id="g2" data-v="panels" aria-pressed="false">Panels</button><button id="g3" data-v="stripes" aria-pressed="true">Stripes</button></div></div>
     <div class="ctl"><span class="eyebrow">Texture</span><div class="seg" id="tex" role="group" aria-label="Texture"><button id="x0" data-v="tx0" aria-pressed="false">Current</button><button id="x1" data-v="tx1" aria-pressed="false">Subtle</button><button id="x2" data-v="tx2" aria-pressed="true">Rich</button></div></div>
     <div class="ctl"><span class="eyebrow">Load</span><div class="seg" id="spd" role="group" aria-label="Load speed"><button id="l1" data-v="fast" aria-pressed="true">Fast</button><button id="l2" data-v="slow" aria-pressed="false">Slow, with a stall</button></div></div>
     <button class="play" id="go">Play</button>
@@ -268,9 +270,9 @@ const V='viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"';
 const GEO={none:'',
 orbit:`<svg ${V}><circle cx="1330" cy="860" r="520" fill="#1d1b19"/><circle cx="1330" cy="860" r="520" fill="none" stroke="#ffffff0d" stroke-width="2"/><circle cx="1330" cy="860" r="640" fill="none" stroke="#ffffff0a" stroke-width="2"/><circle cx="1330" cy="860" r="770" fill="none" stroke="#ffffff08" stroke-width="2"/><circle cx="1330" cy="860" r="920" fill="none" stroke="#ffffff06" stroke-width="2"/><circle cx="1330" cy="860" r="380" fill="#211f1c"/><path d="M1330 860 m-640 0 a640 640 0 0 1 120 -372" fill="none" stroke="#5b3a22" stroke-width="6" stroke-linecap="round"/><circle cx="1478" cy="150" r="34" fill="#22201d"/><circle cx="1478" cy="150" r="34" fill="none" stroke="#ffffff0d" stroke-width="2"/></svg>`,
 panels:`<svg ${V}><rect x="0" y="0" width="34" height="900" fill="#3a2617"/><rect x="34" y="0" width="4" height="900" fill="#00000066"/><rect x="80" y="70" width="1460" height="500" rx="36" fill="#191816" stroke="#ffffff0b" stroke-width="2"/><rect x="80" y="610" width="1460" height="230" rx="36" fill="#1b1a17" stroke="#ffffff0b" stroke-width="2"/><rect x="82" y="72" width="1456" height="496" rx="34" fill="none" stroke="#00000059" stroke-width="3" transform="translate(0 3)"/><g fill="#2b2926" stroke="#00000080" stroke-width="2"><circle cx="112" cy="102" r="9"/><circle cx="1508" cy="102" r="9"/><circle cx="112" cy="538" r="9"/><circle cx="1508" cy="538" r="9"/></g><g stroke="#00000066" stroke-width="2"><line x1="106" y1="102" x2="118" y2="102"/><line x1="1502" y1="102" x2="1514" y2="102"/><line x1="106" y1="538" x2="118" y2="538"/><line x1="1502" y1="538" x2="1514" y2="538"/></g></svg>`,
-stripes:`<svg ${V}><g fill="none" stroke-linecap="butt" stroke-width="44"><path d="M-40 770 H1080 a300 300 0 0 0 300 -300 V-40" stroke="#4a2e1b"/><path d="M-40 718 H1080 a248 248 0 0 0 248 -248 V-40" stroke="#6b4325"/><path d="M-40 666 H1080 a196 196 0 0 0 196 -196 V-40" stroke="#8a6a3d" stroke-opacity=".75"/></g></svg>`};
+stripes:`<svg ${V}><g fill="none" stroke-linecap="butt" stroke-width="44"><path d="M1040 -40 V300 A260 260 0 0 0 1300 560 H1640" stroke="#6b3416"/><path d="M1092 -40 V300 A208 208 0 0 0 1300 508 H1640" stroke="#b04a1c"/><path d="M1144 -40 V300 A156 156 0 0 0 1300 456 H1640" stroke="#d69a2e"/></g><g fill="none" stroke="#ffffff14" stroke-width="2"><path d="M1018 -40 V300 A282 282 0 0 0 1300 582 H1640"/></g></svg>`};
 function setGeo(k){document.querySelectorAll('.geo').forEach(g=>g.innerHTML=GEO[k])}
-setGeo('orbit');seg('geo',setGeo);
+setGeo('stripes');seg('geo',setGeo);
 seg('sty',v=>style=v);seg('spd',v=>speed=v);seg('tex',v=>{tv.classList.remove('tx0','tx1','tx2');tv.classList.add(v)});
 document.getElementById('go').addEventListener('click',()=>{tv.focus();launch()});
 
