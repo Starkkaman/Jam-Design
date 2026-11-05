@@ -1,0 +1,213 @@
+<title>Base Look Round 6</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: focused studies page. Progress (3), controls vs indicators, meters, TV selector (5). All specimens on the Hi-Fi band/card tokens. */
+:root{--bg:#ebe9e4;--fg:#1f2022;--muted:#5d605f;--line:#d0cdc6;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --settle:cubic-bezier(.16,1,.3,1);--glide:cubic-bezier(.2,.8,.2,1);
+  --band:#1d1c1a;--band-ink:#ece8df;--band-dim:#a8a397;--orange:#e8641c;--card:#eceae6;--alu:#dcd9d3;--rule:#c4c0b7;--ink:#1d1c1a;--dim:#5f5c55;--red:#c8401a;--lamp:#6fd447}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#151617;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#202223;--card:#2c2b28;--alu:#232220;--rule:#3a3935;--ink:#eeeae2;--dim:#aaa69c;--band:#121110;--orange:#f07432;--red:#ff7a5c;--lamp:#8cf05e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151617;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#202223;--card:#2c2b28;--alu:#232220;--rule:#3a3935;--ink:#eeeae2;--dim:#aaa69c;--band:#121110;--orange:#f07432;--red:#ff7a5c;--lamp:#8cf05e;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--f)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:40px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:48px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(28px,4.4vw,40px)/1.08 var(--f);margin:6px 0 10px;text-wrap:balance}
+h2{font:600 22px var(--f);margin:0}
+p{margin:0;max-width:68ch}
+.muted{color:var(--muted)}
+section{display:grid;gap:14px;min-width:0}
+.btn{font:600 14px var(--f);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:10px;padding:9px 14px;cursor:pointer;justify-self:start}
+.btn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.grid3{grid-template-columns:1fr}}
+.cell{display:grid;gap:8px;align-content:start}
+.cell b{font-size:15px}
+.cell .note{font-size:13px;color:var(--muted)}
+.tag{font:500 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--orange)}
+.band{background:var(--band);background-image:repeating-linear-gradient(0deg,#ffffff12 0 1px,transparent 1px 10px);color:var(--band-ink);border-radius:14px;padding:16px;display:grid;gap:10px;box-shadow:inset 0 1px 0 #ffffff1a}
+.band .lab{font:500 12px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--band-dim)}
+.band .t{font:500 17px var(--f)}
+.cardp{background:var(--card);color:var(--ink);border-radius:14px;padding:16px;display:grid;gap:12px;box-shadow:inset 0 1px 0 #ffffff80,0 1px 2px #0000001a,0 6px 16px #00000014}
+.cardp .lab{font:500 12px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+
+/* ===== PROGRESS STUDIES ===== */
+.pg{--p:62%;position:relative;height:8px;border-radius:4px;overflow:hidden;box-shadow:inset 0 1px 2px #000000cc,0 0 0 1px #0000004d,0 1px 0 #ffffff14}
+.pg::before,.pg::after{content:"";position:absolute;top:0;bottom:0;transition:left 1400ms var(--settle)}
+/* P1: Round 4, as liked */
+.p1{background:linear-gradient(90deg,#c9531a,#f07432 55%,#ff9b50)}
+.p1::before{top:-4px;bottom:-4px;width:28px;left:calc(var(--p) - 20px);background:radial-gradient(closest-side,#fff1dccc,#ffb36b55 60%,transparent)}
+.p1::after{right:0;left:var(--p);background:linear-gradient(90deg,#1412110a,#141211 14px),repeating-linear-gradient(90deg,#2a1c13 0 2px,#1b1512 2px 6px)}
+/* P2: backlit slot — the whole tube is faintly lit, the watched part is fully on */
+.p2{height:10px;border-radius:5px;background:linear-gradient(90deg,#c9531a,#f07432 55%,#ff9b50)}
+.p2::after{right:0;left:var(--p);background:#141211d9;box-shadow:-1px 0 0 #fff1dc}
+.p2::before{left:0;right:0;background:linear-gradient(180deg,#ffffff40,transparent 45%);z-index:1}
+/* P3: slatted — light seen through fine vertical slats, like a VFD bar */
+.p3{height:10px;border-radius:3px;background:linear-gradient(90deg,#c9531a,#f07432 55%,#ff9b50)}
+.p3::before{left:0;right:0;z-index:2;background:repeating-linear-gradient(90deg,transparent 0 3px,#141211 3px 4px);transition:none}
+.p3::after{right:0;left:var(--p);background:linear-gradient(90deg,#14121140,#141211 6px),#2a1c13;z-index:1}
+
+/* ===== CONTROLS ===== */
+.sw{appearance:none;border:0;padding:0;cursor:pointer;position:relative;width:30px;height:46px;border-radius:8px;background:var(--rule);box-shadow:inset 0 2px 5px #00000059,0 1px 0 #ffffff80;flex:none}
+.sw .pad{position:absolute;left:3px;right:3px;top:21px;height:22px;border-radius:6px;background:#f4f2ee;box-shadow:inset 0 1px 0 #ffffffb3,inset 0 -2px 0 #0000001f,0 2px 0 #0000002e,0 4px 8px #00000038;transition:transform 260ms cubic-bezier(.3,1.5,.5,1),background 150ms}
+.sw[aria-pressed="true"] .pad{transform:translateY(-18px);background:var(--orange)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sw{background:#121110;box-shadow:inset 0 2px 5px #00000059,0 1px 0 #ffffff14}:root:not([data-theme="light"]) .sw .pad{background:#5c5952}:root:not([data-theme="light"]) .sw[aria-pressed="true"] .pad{background:var(--orange)}}
+:root[data-theme="dark"] .sw{background:#121110;box-shadow:inset 0 2px 5px #00000059,0 1px 0 #ffffff14}:root[data-theme="dark"] .sw .pad{background:#5c5952}:root[data-theme="dark"] .sw[aria-pressed="true"] .pad{background:var(--orange)}
+.sw:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+/* slider that reveals light */
+.slider{position:relative;height:44px;display:flex;align-items:center;touch-action:none;cursor:pointer;flex:1;min-width:0}
+.slider:focus-visible{outline:2px solid var(--orange);outline-offset:4px;border-radius:8px}
+.slider .trk{position:relative;flex:1;height:10px;border-radius:5px;overflow:hidden;background:linear-gradient(90deg,#c9531a,#f07432 55%,#ff9b50);box-shadow:inset 0 1px 2px #000000cc,0 0 0 1px #0000004d,0 1px 0 #ffffff26}
+.slider .cov{position:absolute;top:0;bottom:0;right:0;left:var(--v);background:linear-gradient(90deg,#14121140,#141211 8px),#1b1512}
+.slider .thumb{position:absolute;left:var(--v);top:50%;width:22px;height:34px;margin-left:-11px;transform:translateY(-50%);border-radius:7px;background:#f4f2ee;box-shadow:inset 0 1px 0 #ffffffb3,inset 0 -2px 0 #0000001f,0 2px 0 #0000002e,0 4px 8px #00000038}
+.slider .thumb::after{content:"";position:absolute;left:6px;right:6px;top:50%;height:2px;margin-top:-1px;background:#00000026;box-shadow:0 -5px 0 #00000026,0 5px 0 #00000026}
+.slider.anim .cov,.slider.anim .thumb{transition:left 260ms var(--glide)}
+.val{font:500 14px var(--mono);color:var(--dim);width:3.5ch;text-align:right;font-variant-numeric:tabular-nums}
+.lamp{width:10px;height:10px;border-radius:50%;flex:none;background:var(--lamp);box-shadow:inset 0 1px 0 #ffffff80,0 0 4px var(--lamp),0 0 12px var(--lamp)}
+
+/* ===== METERS (indicators only) ===== */
+.vu{width:92px;height:46px;display:block;flex:none}
+.dial-quiet{background:var(--alu);border-radius:46px 46px 6px 6px;box-shadow:inset 0 2px 4px #00000038,0 1px 0 #ffffff80}
+.vu .arc{fill:none;stroke:var(--rule);stroke-width:5;stroke-linecap:round}
+.vu .hot{fill:none;stroke:var(--red);stroke-width:5;stroke-linecap:round}
+.vu .ndl{stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;transform-origin:46px 42px;transition:transform 900ms cubic-bezier(.3,1.6,.4,1)}
+.vu .hub{fill:var(--ink)}
+.vu .seg{fill:none;stroke-width:6;stroke:var(--rule);transition:stroke 260ms}
+.vu .seg.on{stroke:var(--orange)}.vu .seg.on.hotz{stroke:var(--red)}
+.ladder{display:flex;gap:3px;align-items:flex-end;height:26px;flex:none}
+.ladder i{width:6px;border-radius:2px;background:var(--rule);transition:background 220ms,box-shadow 220ms}
+.ladder i.on{background:var(--orange);box-shadow:0 0 6px #f0743280}
+.ladder i.on.hotz{background:var(--red)}
+
+/* ===== TV SELECTOR STUDIES ===== */
+.sels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:860px){.sels{grid-template-columns:1fr}}
+.sel{display:grid;gap:8px}
+.rail{background:var(--band);background-image:repeating-linear-gradient(0deg,#ffffff12 0 1px,transparent 1px 10px);border-radius:14px;padding:6% 7% 7%;display:flex;gap:4%;overflow:hidden;container-type:inline-size;outline:none}
+.rail:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+.tile{flex:1;aspect-ratio:4/3;border-radius:2.4cqw;background:#2a2926;position:relative;display:grid;align-content:end;padding:3cqw;cursor:pointer;color:var(--band-dim);font:600 3.6cqw/1 var(--f);letter-spacing:.1em;text-transform:uppercase;
+  box-shadow:inset 0 .2cqw 0 #ffffff1a,0 1cqw 2.4cqw #00000080;transition:transform 150ms var(--glide),background 150ms,color 150ms}
+.tile.on{transform:scale(1.07) translateY(-1cqw);background:#34322e;color:var(--band-ink);box-shadow:inset 0 .2cqw 0 #ffffff26,0 2.4cqw 5cqw #000000b3}
+.tile .ind,.tile::before,.tile::after{pointer-events:none}
+/* S1 fade-up strip */
+.s1 .ind{position:absolute;left:3cqw;right:3cqw;bottom:1.6cqw;height:.9cqw;border-radius:.45cqw;background:linear-gradient(90deg,#f07432,#ff9b50);box-shadow:0 0 1.6cqw #f0743299;opacity:0;transition:opacity 220ms var(--settle)}
+.s1 .tile.on .ind{opacity:1}
+.s1 .tile{padding-bottom:4.5cqw}
+/* S2 centre bloom */
+.s2 .ind{position:absolute;left:3cqw;right:3cqw;bottom:1.6cqw;height:.9cqw;border-radius:.45cqw;background:#f07432;box-shadow:0 0 1.6cqw #f0743299;transform:scaleX(0);transition:transform 260ms var(--settle)}
+.s2 .tile.on .ind{transform:scaleX(1)}
+.s2 .tile{padding-bottom:4.5cqw}
+/* S3 indicator lamp */
+.s3 .ind{position:absolute;top:3cqw;right:3cqw;width:2.2cqw;height:2.2cqw;border-radius:50%;background:#3a3935;box-shadow:inset 0 .2cqw 0 #ffffff1a}
+.s3 .ind::after{content:"";position:absolute;inset:0;border-radius:50%;background:#f07432;box-shadow:inset 0 .2cqw 0 #ffffff66,0 0 1cqw #f07432,0 0 3cqw #f0743288;opacity:0;transition:opacity 260ms var(--settle)}
+.s3 .tile.on .ind::after{opacity:1}
+/* S4 underglow: the tile spills orange light onto the panel below it */
+.s4 .tile::before{content:"";position:absolute;left:-10%;right:-10%;bottom:-40%;height:60%;background:radial-gradient(closest-side,#f0743266,transparent);opacity:0;z-index:-1;transition:opacity 300ms var(--settle)}
+.s4 .tile::after{content:"";position:absolute;left:12%;right:12%;bottom:-.2cqw;height:.5cqw;border-radius:.25cqw;background:#ff9b50;opacity:0;transition:opacity 200ms}
+.s4 .tile.on::before,.s4 .tile.on::after{opacity:1}
+.s4 .tile{isolation:auto}
+.s4.rail{isolation:isolate}
+/* S5 lit frame */
+.s5 .tile::after{content:"";position:absolute;inset:-.6cqw;border-radius:3cqw;border:.6cqw solid #f07432;box-shadow:0 0 2cqw #f0743266;opacity:0;transition:opacity 200ms var(--settle)}
+.s5 .tile.on::after{opacity:1}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.rules{grid-template-columns:1fr}}
+.rule{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Design bible · Round 6 · Studies</span>
+    <h1>Lights, controls and the selector</h1>
+    <p class="muted">Three progress bars, a clear split between controls and indicators, the three meters you kept, and five TV selectors. Each one moves differently from the progress bar.</p>
+  </header>
+
+  <section>
+    <h2>Progress bar</h2>
+    <p class="muted">P1 is the Round 4 bar you liked, rebuilt exactly. P2 and P3 are two new attempts at "light being revealed".</p>
+    <button class="btn" id="rp">Replay</button>
+    <div class="grid3">
+      <div class="cell"><span class="tag">P1 · Round 4</span><div class="band"><span class="lab">Continue watching</span><span class="t">Severance · S2 E4</span><div class="pg p1"></div></div><b>Shutter and hot spot</b><span class="note">A dark shutter with a faint filament texture. A warm hot spot sits at the leading edge.</span></div>
+      <div class="cell"><span class="tag">P2 · New</span><div class="band"><span class="lab">Continue watching</span><span class="t">Severance · S2 E4</span><div class="pg p2"></div></div><b>Backlit tube</b><span class="note">The whole tube is faintly lit, like a dimmed backlight. The watched part is fully on, with a crisp cream line at the edge and a glassy top highlight.</span></div>
+      <div class="cell"><span class="tag">P3 · New</span><div class="band"><span class="lab">Continue watching</span><span class="t">Severance · S2 E4</span><div class="pg p3"></div></div><b>Slatted</b><span class="note">The light shows through fine vertical slats, like the segment bars on a 70s tape deck's display. Reads as "lit" from the sofa.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Controls and indicators</h2>
+    <div class="rules">
+      <div class="rule"><b>Indicators light up</b><span class="muted">Status lights, meters and progress show state. They are the only things that glow.</span></div>
+      <div class="rule"><b>Controls don't glow</b><span class="muted">Switches and buttons use colour (the orange paddle) and position, never light. The one exception: a slider reveals light up to where you set it, because the light is its reading.</span></div>
+      <div class="rule"><b>Straight controls only</b><span class="muted">No knobs, dials or curved controls you have to drag. Arcs and dials are read-only.</span></div>
+      <div class="rule"><b>Meters are read-only</b><span class="muted">The quiet face, lit scale and ladder show levels. To change a level you use a straight slider next to it.</span></div>
+    </div>
+    <div class="grid3">
+      <div class="cell"><span class="tag">Control</span><div class="cardp"><span class="lab">Kitchen lights</span><div class="row"><span>On, no glow</span><button class="sw" aria-pressed="true" aria-label="Kitchen lights"><i class="pad"></i></button></div></div><span class="note">The paddle turns orange and moves up. No halo.</span></div>
+      <div class="cell"><span class="tag">Control that reveals light</span><div class="cardp"><span class="lab">Kitchen speakers · volume</span><div class="row"><div class="slider" id="sl" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40" style="--v:40%"><div class="trk"><i class="cov"></i></div><i class="thumb"></i></div><span class="val" id="slv">40</span></div></div><span class="note">Drag, tap or use the arrow keys. The light is revealed up to the thumb. The thumb is a plain aluminium paddle.</span></div>
+      <div class="cell"><span class="tag">Indicator</span><div class="cardp"><span class="lab">Front door</span><div class="row"><span>Locked</span><i class="lamp" aria-hidden="true"></i></div></div><span class="note">Lights are reserved for indicators like this one.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Meters (indicators only)</h2>
+    <p class="muted">The three you kept, all read-only. The volume slider above drives them.</p>
+    <div class="grid3">
+      <div class="cell"><span class="tag">Quiet face</span><div class="cardp"><div class="row"><span>Kitchen speakers</span><svg class="vu dial-quiet" id="m-q" viewBox="0 0 92 46" aria-hidden="true"></svg></div></div></div>
+      <div class="cell"><span class="tag">Lit scale</span><div class="cardp"><div class="row"><span>Kitchen speakers</span><svg class="vu" id="m-l" viewBox="0 0 92 46" aria-hidden="true"></svg></div></div></div>
+      <div class="cell"><span class="tag">Ladder</span><div class="cardp"><div class="row"><span>Kitchen speakers</span><div class="ladder" id="m-d"></div></div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>TV selector</h2>
+    <p class="muted">The tile lift (fast, 150 ms) is the same in all five. Only the indicator changes, and none of them sweeps like the progress bar. Each rail cycles by itself until you click it. Then use ← → or click the tiles.</p>
+    <div class="sels">
+      <div class="sel"><span class="tag">S1</span><div class="rail s1" tabindex="0"><div class="tile on">Watch<i class="ind"></i></div><div class="tile">Play<i class="ind"></i></div><div class="tile">Stream<i class="ind"></i></div><div class="tile">House<i class="ind"></i></div></div><b>Fade-up strip</b><span class="note muted">The strip from Round 5, but it warms on in place instead of sweeping. The quietest change.</span></div>
+      <div class="sel"><span class="tag">S2</span><div class="rail s2" tabindex="0"><div class="tile on">Watch<i class="ind"></i></div><div class="tile">Play<i class="ind"></i></div><div class="tile">Stream<i class="ind"></i></div><div class="tile">House<i class="ind"></i></div></div><b>Centre bloom</b><span class="note muted">The strip grows out from the middle. It moves, but it can't be mistaken for progress.</span></div>
+      <div class="sel"><span class="tag">S3</span><div class="rail s3" tabindex="0"><div class="tile on">Watch<i class="ind"></i></div><div class="tile">Play<i class="ind"></i></div><div class="tile">Stream<i class="ind"></i></div><div class="tile">House<i class="ind"></i></div></div><b>Indicator lamp</b><span class="note muted">Every tile has a lamp. The focused tile's lamp lights orange, like the "selected" lamp on a tape deck. Very Hi-Fi, but the smallest signal from the sofa.</span></div>
+      <div class="sel"><span class="tag">S4</span><div class="rail s4" tabindex="0"><div class="tile on">Watch</div><div class="tile">Play</div><div class="tile">Stream</div><div class="tile">House</div></div><b>Underglow</b><span class="note muted">The lifted tile spills soft orange light onto the panel beneath it, with a thin lit edge. Feels like the tile is lit from inside.</span></div>
+      <div class="sel"><span class="tag">S5</span><div class="rail s5" tabindex="0"><div class="tile on">Watch</div><div class="tile">Play</div><div class="tile">Stream</div><div class="tile">House</div></div><b>Lit frame</b><span class="note muted">A thin orange ring fades in around the tile. The strongest signal from 3 m, and the most conventional.</span></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// progress replay
+const pgs=[...document.querySelectorAll('.pg')];
+document.getElementById('rp').addEventListener('click',()=>{pgs.forEach(p=>{p.style.setProperty('--p','0%')});requestAnimationFrame(()=>requestAnimationFrame(()=>pgs.forEach(p=>p.style.setProperty('--p','62%'))))});
+// p1/p2/p3 cover transitions run on left via ::after; force reflow trick
+pgs.forEach(p=>p.style.setProperty('--p','62%'));
+
+// switch
+document.querySelectorAll('.sw').forEach(s=>s.addEventListener('click',()=>s.setAttribute('aria-pressed',s.getAttribute('aria-pressed')!=='true')));
+
+// meters
+const NS='http://www.w3.org/2000/svg';
+function el(n,a){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e}
+function pt(a,r){const t=Math.PI*(1-a);return[46+r*Math.cos(t),42-r*Math.sin(t)]}
+function arc(a0,a1,r){const[x0,y0]=pt(a0,r),[x1,y1]=pt(a1,r);return`M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`}
+const mq=document.getElementById('m-q');mq.append(el('path',{class:'arc',d:arc(.02,.8,36)}),el('path',{class:'hot',d:arc(.8,.98,36)}));const ndl=el('line',{class:'ndl',x1:46,y1:42,x2:46,y2:10});mq.append(ndl,el('circle',{class:'hub',cx:46,cy:42,r:3}));
+const ml=document.getElementById('m-l');const N=10;const segs=[];for(let k=0;k<N;k++){const s=el('path',{class:'seg'+(k>=N-2?' hotz':''),d:arc(k/N+.012,(k+1)/N-.012,36)});ml.append(s);segs.push(s)}
+const md=document.getElementById('m-d');const bars=[];for(let k=0;k<8;k++){const i=document.createElement('i');i.style.height=(8+k*2.4)+'px';if(k>=6)i.classList.add('hotz');md.append(i);bars.push(i)}
+function meters(v){ndl.style.transform='rotate('+(-80+v*1.6)+'deg)';const n=Math.round(v/100*N);segs.forEach((s,k)=>s.classList.toggle('on',k<n));const b=Math.round(v/100*8);bars.forEach((x,k)=>x.classList.toggle('on',k<b))}
+
+// slider
+const sl=document.getElementById('sl'),slv=document.getElementById('slv');let val=40;
+function setV(v,anim){val=Math.max(0,Math.min(100,Math.round(v)));sl.classList.toggle('anim',!!anim);sl.style.setProperty('--v',val+'%');sl.setAttribute('aria-valuenow',val);slv.textContent=val;meters(val)}
+function fromX(x){const r=sl.querySelector('.trk').getBoundingClientRect();return (x-r.left)/r.width*100}
+sl.addEventListener('pointerdown',e=>{sl.setPointerCapture(e.pointerId);setV(fromX(e.clientX),true);const mv=ev=>setV(fromX(ev.clientX),false);const up=()=>{sl.removeEventListener('pointermove',mv);sl.removeEventListener('pointerup',up)};sl.addEventListener('pointermove',mv);sl.addEventListener('pointerup',up)});
+sl.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setV(val+5,true);e.preventDefault()}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setV(val-5,true);e.preventDefault()}});
+setV(40,false);
+
+// TV selector rails
+document.querySelectorAll('.rail').forEach(r=>{const t=[...r.querySelectorAll('.tile')];let i=0,auto=true;
+  const go=n=>{i=(n+t.length)%t.length;t.forEach((x,k)=>x.classList.toggle('on',k===i))};
+  const stop=()=>{auto=false};
+  r.addEventListener('pointerdown',stop);r.addEventListener('keydown',e=>{stop();if(e.key==='ArrowRight'){go(i+1);e.preventDefault()}if(e.key==='ArrowLeft'){go(i-1);e.preventDefault()}});
+  t.forEach((x,k)=>x.addEventListener('click',()=>{stop();go(k)}));
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)setInterval(()=>{if(auto)go(i+1)},1500)});
+</script>

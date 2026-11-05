@@ -1,0 +1,167 @@
+# Design Bible — running decision log
+
+## Roadmap
+1. Discovery: agent interviews (Callsheet, HA Mr Manager, JamFin, NervOS, Jam-Dash, Control Freak/lobby) + user interview
+2. Direction (Rounds 1–2): mood + hybrid  <- here
+3. Foundations: colour roles, type scale, spacing/grid, radius, motion curves, sound(?)
+4. Surface profiles ("volumes"): Desk (Jam-Dash, Callsheet) · Touch (HA iPad, JamFin mobile) · Lounge 10-ft (TV launcher, JamFin TV, NervOS)
+5. Components: tile, list row, lamp, readout, button, focus ring, hero, rail, toast
+6. Token pipeline: one tokens.json -> CSS vars / HA theme YAML / Godot Theme / JamFin
+7. Alt themes for other household users (swap tokens, keep roles)
+
+## Decided (2026-11-04)
+- R1: Liked A's colours + subtle glow; B's readability + accent colours; D as overall hybrid. C rejected (too much contrast, no focal point). D issues: overlapping text, faint right-side labels.
+- Retro dose varies by device: quiet on work tools, louder on play surfaces.
+- Light/dark follows the device; TV always dark.
+- Motion: fluid or cinematic, varies by device (never snappy/mechanical-only).
+
+## Draft tokens ("Telemetry", R2)
+- Amber = readouts (look), orange = actions (touch), green/amber/red = lamp state only.
+- Body: Schibsted Grotesk; data/labels: IBM Plex Mono.
+- Desk motion 240ms cubic-bezier(.22,1,.36,1); Lounge 420ms cubic-bezier(.16,1,.3,1).
+
+## R2 feedback
+- Amber (readouts) / orange (actions) split: kept, pending user confirming.
+- TV had too much text. Lounge rule: one title + one short detail line max; no part numbers, kickers or status sentences; tiles = one word; only the focused tile is bright.
+
+## Interview: JamFin (received 2026-11-04)
+Full answers: NAS ~/project/jamfin/docs/design-bible-answers.md. Rules file: docs/experience-system.md.
+- Stack: Kotlin/Compose (tv-material), tokens in ui-common/.../theme/Palette.kt (roles: ground, onGround, mutedOnGround, slab, rule, accents), MotionTokens.kt, Look.kt.
+- 8 looks. User LIKED: Unigrid, Olympia, New Wave ("most polished"), Cel'88 parallax city, Unigrid/Olympia/Kinetic animations, popovers above/below timeline "everywhere". Aim: "fun without sacrificing clarity".
+- DISLIKED: smash cuts / selector flash, wasted space, Swiss "too dense, too bright, cold and harsh", bright whites, "amateur, lacking polish", wants "less contrasty, more texture, a bit of grit", looks should differ more; hitching animations should mask loading.
+- Shared rules already in place: no pure white; Night ground ~#161412, text ~#E8E2D6; secondary text >= 4.5:1; true black only behind video; text never textured/rotated.
+- Motion today: focus <=150ms, screen <=350ms, Back 240/150, signature 600/300, menus 200/150. Easings Leave(.4,0,1,1) Settle(.3,1.3,.5,1) Glide(.2,.8,.2,1). Calm setting + per-look UI sounds.
+- HARD (TV MT9690/Mali-G57, 1080p, 960x540dp): GPU-bound on full redraws -> grain only as static tiles, NO blur, animate only transform+alpha (=> glow must be a pre-rendered layer faded by alpha, not animated box-shadow), focused items on own layers. 4-5 cards/row.
+- Fonts: bundled OFL only (Archivo, Barlow, Bungee, Dela Gothic One, Jost, Karla, Londrina, Saira, Schibsted Grotesk, Sofia Sans XCond, Syne, Zen Kaku). Schibsted OK; IBM Plex Mono is OFL but would need bundling.
+- Must not change: focus graph, fixed zones (title+Play upper-left, progress on card bottom edge, timeline bottom), plain button wording, resume <=3 presses, no long/double press.
+
+### Implications for bible
+- TENSION: R2 TV focus at 420ms vs JamFin focus <=150ms. Proposal: focus = fast (~150-180ms Glide), cinematic only for screen/hero transitions (350-600ms). Raise with user.
+- Add "grit": static grain tile + slightly lower contrast grounds. Keep "volumes" but allow per-look character (user wants looks to differ more) -> bible = shared roles/zones/motion grammar, looks vary skin.
+
+## Interview: Home Assistant Mr Manager (received 2026-11-04)
+Full: ~/project/home-assistant/docs/design-bible-interview-2026-11-04.md. Morning notes: https://claude.ai/artifact/VJjYvBZudQPs1RgCHyrEg8
+- Jam Cards (36 custom cards, repo Starkkaman/jam-cards). Tokens jam-cards/tokens/looks/<id>.mjs -> tools/themes.mjs -> jam-theme YAML (--jam-* vars). Look pack src/looks/<id>.js. Per-user look via jam-looks.
+- State contract already exists: data-state on|off|offline|action + data-alert. (Bible should adopt this grammar everywhere.)
+- Surfaces: Echo Show 8 1024x768, iPad 961x601 (offline), phone 390, desktop 1280. Kiosk + phone matter most; kiosk read from ~3 m.
+- Default JamBoard (Saul Bass): bg #141210, slab #1f1c19, fg #ece2c9, dim #9a8f7c, ochre #e5a31b; room colours teal/blue/pink/violet/green; Londrina + Jost; radius 0.
+- User quotes: "Braun is kinda boring... incorporate a little more color"; "cards have lost a lot of readability"; "kiosk music is ugly"; "Tv card looks way better"; "emphasize clarity without ever sacrificing fun... dramatic changes fine". Said NO to NERV and LCARS.
+- Standing rules: mockups + OK before shipping; each look has distinctive design + signature motion; text >= 15/13/12px; everything at a glance.
+- Pain: idle controls wearing accent (open), top 40% kiosk empty, unlocked door quieter than locked, phone fits 3/5 tabs.
+- HARD: kiosk no scroll, no continuous animation, 44px targets, >=4.5:1, 12px min; theme can't read state (logic in cards); fonts OFL self-hosted; original dashboards never edited; any HA change needs Isaac's OK.
+
+### Implications
+- Room colours = a third colour role (identity), separate from readout/action/state. Supports "more colour than Braun".
+- R2 rule "orange only for things you press" also fixes the open "idle controls wear accent" issue: idle = neutral, active = state colour.
+- Two agents now independently say: recurring complaint is READABILITY lost in stylised looks. Bible's core: legibility floor is non-negotiable; personality lives in motion, texture, colour, motifs.
+
+## Interview: Callsheet (from transcript; file ~/project/daily-brief/for-design-unification-callsheet.md)
+- HA add-on (Ingress). Briefing, Replies, Agenda, Chat, Projects, Setup. Desktop (keyboard: Cmd-K, J/K) + phone (700px bp, 44px). No TV.
+- Plain JS/CSS; tokens at top of app.css per data-look x data-mode, data-base = bold|clean|easy. Source ~/project/daily-brief/harmony/themes-harmony.css + gen.py (contrast report).
+- Looks: Bold (Londrina+Jost, cream #e3d8bd), Clean (Plex Sans, blue #2457d6), Easy read (Atkinson Hyperlegible) + JamDash's 9 look ids. Motion 150/250/350, nothing loops.
+- Quotes: "3 looks definitely work!"; "red could be darker"; "get rid of the cheeky production nods"; "way too much text on screen"; "menus getting dense, want it fun"; wants Callsheet<->JamDash "fluid".
+- HARD: offline, bundled OFL fonts, WCAG AA (+ deeper step for text on colour), 44px, plain words, look ids shared with JamDash.
+
+## Interview: Jam-Dash (from transcript; reply bounced)
+- SvelteKit in Go binary; smol-boi + TrueNAS :8484. Screens: Home (alert hero, app tiles, live previews), Apps, App detail, Store, Files, Shares, System, Settings. Global view via HA add-on.
+- Desktop first 1440, phone close second 390.
+- Looks: web/src/lib/themes/<id>/<id>.css; guide web/docs/LOOKS.md. Remaining: Depth (default), Depth II, Braun, Braun II, LCARS, LCARS II, NERV, Transit, Olympia, Grid, Pulsar, New Wave, Riso. Removed: Kinetic/Aero/Harper ("no"), six II redesigns ("just not for me").
+- Depth: dusk #173A52, ridge #3E5F78, sun #F0B36E, window #F6F8FA, action #2F6FE4, alert #FF8F73; Instrument Sans; radius 14/26/20; ease (.2,.8,.2,1).
+- Quotes: "excellent design and cool animations"; "text is too small"; "navigation in depth is atrocious"; liked "Depth II, Braun II, LCARS II - much better!". Must be shareable with others.
+- HARD: AA, body >=15 / labels 13 / min 12, 44px, reduced motion, state never colour-only, local fonts, no franchise logos.
+
+## Interview: Lobby / Control Freak = TV launcher (from transcript; file /mnt/ai/projects/lobby/docs/for-design-unification.md)
+- Hisense Google TV "Phoster", Android 14, WebView Chromium 156, 1920x1080. D-pad only. ~3 m, often at NIGHT in dark room.
+- Text >= 22px, body 26+; safe area 96 sides / 54 top-bottom; focus unmistakable; nothing hidden in carousels; everything visible at once.
+- Layout: top line (name, time, date, weather) / hero for focused item / five groups: Continue, Watch, Play, Listen, Home.
+- Plain HTML/CSS/JS; tokens in designs/<nn>/style.css. 8 designs (Homage, Dessau, Sea Ranch, Tanaka, Liquid, Kinetic, Dither, Calder), none Rams; user hasn't reviewed. Shortlist Homage/Kinetic/Calder.
+- HARD: transform/opacity only; flash rule (<=2/s big luminance changes); night glare (Sea Ranch cut to <8% bright screen area); colour fades must not drop focused label contrast -> snap colour, animate transform.
+
+## Cross-project synthesis (5 of 6 in; NervOS pending)
+1. Universal user brief: "clarity without ever sacrificing fun". Recurring complaints: text too small, too much text, too dense, too bright/harsh, hidden navigation, amateur polish.
+2. Fonts available everywhere (bundled OFL): Schibsted Grotesk (JamFin list + Lobby), Jost, Archivo, Barlow. Instrument Sans in Jam-Dash. Mono must be bundled (IBM Plex Mono OFL).
+3. Shared floors to adopt verbatim: AA contrast; text 15/13/12 desk & touch, 22/26 TV; 44px touch; state never colour-only; transform+opacity only on TV; no blur on TV; flash rule; no continuous kiosk animation; reduced-motion; local fonts.
+4. State grammar: HA's data-state on|off|offline|action + alert -> bible-wide.
+5. Look systems already exist in all 5 (CSS vars / Compose Palette roles / HA --jam-*). Bible = ONE role vocabulary + a default look ("Telemetry") + rules every look obeys; existing looks become alt themes. Callsheet<->JamDash already share look ids: extend that registry to all.
+6. Motion: everyone already ~150 focus / 250 / 350 screen. User wants fluid/cinematic -> keep focus fast, put cinema in screen transitions + one signature motion per look.
+7. Lobby's TV layout + JamFin's TV fixed zones are close: reconcile into one Lounge layout.
+
+## Interview: NervOS (received)
+- Godot 4.7.2 launcher on Aero 15 (CachyOS), 65" HDR 1080p120, ~3 m, Steam Controller (SDL3), kbd, HA MQTT remote. Sections ARCHIVE / HANGAR / UPLINK / THEATER.
+- Tokens design/tokens.json -> core/tokens.gd; themes app/themes/<id>/theme.json + per-theme layouts; motion core/choreo.gd (stepped fps, SAFE mode). Data-only user themes in ~/.local/share/nervos/themes.
+- Default NERVOS (anime ops-room): void #0D0B14, panel #1D1829, ink #EFE7D6, amber focus #FFA41B, green #52F28C; Saira + Share Tech Mono; chamfers; stepped 12fps; focus 140 / panel 240 / page 320. Others: CUT-OUT, CHOOSE YOUR HERO, VHS.
+- Quotes: VHS "very fun, I love it!"; Hero "I like it a lot!"; "Loved the art... character art"; carousels "from time to time"; CUT-OUT v1 "way too busy"; descriptions "too long now haha".
+- Pain: default hub busy; long-title overlap.
+- HARD: GTX 1060 shared with games -> cheap idle; flash <=2/s + SAFE mode; OFL bundled; original art only in repo; keep "Signal Deck" + MQTT ids; HDR 200-nit SDR ref.
+
+## NOTE: two 10-ft launchers in the living room
+NervOS (Aero 15) and Lobby (Hisense Google TV) overlap (both list Moonlight/RetroArch/Jellyfin). Ask user how they relate.
+
+## Decided (after interviews)
+- NervOS and Lobby stay SEPARATE products; share only the bible rules.
+- Looks: Telemetry default everywhere + small shared shelf of alternates rebuilt on shared roles, offered in every app; rest retired.
+- TV motion: fast focus (~150ms), cinema in scene changes (350-600ms) + one signature move per look.
+
+## Bible 0.1 markup (user)
+- TV carousels OK for image-led rows (covers, screenshots): keeps UI calm. Next item peeks; groups/controls/settings never in carousels.
+- Desk gets MORE motion than phone (hover, staggers, screen changes). Phone restrained.
+- Look shelf: user "coming to my senses" -> rethinking. Wants to pick a NEW BASE LOOK (Telemetry under review). Shelf + base on hold.
+
+## New base look (2026-11-05)
+- Telemetry rejected as base: "feels like every other good responsive UI", lacks personality.
+- Lives with 2 others: Mission Control "too nerdy" for them; Braun is default-by-default, but explore first.
+- Inspirations: 70s NASA, Rams, TNG/Voyager, McQuarrie, Syd Mead, Bebop, Evangelion, Miyazaki, Satoshi Kon, mid-century modern, Atari 2600 industrial design, Fallout. "Retro design lover, but also clean, effective design."
+- Round 3 (https://claude.ai/artifact/7aRorPkJqjQPgtxr7dx7XK): A Hi-Fi (Braun+Atari woodgrain, VU needles), B Starliner (painted time-of-day sky, TNG-style colour-coded soft panels), C Session (calm lists + Bebop/Eva serif title cards), D Postcard (illustrated Miyazaki house scene). All original, household-friendly.
+
+## Round 3 feedback -> Round 4 (https://claude.ai/artifact/3ofRwCh9UiaXDkvPagM2Cy)
+- A Hi-Fi: LIKES colours, orange button, rocker switch, continue-watching black band. Avoid too much skeuomorphism.
+- B Starliner: "too much like a first draft AI design". C Session: "really nice" but dislikes serif fonts. D Postcard: no.
+- R4 "Hi-Fi, flattened": aluminium #dcd9d3 / black band #1d1c1a / walnut #5b3a22 line / orange #e8641c; Jost + Plex Mono; C's numbered 3-item list; flat VU dial; Jost-caps title card w/ orange stripe; texture switch Flat / A touch / Full.
+
+## Round 4 feedback
+- Texture: "A touch" is right. Ribs too dense (read as flat colour at distance) -> spaced to 1px every 10px.
+- Switch: orange-when-down was arbitrary. Rule: rocker UP = on, orange paddle only when on, state also written in text (never colour-only).
+- Wants more depth on indicators, buttons, card layers -> added "A touch + depth" (floating list card, band raised over it, lit lens lamps, bevelled press-down buttons, recessed dial/progress). Awaiting verdict.
+- Depth "mostly right". Lamps were too realistic -> flat lamp, thin rim, soft glow (match surrounding depth level). Dial inset = same half-disc shape as dial; face contrasts with its panel (dark on day, aluminium on night). Progress = lit orange strip revealed by a sliding shutter, hot spot at edge, unlit filament texture behind.
+- Rule candidate: every element sits at the same realism level; nothing more "real" than its neighbours.
+
+## Round 4 v3 feedback -> Round 5
+- Lamps brighter. Dark switch blended in; LIKES light switch -> night = light graphite paddle in near-black slot.
+- Dial: black face too distracting -> 4 options in R5 (A quiet recess, B lit segments [default], C amber face, D ladder).
+- Progress reveal: "very cool, very much the vibe". SIGNATURE MOVE CONFIRMED: "light reveal" — orange light revealed by a shutter (transform) / glow warms in (opacity) when something becomes active. Applied: progress, loading, switch on, level meter, TV focus strip, title-card stripe.
+
+## Round 5 feedback -> Round 6 (https://claude.ai/artifact/2HA6dDsfZiSgXkZHSUmLRm -> round6)
+- Progress: R4 version looked better than R5. R6 shows P1 (R4 exact), P2 backlit tube, P3 slatted.
+- Switches: NO glow.
+- RULE: lights are for INDICATORS, not controls. Controls may contain light only as a slider revealing light.
+- RULE: no knobs / curved / dial controls for input (unreliable). Arcs & dials are read-only.
+- Meters kept: quiet face, lit scale, ladder (indicators only). Amber face dropped.
+- TV selector: likes the indicator strip but NOT the progress-style sweep. R6 shows S1 fade-up strip, S2 centre bloom, S3 lamp, S4 underglow, S5 lit frame.
+
+## Round 6 feedback -> Round 7 (https://claude.ai/artifact/RFBframE5YumEVUBkauNcv -> round7)
+- Progress LOCKED: P1 shutter + hot spot. Slatted parked for a future shelf theme.
+- Fader cap: less white -> brushed aluminium #cfcbc3 (graphite #8d8981 in dark).
+- RULE: indicator lights come in shapes: round LED, square, slot, bar group; colours ok/active/warn/alert/info (not only green).
+- RULE: every light sits behind a window that's always visible (unlit = recess).
+- Meters: all 3 kept. R7 shows lit scale + ladder as per-notch LED (with bleed) and as shutter-revealed continuous light.
+- TV selector: UNDERGLOW chosen, but the window must always be visible; the glow motivates the warm highlighted label. R7: A window inside tile, B window on tile lip.
+
+## Round 7 feedback (v2 published same URL)
+- Meters: all look good. LOCKED: lit scale + ladder = one LED per notch (with bleed). Shutter meters dropped.
+- Readouts added: quiet face = needle + end labels + dark recessed readout window with orange mono digits; lit scale = big number centred in arc + unit + range at ends; red slot "peak" lamp >= 85%.
+- TV selector: window on the LIP chosen, but was too bright -> two dimmer levels shown (lit .75/.55, spill .55/.35), deeper orange, label warmth reduced.
+- Slatted replay fixed.
+- LOVES quiet face; readout-in-a-window is "a very nice touch" -> RULE: numeric readouts sit in dark recessed windows with orange mono digits.
+- Lit scale: centre readout now in a ROUND inset window.
+- TV lip: LOCKED at a touch brighter than Softer (lit .85 / spill .65). RULE: indicator windows never grow with their control; selection only illuminates them.
+- Readout windows enlarged (round r44 / 28px digits; quiet face 84x29 / 18px).
+- Needles cast a subtle shadow; light comes from one fixed direction (top-left), so the shadow doesn't rotate with the needle.
+- TV lip slot: moved fully inside the tile's bottom face (no overhang), no outer glow on the window itself; only the underglow spills. Brightness locked.
+- RULE: a light's window never extends past its object's edge.
+- Quiet face readout: back to 84x24 / 16px (the previous size was right).
+- Lit scale readout options shown: 1 half-circle window concentric with LEDs, 2 small circle + black punch-label tape unit, 3 seven-segment display (ghost segments visible).
+- TV slot: user wants it at the BOTTOM, as a window in the button's base that wraps around the edge. Options: W1 base window, W2 lit base edge (full width), W3 centre notch.
+- Lit scale readout: SEVEN-SEGMENT chosen. Placement A (screen bottom on the old half-circle baseline) vs B (centred where small circle was). Unit on black punch-label tape BELOW the screen, never over it.
+- TV selector: W1 base window chosen. Refined: selected button does NOT change colour (only lifts); label gets an uneven warm glow strongest near the window; underglow lights the panel's rib texture (rib-masked glow layer).
+- Seven-segment placement A LOCKED (screen bottom on the arc baseline, punch-label unit below).
+- Jam Home mockup in Hi-Fi built (kiosk 1024x768 + phone 390): rooms list w/ rockers + bar-group counts, living room faders + scene buttons (square windows) + TV band w/ progress, music w/ ladder + volume fader, power quiet face + 7-seg lit scale, front door LED + Unlock, dock = W1 base-window tiles with rib underglow. Kiosk uses spare height for larger type.

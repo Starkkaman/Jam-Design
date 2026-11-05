@@ -1,0 +1,269 @@
+<title>Telemetry Design Bible</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reference manual. Left rail of sections on desktop, single column on phone. Tokens below ARE the Telemetry default look. */
+:root{
+  --ground:#e6e4df; --panel:#f1efeb; --panel-2:#e9e7e2; --line:#d2cfc8;
+  --ink:#24262a; --ink-dim:#5c5f61;
+  --readout:#9a5a06; --action:#d4561a;
+  --ok:#3f7f45; --warn:#9a6a00; --crit:#c2362b; --off:#8a8c88;
+  --room-1:#1f8f87; --room-2:#3f6fd1; --room-3:#c9527c; --room-4:#8a5cc4; --room-5:#6f8f2c;
+  --glow:none;
+  --f-ui:"Schibsted Grotesk",system-ui,sans-serif; --f-data:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1); --settle:cubic-bezier(.3,1.3,.5,1); --leave:cubic-bezier(.4,0,1,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#12171a; --panel:#1a2125; --panel-2:#20282c; --line:#2d373c; --ink:#ebe8e1; --ink-dim:#a6aeaa;
+  --readout:#ffb547; --action:#f07a3a; --ok:#6fd49a; --warn:#f2c14e; --crit:#ff6b5b; --off:#6c7773;
+  --room-1:#2fb8ae; --room-2:#6a93f0; --room-3:#ec7aa2; --room-4:#ad86e6; --room-5:#9cbf48;
+  --glow:0 0 10px color-mix(in srgb,var(--readout) 35%,transparent); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12171a; --panel:#1a2125; --panel-2:#20282c; --line:#2d373c; --ink:#ebe8e1; --ink-dim:#a6aeaa;
+  --readout:#ffb547; --action:#f07a3a; --ok:#6fd49a; --warn:#f2c14e; --crit:#ff6b5b; --off:#6c7773;
+  --room-1:#2fb8ae; --room-2:#6a93f0; --room-3:#ec7aa2; --room-4:#ad86e6; --room-5:#9cbf48;
+  --glow:0 0 10px color-mix(in srgb,var(--readout) 35%,transparent); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:400 16px/1.55 var(--f-ui)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:24px}nav.toc{display:none}}
+nav.toc{position:sticky;top:calc(24px + env(safe-area-inset-top,0px));align-self:start;display:grid;gap:6px}
+nav.toc a{color:var(--ink-dim);text-decoration:none;font:500 12px var(--f-data);letter-spacing:.06em;text-transform:uppercase;padding:4px 0}
+nav.toc a:hover{color:var(--action)}
+main{display:grid;gap:56px;min-width:0}
+section{display:grid;gap:16px;min-width:0;scroll-margin-top:24px}
+.lbl{font:500 11px/1.2 var(--f-data);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
+h1{font:600 clamp(32px,5vw,48px)/1.05 var(--f-ui);margin:6px 0 12px;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 24px/1.2 var(--f-ui);margin:0;text-wrap:balance}
+h3{font:600 16px/1.3 var(--f-ui);margin:0}
+p{margin:0;max-width:66ch}
+.muted{color:var(--ink-dim)}
+.lede{font-size:19px;max-width:60ch}
+.thesis{font:600 clamp(20px,3vw,26px)/1.3 var(--f-ui);border-left:3px solid var(--readout);padding-left:16px;max-width:40ch}
+.ver{font:400 13px var(--f-data);color:var(--ink-dim)}
+
+.principles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px}
+@media (max-width:640px){.principles{grid-template-columns:1fr}}
+.pr{display:grid;gap:4px;border-top:1px solid var(--line);padding-top:12px}
+.pr .lbl{color:var(--readout)}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{width:100%;border-collapse:collapse;min-width:640px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font:500 11px var(--f-data);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);background:var(--panel-2)}
+td.k{font-weight:600;white-space:nowrap}
+td code,p code{font:400 13px var(--f-data);color:var(--readout)}
+
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.role{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px}
+.role i{height:40px;border-radius:8px;border:1px solid var(--line)}
+.role b{font-size:14px}
+.role span{font-size:13px;color:var(--ink-dim);line-height:1.4}
+.rooms{display:flex;gap:8px;flex-wrap:wrap}
+.rooms i{height:22px;flex:1;min-width:40px;border-radius:5px}
+
+/* state specimen */
+.states{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.st{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px}
+.st .row{display:flex;align-items:center;gap:10px}
+.lamp{width:10px;height:10px;border-radius:50%;flex:none}
+.st[data-state="on"] .lamp{background:var(--ok)}
+.st[data-state="off"] .lamp{background:transparent;border:2px solid var(--off)}
+.st[data-state="offline"] .lamp{background:repeating-linear-gradient(45deg,var(--off) 0 2px,transparent 2px 4px);border:1px solid var(--off)}
+.st[data-state="action"] .lamp{background:var(--action);animation:pulse 1.2s var(--glide) 3}
+.st[data-alert] {border-color:var(--crit)}
+.st[data-alert] .lamp{background:var(--crit);border-radius:2px;transform:rotate(45deg)}
+.st[data-state="off"] .name{color:var(--ink-dim)}
+.st .word{font:500 12px var(--f-data);letter-spacing:.1em;text-transform:uppercase}
+.st[data-state="on"] .word{color:var(--ok)}
+.st[data-alert] .word{color:var(--crit)}
+@keyframes pulse{50%{transform:scale(1.5);opacity:.6}}
+:root:not([data-theme="light"]) .st[data-state="on"] .lamp{box-shadow:0 0 6px color-mix(in srgb,var(--ok) 70%,transparent)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .st[data-state="on"] .lamp{box-shadow:none}}
+
+/* motion specimen */
+.motion{display:grid;gap:10px}
+.mrow{display:grid;grid-template-columns:150px minmax(0,1fr) 120px;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+@media (max-width:640px){.mrow{grid-template-columns:1fr;gap:6px}}
+.mrow b{font-size:14px}
+.track{height:24px;position:relative;border-radius:6px;background:var(--panel-2)}
+.track i{position:absolute;top:4px;left:4px;width:16px;height:16px;border-radius:4px;background:var(--readout);box-shadow:var(--glow)}
+.motion.go .track i{left:calc(100% - 20px)}
+.mrow span{font:400 12px var(--f-data);color:var(--ink-dim)}
+.btn{font:500 14px var(--f-ui);border:0;background:var(--action);color:#fff;padding:10px 16px;border-radius:10px;cursor:pointer;justify-self:start;transition:transform 150ms var(--glide)}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible{outline:2px solid var(--action);outline-offset:3px}
+
+.vols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.vols{grid-template-columns:1fr}}
+.vol{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;align-content:start}
+.meter{display:flex;gap:3px}
+.meter i{height:6px;flex:1;border-radius:2px;background:var(--line)}
+.meter i.on{background:var(--readout)}
+.vol ul{margin:0;padding-left:18px;font-size:14px;display:grid;gap:4px}
+.vol .apps{font:400 12px var(--f-data);color:var(--ink-dim)}
+
+.shelf{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.lk{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:6px}
+.lk .q{font-size:13px;color:var(--ink-dim);font-style:italic}
+.tag{font:500 10px var(--f-data);letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:4px;justify-self:start;border:1px solid var(--line);color:var(--ink-dim)}
+.tag.def{border-color:var(--readout);color:var(--readout)}
+
+ol.road{margin:0;padding-left:22px;display:grid;gap:8px;max-width:70ch}
+ol.road li.done{color:var(--ink-dim)}
+ol.road li b{color:var(--ink)}
+.open{display:grid;gap:8px;max-width:70ch}
+.open div{border-left:2px solid var(--action);padding-left:12px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Sections">
+    <a href="#brief">Brief</a><a href="#principles">Principles</a><a href="#floors">Floors</a><a href="#colour">Colour</a><a href="#type">Type</a><a href="#state">State</a><a href="#motion">Motion</a><a href="#volume">Volume</a><a href="#looks">Look shelf</a><a href="#road">Roadmap</a>
+  </nav>
+  <main>
+    <section id="brief">
+      <span class="lbl">House design bible · Draft 0.1 · 4 Nov 2026</span>
+      <h1>Telemetry</h1>
+      <p><span class="tag">Base look under review</span></p>
+      <p class="thesis">Clarity without ever sacrificing fun.</p>
+      <p class="lede">You've given every project this brief. This bible turns it into one set of rules for Home Assistant, Jam-Dash, Callsheet, JamFin, NervOS and Lobby. The default look, Telemetry, combines Dieter Rams's order, NASA's instrument habits, and the warmth of amber phosphor.</p>
+      <p class="ver">Sources: your answers in Rounds 1–2, plus interviews with all six project agents. Decision log: scratchpad/bible/decisions.md</p>
+    </section>
+
+    <section id="principles">
+      <h2>Principles</h2>
+      <div class="principles">
+        <div class="pr"><span class="lbl">01 · Readable first</span><h3>The look never pays for itself with legibility</h3><p class="muted">Readability loss is the most common complaint across all six projects. Personality lives in colour, motion, texture and motifs. Size, contrast and spacing stay fixed.</p></div>
+        <div class="pr"><span class="lbl">02 · Everything at a glance</span><h3>Show it, don't hide it</h3><p class="muted">No navigation that hides items, like Depth's arc ("atrocious"). Dashboards and launchers show every group on one screen. On the TV, rows of covers or screenshots can be carousels: they keep the screen calm, and the pictures do the talking.</p></div>
+        <div class="pr"><span class="lbl">03 · Less text</span><h3>One title, one line</h3><p class="muted">"Way too much text", "too long now haha", "TV is too much text". Each card says one thing. Help folds behind a "?".</p></div>
+        <div class="pr"><span class="lbl">04 · Amber looks, orange acts</span><h3>Colour has jobs</h3><p class="muted">Amber marks what you read, orange marks what you press. Green, amber and red are for state only. Idle controls stay neutral.</p></div>
+        <div class="pr"><span class="lbl">05 · Warm, never harsh</span><h3>No pure white, no glare</h3><p class="muted">"Too bright, cold and harsh" came up in four apps. Grounds are tinted, true black appears only behind video, and night screens stay mostly dark.</p></div>
+        <div class="pr"><span class="lbl">06 · Motion means something</span><h3>Fast to move, cinematic to arrive</h3><p class="muted">Moving focus is quick. Arriving somewhere gets the show. Each look gets one signature move. Nothing hitches. Loading is masked, not exposed.</p></div>
+      </div>
+    </section>
+
+    <section id="floors">
+      <h2>Floors</h2>
+      <p class="muted">These limits apply in every look and every app. They come from rules your agents already enforce, combined and set to the strictest version.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Rule</th><th>Desk &amp; phone</th><th>Kiosk (3 m)</th><th>TV (3 m, night)</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Text sizes</td><td>Body 15, labels 13, nothing under 12 px</td><td>Body 18, labels 14, min 12 px</td><td>Body 26, min 22 px at 1080p</td></tr>
+          <tr><td class="k">Contrast</td><td colspan="3">WCAG AA: 4.5:1 for text, including secondary text. Text on coloured fills uses the deeper step. Focused labels never fade below AA during a transition: the colour snaps, and only transforms animate.</td></tr>
+          <tr><td class="k">Targets</td><td>44 px touch</td><td>44 px minimum, no scrolling</td><td>Focus visible from the sofa. Carousels allowed for image rows (covers, screenshots, art): the next item always peeks in, and groups, controls and settings are never in a carousel.</td></tr>
+          <tr><td class="k">State</td><td colspan="3">Never colour alone: every state has a lamp shape plus a word. Uses HA's grammar: on / off / offline / action / alert.</td></tr>
+          <tr><td class="k">Motion cost</td><td>Desk gets more motion than phone: hover reactions, staggered entrances, richer screen changes. Phone stays restrained: short, touch-driven, battery-friendly. Reduced motion respected on both.</td><td>No continuous animation; one-shot only</td><td>Animate transform and opacity only. No blur. Glow is a pre-rendered layer faded by opacity. Grain is static tiles only.</td></tr>
+          <tr><td class="k">Flashing</td><td colspan="3">No more than 2 big luminance changes per second (Lobby's measured rule). A Calm / SAFE motion setting everywhere.</td></tr>
+          <tr><td class="k">Fonts</td><td colspan="3">OFL, bundled locally, no CDNs.</td></tr>
+          <tr><td class="k">Input</td><td>Keyboard shortcuts on desk</td><td>Taps only</td><td>D-pad / gamepad taps only, no long or double presses. Resume in at most 3 presses.</td></tr>
+          <tr><td class="k">Words</td><td colspan="3">Plain button wording. No jokes in the interface ("get rid of the cheeky production nods").</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="colour">
+      <h2>Colour roles</h2>
+      <p class="muted">Every look fills in the same role names. That's what lets a look move between apps. Values shown are Telemetry in your current theme.</p>
+      <div class="roles">
+        <div class="role"><i style="background:var(--ground)"></i><b>ground</b><span>Page and screen base. Blue-black at night, warm grey by day.</span></div>
+        <div class="role"><i style="background:var(--panel)"></i><b>panel</b><span>Cards and sheets. One step up from ground.</span></div>
+        <div class="role"><i style="background:var(--ink)"></i><b>ink / ink-dim</b><span>Text. Dim still passes 4.5:1.</span></div>
+        <div class="role"><i style="background:var(--readout)"></i><b>readout</b><span>Numbers, clocks, live values. Glows softly in the dark.</span></div>
+        <div class="role"><i style="background:var(--action)"></i><b>action</b><span>Buttons, focus, the thing you can press next.</span></div>
+        <div class="role"><i style="background:var(--ok)"></i><b>state</b><span>ok · warn · crit · off. Used on lamps only.</span></div>
+      </div>
+      <div class="role" style="max-width:none"><b>identity: rooms &amp; sections</b><span>The extra colour you asked for ("Braun is kinda boring"). One hue per room in HA, per section in NervOS, per app on the TV. It's used as a stripe or tag, never on idle controls.</span><div class="rooms"><i style="background:var(--room-1)"></i><i style="background:var(--room-2)"></i><i style="background:var(--room-3)"></i><i style="background:var(--room-4)"></i><i style="background:var(--room-5)"></i></div></div>
+    </section>
+
+    <section id="type">
+      <h2>Type</h2>
+      <p class="muted">Two faces. Both are OFL and already bundled in at least two of your apps.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Role</th><th>Face</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td class="k" style="font:600 22px var(--f-ui)">Schibsted Grotesk</td><td>UI, titles, body</td><td>Everything you read as words. A warm grotesk: Rams-level order without Swiss coldness. Already in JamFin and Lobby.</td></tr>
+          <tr><td class="k" style="font:500 18px var(--f-data);color:var(--readout)">IBM Plex Mono</td><td>Data &amp; labels</td><td>Numbers, clocks, small uppercase labels with 0.12em tracking. This is where the NASA telemetry feel comes from. It has to be bundled in each app.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="muted">Each look can swap the display face, like VHS's Big Shoulders. The type sizes in Floors never change.</p>
+    </section>
+
+    <section id="state">
+      <h2>State grammar</h2>
+      <p class="muted">These five states are already in Home Assistant's card code. The bible makes them universal: a container in Jam-Dash, a light in HA, a stream host in NervOS.</p>
+      <div class="states">
+        <div class="st" data-state="on"><div class="row"><i class="lamp"></i><span class="name">Kitchen lights</span></div><span class="word">On</span></div>
+        <div class="st" data-state="off"><div class="row"><i class="lamp"></i><span class="name">Fan</span></div><span class="word">Off</span></div>
+        <div class="st" data-state="offline"><div class="row"><i class="lamp"></i><span class="name">iPad kiosk</span></div><span class="word">Offline</span></div>
+        <div class="st" data-state="action"><div class="row"><i class="lamp"></i><span class="name">Gaming PC</span></div><span class="word">Waking</span></div>
+        <div class="st" data-state="on" data-alert><div class="row"><i class="lamp"></i><span class="name">Front door</span></div><span class="word">Unlocked</span></div>
+      </div>
+      <p class="muted">On is a solid lamp. Off is a hollow ring. Offline is a hatched lamp. Action pulses three times, then holds. Alert is a red diamond with a red rim. An unlocked door is now louder than a locked one, which closes an open HA audit item.</p>
+    </section>
+
+    <section id="motion">
+      <h2>Motion grammar</h2>
+      <p class="muted">The timings match what JamFin, Callsheet and NervOS already use, so adopting them is cheap. Cinema goes where you arrive somewhere, not where you browse.</p>
+      <div class="motion" id="mo">
+        <div class="mrow"><b>Focus</b><div class="track"><i style="transition:left 150ms var(--glide)"></i></div><span>150 ms · glide</span></div>
+        <div class="mrow"><b>Menu / popover</b><div class="track"><i style="transition:left 200ms var(--glide)"></i></div><span>200 ms in · 150 out</span></div>
+        <div class="mrow"><b>Back</b><div class="track"><i style="transition:left 240ms var(--leave)"></i></div><span>240 ms · leave</span></div>
+        <div class="mrow"><b>Screen</b><div class="track"><i style="transition:left 350ms var(--settle)"></i></div><span>350 ms · settle</span></div>
+        <div class="mrow"><b>Scene (cinematic)</b><div class="track"><i style="transition:left 600ms var(--settle)"></i></div><span>600 ms · settle</span></div>
+      </div>
+      <button class="btn" id="play">Play timings</button>
+      <p class="muted">Scenes are opening a film, launching a game, booting, or changing sections. Each look gets one signature move for those moments, such as JamFin's Channel 3 launch or a mission-clock count-up. Menus pop above or below what they act on, like Unigrid's player menus ("use that everywhere").</p>
+    </section>
+
+    <section id="volume">
+      <h2>Volume</h2>
+      <p class="muted">There is one system. Each device turns the personality up or down: quiet on work tools, loud where you play.</p>
+      <div class="vols">
+        <div class="vol"><span class="lbl">Volume 1 · Desk</span><div class="meter"><i class="on"></i><i></i><i></i></div><h3>Quiet</h3><span class="apps">Jam-Dash · Callsheet · HA desktop</span><ul><li>Follows the device's light/dark setting</li><li>No grid, no grain; glow only in dark</li><li>Dense but calm; keyboard first</li><li>More motion than phone: hover, staggers, screen changes</li></ul></div>
+        <div class="vol"><span class="lbl">Volume 2 · Touch</span><div class="meter"><i class="on"></i><i class="on"></i><i></i></div><h3>Present</h3><span class="apps">HA phone &amp; kiosks · JamFin mobile</span><ul><li>Follows the device's setting; kiosks go dark at night</li><li>Room colours as stripes; big readouts</li><li>Restrained motion: short and touch-driven; one-shot staggers only on kiosks</li></ul></div>
+        <div class="vol"><span class="lbl">Volume 3 · Lounge</span><div class="meter"><i class="on"></i><i class="on"></i><i class="on"></i></div><h3>Loud</h3><span class="apps">Lobby · JamFin TV · NervOS</span><ul><li>Always dark; less than 10% of the screen bright at night</li><li>Static grain and grid, focus glow, character art</li><li>One title and one line on screen; cinematic scenes</li><li>Carousels for cover and screenshot rows</li></ul></div>
+      </div>
+    </section>
+
+    <section id="looks">
+      <h2>Look shelf</h2>
+      <p><span class="tag">Under discussion</span> You want to rethink the shelf and pick a new base look. Everything below is on hold until we do.</p>
+      <p class="muted">Telemetry is the default everywhere. A small shelf of alternates gets rebuilt on the shared roles, so any look works in every app, and each person picks their own (HA already does this per user). These are candidates you've praised. Nothing is final.</p>
+      <div class="shelf">
+        <div class="lk"><span class="tag def">Default</span><h3>Telemetry</h3><span class="q">Rounds 1–2: A's colour and glow, B's readability, D's structure</span></div>
+        <div class="lk"><span class="tag">Candidate</span><h3>VHS</h3><span class="q">"very fun", "I love it!" (NervOS)</span></div>
+        <div class="lk"><span class="tag">Candidate</span><h3>Transit / Unigrid</h3><span class="q">Liked in JamFin; its menus "should be everywhere"</span></div>
+        <div class="lk"><span class="tag">Candidate</span><h3>Olympia</h3><span class="q">Liked in JamFin, animations among the best</span></div>
+        <div class="lk"><span class="tag">Candidate</span><h3>New Wave</h3><span class="q">"feels the most polished" (JamFin)</span></div>
+        <div class="lk"><span class="tag">Candidate</span><h3>Choose Your Hero</h3><span class="q">"I like it a lot!" (NervOS)</span></div>
+        <div class="lk"><span class="tag">Candidate</span><h3>Depth II / Braun II</h3><span class="q">"much better!" (Jam-Dash)</span></div>
+        <div class="lk"><span class="tag">For others</span><h3>Easy read</h3><span class="q">Callsheet's high-contrast Atkinson look, for anyone who needs it</span></div>
+      </div>
+    </section>
+
+    <section id="road">
+      <h2>Roadmap</h2>
+      <ol class="road">
+        <li class="done"><b>Discovery.</b> Interviews with all six agents and with you. Done.</li>
+        <li class="done"><b>Direction.</b> Rounds 1–2, Telemetry hybrid. Done.</li>
+        <li><b>Draft bible.</b> This page. You mark it up.</li>
+        <li><b>Round 3 · Real screens.</b> Telemetry on the HA kitchen kiosk, Callsheet's brief, a NervOS hub and the Lobby home, at their real sizes.</li>
+        <li><b>One token file.</b> <code>telemetry.tokens.json</code> with the roles above, plus small converters: CSS variables (Jam-Dash, Callsheet, Lobby), HA <code>--jam-*</code> YAML, Compose <code>Palette.kt</code>, Godot <code>theme.json</code>.</li>
+        <li><b>Rollout.</b> One app at a time, each agent working from this bible, each with mockups and your OK first.</li>
+        <li><b>Shelf.</b> Rebuild the chosen alternates on the roles; retire the rest.</li>
+      </ol>
+      <h3>Still open</h3>
+      <div class="open">
+        <div>LCARS II is a Jam-Dash favourite, but you told HA not to build LCARS. Should it stay on the shelf or go?</div>
+        <div>Callsheet's "Bold" and HA's "JamBoard" (Saul Bass cut-paper) are the current defaults in two apps. Should they move to the shelf or retire?</div>
+        <div>Interface sounds: JamFin has them per look. Should Telemetry have a sound set, like soft relay clicks?</div>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+const mo=document.getElementById('mo');
+document.getElementById('play').addEventListener('click',()=>{mo.classList.toggle('go')});
+</script>

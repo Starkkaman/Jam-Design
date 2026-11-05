@@ -1,0 +1,239 @@
+<title>Base Look Round 4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Hi-Fi palette + Session structure. A "tactility" switch (0 flat / 1 touch / 2 full) drives specimen depth. Day + Night home panels side by side, TV frame below. */
+:root{--bg:#ebe9e4;--fg:#1f2022;--muted:#5d605f;--line:#d0cdc6;--chip:#fff;--seg-on:#1d1c1a;--seg-on-fg:#f2efe9;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#151617;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#202223;--seg-on:#e9e7e2;--seg-on-fg:#151617;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151617;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#202223;--seg-on:#e9e7e2;--seg-on-fg:#151617;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--f)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:40px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(28px,4.4vw,40px)/1.08 var(--f);margin:6px 0 10px;text-wrap:balance}
+h2{font:600 20px var(--f);margin:0}
+p{margin:0;max-width:68ch}
+.muted{color:var(--muted)}
+.controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:sticky;top:calc(10px + env(safe-area-inset-top,0px));z-index:5}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 14px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--seg-on-fg)}
+.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:820px){.pair{grid-template-columns:1fr}}
+figure{margin:0;display:grid;gap:10px;min-width:0}
+figcaption{font-size:14px;color:var(--muted)}
+
+/* ===== Hi-Fi tokens ===== */
+.hf{--alu:#dcd9d3;--alu-2:#eceae6;--rule:#c4c0b7;--ink:#1d1c1a;--ink-dim:#5f5c55;--band:#1d1c1a;--band-ink:#ece8df;--band-dim:#a8a397;
+  --orange:#e8641c;--orange-deep:#a8440f;--vu:#efcf86;--lamp:#5f9e3e;--walnut:#5b3a22;--red:#c8401a;
+  --depth-btn:0 0 0 transparent;--depth-sw:none;--depth-tile:none;--trim:var(--walnut);--ribs:none}
+.hf.night{--alu:#232220;--alu-2:#2c2b28;--rule:#3a3935;--ink:#eeeae2;--ink-dim:#aaa69c;--band:#121110;--band-ink:#ece8df;--band-dim:#a8a397;--orange:#f07432;--orange-deep:#a8440f;--lamp:#8fd16a;--red:#ff7a5c}
+.t1 .hf,.t3 .hf{--depth-btn:0 2px 0 var(--orange-deep);--depth-sw:inset 0 1px 2px #0003;--depth-tile:0 1px 0 #0000000f;--ribs:repeating-linear-gradient(0deg,#ffffff12 0 1px,transparent 1px 10px)}
+/* depth pass: raised layers, lit lamps, bevelled controls */
+.t3 .hf{--depth-btn:inset 0 1px 0 #ffffff59,inset 0 -2px 0 #0000002e,0 3px 0 var(--orange-deep),0 7px 14px #00000040}
+.t3 .list{margin:0 12px 14px;padding:0 14px;border-radius:14px;background:var(--alu-2);box-shadow:inset 0 1px 0 #ffffff80,0 1px 2px #0000001a,0 6px 16px #00000014}
+.t3 .night .list,.t3 .hf.night .list{box-shadow:inset 0 1px 0 #ffffff12,0 1px 2px #0000004d,0 6px 16px #00000040}
+.t3 .item:first-child{border-top:0}
+.t3 .list{align-self:start}
+.t3 .band{position:relative;z-index:1;border-radius:18px 18px 0 0;box-shadow:0 -8px 22px #00000033,inset 0 1px 0 #ffffff1a}
+.t3 .lamp{width:10px;height:10px;background:var(--lamp);box-shadow:inset 0 1px 0 #ffffff4d,0 0 0 2px #00000026,0 0 6px #8fd16a80}
+.t3 .sw{box-shadow:inset 0 2px 5px #00000059,0 1px 0 #ffffff80}
+.t3 .sw::after{box-shadow:inset 0 1px 0 #ffffffb3,inset 0 -2px 0 #0000001f,0 2px 0 #0000002e,0 4px 8px #00000038}
+/* dial: inset follows the dial's own half-disc shape, face contrasts with the card it sits on */
+.hf{--dial-face:#1d1c1a;--dial-arc:#55524b;--dial-hot:#ff7a5c;--dial-ink:#ece8df}
+.hf.night{--dial-face:#d6d2ca;--dial-arc:#a9a59c;--dial-hot:#c8401a;--dial-ink:#1d1c1a}
+.t3 .vu{background:var(--dial-face);border-radius:46px 46px 6px 6px;box-shadow:inset 0 2px 5px #00000066,0 1px 0 #ffffff80}
+.t3 .hf.night .vu{box-shadow:inset 0 2px 5px #00000040,0 1px 0 #ffffff14}
+.t3 .vu path.arc{stroke:var(--dial-arc)}.t3 .vu path.hot{stroke:var(--dial-hot)}.t3 .vu line{stroke:var(--dial-ink)}.t3 .vu circle{fill:var(--dial-ink)}
+/* progress: a lit orange strip under a shutter; the shutter slides back to reveal the light */
+.t3 .prog{--p:62%;height:8px;border-radius:4px;position:relative;overflow:hidden;background:linear-gradient(90deg,#c9531a,#f07432 55%,#ff9b50);box-shadow:inset 0 1px 2px #000000cc,0 0 0 1px #0000004d,0 1px 0 #ffffff14}
+.t3 .prog i{display:none}
+.t3 .prog::before{content:"";position:absolute;top:-4px;bottom:-4px;width:28px;left:calc(var(--p) - 20px);background:radial-gradient(closest-side,#fff1dccc,#ffb36b55 60%,transparent);transition:left 1400ms cubic-bezier(.16,1,.3,1)}
+.t3 .prog::after{content:"";position:absolute;top:0;bottom:0;right:0;left:var(--p);background:linear-gradient(90deg,#1412110a,#141211 14px),repeating-linear-gradient(90deg,#2a1c13 0 2px,#1b1512 2px 6px);background-blend-mode:normal;box-shadow:inset 0 1px 2px #000;transition:left 1400ms cubic-bezier(.16,1,.3,1)}
+.t3 .prog-note{display:block}
+.t3 .card .bar.t{box-shadow:0 10px 30px #00000080}.t3 .card .bar.b{box-shadow:0 -10px 30px #00000080}
+.t3 .tv .app{box-shadow:inset 0 .12cqw 0 #ffffff1a,0 .5cqw 1.2cqw #00000080}
+.t3 .tv .app.on{box-shadow:inset 0 .12cqw 0 #ffffff26,0 1.2cqw 2.8cqw #000000b3,0 0 2cqw #f0743233}
+.t2 .hf{--depth-btn:0 3px 0 var(--orange-deep),0 4px 8px #0003;--depth-sw:inset 0 2px 4px #0004;--depth-tile:inset 0 1px 0 #ffffff80,0 1px 3px #0002;
+  --trim:repeating-linear-gradient(90deg,#5b3a22 0 7px,#6a452a 7px 9px,#553620 9px 15px);--ribs:repeating-linear-gradient(0deg,#ffffff0a 0 1px,transparent 1px 3px)}
+
+.home{background:var(--alu);color:var(--ink);font-family:var(--f);border-radius:18px;overflow:hidden;position:relative;display:grid;min-height:560px;grid-template-rows:auto auto 1fr auto}
+.trim{height:8px;background:var(--trim)}
+.t2 .trim{height:22px}
+.top{padding:18px 20px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.clock{font:500 40px/1 var(--f);letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.lab{font:500 12px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim)}
+.list{padding:0 20px;display:grid;align-content:start}
+.item{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--rule)}
+.item .no{font:600 15px var(--mono);color:var(--orange)}
+.item .big{font:500 22px/1.15 var(--f);font-variant-numeric:tabular-nums}
+.item .small{font-size:14px;color:var(--ink-dim)}
+/* rocker switch (from A, flattened by tactility) */
+.sw{appearance:none;border:0;padding:0;cursor:pointer;position:relative;width:30px;height:46px;border-radius:8px;background:var(--rule);box-shadow:var(--depth-sw);flex:none}
+.sw::after{content:"";position:absolute;left:3px;right:3px;top:3px;height:22px;border-radius:6px;background:var(--alu-2);transition:transform 260ms cubic-bezier(.3,1.5,.5,1),background 200ms}
+.t1 .sw::after,.t2 .sw::after{box-shadow:0 2px 3px #0004}
+.sw::after{top:21px}
+.sw[aria-pressed="true"]::after{transform:translateY(-18px);background:var(--orange)}
+.sw:focus-visible,.go:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+/* flat meter (VU, without the glass) */
+.vu{width:92px;height:46px;flex:none}
+.vu path.arc{fill:none;stroke:var(--rule);stroke-width:6;stroke-linecap:round}
+.vu path.hot{fill:none;stroke:var(--red);stroke-width:6;stroke-linecap:round}
+.vu line{stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;transform-origin:46px 44px;transition:transform 900ms cubic-bezier(.3,1.6,.4,1)}
+.vu circle{fill:var(--ink)}
+.t2 .vu{background:var(--vu);border-radius:8px 8px 4px 4px}
+/* black band (the card you loved) */
+.band{background:var(--band);background-image:var(--ribs);color:var(--band-ink);padding:16px 20px 20px;display:grid;gap:10px}
+.band .lab{color:var(--band-dim)}
+.band .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.band .what{font:500 20px/1.2 var(--f)}
+.prog{height:4px;background:#ffffff22;border-radius:2px;overflow:hidden}.prog i{display:block;height:100%;width:62%;background:var(--orange)}
+.lamp{width:8px;height:8px;border-radius:50%;background:var(--lamp)}
+.night .lamp,.band .lamp{box-shadow:0 0 6px #8fd16a}
+.go{font:600 14px var(--f);letter-spacing:.14em;text-transform:uppercase;background:var(--orange);color:#fff;border:0;border-radius:10px;padding:12px 20px;cursor:pointer;box-shadow:var(--depth-btn);transition:transform 120ms,box-shadow 120ms;justify-self:start}
+.go:active{transform:translateY(2px);box-shadow:0 0 0 var(--orange-deep)}
+/* title card (from C, now in Jost) */
+.card{position:absolute;inset:0;z-index:4;display:grid;place-content:center;justify-items:center;gap:10px;text-align:center;color:var(--band-ink);pointer-events:none;visibility:hidden}
+.card .bar{position:absolute;left:0;right:0;height:50.5%;background:var(--band)}
+.card .bar.t{top:0}.card .bar.b{bottom:0}
+.card .stripe{position:relative;width:56px;height:4px;background:var(--orange)}
+.card .ep{position:relative;font:500 12px var(--mono);letter-spacing:.3em;color:var(--band-dim)}
+.card .nm{position:relative;font:600 44px/1 var(--f);letter-spacing:.06em;text-transform:uppercase}
+.card .ep,.card .nm,.card .stripe{opacity:0}
+.playing .card{visibility:visible}
+.playing .card .bar.t{animation:inL 2200ms cubic-bezier(.16,1,.3,1) both}
+.playing .card .bar.b{animation:inR 2200ms cubic-bezier(.16,1,.3,1) both}
+.playing .card .ep,.playing .card .nm,.playing .card .stripe{animation:txt 2200ms ease both}
+@keyframes inL{0%{transform:translateX(-101%)}28%,82%{transform:none}100%{transform:translateX(101%)}}
+@keyframes inR{0%{transform:translateX(101%)}28%,82%{transform:none}100%{transform:translateX(-101%)}}
+@keyframes txt{0%,22%{opacity:0;transform:translateY(6px)}38%,78%{opacity:1;transform:none}92%,100%{opacity:0}}
+
+/* TV (always night) */
+.tv{aspect-ratio:16/9;max-width:100%;border-radius:14px;overflow:hidden;position:relative;container-type:inline-size;outline:none;background:var(--band);background-image:var(--ribs);color:var(--band-ink);font-family:var(--f)}
+.tv .trim{position:absolute;top:0;left:0;right:0;height:.6cqw}
+.t2 .tv .trim{height:1.6cqw}
+.tv .in{position:absolute;inset:0;padding:5cqw 5cqw 4.5cqw;display:grid;grid-template-rows:auto 1fr auto;gap:2cqw}
+.tv .tt{display:flex;justify-content:space-between;align-items:baseline}
+.tv .tc{font:500 4cqw/1 var(--f);font-variant-numeric:tabular-nums}
+.tv .ts{font:500 1.6cqw var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--band-dim);display:flex;gap:.8cqw;align-items:center}
+.tv .ts .lamp{width:.8cqw;height:.8cqw}
+.tv .hero{align-self:end;display:grid;gap:1cqw;transition:opacity 420ms cubic-bezier(.16,1,.3,1),transform 420ms cubic-bezier(.16,1,.3,1)}
+.tv .hero.swap{opacity:0;transform:translateY(1cqw)}
+.tv .ht{font:600 5.2cqw/1.05 var(--f);letter-spacing:.02em}
+.tv .hk{font:500 1.8cqw var(--f);color:var(--band-dim)}
+.tv .rail{display:flex;gap:1.8cqw}
+.tv .app{flex:1;aspect-ratio:4/3;border-radius:1.2cqw;background:#2a2926;display:grid;align-content:end;padding:1.6cqw;cursor:pointer;border:.2cqw solid transparent;transition:transform 150ms cubic-bezier(.2,.8,.2,1),border-color 150ms,background 150ms}
+.t2 .tv .app{box-shadow:inset 0 .1cqw 0 #ffffff14,0 .4cqw 1cqw #0006}
+.tv .app .n{font:600 2.2cqw/1 var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--band-dim)}
+.tv .app.on{transform:scale(1.06) translateY(-.5cqw);border-color:var(--orange);background:#34322e}
+.tv .app.on .n{color:var(--band-ink)}
+.tv .app.on::before{content:"";display:block;width:3cqw;height:.4cqw;background:var(--orange);margin-bottom:auto}
+.tv .card .nm{font-size:6cqw}.tv .card .ep{font-size:1.4cqw}.tv .card .stripe{width:6cqw;height:.5cqw}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px}
+.note b{font-weight:600}
+</style>
+
+<div class="wrap t3" id="root">
+  <header>
+    <span class="eyebrow">Design bible · Round 4 · Base look</span>
+    <h1>Hi-Fi, flattened</h1>
+    <p class="muted">A's colours, button, rocker switch and black continue band. C's calm numbered list and title card, now in a sans. "A touch + depth" is new: the list floats as a card, the black band sits on top of it, lamps are lit, and buttons have a bevel and press down. Ribs are spaced wider so they read as lines from a normal distance. The switch is now up for on, with the state written next to it. The progress bar is a lit strip under a shutter: press Play and watch the shutter slide back to reveal more light.</p>
+  </header>
+
+  <div class="controls">
+    <span class="eyebrow">Texture</span>
+    <div class="seg" role="group" aria-label="Texture">
+      <button id="t-0" data-t="0" aria-pressed="false">Flat</button>
+      <button id="t-1" data-t="1" aria-pressed="false">A touch</button>
+      <button id="t-3" data-t="3" aria-pressed="true">A touch + depth</button>
+      <button id="t-2" data-t="2" aria-pressed="false">Full (Round 3)</button>
+    </div>
+  </div>
+
+  <div class="pair">
+    <figure>
+      <div class="hf home" id="h-day">
+        <div class="trim"></div>
+        <div class="top"><span class="clock">7:42 pm</span><span class="lab">Thursday · 6 Nov</span></div>
+        <div class="list">
+          <div class="item"><span class="no">01</span><div><div class="big">21.5 °C</div><div class="small" data-on="Living room · 3 of 5 lights on" data-off="Living room · lights off">Living room · 3 of 5 lights on</div></div><button class="sw" aria-pressed="true" aria-label="Living room lights"></button></div>
+          <div class="item"><span class="no">02</span><div><div class="big">Kind of Blue</div><div class="small">Music · Kitchen speakers</div></div>
+            <svg class="vu" viewBox="0 0 92 46" aria-hidden="true"><path class="arc" d="M8 42 A38 38 0 0 1 72 15"/><path class="hot" d="M72 15 A38 38 0 0 1 84 42"/><line x1="46" y1="44" x2="46" y2="10" style="transform:rotate(-24deg)"/><circle cx="46" cy="44" r="3"/></svg></div>
+          <div class="item"><span class="no">03</span><div><div class="big">Bins out</div><div class="small">2 replies can wait till morning</div></div><span></span></div>
+        </div>
+        <div class="band">
+          <div class="row"><span class="lab">Continue watching</span><span class="lamp" aria-hidden="true"></span></div>
+          <div class="what">Severance · S2 E4</div>
+          <div class="prog"><i></i></div>
+          <button class="go" data-card="h-day">Play</button>
+        </div>
+        <div class="card" aria-hidden="true"><i class="bar t"></i><i class="bar b"></i><span class="stripe"></span><span class="ep">Season 2 · Episode 4</span><span class="nm">Severance</span></div>
+      </div>
+      <figcaption>Day: phone and kitchen kiosk.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="hf home night" id="h-night">
+        <div class="trim"></div>
+        <div class="top"><span class="clock">11:08 pm</span><span class="lab">Thursday · 6 Nov</span></div>
+        <div class="list">
+          <div class="item"><span class="no">01</span><div><div class="big">19.0 °C</div><div class="small" data-on="Living room · 3 of 5 lights on" data-off="Living room · lights off">Living room · lights off</div></div><button class="sw" aria-pressed="false" aria-label="Living room lights"></button></div>
+          <div class="item"><span class="no">02</span><div><div class="big">Front door</div><div class="small">Locked · back door locked</div></div><span class="lamp" aria-hidden="true"></span></div>
+          <div class="item"><span class="no">03</span><div><div class="big">Alarm 7:00</div><div class="small">2 meetings tomorrow</div></div><span></span></div>
+        </div>
+        <div class="band">
+          <div class="row"><span class="lab">Continue watching</span><span class="lamp" aria-hidden="true"></span></div>
+          <div class="what">Severance · S2 E4</div>
+          <div class="prog"><i></i></div>
+          <button class="go" data-card="h-night">Play</button>
+        </div>
+        <div class="card" aria-hidden="true"><i class="bar t"></i><i class="bar b"></i><span class="stripe"></span><span class="ep">Season 2 · Episode 4</span><span class="nm">Severance</span></div>
+      </div>
+      <figcaption>Night: the same screen when your device is in dark mode. The aluminium turns to graphite and the band stays black.</figcaption>
+    </figure>
+  </div>
+
+  <figure>
+    <div class="hf tv" id="tv" tabindex="0" aria-label="TV launcher mock. Arrow keys move, Enter plays.">
+      <div class="trim"></div>
+      <div class="in">
+        <div class="tt"><span class="tc">7:42</span><span class="ts"><i class="lamp"></i>21.5°</span></div>
+        <div class="hero" id="hero"><span class="ht" id="ht">Severance</span><span class="hk" id="hk">19 min left</span></div>
+        <div class="rail">
+          <div class="app on"><span class="n">Watch</span></div><div class="app"><span class="n">Play</span></div><div class="app"><span class="n">Stream</span></div><div class="app"><span class="n">House</span></div>
+        </div>
+      </div>
+      <div class="card" aria-hidden="true"><i class="bar t"></i><i class="bar b"></i><span class="stripe"></span><span class="ep" id="tep">Season 2 · Episode 4</span><span class="nm" id="tnm">Severance</span></div>
+    </div>
+    <figcaption>TV: the black band becomes the whole screen. Click it, use ← →, and press Enter (or click a tile twice) for the title card.</figcaption>
+  </figure>
+
+  <section>
+    <h2>What carried over</h2>
+    <div class="notes">
+      <div class="note"><b>From A</b><span class="muted">Aluminium, black and walnut, with orange for the one thing you press. The rocker switch, the orange button and the black continue band. The VU meter stays as a flat drawn dial.</span></div>
+      <div class="note"><b>From C</b><span class="muted">One calm numbered list, three things at a time. The title card for Play and launches, now in Jost capitals with an orange stripe.</span></div>
+      <div class="note"><b>Dropped</b><span class="muted">At Flat: woodgrain, ribbed texture, glass meters and button shadows. Walnut survives only as a thin colour line at the top.</span></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const root=document.getElementById('root');
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{root.classList.remove('t0','t1','t2','t3');root.classList.add('t'+b.dataset.t);document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b))}));
+document.querySelectorAll('.sw').forEach(s=>s.addEventListener('click',()=>{const on=s.getAttribute('aria-pressed')!=='true';s.setAttribute('aria-pressed',on);const sm=s.closest('.item')?.querySelector('.small[data-on]');if(sm)sm.textContent=on?sm.dataset.on:sm.dataset.off}));
+function playCard(el){el.classList.remove('playing');void el.offsetWidth;el.classList.add('playing');setTimeout(()=>el.classList.remove('playing'),2300)}
+document.querySelectorAll('.go').forEach(b=>b.addEventListener('click',()=>{const host=document.getElementById(b.dataset.card);const pr=host.querySelector('.prog');if(pr){const cur=parseFloat(getComputedStyle(pr).getPropertyValue('--p'))||62;pr.style.setProperty('--p',Math.min(cur+8,100)+'%')}playCard(host);const v=document.querySelector('#h-day .vu line');if(v)v.style.transform='rotate('+(Math.random()*60-40).toFixed(0)+'deg)'}));
+const data=[["19 min left","Severance","Season 2 · Episode 4","Severance"],["Last played Tuesday","Hades II","Now loading","Hades II"],["Gaming PC is ready","Moonlight","Connecting","Moonlight"],["3 lights on","Living room","House","Living room"]];
+const tiles=[...document.querySelectorAll('.tv .app')],hero=document.getElementById('hero'),tv=document.getElementById('tv');let i=0,timer;
+function f(n){i=(n+tiles.length)%tiles.length;tiles.forEach((t,k)=>t.classList.toggle('on',k===i));hero.classList.add('swap');clearTimeout(timer);timer=setTimeout(()=>{hk.textContent=data[i][0];ht.textContent=data[i][1];hero.classList.remove('swap')},180)}
+function launch(){tep.textContent=data[i][2];tnm.textContent=data[i][3];playCard(tv)}
+tiles.forEach((t,k)=>t.addEventListener('click',()=>{if(k===i)launch();else f(k)}));
+tv.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){f(i+1);e.preventDefault()}if(e.key==='ArrowLeft'){f(i-1);e.preventDefault()}if(e.key==='Enter'){launch();e.preventDefault()}});
+</script>

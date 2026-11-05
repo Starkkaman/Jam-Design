@@ -1,0 +1,322 @@
+<title>Base Look Round 5</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Hi-Fi "A touch + depth" locked. Home day/night, dial options grid, signature "Reveal" demos, TV. */
+:root{--bg:#ebe9e4;--fg:#1f2022;--muted:#5d605f;--line:#d0cdc6;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --settle:cubic-bezier(.16,1,.3,1);--glide:cubic-bezier(.2,.8,.2,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#151617;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#202223;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151617;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#202223;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--f)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:40px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:40px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(28px,4.4vw,40px)/1.08 var(--f);margin:6px 0 10px;text-wrap:balance}
+h2{font:600 22px var(--f);margin:0}
+h3{font:600 16px var(--f);margin:0}
+p{margin:0;max-width:68ch}
+.muted{color:var(--muted)}
+section{display:grid;gap:14px;min-width:0}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:820px){.pair{grid-template-columns:1fr}}
+figure{margin:0;display:grid;gap:10px;min-width:0}
+figcaption{font-size:14px;color:var(--muted)}
+.replay{font:600 14px var(--f);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:10px;padding:9px 14px;cursor:pointer;justify-self:start}
+.replay:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+
+/* ===== Hi-Fi tokens ===== */
+.hf{--alu:#dcd9d3;--card:#eceae6;--rule:#c4c0b7;--ink:#1d1c1a;--dim:#5f5c55;--band:#1d1c1a;--band-ink:#ece8df;--band-dim:#a8a397;
+  --orange:#e8641c;--deep:#a8440f;--lamp:#6fd447;--lamp-glow:#8fe86acc;--red:#c8401a;--walnut:#5b3a22;
+  --sw-track:#c4c0b7;--sw-pad:#f4f2ee;--sw-hi:#ffffffb3;--sw-edge:#ffffff80;
+  --dial-face:var(--card);--dial-arc:#cfcbc2;--dial-ink:#1d1c1a;--amber:#efcf86;
+  --ribs:repeating-linear-gradient(0deg,#ffffff12 0 1px,transparent 1px 10px);color:var(--ink);font-family:var(--f)}
+.hf.night{--alu:#232220;--card:#2c2b28;--rule:#3a3935;--ink:#eeeae2;--dim:#aaa69c;--band:#121110;
+  --orange:#f07432;--lamp:#8cf05e;--lamp-glow:#a6f27ccc;--red:#ff7a5c;
+  --sw-track:#121110;--sw-pad:#5c5952;--sw-hi:#ffffff33;--sw-edge:#ffffff14;
+  --dial-arc:#45433e;--dial-ink:#eeeae2}
+
+.home{background:var(--alu);border-radius:18px;overflow:hidden;position:relative;display:grid;grid-template-rows:auto auto 1fr auto;min-height:540px}
+.trim{height:8px;background:var(--walnut)}
+.top{padding:18px 20px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.clock{font:500 40px/1 var(--f);font-variant-numeric:tabular-nums}
+.lab{font:500 12px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.list{align-self:start;margin:0 12px 14px;padding:0 14px;border-radius:14px;background:var(--card);box-shadow:inset 0 1px 0 var(--sw-edge),0 1px 2px #0000001a,0 6px 16px #00000014}
+.night .list{box-shadow:inset 0 1px 0 #ffffff12,0 1px 2px #0000004d,0 6px 16px #00000040}
+.item{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--rule)}
+.item:first-child{border-top:0}
+.no{font:600 15px var(--mono);color:var(--orange)}
+.big{font:500 22px/1.15 var(--f);font-variant-numeric:tabular-nums}
+.small{font-size:14px;color:var(--dim)}
+
+/* lamp: brighter, warms up like a bulb */
+.lamp{width:10px;height:10px;border-radius:50%;flex:none;position:relative;background:var(--rule);box-shadow:inset 0 1px 0 #ffffff33,0 0 0 2px #00000026}
+.lamp::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--lamp);box-shadow:inset 0 1px 0 #ffffff80,0 0 4px var(--lamp),0 0 12px var(--lamp-glow);opacity:1;transition:opacity 420ms var(--settle)}
+.lamp.off::after{opacity:0;transition-duration:180ms}
+
+/* rocker: light version kept, dark version = light paddle in a dark slot */
+.sw{appearance:none;border:0;padding:0;cursor:pointer;position:relative;width:30px;height:46px;border-radius:8px;background:var(--sw-track);box-shadow:inset 0 2px 5px #00000059,0 1px 0 var(--sw-edge);flex:none}
+.sw .pad{position:absolute;left:3px;right:3px;top:21px;height:22px;border-radius:6px;background:var(--sw-pad);box-shadow:inset 0 1px 0 var(--sw-hi),inset 0 -2px 0 #0000001f,0 2px 0 #0000002e,0 4px 8px #00000038;transition:transform 260ms cubic-bezier(.3,1.5,.5,1);overflow:hidden}
+.sw .pad::after{content:"";position:absolute;inset:0;border-radius:6px;background:linear-gradient(180deg,#ff9b50,var(--orange));box-shadow:inset 0 1px 0 #ffffff66;opacity:0;transition:opacity 360ms var(--settle) 80ms}
+.sw[aria-pressed="true"] .pad{transform:translateY(-18px)}
+.sw[aria-pressed="true"] .pad::after{opacity:1}
+.sw[aria-pressed="true"]{box-shadow:inset 0 2px 5px #00000059,0 1px 0 var(--sw-edge),0 0 14px #f0743240}
+.sw:focus-visible,.go:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+
+/* the band */
+.band{position:relative;z-index:1;border-radius:18px 18px 0 0;background:var(--band);background-image:var(--ribs);color:var(--band-ink);padding:16px 20px 20px;display:grid;gap:10px;box-shadow:0 -8px 22px #00000033,inset 0 1px 0 #ffffff1a}
+.band .lab{color:var(--band-dim)}
+.band .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.band .what{font:500 20px/1.2 var(--f)}
+.go{font:600 14px var(--f);letter-spacing:.14em;text-transform:uppercase;background:var(--orange);color:#fff;border:0;border-radius:10px;padding:12px 20px;cursor:pointer;justify-self:start;
+  box-shadow:inset 0 1px 0 #ffffff59,inset 0 -2px 0 #0000002e,0 3px 0 var(--deep),0 7px 14px #00000040;transition:transform 120ms,box-shadow 120ms}
+.go:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff59,0 1px 0 var(--deep),0 2px 4px #00000040}
+
+/* ===== THE SIGNATURE: a lit strip revealed by a sliding shutter (transform only) ===== */
+.lit{--p:0;position:relative;height:8px;border-radius:4px;overflow:hidden;background:linear-gradient(90deg,#c9531a,#f07432 55%,#ff9b50);box-shadow:inset 0 1px 2px #000000cc,0 0 0 1px #0000004d,0 1px 0 #ffffff14}
+.lit .run{position:absolute;top:0;bottom:0;left:-16px;right:0;transform:translateX(calc(var(--p) * 100%));transition:transform 1400ms var(--settle);
+  background:linear-gradient(90deg,#14121100,#141211 14px),repeating-linear-gradient(90deg,#2a1c13 0 2px,#1b1512 2px 6px)}
+.lit .run::before{content:"";position:absolute;top:-4px;bottom:-4px;left:-6px;width:28px;background:radial-gradient(closest-side,#fff1dccc,#ffb36b55 60%,transparent)}
+.lit.full .run::before{opacity:0;transition:opacity 400ms 900ms}
+.lit.thin{height:4px;border-radius:2px}
+
+/* dial options */
+.vu{width:92px;height:46px;flex:none;display:block}
+.dial-quiet{background:var(--alu);border-radius:46px 46px 6px 6px;box-shadow:inset 0 2px 4px #00000038,0 1px 0 var(--sw-edge)}
+.dial-amber{background:var(--amber);border-radius:46px 46px 6px 6px;box-shadow:inset 0 2px 4px #00000040,0 1px 0 var(--sw-edge)}
+.night .dial-amber{background:#d9b96f}
+.vu .arc{fill:none;stroke:var(--dial-arc);stroke-width:5;stroke-linecap:round}
+.vu .hot{fill:none;stroke:var(--red);stroke-width:5;stroke-linecap:round}
+.vu .ndl{stroke:var(--dial-ink);stroke-width:2.5;stroke-linecap:round;transform-origin:46px 42px;transition:transform 900ms cubic-bezier(.3,1.6,.4,1)}
+.vu .hub{fill:var(--dial-ink)}
+.dial-amber .arc{stroke:#00000026}.dial-amber .ndl{stroke:#1d1c1a}.dial-amber .hub{fill:#1d1c1a}
+.vu .seg{fill:none;stroke-width:6;stroke-linecap:butt;stroke:var(--rule);transition:stroke 260ms}
+.vu .seg.on{stroke:var(--orange)}
+.vu .seg.on.hotz{stroke:var(--red)}
+.vu .glow{fill:none;stroke-width:12;stroke:var(--orange);opacity:0;transition:opacity 260ms}
+.vu .glow.on{opacity:.22}
+.ladder{display:flex;gap:3px;align-items:flex-end;height:26px;flex:none}
+.ladder i{width:6px;border-radius:2px;background:var(--rule);transition:background 220ms,box-shadow 220ms}
+.ladder i.on{background:var(--orange);box-shadow:0 0 6px #f0743280}
+.ladder i.on.hotz{background:var(--red)}
+
+.dopts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.dopts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.dopts{grid-template-columns:1fr}}
+.dopt{display:grid;gap:8px}
+.dopt .mini{border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);box-shadow:inset 0 1px 0 var(--sw-edge),0 1px 2px #0000001a,0 4px 10px #00000014}
+.dopt .mini .big{font-size:17px}
+.dopt b{font-size:15px}
+.dopt span.muted{font-size:13px}
+.pick{font:500 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--orange)}
+
+/* reveal demos */
+.demos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.demos{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.demos{grid-template-columns:1fr}}
+.demo{border-radius:14px;padding:16px;display:grid;gap:12px;align-content:start;background:var(--band);background-image:var(--ribs);color:var(--band-ink);min-height:170px}
+.demo .lab{color:var(--band-dim)}
+.demo .t{font:500 17px/1.25 var(--f)}
+.demo .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:820px){.rules{grid-template-columns:1fr}}
+.rule{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px}
+
+/* title card */
+.card{position:absolute;inset:0;z-index:4;display:grid;place-content:center;justify-items:center;gap:10px;text-align:center;color:var(--band-ink);pointer-events:none;visibility:hidden}
+.card .bar{position:absolute;left:0;right:0;height:50.5%;background:var(--band)}
+.card .bar.t{top:0;box-shadow:0 10px 30px #00000080}.card .bar.b{bottom:0;box-shadow:0 -10px 30px #00000080}
+.card .lit{width:120px;height:6px;position:relative;opacity:0}
+.card .ep{position:relative;font:500 12px var(--mono);letter-spacing:.3em;color:var(--band-dim);opacity:0}
+.card .nm{position:relative;font:600 44px/1 var(--f);letter-spacing:.06em;text-transform:uppercase;opacity:0}
+.playing .card{visibility:visible}
+.playing .card .bar.t{animation:inL 2600ms var(--settle) both}
+.playing .card .bar.b{animation:inR 2600ms var(--settle) both}
+.playing .card .ep,.playing .card .nm,.playing .card .lit{animation:txt 2600ms ease both}
+@keyframes inL{0%{transform:translateX(-101%)}24%,84%{transform:none}100%{transform:translateX(101%)}}
+@keyframes inR{0%{transform:translateX(101%)}24%,84%{transform:none}100%{transform:translateX(-101%)}}
+@keyframes txt{0%,20%{opacity:0;transform:translateY(6px)}32%,80%{opacity:1;transform:none}94%,100%{opacity:0}}
+
+/* TV */
+.tv{aspect-ratio:16/9;max-width:100%;border-radius:14px;overflow:hidden;position:relative;container-type:inline-size;outline:none;background:var(--band);background-image:var(--ribs);color:var(--band-ink)}
+.tv .trim{position:absolute;top:0;left:0;right:0;height:.6cqw}
+.tv .in{position:absolute;inset:0;padding:5cqw 5cqw 4.5cqw;display:grid;grid-template-rows:auto 1fr auto;gap:2cqw}
+.tv .tt{display:flex;justify-content:space-between;align-items:baseline}
+.tv .tc{font:500 4cqw/1 var(--f);font-variant-numeric:tabular-nums}
+.tv .ts{font:500 1.6cqw var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--band-dim);display:flex;gap:.9cqw;align-items:center}
+.tv .ts .lamp{width:.9cqw;height:.9cqw}
+.tv .hero{align-self:end;display:grid;gap:1cqw;transition:opacity 420ms var(--settle),transform 420ms var(--settle)}
+.tv .hero.swap{opacity:0;transform:translateY(1cqw)}
+.tv .ht{font:600 5.2cqw/1.05 var(--f);letter-spacing:.02em}
+.tv .hk{font:500 1.8cqw var(--f);color:var(--band-dim)}
+.tv .rail{display:flex;gap:1.8cqw}
+.tv .app{flex:1;aspect-ratio:4/3;border-radius:1.2cqw;background:#2a2926;display:grid;grid-template-rows:1fr auto auto;gap:1cqw;padding:1.6cqw;cursor:pointer;
+  box-shadow:inset 0 .12cqw 0 #ffffff1a,0 .5cqw 1.2cqw #00000080;transition:transform 150ms var(--glide),background 150ms,box-shadow 150ms}
+.tv .app .n{grid-row:2;font:600 2.2cqw/1 var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--band-dim)}
+.tv .app .lit{grid-row:3;height:.5cqw;border-radius:.25cqw}
+.tv .app .lit .run{transition-duration:700ms}
+.tv .app.on{transform:scale(1.06) translateY(-.5cqw);background:#34322e;box-shadow:inset 0 .12cqw 0 #ffffff26,0 1.2cqw 2.8cqw #000000b3}
+.tv .app.on .n{color:var(--band-ink)}
+.tv .card .nm{font-size:6cqw}.tv .card .ep{font-size:1.4cqw}.tv .card .lit{width:12cqw;height:.6cqw}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Design bible · Round 5 · Base look</span>
+    <h1>Hi-Fi: light reveal</h1>
+    <p class="muted">The base look, locked at "A touch + depth". In this round: brighter status lights, a dark switch built like the light one, four dial options, and the signature move (orange light revealed behind a shutter) applied across the system.</p>
+  </header>
+
+  <section>
+    <div class="pair">
+      <figure>
+        <div class="hf home" id="h-day">
+          <div class="trim"></div>
+          <div class="top"><span class="clock">7:42 pm</span><span class="lab">Thursday · 6 Nov</span></div>
+          <div class="list">
+            <div class="item"><span class="no">01</span><div><div class="big">21.5 °C</div><div class="small" data-on="Living room · 3 of 5 lights on" data-off="Living room · lights off">Living room · 3 of 5 lights on</div></div><button class="sw" aria-pressed="true" aria-label="Living room lights"><i class="pad"></i></button></div>
+            <div class="item"><span class="no">02</span><div><div class="big">Kind of Blue</div><div class="small">Music · Kitchen speakers</div></div><svg class="vu" data-kind="lit" viewBox="0 0 92 46" aria-hidden="true"></svg></div>
+            <div class="item"><span class="no">03</span><div><div class="big">Bins out</div><div class="small">2 replies can wait till morning</div></div><span></span></div>
+          </div>
+          <div class="band">
+            <div class="row"><span class="lab">Continue watching</span><i class="lamp" aria-hidden="true"></i></div>
+            <div class="what">Severance · S2 E4</div>
+            <div class="lit prog" style="--p:.62"><i class="run"></i></div>
+            <button class="go" data-card="h-day">Play</button>
+          </div>
+          <div class="card" aria-hidden="true"><i class="bar t"></i><i class="bar b"></i><div class="lit"><i class="run"></i></div><span class="ep">Season 2 · Episode 4</span><span class="nm">Severance</span></div>
+        </div>
+        <figcaption>Day.</figcaption>
+      </figure>
+      <figure>
+        <div class="hf home night" id="h-night">
+          <div class="trim"></div>
+          <div class="top"><span class="clock">11:08 pm</span><span class="lab">Thursday · 6 Nov</span></div>
+          <div class="list">
+            <div class="item"><span class="no">01</span><div><div class="big">19.0 °C</div><div class="small" data-on="Living room · 3 of 5 lights on" data-off="Living room · lights off">Living room · lights off</div></div><button class="sw" aria-pressed="false" aria-label="Living room lights"><i class="pad"></i></button></div>
+            <div class="item"><span class="no">02</span><div><div class="big">Front door</div><div class="small">Locked · back door locked</div></div><i class="lamp" aria-hidden="true"></i></div>
+            <div class="item"><span class="no">03</span><div><div class="big">Kind of Blue</div><div class="small">Music · Bedroom, quiet</div></div><svg class="vu" data-kind="lit" data-level="3" viewBox="0 0 92 46" aria-hidden="true"></svg></div>
+          </div>
+          <div class="band">
+            <div class="row"><span class="lab">Continue watching</span><i class="lamp" aria-hidden="true"></i></div>
+            <div class="what">Severance · S2 E4</div>
+            <div class="lit prog" style="--p:.62"><i class="run"></i></div>
+            <button class="go" data-card="h-night">Play</button>
+          </div>
+          <div class="card" aria-hidden="true"><i class="bar t"></i><i class="bar b"></i><div class="lit"><i class="run"></i></div><span class="ep">Season 2 · Episode 4</span><span class="nm">Severance</span></div>
+        </div>
+        <figcaption>Night. The dark switch is now a light graphite paddle sitting in a near-black slot, the same contrast as the day switch turned around. It glows orange when it's on.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Dial options</h2>
+    <p class="muted">There's no black face in any of these. Each is shown in day and night. The home screens above use B.</p>
+    <div class="dopts" id="dopts"></div>
+  </section>
+
+  <section>
+    <h2>Signature: light reveal</h2>
+    <p class="muted">The rule: when something becomes active, its orange light is revealed. Nothing flashes on. A shutter slides back or a glow warms up. It's one idea used everywhere, so the whole house feels like one piece of equipment.</p>
+    <button class="replay" id="replay">Replay all</button>
+    <div class="demos">
+      <div class="demo hf"><span class="lab">Progress</span><span class="t">Severance · 19 min left</span><div class="lit" id="d-prog"><i class="run"></i></div><span class="small" style="color:var(--band-dim)">The shutter opens to how far you've watched.</span></div>
+      <div class="demo hf"><span class="lab">Loading</span><div class="row"><span class="t" id="d-load-t">Waking gaming PC</span><i class="lamp off" id="d-load-l"></i></div><div class="lit thin" id="d-load"><i class="run"></i></div><span class="small" style="color:var(--band-dim)">Opens in real steps, and the light comes on when it's ready. This also covers loading that hasn't finished.</span></div>
+      <div class="demo hf"><span class="lab">Turning on</span><div class="row"><span class="t">Kitchen lights</span><button class="sw" id="d-sw" aria-pressed="false" aria-label="Kitchen lights"><i class="pad"></i></button></div><span class="small" style="color:var(--band-dim)">The paddle moves first, then the orange warms in. The status light fades up like a bulb.</span></div>
+      <div class="demo hf"><span class="lab">Level</span><div class="row"><span class="t">Volume</span><svg class="vu" data-kind="lit" data-level="0" id="d-vu" viewBox="0 0 92 46" aria-hidden="true"></svg></div><span class="small" style="color:var(--band-dim)">Segments light one by one, the way a meter's lamps would.</span></div>
+    </div>
+    <div class="rules">
+      <div class="rule"><b>What lights up</b><span class="muted">Only things that are active or in progress: what's playing, what's on, what's focused on the TV, what's loading. Idle controls stay unlit.</span></div>
+      <div class="rule"><b>How it moves</b><span class="muted">The shutter opens in about 0.6–1.4 s on the settle curve. Glows warm in over about 0.4 s and cool off faster. Focus itself stays fast (150 ms); the light grows after focus lands.</span></div>
+      <div class="rule"><b>Why it's cheap</b><span class="muted">The shutter moves with a transform and the glow fades with opacity: the two things your TV hardware handles well. No blur, and nothing flashes.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>On the TV</h2>
+    <figure>
+      <div class="hf tv" id="tv" tabindex="0" aria-label="TV launcher mock. Arrow keys move, Enter plays.">
+        <div class="trim"></div>
+        <div class="in">
+          <div class="tt"><span class="tc">7:42</span><span class="ts"><i class="lamp"></i>21.5°</span></div>
+          <div class="hero" id="hero"><span class="ht" id="ht">Severance</span><span class="hk" id="hk">19 min left</span></div>
+          <div class="rail">
+            <div class="app on"><span class="n">Watch</span><div class="lit"><i class="run"></i></div></div>
+            <div class="app"><span class="n">Play</span><div class="lit"><i class="run"></i></div></div>
+            <div class="app"><span class="n">Stream</span><div class="lit"><i class="run"></i></div></div>
+            <div class="app"><span class="n">House</span><div class="lit"><i class="run"></i></div></div>
+          </div>
+        </div>
+        <div class="card" aria-hidden="true"><i class="bar t"></i><i class="bar b"></i><div class="lit"><i class="run"></i></div><span class="ep" id="tep">Season 2 · Episode 4</span><span class="nm" id="tnm">Severance</span></div>
+      </div>
+      <figcaption>Click the frame and use ← →. The tile lifts fast, then its light strip is revealed. Press Enter: the title card's stripe is revealed the same way.</figcaption>
+    </figure>
+  </section>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+function el(n,a){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e}
+function pt(a,r){const t=Math.PI*(1-a);return[46+r*Math.cos(t),42-r*Math.sin(t)]}
+function arcPath(a0,a1,r){const[x0,y0]=pt(a0,r),[x1,y1]=pt(a1,r);return`M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`}
+const N=10;
+function buildDial(svg){
+  svg.innerHTML='';const kind=svg.dataset.kind;
+  if(kind==='lit'){for(let k=0;k<N;k++){const a0=k/N+.012,a1=(k+1)/N-.012;svg.append(el('path',{class:'glow',d:arcPath(a0,a1,36)}));}
+    for(let k=0;k<N;k++){const a0=k/N+.012,a1=(k+1)/N-.012;svg.append(el('path',{class:'seg'+(k>=N-2?' hotz':''),d:arcPath(a0,a1,36)}));}
+    setLevel(svg,svg.dataset.level?+svg.dataset.level:7,false);return}
+  svg.append(el('path',{class:'arc',d:arcPath(.02,.8,36)}),el('path',{class:'hot',d:arcPath(.8,.98,36)}));
+  const n=el('line',{class:'ndl',x1:46,y1:42,x2:46,y2:10});n.style.transform='rotate(-22deg)';svg.append(n,el('circle',{class:'hub',cx:46,cy:42,r:3}));
+}
+function setLevel(svg,lv,stagger=true){const segs=[...svg.querySelectorAll('.seg')],gl=[...svg.querySelectorAll('.glow')];
+  segs.forEach((s,k)=>{const on=k<lv;const d=stagger?(on?k*70:(N-k)*30):0;s.style.transitionDelay=d+'ms';gl[k].style.transitionDelay=d+'ms';s.classList.toggle('on',on);gl[k].classList.toggle('on',on)})}
+function ladder(lv){const w=document.createElement('div');w.className='ladder';for(let k=0;k<8;k++){const i=document.createElement('i');i.style.height=(8+k*2.4)+'px';if(k<lv)i.classList.add('on');if(k>=6)i.classList.add('hotz');w.append(i)}return w}
+
+const opts=[
+  ['A','Quiet face','The dial sits in a shallow aluminium recess of its own shape. Needle and scale only. The calmest option.','quiet'],
+  ['B','Lit scale','No face and no needle. The arc is made of segments that light orange up to the level. This uses the signature move, which is why the home screens use it.','lit'],
+  ['C','Amber face','The warm VU-meter yellow from Round 3, flat and soft. The most "stereo", and it stands out without being black.','amber'],
+  ['D','Ladder','Bars of rising height, like a mixing desk. Fits in a list row more easily than an arc.','ladder']];
+const host=document.getElementById('dopts');
+opts.forEach(([L,name,txt,kind])=>{const d=document.createElement('div');d.className='dopt';
+  const mk=(night)=>{const m=document.createElement('div');m.className='hf mini'+(night?' night':'');m.innerHTML='<div><div class="big">Kind of Blue</div><div class="small">'+(night?'Night':'Day')+'</div></div>';
+    if(kind==='ladder'){m.append(ladder(5))}else{const s=document.createElementNS(NS,'svg');s.setAttribute('viewBox','0 0 92 46');s.setAttribute('class','vu'+(kind==='quiet'?' dial-quiet':kind==='amber'?' dial-amber':''));s.dataset.kind=kind==='lit'?'lit':'needle';buildDial(s);m.append(s)}return m};
+  d.innerHTML='<span class="pick">Option '+L+(kind==='lit'?' · in use above':'')+'</span><b>'+name+'</b>';d.append(mk(false),mk(true));const p=document.createElement('span');p.className='muted';p.textContent=txt;d.append(p);host.append(d)});
+document.querySelectorAll('.home .vu').forEach(buildDial);
+const dvu=document.getElementById('d-vu');buildDial(dvu);
+
+// switches
+document.querySelectorAll('.sw').forEach(s=>s.addEventListener('click',()=>{const on=s.getAttribute('aria-pressed')!=='true';s.setAttribute('aria-pressed',on);const sm=s.closest('.item')?.querySelector('.small[data-on]');if(sm)sm.textContent=on?sm.dataset.on:sm.dataset.off}));
+
+// title card
+function playCard(h){h.classList.remove('playing');void h.offsetWidth;h.classList.add('playing');const l=h.querySelector('.card .lit');if(l){reveal(l,0,false);setTimeout(()=>reveal(l,1),700)}setTimeout(()=>h.classList.remove('playing'),2700)}
+function reveal(l,p,anim=true){const r=l.querySelector('.run');if(!anim){r.style.transition='none';l.style.setProperty('--p',p);void r.offsetWidth;r.style.transition='';return}l.style.setProperty('--p',p);l.classList.toggle('full',p>=1)}
+document.querySelectorAll('.go').forEach(b=>b.addEventListener('click',()=>{const h=document.getElementById(b.dataset.card);const pr=h.querySelector('.prog');const cur=parseFloat(pr.style.getPropertyValue('--p'))||.62;reveal(pr,Math.min(cur+.08,1));playCard(h);h.querySelectorAll('.vu[data-kind="lit"]').forEach(v=>setLevel(v,4+Math.floor(Math.random()*5)))}));
+
+// demos
+const prog=document.getElementById('d-prog'),load=document.getElementById('d-load'),ll=document.getElementById('d-load-l'),lt=document.getElementById('d-load-t'),dsw=document.getElementById('d-sw');
+let timers=[];function later(ms,fn){timers.push(setTimeout(fn,ms))}
+function run(){timers.forEach(clearTimeout);timers=[];
+  reveal(prog,0,false);later(300,()=>reveal(prog,.62));
+  reveal(load,0,false);ll.classList.add('off');lt.textContent='Waking gaming PC';
+  later(400,()=>reveal(load,.3));later(1500,()=>reveal(load,.65));later(2600,()=>{reveal(load,1);lt.textContent='Gaming PC is ready'});later(3300,()=>ll.classList.remove('off'));
+  dsw.setAttribute('aria-pressed','false');later(600,()=>dsw.setAttribute('aria-pressed','true'));
+  setLevel(dvu,0,false);later(500,()=>setLevel(dvu,8));}
+document.getElementById('replay').addEventListener('click',run);
+// start in a visible resting state, then animate once
+reveal(prog,.62,false);reveal(load,1,false);ll.classList.remove('off');lt.textContent='Gaming PC is ready';dsw.setAttribute('aria-pressed','true');setLevel(dvu,8,false);
+setTimeout(run,600);
+
+// TV
+const data=[["19 min left","Severance","Season 2 · Episode 4","Severance"],["Last played Tuesday","Hades II","Now loading","Hades II"],["Gaming PC is ready","Moonlight","Connecting","Moonlight"],["3 lights on","Living room","House","Living room"]];
+const tiles=[...document.querySelectorAll('.tv .app')],hero=document.getElementById('hero'),tv=document.getElementById('tv');let i=0,ht_;
+function f(n){i=(n+tiles.length)%tiles.length;tiles.forEach((t,k)=>{const on=k===i;t.classList.toggle('on',on);const l=t.querySelector('.lit');if(on){reveal(l,0,false);setTimeout(()=>reveal(l,1),150)}else reveal(l,0,false)});
+  hero.classList.add('swap');clearTimeout(ht_);ht_=setTimeout(()=>{hk.textContent=data[i][0];ht.textContent=data[i][1];hero.classList.remove('swap')},180)}
+reveal(tiles[0].querySelector('.lit'),1,false);
+function launch(){tep.textContent=data[i][2];tnm.textContent=data[i][3];playCard(tv)}
+tiles.forEach((t,k)=>t.addEventListener('click',()=>{if(k===i)launch();else f(k)}));
+tv.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){f(i+1);e.preventDefault()}if(e.key==='ArrowLeft'){f(i-1);e.preventDefault()}if(e.key==='Enter'){launch();e.preventDefault()}});
+</script>

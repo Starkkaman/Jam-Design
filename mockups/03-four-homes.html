@@ -1,0 +1,261 @@
+<title>Base Look Round 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Saira+Semi+Condensed:wght@400;500;600&family=Saira+Expanded:wght@500;600&family=Shippori+Mincho+B1:wght@600;800&family=Karla:wght@400;500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: page chrome is neutral; four sealed specimen panels (2x2), each a full "home" moment with its own signature motion. */
+:root{--bg:#ebe9e4;--fg:#1f2022;--muted:#5d605f;--line:#d0cdc6;--chip:#fff;--f-ui:"Karla",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#151617;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#202223;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151617;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#202223;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--f-ui)}
+.wrap{max-width:1200px;margin:0 auto;padding-block:40px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:32px}
+.eyebrow{font:500 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 clamp(28px,4.4vw,40px)/1.08 var(--f-ui);margin:6px 0 10px;text-wrap:balance}
+h2{font:700 20px var(--f-ui);margin:0}
+p{margin:0;max-width:68ch}
+.muted{color:var(--muted)}
+.threads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.threads{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.threads{grid-template-columns:1fr}}
+.th{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px}
+.th b{font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:880px){.grid{grid-template-columns:1fr}}
+figure{margin:0;display:grid;gap:12px;min-width:0}
+figcaption{display:grid;gap:6px;font-size:14px}
+figcaption b{font-size:16px}
+.letter{font:500 12px var(--f-mono);border:1px solid var(--line);background:var(--chip);border-radius:4px;padding:2px 7px;margin-right:6px}
+.refs{font:400 12px var(--f-mono);color:var(--muted)}
+.house{border-left:2px solid var(--line);padding-left:10px}
+.sig{font:600 13px var(--f-ui);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:7px 12px;cursor:pointer;justify-self:start}
+.sig:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+
+/* shared specimen skeleton */
+.spec{position:relative;overflow:hidden;min-height:520px;display:grid;gap:12px;align-content:start;padding:20px;isolation:isolate}
+.spec .sw{appearance:none;border:0;cursor:pointer;flex:none;position:relative;padding:0}
+.spec .sw:focus-visible,.spec .go:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ============ A · HI-FI ============ */
+.hifi{background:#d8d5cf;color:#1d1c1a;font-family:"Jost",sans-serif;border-radius:18px;padding:0;gap:0}
+.hifi .trim{height:26px;background:repeating-linear-gradient(90deg,#5b3a22 0 7px,#6a452a 7px 9px,#553620 9px 15px);box-shadow:inset 0 -2px 0 #3a2414}
+.hifi .face{padding:18px 20px;display:grid;gap:12px;background:linear-gradient(180deg,#e2dfd9,#d3d0c9)}
+.hifi .band{background:#1d1c1a;color:#e9e5dc;padding:14px 20px;display:grid;gap:10px;background-image:repeating-linear-gradient(0deg,#ffffff08 0 1px,transparent 1px 4px)}
+.hifi .lab{font:500 11px "Jost",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6a675f}
+.hifi .band .lab{color:#a7a296}
+.hifi .clock{font:500 34px/1 "Jost",sans-serif;letter-spacing:.02em}
+.hifi .vu{display:flex;gap:12px}
+.hifi .meter{flex:1;height:78px;border-radius:10px;background:linear-gradient(180deg,#f6e2b0,#efcf86);position:relative;overflow:hidden;box-shadow:inset 0 2px 6px #0003;border:2px solid #1d1c1a}
+.hifi .meter::before{content:"";position:absolute;left:10%;right:10%;bottom:-60%;height:140%;border-radius:50%;border-top:2px solid #1d1c1a55}
+.hifi .meter .scale{position:absolute;inset:8px 12px auto;display:flex;justify-content:space-between;font:500 9px "Jost",sans-serif;color:#1d1c1a99}
+.hifi .meter .scale b{color:#c8401a}
+.hifi .needle{position:absolute;left:50%;bottom:-6px;width:2px;height:70px;background:#1d1c1a;transform-origin:bottom center;transform:rotate(var(--a,-20deg));transition:transform 900ms cubic-bezier(.3,1.6,.4,1)}
+.hifi .meter .cap{position:absolute;bottom:6px;left:12px;font:600 10px "Jost",sans-serif;letter-spacing:.14em}
+.hifi .tile{background:#ecebe7;border-radius:12px;padding:12px 14px;display:grid;gap:6px;box-shadow:inset 0 1px 0 #fff,0 1px 2px #0002}
+.hifi .big{font:500 28px/1 "Jost",sans-serif}
+.hifi .sw{width:30px;height:46px;border-radius:8px;background:#bdb9b0;box-shadow:inset 0 2px 4px #0003}
+.hifi .sw::after{content:"";position:absolute;left:3px;right:3px;top:3px;height:22px;border-radius:6px;background:#f4f2ee;box-shadow:0 2px 3px #0004;transition:transform 260ms cubic-bezier(.3,1.5,.5,1),background 200ms}
+.hifi .sw[aria-pressed="true"]::after{transform:translateY(18px);background:#e8641c}
+.hifi .go{font:600 13px "Jost",sans-serif;letter-spacing:.14em;text-transform:uppercase;background:#e8641c;color:#fff;border:0;border-radius:10px;padding:12px 16px;cursor:pointer;box-shadow:0 3px 0 #9d3f0c;transition:transform 120ms,box-shadow 120ms;justify-self:start}
+.hifi .go:active{transform:translateY(3px);box-shadow:0 0 0 #9d3f0c}
+.hifi .lamp{width:8px;height:8px;border-radius:50%;background:#8fd16a;box-shadow:0 0 6px #8fd16a}
+
+/* ============ B · STARLINER ============ */
+.star{background:#151b30;color:#f3ece2;font-family:"Saira Semi Condensed",sans-serif;border-radius:28px}
+.star .sky{position:absolute;inset:0 0 auto;height:210px;z-index:-1;background:linear-gradient(180deg,#1b2446 0%,#4a3b6b 38%,#c4626b 72%,#f0a96a 100%);transition:filter 1600ms ease}
+.star .sky::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(180deg,transparent,#151b30)}
+.star .planet{position:absolute;right:28px;top:34px;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe2b0,#f0a96a 45%,#b8505a 100%);box-shadow:0 0 40px #f0a96a66;transition:transform 1600ms cubic-bezier(.16,1,.3,1)}
+.star .hello{padding-top:34px;display:grid;gap:2px}
+.star .clock{font:500 44px/1 "Saira Expanded",sans-serif;letter-spacing:.02em}
+.star .sub{font-size:15px;color:#f3ece2cc}
+.star .deck{margin-top:62px;display:grid;gap:10px}
+.star .tile{background:#1f2742;border-radius:22px;padding:14px 16px;display:grid;gap:6px;position:relative;overflow:hidden;transition:transform 600ms cubic-bezier(.3,1.3,.5,1),opacity 600ms}
+.star .tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
+.star .lab{font:600 12px "Saira Semi Condensed",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+.star .big{font:500 28px/1 "Saira Expanded",sans-serif}
+.star .pills{display:flex;gap:6px;flex-wrap:wrap}
+.star .pill{font:600 12px "Saira Semi Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:var(--c);color:#151b30}
+.star .sw{width:54px;height:30px;border-radius:999px;background:#3a4363}
+.star .sw::after{content:"";position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#f3ece2;transition:transform 380ms cubic-bezier(.3,1.4,.5,1)}
+.star .sw[aria-pressed="true"]{background:#f0a96a}
+.star .sw[aria-pressed="true"]::after{transform:translateX(24px)}
+.star .go{font:600 14px "Saira Semi Condensed",sans-serif;letter-spacing:.12em;text-transform:uppercase;background:#f0a96a;color:#151b30;border:0;border-radius:999px;padding:12px 20px;cursor:pointer;justify-self:start}
+.star.play .tile{animation:rise 700ms cubic-bezier(.3,1.3,.5,1) both}
+.star.play .tile:nth-child(2){animation-delay:90ms}.star.play .tile:nth-child(3){animation-delay:180ms}
+.star.play .planet{transform:translateY(-14px) scale(1.06)}
+@keyframes rise{from{transform:translateY(18px);opacity:.3}}
+
+/* ============ C · SESSION ============ */
+.sess{background:#161b26;color:#efe6d6;font-family:"Karla",sans-serif;border-radius:6px}
+.sess .lab{font:700 11px "Karla",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#f2c230}
+.sess .head{display:grid;gap:4px;border-bottom:1px solid #efe6d633;padding-bottom:12px}
+.sess .title{font:800 40px/1 "Shippori Mincho B1",serif;letter-spacing:.01em}
+.sess .title i{font-style:normal;color:#f2c230}
+.sess .clock{font:500 14px "IBM Plex Mono",monospace;color:#efe6d6b3}
+.sess .tile{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid #efe6d61f}
+.sess .no{font:800 22px "Shippori Mincho B1",serif;color:#d2452f;width:30px}
+.sess .big{font:600 24px/1 "Karla",sans-serif}
+.sess .small{font-size:14px;color:#efe6d6b3}
+.sess .sw{width:52px;height:26px;background:#2a3142;border-radius:2px}
+.sess .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;background:#efe6d6;transition:transform 220ms cubic-bezier(.2,.8,.2,1)}
+.sess .sw[aria-pressed="true"]{background:#d2452f}
+.sess .sw[aria-pressed="true"]::after{transform:translateX(26px)}
+.sess .go{font:700 13px "Karla",sans-serif;letter-spacing:.2em;text-transform:uppercase;background:#f2c230;color:#161b26;border:0;padding:12px 18px;cursor:pointer;justify-self:start}
+.sess .card{position:absolute;inset:0;z-index:3;display:grid;place-content:center;gap:6px;text-align:center;background:#161b26;pointer-events:none;opacity:0}
+.sess .card .bar{position:absolute;left:0;right:0;height:50%;background:#1f2533}
+.sess .card .bar.t{top:0;transform:translateX(-101%)}.sess .card .bar.b{bottom:0;transform:translateX(101%)}
+.sess .card .ep{position:relative;font:700 12px "Karla",sans-serif;letter-spacing:.3em;color:#f2c230}
+.sess .card .nm{position:relative;font:800 46px/1 "Shippori Mincho B1",serif}
+.sess.play .card{animation:card 1900ms ease both}
+.sess.play .card .bar.t{animation:barL 1900ms cubic-bezier(.16,1,.3,1) both}
+.sess.play .card .bar.b{animation:barR 1900ms cubic-bezier(.16,1,.3,1) both}
+@keyframes card{0%{opacity:0}12%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes barL{0%{transform:translateX(-101%)}30%,100%{transform:none}}
+@keyframes barR{0%{transform:translateX(101%)}30%,100%{transform:none}}
+
+/* ============ D · POSTCARD ============ */
+.post{background:#f4f1ea;color:#23302f;font-family:"Nunito Sans",sans-serif;border-radius:24px;padding:0;gap:0}
+.post .scene{height:190px;position:relative;overflow:hidden;background:linear-gradient(180deg,#7fb7df 0%,#a9d0e6 55%,#f4d7a8 100%)}
+.post .sun{position:absolute;left:62%;top:38px;width:58px;height:58px;border-radius:50%;background:#fff3d0;box-shadow:0 0 0 10px #fff3d044,0 0 0 22px #fff3d022}
+.post .cloud{position:absolute;height:22px;border-radius:22px;background:#fffdf8;opacity:.92;transition:transform 2400ms cubic-bezier(.16,1,.3,1)}
+.post .cloud::before,.post .cloud::after{content:"";position:absolute;bottom:6px;border-radius:50%;background:#fffdf8}
+.post .cloud::before{left:14px;width:30px;height:30px}.post .cloud::after{left:36px;width:22px;height:22px}
+.post .c1{left:8%;top:44px;width:90px}.post .c2{left:44%;top:92px;width:70px;opacity:.75}
+.post .hill{position:absolute;bottom:-40px;border-radius:50% 50% 0 0}
+.post .h1{left:-10%;width:70%;height:110px;background:#6f9a57}
+.post .h2{right:-15%;width:80%;height:90px;background:#4f7d4a}
+.post .house{position:absolute;right:24%;bottom:38px;width:34px;height:24px;background:#e2553d;border-radius:3px}
+.post .house::before{content:"";position:absolute;left:-4px;right:-4px;top:-14px;height:16px;background:#23302f;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.post .house::after{content:"";position:absolute;left:12px;top:8px;width:9px;height:9px;background:#ffd36b;border-radius:2px}
+.post .scene .hello{position:absolute;left:20px;top:22px;display:grid;gap:0}
+.post .clock{font:700 40px/1 "Fraunces",serif;color:#1d2b3a}
+.post .sub{font:600 14px "Nunito Sans",sans-serif;color:#1d2b3acc}
+.post .body{padding:16px 20px;display:grid;gap:10px}
+.post .tile{background:#fffdf8;border-radius:16px;padding:12px 14px;display:grid;gap:4px;box-shadow:0 1px 0 #e3ddcf,0 6px 16px #23302f10}
+.post .lab{font:700 12px "Nunito Sans",sans-serif;letter-spacing:.06em;color:#2c7a7b}
+.post .big{font:700 26px/1 "Fraunces",serif}
+.post .sw{width:54px;height:30px;border-radius:999px;background:#d9d3c5}
+.post .sw::after{content:"";position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0003;transition:transform 340ms cubic-bezier(.3,1.4,.5,1)}
+.post .sw[aria-pressed="true"]{background:#e2553d}
+.post .sw[aria-pressed="true"]::after{transform:translateX(24px)}
+.post .go{font:700 15px "Nunito Sans",sans-serif;background:#23302f;color:#fffdf8;border:0;border-radius:14px;padding:12px 18px;cursor:pointer;justify-self:start}
+.post.play .c1{transform:translateX(60px)}.post.play .c2{transform:translateX(-40px)}
+
+@media (prefers-reduced-motion:reduce){.spec *,.spec{animation:none!important;transition:none!important}}
+.ask{border-top:1px solid var(--line);padding-top:20px;display:grid;gap:10px}
+.ask ul{margin:0;padding-left:20px;display:grid;gap:6px;max-width:70ch}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Design bible · Round 3 · New base look</span>
+    <h1>Four homes, not four cockpits</h1>
+    <p class="muted">Your references share a few threads. Each direction pulls on different ones. Every panel shows the same Thursday evening at home and has its own signature move: press "Play signature" under it. They're all original, with nothing lifted from a show or game, and every one keeps the bible's floors.</p>
+  </header>
+
+  <section class="threads" aria-label="What your references share">
+    <div class="th"><b>Hardware you can touch</b><span class="muted">Rams, the Atari 2600's woodgrain and ribs, mid-century furniture, Fallout's chunky switches.</span></div>
+    <div class="th"><b>A painted, hopeful sky</b><span class="muted">McQuarrie, Syd Mead, 70s NASA art, Miyazaki's clouds. The future looks like a nice evening.</span></div>
+    <div class="th"><b>Bold type for big moments</b><span class="muted">Evangelion's and Bebop's title cards, Satoshi Kon's cuts. Quiet screens, loud transitions.</span></div>
+    <div class="th"><b>Warm, lived-in spaces</b><span class="muted">TNG and Voyager's carpeted, colour-coded rooms. A ship you'd actually live on.</span></div>
+  </section>
+
+  <div class="grid">
+    <figure>
+      <div class="spec hifi" id="s-a" aria-label="Direction A specimen: Hi-Fi">
+        <div class="trim"></div>
+        <div class="face">
+          <div class="row"><span class="clock num">7:42 pm</span><span class="lab">Thursday · 6 Nov</span></div>
+          <div class="vu">
+            <div class="meter"><div class="scale"><span>-20</span><span>-5</span><span>0</span><b>+3</b></div><i class="needle" style="--a:-28deg"></i><span class="cap">Living room</span></div>
+            <div class="meter"><div class="scale"><span>-20</span><span>-5</span><span>0</span><b>+3</b></div><i class="needle" style="--a:8deg"></i><span class="cap">Music</span></div>
+          </div>
+          <div class="tile"><span class="lab">Living room</span><div class="row"><span class="big num">21.5 °C</span><button class="sw" aria-pressed="true" aria-label="Living room lights"></button></div><span class="lab">3 of 5 lights on</span></div>
+        </div>
+        <div class="band">
+          <div class="row"><span class="lab">Continue watching</span><span class="lamp" aria-hidden="true"></span></div>
+          <div style="font:500 18px Jost,sans-serif">Severance · S2 E4 · 19 min left</div>
+          <button class="go">Play</button>
+        </div>
+      </div>
+      <button class="sig" data-t="s-a">Play signature</button>
+      <figcaption><b><span class="letter">A</span>Hi-Fi</b>
+        <span>Braun with soul. The house as a 1970s stereo: brushed aluminium face, walnut trim, a ribbed black band, orange rocker switches and VU-meter readouts. The signature move is the needles swinging when something changes.</span>
+        <span class="refs">Rams · Atari 2600 · mid-century · Fallout's switches</span>
+        <span class="house">For the household: everyone already knows how a stereo works. Not nerdy, just nice.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="spec star" id="s-b" aria-label="Direction B specimen: Starliner">
+        <div class="sky"></div><div class="planet"></div>
+        <div class="hello"><span class="clock num">19:42</span><span class="sub">Good evening. Clear skies tonight.</span></div>
+        <div class="deck">
+          <div class="tile" style="--c:#f0a96a"><span class="lab">Living room</span><div class="row"><span class="big num">21.5°</span><button class="sw" aria-pressed="true" aria-label="Living room lights"></button></div></div>
+          <div class="tile" style="--c:#a79bd4"><span class="lab">Continue</span><div style="font-size:18px">Severance · 19 min left</div></div>
+          <div class="tile" style="--c:#5fb3b3"><span class="lab">Tonight</span><div class="pills"><span class="pill" style="--c:#5fb3b3">Bins out</span><span class="pill" style="--c:#d9a441">2 replies</span><span class="pill" style="--c:#a79bd4">Movie night</span></div></div>
+        </div>
+        <button class="go">Play Severance</button>
+      </div>
+      <button class="sig" data-t="s-b">Play signature</button>
+      <figcaption><b><span class="letter">B</span>Starliner</b>
+        <span>A lounge on a passenger ship. A painted sky across the top follows the real time of day. Below it are soft, rounded panels, each with a colour-coded edge, like a starship's comfortable crew quarters. The signature move is panels rising into place as the sky shifts.</span>
+        <span class="refs">McQuarrie · Syd Mead · TNG/Voyager interiors · 70s NASA art</span>
+        <span class="house">For the household: it reads as optimistic and pretty, not technical.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="spec sess" id="s-c" aria-label="Direction C specimen: Session">
+        <div class="head"><span class="lab">Thursday night</span><span class="title">Evening <i>Session</i></span><span class="clock num">19:42 · 6 Nov</span></div>
+        <div class="tile"><span class="no">1</span><div><div class="big num">21.5 °C</div><div class="small">Living room · 3 lights on</div></div><button class="sw" aria-pressed="true" aria-label="Living room lights"></button></div>
+        <div class="tile"><span class="no">2</span><div><div class="big">Severance</div><div class="small">S2 E4 · 19 min left</div></div><span></span></div>
+        <div class="tile"><span class="no">3</span><div><div class="big">Bins out</div><div class="small">2 replies can wait till morning</div></div><span></span></div>
+        <button class="go">Play</button>
+        <div class="card" aria-hidden="true"><i class="bar t"></i><i class="bar b"></i><span class="ep">Episode 04</span><span class="nm">Severance</span></div>
+      </div>
+      <button class="sig" data-t="s-c">Play signature</button>
+      <figcaption><b><span class="letter">C</span>Session</b>
+        <span>Calm, list-like screens. Then a big serif title card for the moments that matter: starting a film, launching a game, waking up. The signature move is the title card. It slides in from both sides with low brightness change, so it stays within the flash rule.</span>
+        <span class="refs">Bebop · Evangelion · Satoshi Kon</span>
+        <span class="house">For the household: the everyday screens are plain. The drama only appears when you press Play.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="spec post" id="s-d" aria-label="Direction D specimen: Postcard">
+        <div class="scene"><i class="sun"></i><i class="cloud c1"></i><i class="cloud c2"></i><i class="hill h1"></i><i class="hill h2"></i><i class="house"></i>
+          <div class="hello"><span class="clock num">7:42</span><span class="sub">Thursday evening at home</span></div></div>
+        <div class="body">
+          <div class="tile"><span class="lab">Living room</span><div class="row"><span class="big num">21.5°</span><button class="sw" aria-pressed="true" aria-label="Living room lights"></button></div></div>
+          <div class="tile"><span class="lab">Continue</span><div style="font:600 17px 'Nunito Sans',sans-serif">Severance · 19 min left</div></div>
+          <div class="tile"><span class="lab">Tonight</span><div>Bins out. Two replies can wait.</div></div>
+          <button class="go">Play</button>
+        </div>
+      </div>
+      <button class="sig" data-t="s-d">Play signature</button>
+      <figcaption><b><span class="letter">D</span>Postcard</b>
+        <span>Illustrated and hand-made. A small painted scene of your house that changes with weather and time, set above warm, friendly cards. The signature move is clouds drifting and the light changing. On the TV it would become a full landscape behind the tiles.</span>
+        <span class="refs">Miyazaki · Fallout's illustrated optimism · mid-century posters</span>
+        <span class="house">For the household: the friendliest of the four. The least "retro-tech".</span></figcaption>
+    </figure>
+  </div>
+
+  <section class="ask">
+    <h2>How to answer</h2>
+    <ul>
+      <li>Pick the one you'd live with every day, and say whether the other two people would too.</li>
+      <li>Steal freely. "A's hardware with B's sky" or "C's title card in any of them" are both valid answers.</li>
+      <li>These can also stack: one base look for every day, plus another look's signature move for big moments.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+document.querySelectorAll('.spec .sw').forEach(s=>s.addEventListener('click',()=>s.setAttribute('aria-pressed',s.getAttribute('aria-pressed')!=='true')));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.querySelectorAll('.sig').forEach(b=>b.addEventListener('click',()=>{
+  const el=document.getElementById(b.dataset.t);
+  if(el.id==='s-a'){el.querySelectorAll('.needle').forEach(n=>{const v=(Math.random()*56-34).toFixed(0);n.style.setProperty('--a',v+'deg')});return}
+  el.classList.remove('play');void el.offsetWidth;el.classList.add('play');
+  if(el.id==='s-b'||el.id==='s-d'){setTimeout(()=>el.classList.remove('play'),reduce?0:2600)}
+}));
+</script>
