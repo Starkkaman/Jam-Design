@@ -220,3 +220,42 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D145. Step mode is reused for checks, weekly review and first-run setup; a reading page is the steps expanded, with no orange.
 - D146. "Hide this kind of thing" defaults to one item; wider scope is deliberate, locked for VIPs, listed with Remove and Undo. Every merge has Undo.
 - D147. Shortcuts are single letters; `?` always opens the key sheet.
+
+### Pass 3 · NervOS (final form)
+- D148. One 230 px Guide band for every TV app: opaque, no veil, a state slot and word, ≤1 orange key; picture choosers (save slots) replace the band's key row.
+- D149. Row things light their bottom edge, column things their leading edge, holds fill the top edge.
+- D150. ≡ = "options for what's focused"; on the top band it opens Power; a hold is never the only path.
+- D151. Hints name the last-used input's buttons (A/B or OK/Back).
+- D152. When another app owns Guide (Steam), the house band needs a second way in, and the screen says what it is.
+- D153. Power is a sheet with focus on Cancel and no orange; Sleep is one press.
+- D154. TV keyboard: 12-unit grid, Done the one orange, printed hints, steady caret.
+- D155. Boot ≤1.6 s; the return reuses the shutter; B cancels a launch; Settings and Power open without the shutter.
+- D156. An app may keep its own section names if the current section shows a plain 22 px sub-label (answers D78).
+- D157. One TV player band shared by NervOS Theater and JamFin: Play, ±10/30 s, Subtitles, Audio, Chapters, Stop, timeline on the band's top edge.
+- Note: NervOS now stops its systems carousel at the ends (Arcade → Super Nintendo is 7 presses instead of 1). This changes a carousel Isaac approved; he decides (see D120).
+
+### Pass 3 · Jam-Dash (final form)
+- D158. Four indicator shapes only: warn = amber round light + printed ▲ (replaces D92 and D142's triangle window; Callsheet and Jam-Dash disagree, pick one).
+- D159. "Fixed hh:mm" and "Seen hh:mm" are the quiet past forms of the state words.
+- D160. First-screen promise: the status summary never falls below the fold; app tiles may scroll.
+- D161. Density ladder ends in Rows, also a per-device setting.
+- D162. Night bands: `#070706`, 1 px rib at 14% white every 5 px, edge `#4a4944`, top highlight `#ffffff2e` (refines D99).
+- D163. Tile names never get an ellipsis: wrap to two lines; rows use a user-set short name.
+- D164. History: 7 days; open items lit "Open now", finished ones unlit with how they ended; no bells, no unread counts.
+- D165. Secrets are typed only by the person, shown as dots with Replace, never shown back.
+- D166. Live text steps, it doesn't stream: a paused log counts new lines instead of moving.
+- D167. Forms check as you type: a failing check is a warn, Save waits, and Save says what it costs.
+
+### Pass 3 · JamFin (final form)
+- D168. OK presses what is lit: on a player timeline OK pauses; a prompt may take focus only if a mistaken press loses nothing, visibly, for ≤8 s; Next episode never takes focus.
+- D169. Focus-driven content waits 500 ms (one number, replacing 280/450/500); invisible prefetch may start at 280 ms; ↓/OK commit at once.
+- D170. Range keys (1–10, 11–20…) for rows over 12 items in a fixed order.
+- D171. One launch rule: hold = max(load, floor); full shutter (600 ms) for launches and first Play; short form (300 ms) after; Calm ≤150 ms fade; 1.6 s only for milestones.
+- D172. The title card takes the lighting: light flat halves in Day, black ribbed at Night.
+- D173. Windows in Day: unlit = hairline groove on light surfaces; lit = full window with a dark rim. Black bands keep the recess (compare D121, D131).
+- D174. Press twice disarms after 3 s (settles D111).
+- D175. Lower views work like Home; a TV screen never leaves empty ground taller than ~15%.
+- D176. The sign adds, never repeats what the plinth shows.
+- D177. Choosers hold five rows, then scroll with "n of N ▲▼".
+- D178. Accents on TV homes live on the black band, so they show with full-colour covers (settles D19; launcher and NervOS should move theirs too).
+- D179. A JamFin profile's look and lighting (Day allowed on the shared TV) is the one exception to "one house look on shared screens".
