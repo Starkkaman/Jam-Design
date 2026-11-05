@@ -16,6 +16,7 @@
 - **Versions**: Jam Cards **0.10.0** is on GitHub (main). **HA still runs 0.9.0** until Isaac installs 0.10.0 from HACS. The
   0.10.0 opt-ins (dock state fill, attention, …) are off by default, and the live dashboards don't use them yet.
   jam-theme with all 10 looks is installed.
+- **Isaac's look**: Isaac uses **Jam Braun** on Jam Home (his per-user pick). JamBoard (Poster) is the house default. See the "Jam Braun look" section and [`screens/braun/`](screens/braun/).
 - **Surfaces and input** (touch everywhere, mouse/keyboard on desktop):
   - Phone, ~390 px wide (family). This and the kiosks matter most.
   - Kitchen kiosk: Echo Show 8, 1280×800 @1.33 = **961×601 CSS px**, landscape, read from ~3 m.
@@ -173,7 +174,8 @@ strip, sheets (`openSheet`) and motifs, all in `src/core.js`.
 - **How a look is selected**: a look is just an HA theme.
   - Per user: Profile → Theme, or the `jam-looks` card. It fires the frontend's own `settheme` event, like Profile → Theme does. That sets the theme for the logged-in user (this browser + that user's profile in HA 2026.10) and keeps their auto/light/dark choice.
   - House default: the backend default via `frontend.set_theme`.
-  - A view's `theme:` overrides both: every live view pins `theme: JamBoard`, and each Labs view pins its look.
+  - A view's `theme:` overrides both. The live dashboards' views pin no theme (per the configs in jam-home `dashboards/`), so
+    each user's own pick applies. Each Labs view pins its look.
   - Cards read `--jam-look` and switch pack live, without a reload.
 - **State contract**: details are in jam-cards `docs/DESIGN.md` "State grammar".
   - On = the strongest fill the look owns; off = quiet.
@@ -182,6 +184,131 @@ strip, sheets (`openSheet`) and motifs, all in `src/core.js`.
   - Unreachable = "Offline" on a broken form (Poster: a hollow card with a dashed edge).
   - Hooks for look packs: `data-state="on|off|offline"` on jam-light / jam-button / jam-tile / jam-fan hosts, and `data-state="on|off|action"` + `data-alert="true"` on jam-kiosk dock blocks.
 - **Accents**: one colour per room. Living = ochre, kitchen = teal, master = blue, Marissa = pink, music = violet, nerd = green; red is alerts only.
+
+## Jam Braun look
+After Dieter Rams (T3 radio, ET66 calculator, AB-1 clock): a warm-white or anthracite appliance you operate. Quiet panels
+with a hairline and a soft shadow (the only look with elevation), one orange signal for "active / act", toggle switches
+instead of power corners, LED dots instead of colour floods, no cut corners.
+- **Brief**: jam-cards `docs/looks/BRAUN.md`.
+- **Rules**: jam-cards `docs/DESIGN.md` "Braun rules".
+- **Tokens**: `tokens/looks/braun.mjs`, which generates jam-theme `themes/jamboard-braun.yaml` (theme name **"Jam Braun"**).
+- **Pack**: jam-cards `src/looks/braun.js`.
+
+**Version note.** The screenshots below are rendered with jam-cards main (**0.10.0**) and the current jam-theme. HA runs
+jam-cards **0.9.0**, and the jam-theme on HA is current (installed 2026-11-04). Braun changes from 0.9.0 to 0.10.0:
+- **Living colour**: a new `jam-living` token, walnut `#8a5a3b` light / `#b07a52` dark, so the living room is no longer the
+  signal orange. The audit had flagged that as a Braun bug.
+- **Offline**: the state-grammar Offline form. The panel lifts out: no face, no shadow, a 1.5 px dashed `--dim` hairline,
+  and the word "Offline". It used to be the off form + "N/A".
+- **Locks**: a lock is never "on" (core change), so an unlocked door shows as the red alert.
+- **Alert rule** on the new jam-house attention strip and on jam-matrix alert cells: a panel-2 face, alert-red text and a
+  1.5 px red ring. The red fill with ink text was 3.54:1 in light mode.
+- **Type floor**: labels are at least 12 px and chips at least 13 px.
+- **Look cards**: polish for jam-dial, jam-keypad and jam-radio. Not on the live dashboards.
+
+On HA today, then, the living room may still read as signal orange (depending on whether 0.9.0 cards read `jam-living`),
+and unreachable lights read "N/A" on the off form.
+
+### Tokens (theme "Jam Braun")
+| Token | Light (primary) | Dark |
+|---|---|---|
+| Page (HA ground / `lovelace-background`) | `#e7e3da` warm white | `#1c1c1a` anthracite |
+| Panel (`jam-slab`, card face) / panel 2 (`slab2`, keys, tracks) / `slab3` (keys in sheets) | `#f2efe8` / `#e4e0d6` / `#dcd7cc` | `#2a2a27` / `#34342f` / `#3d3d38` |
+| Text (`jam-fg`) / dim (`jam-dim`) / hairline (`jam-line`) | `#262626` / `#605c54` / `#d6d1c6` | `#ece9e2` / `#aca89f` / `#3d3d38` |
+| Signal (`jam-ochre`: default accent, focus ring, HA primary) | `#f07d1e` | `#f28a2e` |
+| Living (`jam-living`, walnut) | `#8a5a3b` | `#b07a52` |
+| Alert fill (`jam-red`) / alert text (`jam-alert-text`) | `#d9482b` / `#b32205` | `#e5583a` / `#ff8668` |
+| Room hues teal / blue / pink / violet / green | `#22a39a` / `#4a7be0` / `#d24f7c` / `#9b6dd6` / `#5f9a4a` | `#22a39a` / `#4a7be0` / `#e2658f` / `#9b6dd6` / `#6fae58` |
+| Text on fills (`jam-on-fg`) | `#262626` | `#1c1c1a` |
+| Graph series s1–s5 | `#d26a12` `#00879c` `#c2361a` `#8a52ad` `#5f7d1c` | `#f28a2e` `#1f9fb0` `#d43a1c` `#a66cc4` `#7f9b2a` |
+| Elevation (`jam-elev-1`) | `0 1px 0 rgba(255,255,255,.7) inset, 0 2px 8px rgba(0,0,0,.08)` | `0 1px 0 rgba(255,255,255,.04) inset, 0 2px 10px rgba(0,0,0,.35)` |
+| Pack constants (no tokens) | ET66 yellow `#e8b12a`, olive `#6f8f3a` | same |
+
+These values are the same in both modes:
+- **Fonts**: Archivo (OFL, variable 300–700, `dist/fonts/archivo-var-latin.woff2`) for display and body; HA's body and
+  heading font are set to Archivo too.
+  - Display: weight 500, mixed case, lead 1.18, scale .72× Poster's size, tracking −.005em.
+  - Big numerals: 400 at .85×; the kiosk clock is 300.
+  - Labels: 500, uppercase, tracking .06em.
+  - Keys: 500, mixed case.
+- **Shapes**: no cut corners (every `jam-shape-*` is `none`).
+  - Radii: cards, sheets and hero 14 px; inner posters 10 px; keys, chips and pills 999 px. HA's radii are mapped to match (6 / 10 / 14 / 999).
+  - Border: `1px solid var(--jam-line)`. Rules and stripes are 2 px.
+- **Motion**: smooth, never stepped. Ease-out `cubic-bezier(.2,.7,.3,1)`, 160–220 ms; press = `scale(.98)`. The pack's own
+  keyframes replace Poster's wipes, stamps and spiral: braun-enter, braun-press, braun-settle, braun-rise, braun-fade-in/out, braun-nudge.
+- **Contrast**: every text is at least 4.5:1 in both modes. Text on the signal is ink, not white.
+
+### What the Braun pack changes (src/looks/braun.js)
+- **Surfaces**: panels with a hairline + soft shadow, inner panels 10 px. Tone marks are LED dots; stripes are 2 px rules.
+- **Controls**:
+  - Keys are pills on panel 2. The primary key and the active choice are the orange signal.
+  - Sliders: a 4 px strip with rounded ends, an orange fill and an 18 px knob.
+  - Focus: a 2 px signal ring with a 2 px offset.
+- **Power corner → toggle switch**: a 34×18 pill top-right with the same 46 px hit area, olive `#6f8f3a` when on.
+- **Lights**: the face stays a panel, tinted flat in the light's own colour while on (18 % light, 24 % dark), with an LED
+  dot in the light's colour, a brightness strip and member dots.
+- **Colour revision 2026-11-03** (after Isaac's "Braun is kinda boring so far. I think we can incorporate a little more color."):
+  - Light-colour tints on lit lights.
+  - ET66 yellow `#e8b12a` for secondary accent keys: shuffle/favourite on, active tab/scene/choice, current TV source.
+  - Olive for on toggles and switch keys.
+  - The room colour as a 4 px rule on top of each jam-heading.
+  - 15 % room tints on kiosk dock blocks.
+  - 12 % tints on the speaker / TV text bands. The kiosk speaker's side panel stays a plain panel.
+- **Motifs**:
+  - Empty: a 5×4 dot grille.
+  - Idle album art: a T3 speaker-grille dot field with one orange dot.
+  - Power glyph: a thin 1.75 px stroke.
+  - Sheets: no spiral flash.
+  - Screensaver: the AB-1 dial ring with an orange dot.
+- **Kiosk (jam-kiosk)**:
+  - Room bar: 2 px.
+  - Clock: weight 300, with the colon in the signal.
+  - Dock blocks: tinted panels (15 % room colour) with a 12 px room dot before the name; pressed = solid room colour.
+    Action blocks (All off) are a plain panel.
+  - Lock: a quiet panel disc; unlocked = the red disc with a red ring.
+  - With `dock_state: fill` (opt-in), an on block fills.
+- **Screensaver**: an AB-1 clock on a plain panel page. The time is 300 and the weather word 400; a hairline ring with an
+  orange dot replaces Poster's colour bars. The time chip and now-playing block are panels with a hairline.
+- **Alert rule**: alert-red text on a panel-2 face with a 1.5 px red ring (attention strip, matrix cells). An unlocked
+  door uses the red fill (kiosk disc, house chip dot).
+- **Offline**: no panel, no shadow, a dashed hairline, dim text.
+- **Look cards**: jam-dial (raised cap, rounded arc), jam-keypad (brown ET66 body, green LCD, coloured keys), jam-radio
+  (T3 grille, dark LCD, ribbed wheel).
+
+### Braun screens
+Rendered with the jam-home harness (`?look=braun`, fake states, clock fixed at Tue 2026-10-27 14:30), except where noted.
+The files are in [`screens/braun/`](screens/braun/).
+
+| Screen | Screenshots |
+|---|---|
+| Phone Living | [dark](screens/braun/phone-living-default-dark.png) · [light](screens/braun/phone-living-default-light.png) |
+| Phone Kitchen | [dark](screens/braun/phone-kitchen-default-dark.png) · [light](screens/braun/phone-kitchen-default-light.png) |
+| Phone Master | [dark](screens/braun/phone-master-default-dark.png) · [light](screens/braun/phone-master-default-light.png) |
+| Phone Marissa | [dark](screens/braun/phone-marissa-default-dark.png) · [light](screens/braun/phone-marissa-default-light.png) |
+| Phone Music | [dark](screens/braun/phone-music-default-dark.png) · [light](screens/braun/phone-music-default-light.png) |
+| Light pop-up, group | [dark](screens/braun/phone-lightpopup-group-dark.png) · [light](screens/braun/phone-lightpopup-group-light.png) |
+| Light pop-up, WLED | [dark](screens/braun/phone-lightpopup-wled-dark.png) · [light](screens/braun/phone-lightpopup-wled-light.png) |
+| TV Remote sheet | [dark](screens/braun/phone-tvremote-default-dark.png) · [light](screens/braun/phone-tvremote-default-light.png) |
+| TV Source sheet | [dark](screens/braun/phone-tvsource-default-dark.png) · [light](screens/braun/phone-tvsource-default-light.png) |
+| NerveOS sheet | [dark](screens/braun/phone-nerveos-default-dark.png) · [light](screens/braun/phone-nerveos-default-light.png) |
+| Speaker library panel, **error state** (jam-home harness: no Music Assistant) | [dark](screens/braun/phone-speakerpanel-error-dark.png) · [light](screens/braun/phone-speakerpanel-error-light.png) |
+| Speaker library panel, **filled** (Pinned tab, 1280; from the **jam-cards preview** with its fake library, not jam-home) | [dark](screens/braun/desktop-speakerpanel-pinned-dark.png) · [light](screens/braun/desktop-speakerpanel-pinned-light.png) |
+| Living kiosk home (1024×768) | [dark](screens/braun/kiosk-living-home-dark.png) · [light](screens/braun/kiosk-living-home-light.png) |
+| Living kiosk, door unlocked | [dark](screens/braun/kiosk-living-unlocked-dark.png) · [light](screens/braun/kiosk-living-unlocked-light.png) |
+| Living Lights sheet | [dark](screens/braun/kiosk-living-sheetlights-default-dark.png) · [light](screens/braun/kiosk-living-sheetlights-default-light.png) |
+| Living TV sheet | [dark](screens/braun/kiosk-living-sheettv-default-dark.png) · [light](screens/braun/kiosk-living-sheettv-default-light.png) |
+| Living Music sheet | [dark](screens/braun/kiosk-living-sheetmusic-default-dark.png) · [light](screens/braun/kiosk-living-sheetmusic-default-light.png) |
+| Living screensaver (Clock) | [dark](screens/braun/kiosk-living-screensaver-dark.png) · [light](screens/braun/kiosk-living-screensaver-light.png) · [dark, TV playing](screens/braun/kiosk-living-screensaverclock-playing-dark.png) |
+| Kitchen kiosk home (961×601) | [dark](screens/braun/kiosk-kitchen-home-dark.png) · [light](screens/braun/kiosk-kitchen-home-light.png) |
+| Kitchen kiosk, door unlocked | [dark](screens/braun/kiosk-kitchen-unlocked-dark.png) · [light](screens/braun/kiosk-kitchen-unlocked-light.png) |
+| Kitchen Lights sheet | [dark](screens/braun/kiosk-kitchen-sheetlights-default-dark.png) · [light](screens/braun/kiosk-kitchen-sheetlights-default-light.png) |
+| Kitchen Music sheet | [dark](screens/braun/kiosk-kitchen-sheetmusic-default-dark.png) · [light](screens/braun/kiosk-kitchen-sheetmusic-default-light.png) |
+| Kitchen screensaver (Clock) | [dark](screens/braun/kiosk-kitchen-screensaver-dark.png) · [light](screens/braun/kiosk-kitchen-screensaver-light.png) |
+| **State:** on / off / offline lights (jam-control crop at 1280: lit = light-colour tint + olive toggle, off = plain panel, offline = dashed hairline + "Offline") | [dark](screens/braun/card-light-on-off-offline-dark.png) · [light](screens/braun/card-light-on-off-offline-light.png) |
+| **State:** alert, door unlocked on the phone house strip (red dot chip "Door unlocked · lock"; crop of the Living view top) | [dark](screens/braun/house-door-unlocked-alert-dark.png) · [light](screens/braun/house-door-unlocked-alert-light.png) |
+| **State:** kiosk dock on/off/action with `dock_state: fill` (0.10.0 opt-in, not live; from the **jam-cards preview** fixture, whose dock has an extra Air block) | [dark](screens/braun/kiosk-dockstates-fill-dark.png) · [light](screens/braun/kiosk-dockstates-fill-light.png) |
+
+Photos-mode screensaver shots in Braun are not included (the Poster set has one; Braun only changes the time chip).
 
 ## Hard constraints
 - Kiosk: no scrolling, no continuous animation (minute-tick clock, transform/opacity only), 44 px targets, contrast
