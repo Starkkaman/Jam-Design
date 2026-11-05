@@ -80,6 +80,11 @@ p{margin:0;max-width:70ch}
 .t1.in .mid{opacity:1;transition-delay:260ms}
 .t1.out .mid{opacity:0;transition:opacity 180ms}
 .t1 .lit{width:24cqw}
+/* Shutter + slatted progress: light seen through fine vertical slats, like a tape deck's segment bar */
+.t1.slatted .lit{width:30cqw;height:1.1cqw;border-radius:.2cqw}
+.t1.slatted .lit::after{content:"";position:absolute;inset:0;z-index:2;background:repeating-linear-gradient(90deg,transparent 0 .3cqw,#141211 .3cqw .44cqw)}
+.t1.slatted .lit .run{background:linear-gradient(90deg,#3d281a40,#3d281a .5cqw),#3d281a}
+.t1.slatted .lit .run::before{opacity:.55}
 
 /* T2 · Tape counter faceplate */
 .t2{background:#151413;background-image:var(--ribs);opacity:0;transition:opacity 280ms var(--settle)}
@@ -127,7 +132,7 @@ p{margin:0;max-width:70ch}
   </header>
 
   <div class="controls">
-    <div class="ctl"><span class="eyebrow">Style</span><div class="seg" id="sty" role="group" aria-label="Title card style"><button id="s1" data-v="t1" aria-pressed="true">Shutter</button><button id="s2" data-v="t2" aria-pressed="false">Tape counter</button><button id="s3" data-v="t3" aria-pressed="false">Tuning dial</button></div></div>
+    <div class="ctl"><span class="eyebrow">Style</span><div class="seg" id="sty" role="group" aria-label="Title card style"><button id="s1" data-v="t1s" aria-pressed="true">Shutter · slatted</button><button id="s1b" data-v="t1" aria-pressed="false">Shutter</button><button id="s2" data-v="t2" aria-pressed="false">Tape counter</button><button id="s3" data-v="t3" aria-pressed="false">Tuning dial</button></div></div>
     <div class="ctl"><span class="eyebrow">Load</span><div class="seg" id="spd" role="group" aria-label="Load speed"><button id="l1" data-v="fast" aria-pressed="true">Fast</button><button id="l2" data-v="slow" aria-pressed="false">Slow, with a stall</button></div></div>
     <button class="play" id="go">Play</button>
   </div>
@@ -207,7 +212,7 @@ tv.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){focusTile(fi+1);e.pre
 addEventListener('resize',place);requestAnimationFrame(place);
 
 // ---------- controls
-let style='t1',speed='fast';
+let style='t1s',speed='fast';
 function seg(id,cb){const b=[...document.querySelectorAll('#'+id+' button')];b.forEach(x=>x.addEventListener('click',()=>{b.forEach(y=>y.setAttribute('aria-pressed',y===x));cb(x.dataset.v)}))}
 seg('sty',v=>style=v);seg('spd',v=>speed=v);
 document.getElementById('go').addEventListener('click',()=>{tv.focus();launch()});
@@ -216,7 +221,7 @@ document.getElementById('go').addEventListener('click',()=>{tv.focus();launch()}
 function progress(t){if(speed==='fast')return Math.min(1,t/900);
   if(t<1300)return .38*(t/1300);if(t<2700)return .38+.06*((t-1300)/1400);return Math.min(1,.44+.56*((t-2700)/1100))}
 const MIN=1600,HOLD=500;
-function launch(){if(busy)return;busy=true;const it=items[fi];const card=document.getElementById('c-'+style);
+function launch(){if(busy)return;busy=true;const it=items[fi];const card=document.getElementById('c-'+(style==='t1s'?'t1':style));card.classList.toggle('slatted',style==='t1s');
   card.querySelectorAll('[data-f="eb"]').forEach(e=>e.textContent=it.eb);card.querySelectorAll('[data-f="ttl"]').forEach(e=>e.textContent=it.ttl);card.querySelectorAll('[data-f="verb"]').forEach(e=>e.textContent=it.verb+'…');
   const tape=card.querySelector('[data-f="tape"]');if(tape)tape.textContent='Loading';const led=card.querySelector('[data-f="led"]');if(led)led.classList.remove('on');
   const lit=card.querySelector('.lit'),needleHost=card.querySelector('.dial');
