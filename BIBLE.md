@@ -177,11 +177,20 @@ A look may have a full-screen film layer (scanlines, grain, colour fringe) if th
 | Contrast | WCAG AA, including secondary text | same | same; focused labels never fade below AA |
 | Targets | 44 px touch | 44 px, no scrolling | Focus visible from the sofa |
 | Motion | Desk gets more motion than phone | One-shot only, nothing continuous | Transform + opacity only; no blur; glows are sprites; focus ≤ 150 ms (≤ 80 ms or snap under key repeat); scenes 350–600 ms |
-| Flashing | At most 2 big luminance changes per second; Calm mode everywhere (see §8) | | |
+| Flashing | At most 2 big luminance changes per second, in normal and Calm mode alike. See "Flash and glare" below. | | |
 | State | Never colour alone: shape + word | | |
 | Fonts | OFL, bundled, no CDNs | | |
 | Words | Plain, complete button wording ("Resume from 1:12:04"); no jokes in the interface | | One title + one line on **home screens, launchers and focused cards**. Detail pages and buttons keep complete wording. |
 | Carousels | — | — | Allowed for cover and screenshot rows, and for groups in any look (Hi-Fi included) when the neighbours are named or visible at the edges and the position is shown ("3 of 8"). The next item always peeks. Never for controls or settings. |
+
+### Flash and glare (measured by Lobby; floors for every TV surface, advice for kiosks)
+1. **A big luminance change** is at least 50% of a 310×310 px window (at 1080p) changing relative luminance by 0.10 or more in the same direction. Test it with a held key, alternating presses at 4 a second, and one press a second.
+2. **Saturated red** (linear R/(R+G+B) ≥ 0.8) covering 25% of the screen or more may not switch on and off more than twice a second. Brand colours (Netflix, YouTube) included.
+3. **Night glare cap:** at rest, under about 10% of the screen above relative luminance 0.5. No full-screen white or yellow floods on open; brand colours are pulled into the look's lightness band.
+4. **Focus colour snaps; only transforms animate.** The old focus goes off in the same frame the new one lights. (Fading a label's colour and its background together drops it to about 1:1 for 200 ms.)
+5. **A fade isn't one change.** A cross-fade between light and dark pictures is two changes, because it passes through grey. Zooming a picture open sweeps it through the same area several times; a window growing over a still picture changes each area once.
+6. **Calm mode swaps in one frame, never through a bare frame.** Decode images before swapping; never remove the old face before the new one is ready.
+7. **Launch and open layers are opaque and full-bleed**, so the home screen never shows through. An input with no signal says what to do.
 
 ## 10. Still open
 

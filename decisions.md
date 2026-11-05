@@ -210,3 +210,9 @@ Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopt
 - Isaac's picks: accents STRIPES, SESSION BLOCKS, COLOUR BARS. Saved for later: the HORIZON palette and the MISSION PATCH palette ("could be used later for something").
 - Title card recorded as final in the bible: Shutter + slatted bar, Rich texture, paper headlines, Stripes accent.
 -> BIBLE.md draft 0.5.
+
+## Project check 4: Lobby
+24 screenshots + 7 measured flash/glare proposals. All adopted as TV floors (advice for kiosks), no visible change to Hi-Fi: numeric big-change definition, saturated-red clause, night glare cap (<10% of screen above L 0.5 at rest), snap focus colour / transform-only, fades count as two changes, Calm swaps in one frame without bare frames, opaque full-bleed launch layers.
+
+## Project check 5: Jam-Dash
+56 Depth screenshots + profile. Its questions 1, 3, 4, 6 (which originals/II looks stay, Global views per look, picker previews, look bugs) are app-internal and wait for Jam-Dash's rollout turn / the shelf decision. Q2 (Runner direction) and Q5 (phone monitoring rule) go to Isaac.
