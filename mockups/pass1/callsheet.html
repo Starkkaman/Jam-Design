@@ -1,0 +1,594 @@
+<title>Callsheet Calm v1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one app template rendered into scaled frames: desktop 1440x900 and phone 390x844. Routes: Today, Replies (one at a time / list), All clear, Agenda, Ask, Find-or-ask palette, Worth knowing. Simplified Braun Hi-Fi: flat cards, ribs only on the black day band, flat indicator windows, orange only on the one primary button per screen. Fake sample data only. */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--settle:cubic-bezier(.16,1,.3,1);--bounce:cubic-bezier(.3,1.3,.5,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:26px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}
+h2{font:600 20px var(--f);margin:0}
+p{margin:0;max-width:76ch}
+.muted{color:var(--muted)}
+.ctrls{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.ctrls>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.kseg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--key)}
+.kseg .key{box-shadow:none;background:transparent}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 14px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+section.blk{display:grid;gap:14px}
+figure{margin:0;display:grid;gap:8px;min-width:0;width:100%;align-content:start}
+figcaption{font-size:13px;color:var(--muted)}
+.frame{position:relative;width:100%;border-radius:16px;background:#0d0d0c;padding:10px;box-shadow:0 20px 50px #0000004d}
+.screen{position:relative;overflow:hidden;border-radius:8px;outline:none}
+.screen:focus-visible{box-shadow:0 0 0 3px #ec7c22}
+.phone{max-width:414px;border-radius:44px;padding:12px;justify-self:center}.phone .screen{border-radius:34px}
+.scaler{position:absolute;top:0;left:0;transform-origin:0 0}
+.devices{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start}
+@media (max-width:1100px){.devices{grid-template-columns:1fr}}
+.phones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;align-items:start}
+@media (max-width:1100px){.phones{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.phones{grid-template-columns:1fr}}
+.desks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+@media (max-width:900px){.desks{grid-template-columns:1fr}}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px;align-content:start}
+.flowbox{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--chip);padding:12px}
+.flowbox svg{display:block;min-width:900px;width:100%;height:auto}
+.fl text{font-family:var(--f);font-size:14px;fill:var(--fg)}
+.fl .s{font-size:12px;fill:var(--muted)}
+.fl .m{font-family:var(--mono);font-size:11px;letter-spacing:.12em;fill:var(--muted)}
+.fl .bx{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
+.fl .hub{fill:var(--bg);stroke:#6b4428;stroke-width:3}
+.fl .ext{fill:none;stroke:var(--muted);stroke-width:1.3;stroke-dasharray:5 4}
+.fl .ar{fill:none;stroke:var(--muted);stroke-width:1.6}
+.fl .ah{fill:var(--muted)}
+.fl .pri{fill:#ec7c22}
+.fl .ok{fill:#7bd651}
+.fl .al{fill:#ff5a48}
+.fl .win{fill:#151413}
+.fl .lab{font-size:12px;fill:var(--muted)}
+table.tod{border-collapse:collapse;width:100%;font-size:14px}
+table.tod th,table.tod td{text-align:left;vertical-align:top;padding:8px 10px;border-top:1px solid var(--line)}
+table.tod th{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tablebox{overflow-x:auto}
+
+/* ================= Braun Hi-Fi tokens ================= */
+.bh{--bg:#e3e1dc;--card:#f1efeb;--key:#e6e3de;--rule:#d4d1ca;--ink:#1d1c1a;--dim:#66635c;--band:#1d1c1a;--band-ink:#ece8df;--band-dim:#a8a397;
+  --orange:#ec7c22;--deep:#b55a12;--walnut:#6b4428;--field:#e9e6e0;
+  --win:#151413;--cream:#f3e6c8;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;--alert-ink:#b3261b;--warn-ink:#8a6100;
+  --ribs:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 2px,transparent 2px 8px);
+  position:relative;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:var(--f);overflow:hidden}
+.night .bh{--bg:#1c1c1b;--card:#2a2a28;--key:#353533;--rule:#3a3a37;--ink:#ece9e2;--dim:#a3a097;--band:#121211;--orange:#f08a2c;--field:#20201f;--alert-ink:#ff7466;--warn-ink:#f2c14e}
+.bh button{font-family:var(--f)}
+.lab{font:500 12px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.card{background:var(--card);border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px #0000001a,0 4px 12px #0000000f;min-width:0}
+.night .card{box-shadow:0 1px 2px #00000059}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sm{font-size:15px;color:var(--dim);line-height:1.4}
+/* indicator windows: always a dark recess, lit = flat colour */
+.ind{position:relative;display:inline-block;flex:none;background:var(--win);box-shadow:inset 0 1px 2px #000}
+.ind::after{content:"";position:absolute;inset:1.5px;border-radius:inherit;background:var(--c,var(--cream));opacity:0;transition:opacity 300ms var(--settle)}
+.ind.on::after{opacity:1}
+.led{width:10px;height:10px;border-radius:50%}.sq{width:10px;height:10px;border-radius:2px}.slot{width:22px;height:7px;border-radius:2px}.vslot{width:10px;height:22px;border-radius:3px}
+.bars{display:inline-flex;gap:3px}.bars .ind{width:6px;height:14px;border-radius:2px}.bars .ind::after{inset:1px}
+.ind.ok{--c:var(--ok)}.ind.alert{--c:var(--alert)}.ind.warn{--c:var(--warn)}
+/* buttons */
+.btn{appearance:none;border:0;cursor:pointer;font:500 16px var(--f);border-radius:12px;padding:12px 18px;min-height:46px;display:inline-flex;gap:10px;align-items:center;justify-content:center;transition:transform 100ms;white-space:nowrap}
+.btn.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 2px 0 var(--deep)}
+.btn.sec{background:var(--key);color:var(--ink);box-shadow:0 2px 0 #0000001f}
+.btn:active{transform:translateY(1px)}
+.btn svg,.ql svg,.ib svg,.tab svg,.chipb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.kh{font:500 12px var(--mono);padding:1px 6px;border-radius:5px;background:#00000014;color:inherit;opacity:.85}
+.night .btn.sec .kh{background:#ffffff14}
+.ql{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);font:500 15px var(--f);padding:8px 0;min-height:40px;display:inline-flex;gap:6px;align-items:center;text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:4px;text-decoration-thickness:2px}
+.ql:hover{text-decoration-color:var(--ink)}
+.ib{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);width:44px;height:44px;border-radius:12px;display:grid;place-items:center}
+.ib:hover{background:var(--key)}
+.ib svg{width:22px;height:22px}
+.key{appearance:none;border:0;cursor:pointer;font:500 15px var(--f);color:var(--ink);background:var(--key);border-radius:10px;padding:8px 14px;min-height:40px;display:inline-flex;gap:8px;align-items:center;box-shadow:0 2px 0 #0000001f}
+.key[aria-pressed="true"]{background:var(--card);box-shadow:inset 0 1px 3px #00000033}
+.night .key[aria-pressed="true"]{background:#232321;box-shadow:inset 0 1px 3px #000}
+.tag{font:500 12px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border:1px solid var(--rule);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.tag.vip{color:var(--ink);border-color:var(--ink)}
+.bh :is(.btn,.ql,.ib,.key,.tab,.chipb,.stoprow):focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+/* app frame */
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.trim{flex:none;height:4px;background:var(--walnut)}
+.hdr{flex:none;display:flex;align-items:center;gap:20px;padding:0 28px;height:64px;background:var(--card);box-shadow:0 1px 0 var(--rule);position:relative;z-index:2}
+.wm{font:600 22px var(--f);letter-spacing:.01em}
+.dt{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.tabs{display:flex;gap:2px;align-self:stretch;margin-left:12px}
+.htab{appearance:none;border:0;background:none;cursor:pointer;font:500 16px var(--f);color:var(--dim);padding:0 14px;position:relative;display:flex;gap:8px;align-items:center}
+.htab[aria-selected="true"]{color:var(--ink)}
+.htab[aria-selected="true"]::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:2px 2px 0 0;background:var(--ink)}
+.htab .n{font:500 12px var(--mono);background:var(--key);border-radius:999px;padding:1px 7px;color:var(--ink)}
+.hr{margin-left:auto;display:flex;gap:8px;align-items:center}
+.findb{appearance:none;border:0;cursor:pointer;display:flex;gap:10px;align-items:center;background:var(--field);border-radius:12px;padding:0 10px 0 12px;height:40px;min-width:240px;color:var(--dim);font:400 15px var(--f);box-shadow:inset 0 1px 2px #00000026}
+.findb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.findb .kh{margin-left:auto}
+.refr{appearance:none;border:0;background:none;cursor:pointer;display:flex;gap:8px;align-items:center;color:var(--dim);font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:0 8px;height:40px;border-radius:10px}
+.refr:hover{background:var(--key)}
+.body{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;position:relative}
+.body::-webkit-scrollbar{display:none}
+/* phone */
+.phn .hdr{height:56px;padding:0 6px 0 16px;gap:8px}
+.phn .wm{font-size:20px}
+.ptabs{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--card);box-shadow:0 -1px 0 var(--rule);padding:4px 4px 20px;position:relative;z-index:2}
+.tab{appearance:none;border:0;background:none;cursor:pointer;color:var(--dim);display:grid;justify-items:center;gap:4px;padding:6px 0 4px;min-height:56px;font:500 12px var(--f);position:relative}
+.tab svg{width:22px;height:22px}
+.tab .win{width:22px;height:4px;border-radius:2px;background:var(--win);position:relative;margin-bottom:2px}
+.tab .win::after{content:"";position:absolute;inset:1px;border-radius:1px;background:var(--cream);opacity:0}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab[aria-selected="true"] .win::after{opacity:1}
+.tab .n{position:absolute;top:10px;left:calc(50% + 10px);font:500 12px var(--mono);background:var(--key);color:var(--ink);border-radius:999px;padding:0 6px;line-height:18px}
+/* Today */
+.td{max-width:1200px;margin:0 auto;padding:36px 48px 28px;display:grid;gap:24px}
+.hero{display:grid;gap:8px;max-width:780px}
+.hero h2{font:600 40px/1.1 var(--f);margin:0}
+.say{font:400 26px/1.38 var(--f);margin:0;max-width:30em;text-wrap:pretty}
+.accent{position:absolute;top:36px;right:0;width:380px;height:118px;pointer-events:none}
+.accent svg{width:100%;height:100%;display:block}
+.dayb{background:var(--band);background-image:var(--ribs);color:var(--band-ink);border-radius:16px;padding:12px 22px 10px;display:grid;gap:8px;cursor:pointer;border:0;text-align:left;font:inherit;width:100%}
+.dayb .lab{color:var(--band-dim)}
+.dayb .hdl{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.dayb .hdl .go{display:flex;gap:6px;align-items:center;font:500 14px var(--f);color:var(--band-ink)}
+.dayb .hdl .go svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.trk{position:relative}
+.names{position:relative;height:22px}
+.names span{line-height:20px}
+.names span{position:absolute;bottom:0;font:500 14px var(--f);white-space:nowrap;color:var(--band-ink)}
+.names span.past{color:var(--band-dim)}
+.names span.warn{color:var(--warn)}
+.scale{position:relative;height:18px;margin-top:4px}
+.scale .w{position:absolute;top:1px;height:16px;border-radius:4px;background:var(--win);box-shadow:inset 0 1px 2px #000}
+.scale .w::after{content:"";position:absolute;inset:2px;border-radius:3px;background:var(--c,var(--cream))}
+.scale .w.past::after{opacity:0}
+.scale .w.warn{--c:var(--warn)}
+.ticks{position:relative;height:22px}
+.ticks i{position:absolute;top:2px;width:1px;height:6px;background:#ffffff47}
+.ticks b{position:absolute;top:7px;font:500 12px var(--mono);color:var(--band-dim);transform:translateX(-50%)}
+.needle{position:absolute;top:var(--nt,-4px);bottom:16px;width:2px;margin-left:-1px;background:#fbf6ea;border-radius:1px}
+.needle::before{content:"";position:absolute;top:-2px;left:-4px;width:10px;height:6px;border-radius:2px;background:#fbf6ea}
+.stops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.stop{display:flex;flex-direction:column;gap:8px;min-height:208px}
+.stop .big{font:500 26px/1.2 var(--f)}
+.stop .sm{flex:1}
+.stop.alertc .big{color:var(--ink)}
+.also{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;color:var(--dim);font-size:14px}
+.also .ql{font-size:14px;color:var(--dim)}
+.prom{font:500 12px var(--mono);letter-spacing:.06em;color:var(--dim)}
+.word{font:500 12px var(--f);letter-spacing:.12em;text-transform:uppercase}
+.word.alert{color:var(--alert-ink)}.word.ok{color:var(--dim)}.word.warn{color:var(--warn-ink)}
+/* phone today */
+.phn .td{padding:16px 16px 20px;gap:14px}
+.phn .hero h2{font-size:26px}
+.phn .say{font-size:19px;line-height:1.42}
+.phn .accent{top:14px;width:108px;height:60px}
+.phn .dayb{padding:10px 14px 6px;border-radius:14px}
+.phn .stop{min-height:0}
+.phn .stop .big{font-size:22px}
+.list{display:grid;padding:2px 0}
+.stoprow{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);text-align:left;display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px;min-height:64px;border-top:1px solid var(--rule);width:100%;font:inherit}
+.stoprow:first-child{border-top:0}
+.stoprow .t1{font:500 17px/1.25 var(--f)}
+.stoprow .t0{font:500 12px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.stoprow>svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2}
+.phn .also{justify-content:flex-start;gap:4px 14px}
+/* replies */
+.rp{max-width:1200px;margin:0 auto;padding:28px 48px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px 32px;align-items:start}
+.rp .top{grid-column:1/-1;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.rp .top h2{font:600 30px var(--f);margin:0}
+.cnt{font:500 15px var(--mono);color:var(--dim)}
+.rc{display:grid;gap:14px;padding:26px 28px;touch-action:pan-y;transition:transform 200ms var(--glide),opacity 200ms}
+.rc .who{font:500 32px/1.1 var(--f)}
+.rc .why{font:400 20px/1.4 var(--f)}
+.draft{background:var(--field);border-radius:12px;box-shadow:inset 0 1px 3px #00000026;padding:14px 16px;font:400 17px/1.5 var(--f);outline:none;min-height:80px}
+.draft:focus{box-shadow:inset 0 1px 3px #00000026,0 0 0 2px var(--orange)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.quiet{display:flex;gap:6px 18px;flex-wrap:wrap}
+.quiet .ql{color:var(--dim);font-size:15px}
+.quiet .ql .kh{text-decoration:none}
+.side{display:grid;gap:10px}
+.nx{display:grid;gap:2px;padding:10px 0;border-top:1px solid var(--rule)}
+.nx b{font-weight:500}
+.lrow{appearance:none;border:0;background:none;cursor:pointer;text-align:left;color:var(--ink);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:14px 4px;border-top:1px solid var(--rule);width:100%;font:inherit;min-height:56px}
+.lrow:first-child{border-top:0}
+.lrow b{font:500 18px var(--f)}
+.phn .rp{padding:14px 16px 20px;grid-template-columns:1fr;gap:12px}
+.phn .rp .top{gap:10px}
+.phn .rp .top h2{font-size:24px}
+.phn .rc{padding:18px;gap:12px}
+.phn .rc .who{font-size:26px}
+.phn .rc .why{font-size:17px}
+.phn .draft{font-size:16px}
+.phn .acts .btn{flex:1}
+.phn .quiet{justify-content:space-between;gap:0}
+.phn .quiet .ql{flex-direction:column;gap:2px;font-size:13px;text-decoration:none;min-height:52px;min-width:64px}
+.toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:#1d1c1a;color:#ece8df;border-radius:12px;padding:6px 6px 6px 16px;display:flex;gap:12px;align-items:center;font-size:15px;box-shadow:0 6px 20px #0000004d;z-index:5;white-space:nowrap}
+.night .toast{background:#3a3a37}
+.toast button{appearance:none;border:0;background:#ffffff1a;color:#ece8df;border-radius:9px;padding:0 14px;height:40px;font:500 15px var(--f);cursor:pointer}
+.phn .toast{bottom:96px}
+/* all clear */
+.clr{min-height:100%;display:grid;place-content:center;justify-items:center;text-align:center;gap:12px;padding:40px 24px}
+.clr .blocks{width:300px;height:190px}
+.clr .blocks svg{width:100%;height:100%;overflow:visible}
+.clr .blocks .dr{animation:drop 420ms var(--settle) both}
+.clr .blocks .dr:nth-child(2){animation-delay:90ms}.clr .blocks .dr:nth-child(3){animation-delay:180ms}.clr .blocks .dr:nth-child(4){animation-delay:240ms}
+@keyframes drop{from{transform:translateY(-40px);opacity:0}to{transform:none;opacity:1}}
+.clr h2{font:600 44px/1.1 var(--f);margin:6px 0 0}
+.clr p{font-size:20px;color:var(--dim)}
+.clr p.prom{font-size:12px}
+.phn .clr .blocks{width:220px;height:140px}
+.phn .clr h2{font-size:34px}
+/* agenda */
+.ag{max-width:1200px;margin:0 auto;padding:28px 48px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px 32px;align-items:start}
+.ag .top{grid-column:1/-1;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ag .top h2{font:600 30px var(--f);margin:0}
+.ev{display:grid;grid-template-columns:58px 12px minmax(0,1fr);gap:14px;align-items:start;padding:12px 0}
+.ev .tm{font:500 16px var(--mono);padding-top:1px}
+.ev .nm{font:500 18px/1.3 var(--f)}
+.ev.past .nm,.ev.past .tm{color:var(--dim)}
+.ev .ind{margin-top:3px}
+.free{display:grid;grid-template-columns:58px minmax(0,1fr);gap:26px;align-items:center;padding:4px 0}
+.free span:last-child{border-top:1px dashed var(--rule);padding-top:4px}
+.nowl{display:grid;grid-template-columns:58px minmax(0,1fr);gap:26px;align-items:center;padding:2px 0}
+.nowl i{height:2px;background:var(--ink);border-radius:1px;position:relative}
+.nowl i::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--ink)}
+.clash{border-radius:14px;background:var(--card);padding:6px 16px 12px;box-shadow:inset 0 0 0 2px var(--warn)}
+.clash .ev{padding:8px 0}
+.msg{appearance:none;border:0;cursor:pointer;display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--key);border-radius:10px;padding:10px 12px;font:400 15px/1.35 var(--f);color:var(--ink);min-height:44px}
+.msg svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;flex:none}
+.inv{display:grid;gap:8px;padding:14px 0;border-top:1px solid var(--rule)}
+.inv:first-of-type{border-top:0}
+.inv b{font:500 18px var(--f)}
+.phn .ag{padding:14px 16px 20px;grid-template-columns:1fr;gap:14px}
+.phn .ag .top h2{font-size:24px}
+/* ask */
+.askp{max-width:780px;margin:0 auto;padding:28px 24px 0;display:flex;flex-direction:column;gap:16px;min-height:100%}
+.q{align-self:flex-end;background:var(--key);border-radius:16px 16px 4px 16px;padding:12px 16px;font-size:17px;max-width:80%}
+.ans{display:grid;gap:12px}
+.ans .tx{font:400 20px/1.45 var(--f)}
+.chipb{appearance:none;border:0;cursor:pointer;display:inline-flex;gap:8px;align-items:center;background:var(--key);color:var(--ink);border-radius:999px;padding:6px 14px;min-height:36px;font:400 14px var(--f);box-shadow:0 1px 0 #0000001f}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.compose{position:sticky;bottom:0;margin-top:auto;background:var(--bg);padding:12px 0 20px;display:flex;gap:10px}
+.compose .fieldi{flex:1;background:var(--field);border:0;border-radius:12px;box-shadow:inset 0 1px 3px #00000026;padding:0 16px;font:400 17px var(--f);color:var(--ink);min-height:48px;min-width:0}
+.compose .fieldi::placeholder{color:var(--dim)}
+.phn .askp{padding:16px 16px 0;gap:12px}
+.phn .ans .tx{font-size:18px}
+/* palette */
+.veil{position:absolute;inset:0;background:#0000006b;z-index:4}
+.pal{position:absolute;top:110px;left:50%;transform:translateX(-50%);width:680px;background:var(--card);border-radius:18px;box-shadow:0 20px 60px #00000066;z-index:5;overflow:hidden}
+.pal .in{display:flex;gap:12px;align-items:center;padding:0 18px;height:64px;border-bottom:1px solid var(--rule)}
+.pal .in svg{width:20px;height:20px;fill:none;stroke:var(--dim);stroke-width:2}
+.pal .in input{flex:1;border:0;background:none;font:400 20px var(--f);color:var(--ink);outline:none;min-width:0}
+.pal .grp{padding:8px 10px}
+.pal .grp .lab{padding:8px 10px 4px;display:block}
+.po{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;font-size:16px}
+.po svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2}
+.po.sel{background:var(--key);box-shadow:inset 3px 0 0 var(--ink)}
+.po .sm{font-size:14px}
+.pal .ft{display:flex;justify-content:space-between;gap:12px;padding:10px 20px;border-top:1px solid var(--rule);font-size:13px;color:var(--dim)}
+/* know */
+.kn{max-width:860px;margin:0 auto;padding:28px 48px;display:grid;gap:14px}
+.kn h2{font:600 30px var(--f);margin:0}
+.krow{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px 0;border-top:1px solid var(--rule)}
+.krow:first-of-type{border-top:0}
+.phn .kn{padding:16px}
+.phn .krow{grid-template-columns:22px minmax(0,1fr)}
+.phn .krow .btn{grid-column:2;justify-self:start}
+.stub{padding:60px 48px;display:grid;gap:10px;justify-items:start}
+@media (prefers-reduced-motion:reduce){.bh *{transition:none!important;animation:none!important}}
+[hidden]{display:none!important}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Jam Design · Overnight pass 1 · Callsheet</span>
+    <h1>Callsheet, less daunting</h1>
+    <p class="muted">A redesign that starts from what you need when you open it. You get one sentence about the day, the day on a tuning scale, and three stops: replies, what's worth knowing, and what's coming. Everything else is one step away. The one orange button moves to whatever is next. All names, mail and events are made-up sample data.</p>
+  </header>
+
+  <div class="ctrls">
+    <div><span class="eyebrow">Lighting</span><div class="seg" role="group" aria-label="Day or night" id="seg-light"><button data-m="day" aria-pressed="true">Day</button><button data-m="night" aria-pressed="false">Night</button></div></div>
+    <div><span class="eyebrow">Time of day</span><div class="seg" role="group" aria-label="Time of day" id="seg-tod"><button data-t="morning" aria-pressed="true">Morning 08:15</button><button data-t="midday" aria-pressed="false">Midday 12:40</button><button data-t="evening" aria-pressed="false">Evening 17:05</button></div></div>
+  </div>
+
+  <section class="blk">
+    <h2>1 · The experience flow</h2>
+    <p class="muted">Written before any screen. The brief arrives at 06:30 by push notification and gets read on the phone first; check-ins come at 12:30 and 17:00. The front door follows the approved "Wheatley" rundown order: your day, who needs an answer, what to know, what's coming.</p>
+    <div class="flowbox">
+      <svg class="fl" viewBox="0 0 1120 380" role="img" aria-label="Flow: open from a push or a pinned tab, land on Today, then one step to One at a time, Agenda, Worth knowing or Ask. One at a time ends in All clear and returns to Today.">
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>
+        <text class="m" x="20" y="64">OPEN</text>
+        <rect class="bx" x="20" y="78" width="180" height="56" rx="12"/><text x="36" y="102">Push at 06:30</text><text class="s" x="36" y="122">phone, read first</text>
+        <rect class="bx" x="20" y="150" width="180" height="56" rx="12"/><text x="36" y="174">Pinned tab</text><text class="s" x="36" y="194">desk, check-ins</text>
+        <path class="ar" d="M200 106 H246" marker-end="url(#arr)"/><path class="ar" d="M200 178 H246" marker-end="url(#arr)"/>
+        <text class="m" x="250" y="64">TODAY · THE FRONT DOOR</text>
+        <rect class="hub" x="250" y="74" width="240" height="196" rx="16"/>
+        <text x="270" y="104" style="font-weight:600;font-size:16px">One sentence of the day</text>
+        <rect class="win" x="270" y="118" width="200" height="22" rx="5"/><rect class="pri" x="300" y="122" width="22" height="14" rx="3" style="fill:#f3e6c8"/><rect x="350" y="122" width="40" height="14" rx="3" style="fill:#f2c14e"/><rect x="330" y="116" width="2" height="26" style="fill:#fbf6ea"/>
+        <text class="s" x="270" y="160">Your day on a scale</text>
+        <text x="270" y="190">Replies</text><text x="270" y="214">Worth knowing</text><text x="270" y="238">Coming up</text>
+        <rect class="pri" x="410" y="178" width="60" height="18" rx="5"/><text class="s" x="270" y="260">one orange button, on the next thing</text>
+        <text class="m" x="560" y="30">ONE STEP AWAY</text>
+        <rect class="bx" x="560" y="44" width="200" height="50" rx="12"/><text x="576" y="74">One at a time</text>
+        <rect class="bx" x="560" y="114" width="200" height="50" rx="12"/><text x="576" y="144">Agenda</text>
+        <rect class="bx" x="560" y="184" width="200" height="50" rx="12"/><text x="576" y="214">Worth knowing</text>
+        <rect class="bx" x="560" y="254" width="200" height="50" rx="12"/><text x="576" y="284">Ask</text>
+        <path class="ar" d="M490 188 C520 188 525 69 556 69" marker-end="url(#arr)"/><text class="lab" x="494" y="150">↵</text>
+        <path class="ar" d="M470 130 C520 130 525 139 556 139" marker-end="url(#arr)"/><text class="lab" x="505" y="124">A</text>
+        <path class="ar" d="M490 212 H556" marker-end="url(#arr)"/>
+        <path class="ar" d="M490 250 C520 250 525 279 556 279" marker-end="url(#arr)"/><text class="lab" x="498" y="280">⌘K  /</text>
+        <path class="ar" d="M760 58 C800 40 800 98 760 80" marker-end="url(#arr)"/><text class="lab" x="792" y="74">Copy · Done · Later</text>
+        <rect class="bx" x="860" y="44" width="220" height="50" rx="12"/><circle class="ok" cx="882" cy="69" r="6"/><text x="898" y="74">All clear</text>
+        <path class="ar" d="M760 76 C800 120 820 72 856 72" marker-end="url(#arr)" style="opacity:0"/>
+        <path class="ar" d="M690 94 C700 104 830 104 856 78" marker-end="url(#arr)"/><text class="lab" x="730" y="114">last one done</text>
+        <rect class="ext" x="860" y="114" width="220" height="50" rx="12"/><text x="876" y="144">Answer invite in Calendar ↗</text>
+        <rect class="ext" x="860" y="184" width="220" height="50" rx="12"/><circle class="al" cx="882" cy="209" r="6"/><text x="898" y="214">Security page ↗</text>
+        <rect class="bx" x="860" y="254" width="220" height="50" rx="12"/><text x="876" y="276">Answer + sources</text><text class="s" x="876" y="294">read-only</text>
+        <path class="ar" d="M760 139 H856" marker-end="url(#arr)"/><path class="ar" d="M760 209 H856" marker-end="url(#arr)"/><path class="ar" d="M760 279 H856" marker-end="url(#arr)"/>
+        <path class="ar" d="M970 44 V18 H370 V70" marker-end="url(#arr)"/><text class="lab" x="560" y="14">back to Today: the Replies stop reads All clear</text>
+        <rect class="ext" x="250" y="320" width="830" height="44" rx="12"/><text class="m" x="270" y="347">CAN WAIT</text><text x="360" y="347">Full brief · What changed · Projects · Weekly review · Setup — one quiet line under the stops, or Find (⌘K)</text>
+      </svg>
+    </div>
+    <div class="tablebox"><table class="tod">
+      <tr><th>When</th><th>What he needs at open</th><th>The orange button</th><th>What can wait</th></tr>
+      <tr><td>06:30–09:00, phone, from the push</td><td>The sentence, the shape of the day, who's first in line for a reply, any security heads-up</td><td>Start replies</td><td>Coming up, what changed, projects, setup</td></tr>
+      <tr><td>12:30 check-in, desk</td><td>What changed since morning, what's left, the next meeting</td><td>Start replies (what's left)</td><td>The morning's done items, the full brief</td></tr>
+      <tr><td>17:00 check-in, desk or phone</td><td>Is anyone still waiting, what's left tonight, how tomorrow starts</td><td>See tomorrow (once replies are clear)</td><td>Everything else</td></tr>
+    </table></div>
+  </section>
+
+  <section class="blk">
+    <h2>2 · The first screen</h2>
+    <p class="muted">Both frames work. Click the desktop frame and try <b>Enter</b> (start replies), <b>A</b> (agenda), <b>/</b> or <b>⌘K</b> / <b>Ctrl+K</b> (find or ask), <b>1–4</b> (tabs), and in replies <b>C</b> copy, <b>D</b> done, <b>L</b> later, <b>X</b> not for me, <b>Esc</b> back. On the phone, swipe a reply card right for done and left for later.</p>
+    <div class="devices">
+      <figure><div class="frame desk"><div class="screen" tabindex="0" aria-label="Callsheet desktop mockup, keyboard enabled"><div class="scaler" data-mount data-kind="desk" data-route="today" data-w="1440" data-h="900"></div></div></div><figcaption>Desktop 1440 × 900 · Today. Sentence, day scale, three stops, one quiet line.</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="today" data-w="390" data-h="844"></div></div></div><figcaption>Phone 390 × 844 · Today. The stop with the orange button is a card; the others are rows.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2>3 · One step away</h2>
+    <p class="muted">The follow-on states, each frame live. Copying a draft never sends anything; Done and Later always offer Undo.</p>
+    <div class="desks">
+      <figure><div class="frame desk"><div class="screen" tabindex="0" aria-label="Replies desktop mockup"><div class="scaler" data-mount data-kind="desk" data-route="oat" data-w="1440" data-h="900"></div></div></div><figcaption>Desktop · Replies, one at a time (the default view; List is one press away). Key hints sit on the buttons.</figcaption></figure>
+      <figure><div class="frame desk"><div class="screen" tabindex="0" aria-label="Find or ask desktop mockup"><div class="scaler" data-mount data-kind="desk" data-route="today" data-pal="1" data-w="1440" data-h="900"></div></div></div><figcaption>Desktop · Find or ask (⌘K) over Today. Asking is the top row; people, threads and settings follow.</figcaption></figure>
+    </div>
+    <div class="phones">
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="oat" data-w="390" data-h="844"></div></div></div><figcaption>Replies, one at a time</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="clear" data-w="390" data-h="844"></div></div></div><figcaption>All clear (once a day)</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="agenda" data-w="390" data-h="844"></div></div></div><figcaption>Agenda: gaps collapse, clash in amber</figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="ask" data-w="390" data-h="844"></div></div></div><figcaption>Ask, with sources</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2>What's different from Callsheet 0.9.0</h2>
+    <div class="notes">
+      <div class="note"><b>One sentence, three stops</b><span class="muted">Today drops from about a dozen sections (Start your day, summary, Weekly review, Top of the day, Security, By area, What changed, Coming up, At a glance) to a sentence, the day scale and three stops. The rest is one quiet line or ⌘K away.</span></div>
+      <div class="note"><b>The button that moves</b><span class="muted">There is one orange button on every screen. On Today it sits on the next thing: Start replies in the morning, See tomorrow once replies are clear. The Replies stop's count bars go dark one by one as you work.</span></div>
+      <div class="note"><b>Fun from the hardware</b><span class="muted">The day is a radio tuning scale with a needle at now. Clashes light amber, not red, because red is kept for security alerts. All clear gets the Session blocks accent, dropped in once.</span></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- sample data (all fake) ---------- */
+const R=[
+ {who:'Priya N.',area:'Co. B',src:'Mail',age:'3 days',tags:['VIP','Due Thu'],why:'Wants you to sign off the Q4 budget by Thursday.',short:'the Q4 budget, due Thursday',draft:'Hi Priya, thanks for the numbers. I will sign off the Q4 budget by Thursday.'},
+ {who:'Landlord',area:'Personal',src:'Mail',age:'1 day',tags:['Asked you'],why:'Needs a yes or no on the inspection date, Monday 9 Nov.',short:'the inspection date',draft:'Hi, Monday the 9th works. Any time after 10 is fine.'},
+ {who:'School office',area:'Personal',src:'Mail',age:'Today',tags:['Due today'],why:'The trip form is due back today.',short:'the trip form',draft:'Hi, I will bring the signed trip form to pickup this afternoon. Thanks for the reminder.'},
+ {who:'Alex at Example Supplies',area:'Co. B',src:'Mail',age:'1 day',tags:['Asked you'],why:'Wants to confirm the delivery window for next week.',short:'the delivery window',draft:'Hi Alex, Tuesday morning works best for us. Thanks.'},
+ {who:'Dev T.',area:'Co. A',src:'Slack',age:'2 hours',tags:['Asked you'],why:'Asks if the roadmap review can move to 11:30.',short:'moving the roadmap review',draft:'Could we keep 11:00 and move the supplier call instead?'},
+ {who:'Jordan',area:'Personal',src:'Signal',age:'5 hours',tags:[],why:'Asks if you are free for dinner on Saturday.',short:'dinner on Saturday',draft:'Saturday works. Seven?'},
+ {who:'Mina O.',area:'Co. A',src:'Mail',age:'2 days',tags:['Waiting on you'],why:'Asks for your notes on the design doc.',short:'notes on the design doc',draft:'Hi Mina, I will send my notes on the design doc by tomorrow afternoon.'}
+];
+const TOTAL=R.length;
+const TOD={
+ morning:{now:8.25,clock:'08:15',eb:'Morning brief · 06:30',hi:'Good morning, Sam.',phi:'Morning, Sam.',say:'A full morning. Stand-up at 9:30, then the roadmap review and the supplier call both land at 11.',order:[0,1,2,3,4,5,6],moved:0,
+   know:{alert:1,big:'New sign-in on your Google account',sub:'07:58, a Linux device. Check it was you.',n:3}},
+ midday:{now:12.67,clock:'12:40',eb:'Check-in · 12:30',hi:'Good afternoon, Sam.',phi:'Afternoon, Sam.',say:'Four replies are done. The design sync moved to 14:30, so you have a clear run until then.',order:[5,6,3],moved:1,
+   know:{alert:0,big:'Design sync moved to 14:30',sub:'It was at 14:00. Mina moved it at 12:10.',n:4}},
+ evening:{now:17.08,clock:'17:05',eb:'Check-in · 17:00',hi:'Good evening, Sam.',phi:'Evening, Sam.',say:'Replies are clear. The dentist is at 18:30, and the car service is first thing tomorrow.',order:[],moved:1,
+   know:{alert:0,big:'Nothing new since noon',sub:'The last change was at 12:10.',n:4}}
+};
+function events(t){return[
+ {s:7.75,e:8.25,n:'School drop-off',sh:'Drop-off',m:'30 min · Personal'},
+ {s:9.5,e:10,n:'Daily stand-up',sh:'Stand-up',m:'30 min · Co. A'},
+ {s:11,e:12,n:'Q4 roadmap review',m:'1 hour · Co. A',clash:1},
+ {s:11.5,e:12,n:'Supplier call',m:'30 min · Co. B',clash:1},
+ TOD[t].moved?{s:14.5,e:15.5,n:'Design sync',sh:'Design sync · moved',m:'1 hour · Co. A · moved from 14:00'}:{s:14,e:15,n:'Design sync',sh:'Design sync',m:'1 hour · Co. A'},
+ {s:18.5,e:19.5,n:'Dentist, Robin',sh:'Dentist',m:'1 hour · Personal'}]}
+const TOMORROW=[{s:9,e:10,n:'Car service',m:'Garage on Mill Road · Personal'},{s:10.5,e:11,n:'1:1 with Mina',m:'30 min · Co. A'},{s:13,e:14,n:'Lunch with Jordan',m:'1 hour · Personal'}];
+const ASKS=[
+ {q:'When is the car service, and did they confirm?',a:'Friday 6 Nov at 09:00. The garage confirmed by email on 21 Oct and asked you to bring the locking wheel nut.',src:[['cal','Calendar · Car service'],['mail','Mail · Booking confirmed, 21 Oct']]},
+ {q:'What did Priya send about the budget?',a:'Two emails. On Monday she sent the Q4 numbers; yesterday she asked you to sign off by Thursday.',src:[['mail','Mail · Q4 numbers, 2 Nov'],['mail','Mail · Sign-off by Thursday, 4 Nov']]},
+ {q:'What is due this week?',a:'The school trip form today, the Q4 budget sign-off on Thursday, and the supplier invoice on Friday.',src:[['mail','Mail · Trip form'],['mail','Mail · Sign-off'],['note','Notes · Invoices']]}
+];
+/* ---------- icons ---------- */
+const P={today:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ ask:'<path d="M4 5h16v11H10l-5 4v-4H4z"/>',search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',set:'<path d="M4 7h9M18 7h2M4 17h3M11 17h9"/><circle cx="15.5" cy="7" r="2.3"/><circle cx="8.5" cy="17" r="2.3"/>',
+ chev:'<path d="M9 6l6 6-6 6"/>',back:'<path d="M15 6l-6 6 6 6"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5H4v11h4"/>',check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+ later:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>',note:'<path d="M5 3h10l4 4v14H5z"/><path d="M9 12h6M9 16h4"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ refresh:'<path d="M20 11a8 8 0 0 0-14.6-4.5M4 4v4h4M4 13a8 8 0 0 0 14.6 4.5M20 20v-4h-4"/>',msg:'<path d="M4 5h16v11H10l-5 4v-4H4z"/>'};
+const ic=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hm=h=>{const H=Math.floor(h),M=Math.round((h-H)*60);return String(H).padStart(2,'0')+':'+String(M).padStart(2,'0')};
+const dur=h=>{const H=Math.floor(h),M=Math.round((h-H)*60);return (H?H+' h':'')+(H&&M?' ':'')+(M?M+' min':'')};
+/* ---------- accents ---------- */
+const colourBars=()=>{const c=['#6b3416','#9a3f18','#c45d22','#d68a2c','#e3b24a','#efd58a'];let y=6,o='';c.forEach((k,i)=>{const h=16-i*2.2,x=30+i*46;o+=`<rect x="${x}" y="${y}" width="${380-x}" height="${h}" rx="${h/2}" fill="${k}"/>`;y+=h+6});return `<svg viewBox="0 0 380 118" preserveAspectRatio="xMaxYMid meet" aria-hidden="true">${o}<rect x="370" y="0" width="20" height="118" fill="var(--bg)" opacity="0"/></svg>`};
+const sessionBlocks=()=>`<svg viewBox="0 0 300 190" aria-hidden="true"><g class="dr"><rect x="40" y="40" width="190" height="96" rx="6" fill="#21406c" transform="rotate(-8 135 88)"/></g><g class="dr"><rect x="120" y="120" width="150" height="22" rx="3" fill="#e3b02f" transform="rotate(-8 195 131)"/></g><g class="dr"><rect x="214" y="22" width="44" height="44" rx="4" fill="#c23a2b" transform="rotate(6 236 44)"/></g><g class="dr"><path d="M30 160 L170 140 M36 172 L150 156" stroke="#f3e6c8" stroke-width="3" stroke-linecap="round"/></g></svg>`;
+/* ---------- state ---------- */
+let LIGHT='day',TODK='morning';
+const mounts=[];
+function fresh(m){m.st={order:m.route0==='clear'?[]:[...TOD[TODK].order],copied:false,toast:null,undo:null,view:'one',day:'today',ask:0,pal:!!m.pal0,route:m.route0}}
+/* ---------- pieces ---------- */
+function header(m){
+  const ph=m.kind==='phone',r=m.st.route,n=m.st.order.length;
+  if(ph)return `<div class="trim"></div><header class="hdr"><span class="wm">Callsheet</span><span class="dt" style="margin-left:4px">Thu 5 Nov</span><span style="margin-left:auto;display:flex"><button class="ib" data-go="ask" aria-label="Find or ask">${ic('search')}</button><button class="ib" data-go="stub" aria-label="Setup">${ic('set')}</button></span></header>`;
+  const tabs=[['today','Today'],['oat','Replies'],['agenda','Agenda'],['ask','Ask']].map(([k,l])=>{const sel=(r===k)||(k==='oat'&&(r==='clear'))||(k==='today'&&r==='know');return `<button class="htab" data-go="${k}" aria-selected="${sel}">${l}${k==='oat'&&n?`<span class="n">${n}</span>`:''}</button>`}).join('');
+  return `<div class="trim"></div><header class="hdr"><span class="wm">Callsheet</span><span class="dt">Thu 5 Nov</span><nav class="tabs">${tabs}</nav>
+   <div class="hr"><button class="refr" data-act="refresh" title="Refresh now">${m.st.refreshing?'<i class="ind slot on" style="--c:var(--cream)"></i>Refreshing':'<i class="ind slot"></i>Refreshed 06:30'}</button><button class="findb" data-act="pal">${ic('search')}Find or ask<span class="kh">⌘K</span></button><button class="ib" data-go="stub" aria-label="Setup">${ic('set')}</button></div></header>`}
+function ptabs(m){const r=m.st.route,n=m.st.order.length;return `<nav class="ptabs">${[['today','Today','today'],['oat','Replies','mail'],['agenda','Agenda','cal'],['ask','Ask','ask']].map(([k,l,i])=>{const sel=r===k||(k==='oat'&&r==='clear')||(k==='today'&&(r==='know'||r==='stub'));return `<button class="tab" data-go="${k}" aria-selected="${sel}"><i class="win"></i>${ic(i)}${l}${k==='oat'&&n?`<span class="n">${n}</span>`:''}</button>`}).join('')}</nav>`}
+function bars(n){return `<span class="bars" aria-label="${n} of ${TOTAL} waiting">${Array.from({length:TOTAL},(_,i)=>`<i class="ind ${i<n?'on':''}"></i>`).join('')}</span>`}
+function dayband(m){
+  const ph=m.kind==='phone',T=TOD[TODK],ev=events(TODK),H0=7,H1=21,pc=h=>((h-H0)/(H1-H0)*100).toFixed(2)+'%';
+  const g=[];ev.forEach(e=>{const last=g[g.length-1];if(last&&e.s<last.e){last.e=Math.max(last.e,e.e);last.clash=1;last.sh='Clash: roadmap + supplier call'}else g.push({...e})});
+  const names=ph?'':`<div class="names">${g.map(e=>`<span class="${e.e<=T.now?'past':e.clash?'warn':''}" style="left:${pc(e.s)}">${esc(e.sh||e.n)}</span>`).join('')}</div>`;
+  const wins=g.map(e=>`<i class="w ${e.clash&&e.e>T.now?'warn':''} ${e.e<=T.now?'past':''}" style="left:${pc(e.s)};width:calc(${pc(e.e)} - ${pc(e.s)})"></i>`).join('');
+  let tk='';for(let h=H0;h<=H1;h++){tk+=`<i style="left:${pc(h)}"></i>`;if(!ph||h%2===0)tk+=`<b style="left:${pc(h)}">${String(h).padStart(2,'0')}</b>`}
+  return `<button class="dayb" data-go="agenda" aria-label="Your day. Open the agenda."><span class="hdl"><span class="lab">Your day · now ${T.clock}</span><span class="go">Agenda${ph?'':' <span class="kh">A</span>'}${ic('chev')}</span></span>
+   <span class="trk" style="display:block">${names}<span class="scale" style="display:block">${wins}</span><span class="ticks" style="display:block">${tk}</span><i class="needle" style="left:${pc(T.now)};${ph?'':'--nt:24px'}"></i></span></button>`}
+function stopsData(m){
+  const T=TOD[TODK],n=m.st.order.length,first=R[m.st.order[0]];
+  const rep=n?{id:'rep',lab:'Replies',ind:bars(n),big:`${n} waiting`,sub:`${esc(first.who)} first: ${esc(first.short)}.`,go:'oat',pri:'Start replies',more:'All replies'}
+            :{id:'rep',lab:'Replies',ind:`<span class="row" style="gap:8px"><span class="word ok">All clear</span><i class="ind led ok on"></i></span>`,big:'All clear',sub:`${TOTAL} done today. Nobody is waiting on you.`,go:'list',more:'See what you did'};
+  const k=T.know;
+  const know={id:'know',lab:'Worth knowing',ind:k.alert?`<span class="row" style="gap:8px"><span class="word alert">Alert</span><i class="ind led alert on"></i></span>`:`<i class="ind led"></i>`,big:k.big,sub:k.sub,go:'know',more:`See all ${k.n}`,pri:'Check the sign-in'};
+  const com={id:'com',lab:'Coming up',ind:'',big:'Car service',sub:'Tomorrow, Friday, at 09:00.',go:'agenda',day:'tomorrow',more:'See tomorrow',pri:'See tomorrow'};
+  const priId=n?'rep':(k.alert?'know':'com');
+  return {list:[rep,know,com],priId}}
+function today(m){
+  const ph=m.kind==='phone',T=TOD[TODK],{list,priId}=stopsData(m);
+  const hero=`<div class="hero"><span class="lab">${T.eb}</span><h2>${ph?T.phi:T.hi}</h2><p class="say">${T.say}</p></div>`;
+  const btn=s=>s.id===priId?`<button class="btn pri" data-go="${s.go}" ${s.day?`data-day="${s.day}"`:''} style="${ph?'width:100%':'align-self:flex-start'}">${s.pri}${ph?'':' <span class="kh">↵</span>'}</button>`:`<button class="ql" data-go="${s.go}" ${s.day?`data-day="${s.day}"`:''}>${s.more}${ic('chev')}</button>`;
+  let stops;
+  if(!ph)stops=`<div class="stops">${list.map(s=>`<div class="card stop"><div class="row"><span class="lab">${s.lab}</span>${s.ind}</div><div class="big">${esc(s.big)}</div><p class="sm">${s.sub}</p>${btn(s)}</div>`).join('')}</div>`;
+  else{const p=list.find(s=>s.id===priId),rest=list.filter(s=>s.id!==priId);
+    stops=`<div class="card stop" style="display:flex;flex-direction:column;gap:6px"><div class="row"><span class="lab">${p.lab}</span>${p.ind}</div><div class="big">${esc(p.big)}</div><p class="sm" style="margin-bottom:6px">${p.sub}</p>${btn(p)}</div>
+     <div class="card list" style="padding:0">${rest.map(s=>{const lead=s.id==='know'?(TOD[TODK].know.alert?'<i class="ind led alert on"></i>':'<i class="ind led"></i>'):s.id==='rep'?'<i class="ind led ok on"></i>':'<span></span>';return `<button class="stoprow" data-go="${s.go}" ${s.day?`data-day="${s.day}"`:''}>${lead}<span style="display:grid;gap:2px;min-width:0"><span class="t0">${s.lab}${s.id==='know'&&TOD[TODK].know.alert?' · <span class="word alert">Alert</span>':''}</span><span class="t1">${esc(s.big)}</span></span>${ic('chev')}</button>`}).join('')}</div>`}
+  const also=`<div class="also"><span style="display:flex;gap:4px 16px;flex-wrap:wrap;align-items:center"><span class="lab">Also</span><button class="ql" data-go="stub">Full brief</button><button class="ql" data-go="know">What changed</button><button class="ql" data-go="stub">Projects</button></span>${ph?'':'<span class="prom">Nothing was sent. Drafts wait for you.</span>'}</div>`;
+  return `<div class="accent">${colourBars()}</div><div class="td">${hero}${dayband(m)}${stops}${also}</div>`}
+function replies(m){
+  const ph=m.kind==='phone',o=m.st.order;
+  if(!o.length)return allclear(m);
+  const doneN=TOTAL-o.length,r=R[o[0]];
+  const segv=`<div class="kseg" style="margin-left:auto" role="group" aria-label="View"><button class="key" data-view="one" aria-pressed="${m.st.view==='one'}" style="box-shadow:none">One at a time</button><button class="key" data-view="list" aria-pressed="${m.st.view==='list'}" style="box-shadow:none">List</button></div>`;
+  const top=`<div class="top">${ph?`<button class="ib" data-go="today" aria-label="Back to Today" style="margin-left:-10px">${ic('back')}</button>`:''}<h2>Replies</h2><span class="cnt">${doneN+1} of ${TOTAL}</span>${bars(o.length)}${ph?'':segv}</div>`;
+  if(m.st.view==='list'){
+    return `<div class="rp">${top}<div class="card" style="padding:4px 20px;grid-column:${ph?'auto':'1'}">${o.map((i,k)=>{const x=R[i];return `<button class="lrow" data-pick="${k}"><span style="display:grid;gap:2px;min-width:0"><b>${esc(x.who)}</b><span class="sm">${esc(x.why)}</span></span><span class="sm mono" style="font-size:13px">${esc(x.age)}</span></button>`}).join('')}</div>${ph?'':sidePanel(m,true)}</div>`}
+  const k=s=>ph?'':` <span class="kh">${s}</span>`;
+  const card=`<article class="card rc" data-card>
+    <div class="row" style="justify-content:flex-start;flex-wrap:wrap;gap:8px"><span class="lab">${esc(r.area)} · ${esc(r.src)} · ${esc(r.age)}</span>${r.tags.map(t=>`<span class="tag ${t==='VIP'?'vip':''}">${esc(t)}</span>`).join('')}</div>
+    <div class="who">${esc(r.who)}</div><p class="why">${esc(r.why)}</p>
+    <span class="lab" style="margin-top:4px">Suggested reply · edit before you copy</span>
+    <div class="draft" contenteditable="true" spellcheck="false">${esc(r.draft)}</div>
+    <div class="acts"><button class="btn pri" data-act="copy">${ic(m.st.copied?'check':'copy')}${m.st.copied?'Copied':'Copy draft'}${k('C')}</button><button class="btn sec" data-act="done">${ic('check')}Done${k('D')}</button>${ph?`<button class="btn sec" data-act="later">${ic('later')}Later</button>`:''}</div>
+    <div class="quiet">${ph?'':`<button class="ql" data-act="later">${ic('later')}Later <span class="kh">L</span></button>`}<button class="ql" data-act="open">${ic('ext')}Open in ${r.src==='Mail'?'Gmail':r.src}${k('O')}</button><button class="ql" data-act="note">${ic('note')}Note${k('N')}</button><button class="ql" data-act="nfm">${ic('x')}Not for me${k('X')}</button></div>
+  </article>`;
+  return `<div class="rp">${top}${card}${ph?`<p class="lab" style="text-align:center">Swipe right: done · left: later</p>`:sidePanel(m)}</div>`}
+function sidePanel(m,list){const o=m.st.order.slice(list?0:1,list?0:4);return `<aside class="side">${list?'':`<span class="lab">Up next</span>${o.length?o.map(i=>`<div class="nx"><b>${esc(R[i].who)}</b><span class="sm">${esc(R[i].short[0].toUpperCase()+R[i].short.slice(1))}</span></div>`).join(''):'<p class="sm">This is the last one.</p>'}`}
+  <p class="prom" style="margin-top:12px">Nothing was sent. Drafts wait for you.</p></aside>`}
+function allclear(m){return `<div class="clr"><div class="blocks">${sessionBlocks()}</div><span class="row" style="gap:8px"><i class="ind led ok on"></i><span class="lab">${TOTAL} of ${TOTAL} done</span></span><h2>All clear.</h2><p>Nobody is waiting on you.</p><button class="btn pri" data-go="today" style="margin-top:10px">Back to Today${m.kind==='phone'?'':' <span class="kh">Esc</span>'}</button><p class="prom" style="margin-top:8px">Nothing was sent. Drafts wait for you.</p></div>`}
+function agenda(m){
+  const ph=m.kind==='phone',T=TOD[TODK],tom=m.st.day==='tomorrow',ev=tom?TOMORROW:events(TODK),now=tom?-1:T.now;
+  const seg=`<div class="kseg" role="group" aria-label="Day" style="${ph?'':'margin-left:auto'}"><button class="key" data-day="today" aria-pressed="${!tom}" style="box-shadow:none">Today</button><button class="key" data-day="tomorrow" aria-pressed="${tom}" style="box-shadow:none">Tomorrow</button></div>`;
+  const evRow=(e,clash)=>{const past=e.e<=now;return `<div class="ev ${past?'past':''}"><span class="tm">${hm(e.s)}</span><i class="ind vslot ${past?'':'on'} ${clash?'warn':''}"></i><span style="display:grid;gap:2px;min-width:0"><span class="nm">${esc(e.n)}</span><span class="sm">${esc(e.m)}</span></span></div>`};
+  let rows='',prevEnd=null,nowDone=now<0;const g=[];
+  ev.forEach(e=>{const l=g[g.length-1];if(l&&e.s<l.end){l.items.push(e);l.end=Math.max(l.end,e.e)}else g.push({items:[e],s:e.s,end:e.e})});
+  g.forEach(grp=>{
+    if(!nowDone&&now<grp.s){rows+=`<div class="nowl"><span class="lab" style="letter-spacing:.08em">Now ${T.clock}</span><i></i></div>`;nowDone=true}
+    if(prevEnd!==null&&grp.s-prevEnd>=1)rows+=`<div class="free"><span></span><span class="lab">Free · ${dur(grp.s-prevEnd)}</span></div>`;
+    if(grp.items.length>1)rows+=`<div class="clash"><div class="row" style="justify-content:flex-start;gap:8px;padding:6px 0 0"><i class="ind sq warn on"></i><span class="word warn">Clash · pick one</span></div>${grp.items.map(e=>evRow(e,1)).join('')}<button class="msg" data-go="oat" data-who="4">${ic('msg')}<span><b style="font-weight:500">Dev T.</b> asked to move the review to 11:30</span></button></div>`;
+    else rows+=evRow(grp.items[0]);
+    prevEnd=grp.end});
+  if(!nowDone)rows+=`<div class="nowl"><span class="lab" style="letter-spacing:.08em">Now ${T.clock}</span><i></i></div>`;
+  const inv=`<div class="card" style="display:grid;gap:4px"><div class="row"><span class="lab">Invites to answer</span><span class="mono sm">2</span></div>
+    ${[['Design review','Fri 6 Nov · 14:00','Mina O. · Co. A'],['Quarterly review','Thu 12 Nov · 10:00','Ops team · Co. B']].map(([a,b,c])=>`<div class="inv"><b>${a}</b><span class="sm">${b} · ${c}</span><button class="btn sec" style="justify-self:start">${ic('ext')}Answer in Calendar</button></div>`).join('')}
+    <p class="sm" style="font-size:14px">Callsheet only reads. You answer in Google Calendar.</p></div>`;
+  const title=tom?'Friday 6 Nov':'Thursday 5 Nov';
+  return `<div class="ag"><div class="top">${ph?`<button class="ib" data-go="today" aria-label="Back to Today" style="margin-left:-10px">${ic('back')}</button>`:''}<h2>${title}</h2>${ph?`<span style="margin-left:auto">${seg}</span>`:seg}</div><div class="card" style="padding:8px 20px">${rows}</div>${inv}</div>`}
+function ask(m){
+  const a=ASKS[m.st.ask],ph=m.kind==='phone';
+  return `<div class="askp"><span class="lab">Ask · reads your mail, chat, calendar and notes, never sends</span>
+   <div class="q">${esc(a.q)}</div>
+   <div class="card ans"><p class="tx">${esc(a.a)}</p><div class="chips">${a.src.map(([i,t])=>`<button class="chipb">${ic(i)}${esc(t)}</button>`).join('')}</div><div><button class="ql" data-act="copyans">${ic('copy')}Copy answer</button></div></div>
+   <div style="display:grid;gap:8px"><span class="lab">Try</span><div class="chips">${ASKS.map((x,i)=>i===m.st.ask?'':`<button class="chipb" data-q="${i}">${esc(x.q)}</button>`).join('')}</div></div>
+   <div class="compose"><input class="fieldi" placeholder="Ask a question" aria-label="Question"><button class="btn pri">Ask${ph?'':' <span class="kh">↵</span>'}</button></div></div>`}
+function palette(m){return `<div class="veil" data-act="palx"></div><div class="pal" role="dialog" aria-label="Find or ask">
+  <div class="in">${ic('search')}<input value="when is the car service" aria-label="Find or ask"><span class="kh">Esc</span></div>
+  <div class="grp"><span class="lab">Ask</span><div class="po sel">${ic('ask')}<span>Ask: “when is the car service”</span><span class="kh">↵</span></div></div>
+  <div class="grp" style="padding-top:0"><span class="lab">People and threads</span>
+   <div class="po">${ic('cal')}<span>Car service <span class="sm">· Calendar · Fri 6 Nov, 09:00</span></span><span></span></div>
+   <div class="po">${ic('mail')}<span>Booking confirmed <span class="sm">· Mail · Mill Road Garage, 21 Oct</span></span><span></span></div></div>
+  <div class="grp" style="padding-top:0"><span class="lab">Settings</span><div class="po">${ic('set')}<span>Brief times <span class="sm">· Your day</span></span><span></span></div></div>
+  <div class="ft"><span>↑ ↓ move · ↵ open · Esc close</span><span>Only reads. Nothing is sent.</span></div></div>`}
+function know(m){const ph=m.kind==='phone',T=TOD[TODK];
+  const items=[[T.know.alert?'<i class="ind led alert on"></i>':'<i class="ind led"></i>',(T.know.alert?'<span class="word alert">Alert</span> · ':'<span class="word ok">Seen 08:20</span> · ')+'Security','New sign-in on your Google account','07:58, a Linux device.','Open security page'],
+   ['<i class="ind sq"></i>','Changed','Supplier call moved to 11:30','It was at 14:00. Now it clashes with the roadmap review.',''],
+   ['<i class="ind sq"></i>','Changed','Gym class on Friday was cancelled','The studio emailed at 21:40 last night.','']];
+  if(TOD[TODK].moved)items.splice(1,0,['<i class="ind sq on"></i>','Changed','Design sync moved to 14:30','It was at 14:00. Mina moved it at 12:10.','']);
+  return `<div class="kn"><div class="row" style="justify-content:flex-start;gap:10px">${ph?`<button class="ib" data-go="today" aria-label="Back to Today" style="margin-left:-10px">${ic('back')}</button>`:''}<h2>Worth knowing</h2></div><p class="sm">Security heads-ups always show here, even after you've seen them today.</p>
+   <div class="card" style="padding:4px 20px">${items.map(([i,l,b,s,a])=>`<div class="krow">${i}<span style="display:grid;gap:2px"><span class="lab">${l}</span><span style="font:500 18px var(--f)">${b}</span><span class="sm">${s}</span></span>${a?`<button class="btn ${T.know.alert?'pri':'sec'}">${ic('ext')}${a}</button>`:'<span></span>'}</div>`).join('')}</div></div>`}
+function stub(){return `<div class="stub"><span class="lab">Not in this pass</span><p class="sm">Full brief, Projects and Setup come in a later pass. They stay one step away from Today.</p><button class="btn sec" data-go="today">Back to Today</button></div>`}
+function app(m){
+  const ph=m.kind==='phone',r=m.st.route;
+  const body={today,oat:replies,clear:allclear,agenda,ask,know,stub}[r](m);
+  const toast=m.st.toast?`<div class="toast" role="status">${esc(m.st.toast)}${m.st.undo?'<button data-act="undo">Undo</button>':''}</div>`:'';
+  return `<div class="bh ${ph?'phn':''}"><div class="app">${header(m)}<main class="body">${body}</main>${ph?ptabs(m):''}${toast}${!ph&&m.st.pal?palette(m):''}</div></div>`}
+/* ---------- behaviour ---------- */
+function render(m){m.el.innerHTML=app(m);if(m.st.route==='oat'&&m.kind==='phone')swipe(m)}
+function say(m,t,undo){m.st.toast=t;m.st.undo=undo||null;clearTimeout(m.tt);m.tt=setTimeout(()=>{m.st.toast=null;m.st.undo=null;render(m)},4200)}
+function act(m,a){const s=m.st;
+  if(a==='copy'){s.copied=true;say(m,'Draft copied. Nothing was sent.')}
+  else if(a==='done'||a==='nfm'||a==='later'){const snap=[...s.order];const x=s.order.shift();if(a==='later')s.order.push(x);s.copied=false;
+    say(m,a==='later'?'Later: back at the next check-in':a==='nfm'?'Not for me: this thread stays out of Replies':'Done',snap);if(!s.order.length)s.route='clear'}
+  else if(a==='undo'){if(s.undo){s.order=s.undo;s.route='oat'}s.toast=null;s.undo=null}
+  else if(a==='open')say(m,'Opens the thread in a new tab (mockup)');
+  else if(a==='note')say(m,'Note for Callsheet (mockup)');
+  else if(a==='copyans')say(m,'Answer copied');
+  else if(a==='pal')s.pal=true;else if(a==='palx')s.pal=false;
+  else if(a==='refresh'){s.refreshing=true;setTimeout(()=>{s.refreshing=false;render(m)},1400)}
+  render(m)}
+function go(m,r,el){const s=m.st;s.pal=false;s.toast=null;
+  if(r==='list'){s.route='oat';s.view='list'}else s.route=r;
+  if(el&&el.dataset.day)s.day=el.dataset.day;else if(r==='agenda'&&!el?.dataset.day)s.day=s.day||'today';
+  if(r==='oat'&&!s.order.length)s.route='clear';
+  if(el&&el.dataset.who){const i=s.order.indexOf(+el.dataset.who);if(i>0){s.order.unshift(...s.order.splice(i,1))}s.view='one'}
+  if(r==='oat'&&el&&el.classList.contains('pri'))s.view='one';
+  render(m)}
+function swipe(m){const c=m.el.querySelector('[data-card]');if(!c)return;let x0=null,dx=0;const sc=()=>m.el.getBoundingClientRect().width/390;
+  c.addEventListener('pointerdown',e=>{if(e.target.closest('button,.draft'))return;x0=e.clientX;dx=0;c.setPointerCapture(e.pointerId);c.style.transition='none'});
+  c.addEventListener('pointermove',e=>{if(x0===null)return;dx=(e.clientX-x0)/sc();c.style.transform=`translateX(${dx}px) rotate(${dx/40}deg)`});
+  const end=()=>{if(x0===null)return;x0=null;c.style.transition='';if(dx>90)act(m,'done');else if(dx<-90)act(m,'later');else c.style.transform=''};
+  c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end)}
+function wire(m){
+  m.el.addEventListener('click',e=>{const t=e.target.closest('[data-go],[data-act],[data-view],[data-day],[data-q],[data-pick]');if(!t||!m.el.contains(t))return;
+    if(t.dataset.go)return go(m,t.dataset.go,t);
+    if(t.dataset.act)return act(m,t.dataset.act);
+    if(t.dataset.view){m.st.view=t.dataset.view;return render(m)}
+    if(t.dataset.day){m.st.day=t.dataset.day;return render(m)}
+    if(t.dataset.q){m.st.ask=+t.dataset.q;return render(m)}
+    if(t.dataset.pick){const k=+t.dataset.pick;m.st.order.unshift(...m.st.order.splice(k,1));m.st.view='one';return render(m)}});
+  if(m.kind!=='desk')return;
+  m.el.closest('.screen').addEventListener('keydown',e=>{const s=m.st;if(e.target.closest('input,.draft'))return;const k=e.key.toLowerCase();
+    if((e.metaKey||e.ctrlKey)&&k==='k'){e.preventDefault();s.pal=!s.pal;return render(m)}
+    if(s.pal){if(k==='escape'){s.pal=false;render(m)}else if(k==='enter'){s.pal=false;s.ask=0;go(m,'ask')}e.preventDefault();return}
+    if(k==='/'){e.preventDefault();s.pal=true;return render(m)}
+    if(k==='escape'){return go(m,'today')}
+    if(['1','2','3','4'].includes(k))return go(m,['today','oat','agenda','ask'][+k-1]);
+    if(s.route==='today'){if(k==='enter'){e.preventDefault();const b=m.el.querySelector('.stop .btn.pri');if(b)b.click()}if(k==='a')go(m,'agenda')}
+    else if(s.route==='oat'&&s.view==='one'){const map={c:'copy',d:'done',l:'later',x:'nfm',o:'open',n:'note'};if(map[k]){e.preventDefault();act(m,map[k])}}
+    else if(s.route==='clear'&&k==='enter')go(m,'today')});
+}
+document.querySelectorAll('[data-mount]').forEach(el=>{const m={el,kind:el.dataset.kind,route0:el.dataset.route,pal0:el.dataset.pal==='1'};el.style.width=el.dataset.w+'px';el.style.height=el.dataset.h+'px';el.parentElement.style.aspectRatio=el.dataset.w+'/'+el.dataset.h;fresh(m);wire(m);render(m);mounts.push(m)});
+function fit(){document.querySelectorAll('.scaler').forEach(sc=>{const w=sc.parentElement.clientWidth;sc.style.transform=`scale(${w/+sc.dataset.w})`})}
+addEventListener('resize',fit);fit();
+function setLight(v){LIGHT=v;document.querySelectorAll('.frame').forEach(f=>f.classList.toggle('night',v==='night'));document.querySelectorAll('#seg-light button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===v))}
+document.querySelectorAll('#seg-light button').forEach(b=>b.addEventListener('click',()=>setLight(b.dataset.m)));
+document.querySelectorAll('#seg-tod button').forEach(b=>b.addEventListener('click',()=>{TODK=b.dataset.t;document.querySelectorAll('#seg-tod button').forEach(x=>x.setAttribute('aria-pressed',x===b));mounts.forEach(m=>{const r=m.st.route;fresh(m);m.st.route=(m.route0==='clear')?'clear':r;if(m.st.route==='oat'&&!m.st.order.length)m.st.route='clear';render(m)})}));
+window.__cs={mounts,setLight,act,go};
+</script>
