@@ -37,3 +37,12 @@ Isaac asked (2026-11-05, before bed): mockups for every interface, three passes 
 
 ## Update: Jam Braun reference is in
 The HA agent pushed `projects/jam-home/screens/braun/` (52 shots, phone + both kiosks, light and dark) and a "Jam Braun look" section in `projects/jam-home/README.md` (tokens, fonts, radii, motion). **Jam Braun is the look Isaac actually uses and likes**: use these as the primary reference for the "calm" baseline in every app, and especially for the Home Assistant rounds. The live dashboards don't pin a view theme; each user's own look applies.
+
+## Direction update (Isaac, after seeing passes 1–3): same language, bespoke design
+> "Everything should feel like it has the same design language, not necessarily the same design. … I don't really want to see identical cards and backgrounds across designs unless there's a clear reason. … each interface design is bespoke to it's purpose, but moving between them feels natural. New elements will need to be designed, be creative, that's part of the ask. A lot of our rules will be broken which means they probably shouldn't be global rules, this is an opportunity to discover holes, and issues."
+
+What this means for every round from pass 4 on:
+- **Shared language, not a shared template.** Keep what makes things feel related when you move between apps (the type pair, indicator windows as a vocabulary, state words, one-main-action logic, motion character, the honest calm). Everything else (layout, surfaces, backgrounds, card shapes, chrome, signature pieces) is designed **for this app's purpose**. Don't copy another app's cards or backgrounds unless you can state the reason.
+- **Invent.** Design at least two new elements that only make sense in this app, and draw them well. Use Isaac's influences (70s NASA, Rams/Braun, TNG/Voyager LCARS-era clarity, McQuarrie/Syd Mead, Bebop, Evangelion, Miyazaki/Satoshi Kon, mid-century modern, Atari 2600, Fallout) as raw material, interpreted with restraint: friendly for three people, not nerdy, no skeuomorphic excess (no brushed metal, glow, grain or paper).
+- **Break rules on purpose, and log it.** Notes need a "Rules I broke" table: rule (BIBLE section or CHANGES D-number), what you did instead, why the app needed it, and your verdict: **language-wide** (keep for all), **device family** (TV / kiosk / phone / desktop), **app-local**, or **drop**.
+- Add a "Language check" section: what in your design ties it to the family, and what someone moving from another app would recognise within a second.
