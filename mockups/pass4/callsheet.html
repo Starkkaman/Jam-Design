@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Callsheet Day Sheet</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Callsheet pass 4: the day as a sheet you read. A film call sheet crossed with a 70s flight plan: typographic,
+   time-first, no cards. Own surfaces (warm sheet by day, deep navy sheet by night, from the saved Mission palette);
+   shared language kept: Jost + Plex Mono, indicator windows, state words, one orange per screen, red alert key,
+   walnut trim. Sample data only (Sam, Co. A/B, example names). */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5a5d5c;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a3a5a1;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a3a5a1;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding:32px 16px 64px;display:grid;gap:30px}
+@media (min-width:700px){.wrap{padding-inline:28px}}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1.pt{font:600 clamp(28px,4vw,40px)/1.1 var(--f);margin:6px 0 10px}
+h2.ps{font:600 22px var(--f);margin:0}
+.wrap p{margin:0;max-width:78ch}
+.muted{color:var(--muted)}
+ul.lst{margin:0;padding-left:20px;max-width:90ch;display:grid;gap:6px}
+.ctrls{display:flex;gap:12px 22px;flex-wrap:wrap;align-items:center}
+.ctrls>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line);flex-wrap:wrap}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 13px;border-radius:9px;cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111213}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111213}}
+.flows{display:flex;gap:6px;flex-wrap:wrap}
+.flows button{font:500 14px var(--f);border:1px solid var(--line);background:var(--chip);color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer;min-height:40px;text-align:left}
+.flows button[aria-pressed="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.stepbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--chip)}
+.stepbar .num{display:flex;gap:6px;flex-wrap:wrap}
+.stepbar .num button{width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--fg);font:500 14px var(--mono);cursor:pointer}
+.stepbar .num button[aria-pressed="true"]{background:#ec7c22;border-color:#ec7c22;color:#1a1206}
+.stepbar .sd{flex:1 1 280px;min-width:0}
+.stepbar .sd b{font-weight:600}
+.pbtn{font:500 14px var(--f);border:1px solid var(--line);background:transparent;color:var(--fg);padding:8px 14px;border-radius:9px;cursor:pointer;min-height:40px}
+.stage{display:grid;gap:22px;align-items:start}
+@media (min-width:1100px){.stage{grid-template-columns:minmax(0,1fr) 340px}}
+figure{margin:0;display:grid;gap:8px;min-width:0;align-content:start}
+figcaption{font-size:14px;color:var(--muted)}
+.frame{position:relative;width:100%;border-radius:14px;background:#0b0c0e;padding:8px;box-shadow:0 18px 44px #0000004a}
+.frame.ph{border-radius:40px;padding:10px;max-width:400px;justify-self:center}
+.screen{position:relative;overflow:hidden;border-radius:7px;outline:none}
+.frame.ph .screen{border-radius:31px}
+.screen:focus-visible{box-shadow:0 0 0 3px #ec7c22}
+.scaler{position:absolute;top:0;left:0;transform-origin:0 0}
+.gal{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.gald{display:grid;gap:22px}
+@media (min-width:1100px){.gald{grid-template-columns:1fr 1fr}}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th,.tbl td{text-align:left;vertical-align:top;padding:9px 10px;border-top:1px solid var(--line)}
+.tbl th{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tblw{overflow-x:auto;max-width:100%}
+.elist{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.elist div{border-top:2px solid var(--fg);padding-top:10px}
+.elist b{display:block;font-weight:600;margin-bottom:4px}
+
+/* ============ THE APP (Callsheet "sheet") ============ */
+.app{--sheet:#f6f3ec;--ink:#19202e;--ink2:#343b4a;--dim:#5b606d;--rule:#d6cfbf;--hair:#e7e1d4;--shade:#eee9dd;
+  --walnut:#6b4428;--orange:#ec7c22;--on-orange:#1a1206;--alert:#ff5a48;--on-alert:#1c0804;--alert-ink:#b3261b;
+  --warn:#f2c14e;--warn-ink:#7a5300;--warn-line:#a87a12;--win:#151413;--lit:#f3e6c8;--ok:#7bd651;--veil:#10141d80;
+  position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--sheet);color:var(--ink);
+  font:400 16px/1.45 var(--f);-webkit-font-smoothing:antialiased}
+.app.night{--sheet:#10141d;--ink:#ece5d3;--ink2:#d2cbb9;--dim:#9f9a8b;--rule:#2a3244;--hair:#1c2230;--shade:#161c28;
+  --orange:#f08a2c;--alert-ink:#ff8a7a;--warn-line:#f2c14e;--warn-ink:#f2c14e;--win:#06080c;--veil:#000000a0}
+.app button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+.app .mono{font-family:var(--mono)}
+.app .dim{color:var(--dim)}
+.trim{height:6px;background:var(--walnut);flex:none}
+/* keys */
+.app .k{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:36px;padding:0 14px;border:1.5px solid var(--ink);
+  border-radius:5px;font:500 15px/1.15 var(--f);color:var(--ink);white-space:nowrap;transition:transform .15s}
+.app .k:active{transform:translateY(1px)}
+.app .k.go{background:var(--orange);border-color:var(--orange);color:var(--on-orange)}
+.app .k.red{background:var(--alert);border-color:var(--alert);color:var(--on-alert)}
+.app .k.q{border-color:transparent;padding:0 8px;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px;text-decoration-color:var(--dim)}
+.app .k[disabled]{opacity:.5;cursor:not-allowed}
+.kh{font:500 12px/1 var(--mono);border:1px solid currentColor;border-radius:3px;padding:2px 4px;opacity:.7}
+.phone .kh{display:none}
+.phone .k{min-height:44px;padding:0 16px;font-size:16px}
+.phone .k.q{padding:0 10px}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.veiled .pg .k.go{background:transparent;border-color:var(--ink);color:var(--ink)}
+/* windows (shared language) */
+.led{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--win);flex:none;vertical-align:middle}
+.led.al{background:var(--alert);box-shadow:0 0 0 2px var(--win),0 0 0 3.5px var(--alert)}
+.led.wn{background:var(--warn);box-shadow:0 0 0 2px var(--win)}
+.slot{display:inline-block;width:18px;height:6px;border-radius:3px;background:var(--win);flex:none;vertical-align:middle}
+.slot.on{background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.sq{display:inline-block;width:11px;height:11px;border-radius:2px;background:var(--win);flex:none}
+.sq.on{background:var(--lit);box-shadow:0 0 0 2px var(--win)}
+.app.day .led:not(.al):not(.wn),.app.day .sq:not(.on),.app.day .slot:not(.on){background:transparent;box-shadow:inset 0 0 0 1px var(--dim)}
+.app.day .sq.on{box-shadow:0 0 0 3px var(--win)}.app.day .slot.on{box-shadow:0 0 0 2px var(--win)}
+/* masthead */
+.mast{height:62px;flex:none;display:flex;align-items:stretch;gap:36px;padding:0 56px;border-bottom:1px solid var(--rule)}
+.wm{display:flex;align-items:center;font:600 19px var(--f);letter-spacing:.01em}
+.nav{display:flex;gap:6px}
+.nav button{position:relative;padding:0 12px;font:500 15px var(--f);color:var(--dim);display:flex;align-items:center}
+.nav button[aria-current="page"]{color:var(--ink)}
+.nav button[aria-current="page"]::after{content:"";position:absolute;left:50%;bottom:9px;width:18px;height:5px;margin-left:-9px;border-radius:3px;background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.tools{margin-left:auto;display:flex;align-items:center;gap:4px}
+.pg{flex:1;overflow:auto;min-height:0}
+.desk .pg{padding:26px 56px 44px}
+.phone .pg{padding:14px 16px 28px}
+.dline{display:flex;justify-content:space-between;align-items:center;gap:12px;font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.hl{font:500 46px/1.05 var(--f);letter-spacing:-.012em;margin:12px 0 10px}
+.phone .hl{font-size:31px;margin:8px 0 8px}
+.lede{font:400 23px/1.42 var(--f);color:var(--ink2);max-width:31em;margin:0}
+.phone .lede{font-size:18px}
+.fn{font:500 12px/1 var(--mono);color:var(--dim);vertical-align:super;margin-left:2px}
+.cols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;margin-top:30px;border-top:2px solid var(--ink);padding-top:16px}
+.sh{display:flex;align-items:baseline;gap:10px;font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:0 0 10px}
+.sh .n{color:var(--dim)}
+.sh .r{margin-left:auto;letter-spacing:0;text-transform:none}
+.blk{margin-top:26px}
+.phone .blk{margin-top:22px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:30px;border-top:1px solid var(--rule);padding-top:16px}
+/* offline bar */
+.offbar{flex:none;display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 56px;border-bottom:1.5px dashed var(--dim);background:var(--shade)}
+.phone .offbar{padding:10px 16px}
+.offbar .t{flex:1 1 220px;min-width:0}
+.offbar b{font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;display:block}
+/* cue (alert / clash) */
+.cue{border-top:2px solid var(--ink);padding-top:12px;margin-bottom:24px}
+.cue.al{border-top-color:var(--alert)}
+.cue.wn{border-top-color:var(--warn-line)}
+.cue .lab{display:flex;align-items:center;gap:10px;font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.cue.al .lab{color:var(--alert-ink)}
+.cue.wn .lab{color:var(--warn-ink)}
+.cue .say{font:400 22px/1.35 var(--f);margin:8px 0 14px;max-width:28em}
+.phone .cue .say{font-size:19px}
+/* roster */
+.ros{border-top:1px solid var(--rule)}
+.rrow{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start;cursor:pointer;width:100%}
+.phone .rrow{grid-template-columns:34px minmax(0,1fr) auto;gap:4px 10px;min-height:44px}
+.rrow:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.rrow.sel{box-shadow:inset 3px 0 0 var(--ink)}
+.idb{width:30px;height:30px;border:1.5px solid var(--ink);display:grid;place-items:center;font:500 13px var(--mono);border-radius:2px;margin-top:1px}
+.idb.x{border-style:dashed;color:var(--dim);border-color:var(--dim)}
+.rn{font:600 17px/1.25 var(--f)}
+.rn .dim{font-weight:400}
+.ra{font:400 16px/1.35 var(--f);margin-top:2px}
+.rw{font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:5px}
+.rw .vip{color:var(--ink)}
+.rage{font:400 13px var(--mono);color:var(--dim);padding-top:3px;white-space:nowrap}
+.then{font:600 13px var(--mono);letter-spacing:.12em;color:var(--dim);display:block;margin-bottom:2px}
+.rx{grid-column:2 / -1}
+.draft{margin:10px 0 12px;padding:2px 0 2px 14px;border-left:2px solid var(--ink);font:400 16px/1.45 var(--f);color:var(--ink2);max-width:36em}
+.copied{font:500 13px var(--mono);color:var(--dim);display:inline-flex;align-items:center;gap:8px;letter-spacing:.06em}
+.more{font:500 15px var(--f);padding:12px 0 0;color:var(--ink)}
+.morel{display:block;padding:12px 0;font:500 15px var(--f)}
+.morel:hover{text-decoration:underline}
+/* running order */
+.ro{position:relative}
+.ro::before{content:"";position:absolute;left:79px;top:6px;bottom:6px;width:1px;background:var(--rule)}
+.phone .ro::before{left:65px}
+.orow{display:grid;grid-template-columns:64px 30px minmax(0,1fr);align-items:start;position:relative}
+.phone .orow{grid-template-columns:52px 28px minmax(0,1fr)}
+.ot{font:500 15px var(--mono);padding-top:9px}
+.orail{position:relative;align-self:stretch}
+.tick{position:absolute;left:9px;top:19px;width:12px;height:1.5px;background:var(--ink)}
+.phone .tick{left:8px}
+.ob{padding:8px 0 12px}
+.ob .tt{font:500 18px/1.3 var(--f)}
+.ob .mm{font:400 14px/1.4 var(--f);color:var(--dim)}
+.ob .mm .mono{font-size:13px}
+.orow.past{color:var(--dim)}
+.orow.past .tick{background:var(--dim)}
+.orow.past .tt{font-weight:400}
+.onnow{display:inline-flex;gap:7px;align-items:center;font:500 13px var(--mono);letter-spacing:.1em;margin-left:8px;color:var(--ink)}
+.orow.now .ot{font-weight:600;color:var(--ink)}
+.orow.now .ob{display:flex;align-items:center;gap:10px;padding:10px 0}
+.orow.now .ln{flex:1;height:1.5px;background:var(--ink)}
+.orow.now .orail .slot{position:absolute;left:6px;top:15px}
+.phone .orow.now .orail .slot{left:5px}
+.orow.now .lbl{font:600 13px var(--mono);letter-spacing:.14em}
+.orow.gap .orail::before{content:"";position:absolute;left:14px;top:8px;bottom:8px;border-left:1.5px dashed var(--dim);background:var(--sheet);width:3px}
+.phone .orow.gap .orail::before{left:13px}
+.orow.gap .ob{padding:9px 0 14px}
+.gl{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.gf{font:400 15px/1.4 var(--f);margin:3px 0 4px}
+.orow.fold .ob{font:400 15px var(--f);color:var(--dim);padding:9px 0 10px}
+.orow.end .gl{padding:9px 0}
+.clash .orail::after{content:"";position:absolute;left:8px;top:12px;bottom:12px;width:9px;border:3px solid var(--warn-line);border-right:0}
+.clash .ch{display:flex;align-items:center;gap:9px;font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--warn-ink);padding:9px 0 2px}
+.clash .ce{padding:4px 0 2px}
+/* day strip (phone) */
+.strip{display:block;width:100%;padding:2px 0 4px}
+.strip .labs{position:relative;height:20px;font:500 13px var(--f);white-space:nowrap}
+.strip .labs span{position:absolute;top:0}
+.strip .labs .w{color:var(--warn-ink)}
+.strip .trk{position:relative;height:26px;margin-top:14px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.strip .bl{position:absolute;top:4px;bottom:4px;background:var(--ink);border-radius:1px}
+.strip .bl.past{background:transparent;border:1.5px solid var(--dim)}
+.strip .bl.c1{bottom:50%;margin-bottom:1px}
+.strip .bl.c2{top:50%;margin-top:1px}
+.strip .cb{position:absolute;bottom:-5px;height:3px;background:var(--warn-line)}
+.strip .nd{position:absolute;top:-7px;bottom:-7px;width:2px;margin-left:-1px;background:var(--ink)}
+.strip .nd .slot{position:absolute;top:-6px;left:-8px}
+.strip .hrs{position:relative;height:18px;font:400 12px var(--mono);color:var(--dim);margin-top:5px}
+.strip .hrs span{position:absolute;transform:translateX(-50%)}
+/* notes + coming up */
+.nl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;padding:9px 0;border-bottom:1px solid var(--hair);font:400 15px/1.4 var(--f)}
+.nl .w{padding-top:5px}
+.nl .seen{font:500 12px var(--mono);letter-spacing:.06em;color:var(--dim);display:block;margin-top:2px}
+.adv{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:8px 0;border-bottom:1px solid var(--hair);font:400 15px var(--f)}
+.adv .d{font:500 13px var(--mono);letter-spacing:.06em;padding-top:2px}
+.foot{margin-top:28px;padding-top:12px;border-top:1px solid var(--rule);display:grid;gap:10px}
+.srcs{display:grid;gap:2px;font:400 13px var(--mono);color:var(--dim)}
+.prom{font:500 15px var(--f)}
+/* wrap sign-off */
+.wrapo{padding:6px 0 4px}
+.wrapo .lab{font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.wrapo .big{font:400 36px/1.15 var(--f);margin:8px 0 18px}
+.phone .wrapo .big{font-size:28px}
+.tally{display:flex;gap:30px;flex-wrap:wrap}
+.tally div{display:grid}
+.tally b{font:300 44px/1 var(--f)}
+.phone .tally b{font-size:36px}
+.phone .tally{gap:26px}
+.tally span{font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:6px}
+.wrule{margin:22px 0 14px;height:8px;border-top:3px solid var(--walnut);border-bottom:1px solid var(--walnut);transform-origin:0 50%;animation:draw .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.wrapo .tmr{font:400 17px/1.4 var(--f)}
+/* tab bar (phone) */
+.tabs{flex:none;height:64px;display:flex;border-top:1px solid var(--rule);background:var(--sheet)}
+.tabs button{flex:1;display:grid;place-items:center;font:500 13px var(--f);color:var(--dim);position:relative}
+.tabs button[aria-current="page"]{color:var(--ink)}
+.tabs button[aria-current="page"]::before{content:"";position:absolute;top:9px;left:50%;width:18px;height:5px;margin-left:-9px;border-radius:3px;background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.phead{height:54px;flex:none;display:flex;align-items:center;padding:0 6px 0 16px;border-bottom:1px solid var(--rule)}
+.phead .wm{font-size:18px}
+.phead .tools .k{min-width:44px;padding:0 8px}
+.back{display:inline-flex;align-items:center;gap:6px;font:500 15px var(--f);min-height:44px}
+/* lock screen */
+.lock{position:absolute;inset:0;background:#0b0d12;color:#ece5d3;display:flex;flex-direction:column;align-items:center;padding:70px 16px 30px}
+.lock .tm{font:300 78px/1 var(--f)}
+.lock .dt{font:400 18px var(--f);margin-top:6px;opacity:.85}
+.lock .nt{margin-top:46px;width:100%;background:#1b1f29;border-radius:16px;padding:14px 16px;cursor:pointer}
+.lock .nt .h{display:flex;justify-content:space-between;font:500 13px var(--mono);letter-spacing:.12em;opacity:.8}
+.lock .nt b{display:block;font:600 16px var(--f);margin:6px 0 2px}
+.lock .nt p{margin:0;font:400 15px/1.4 var(--f)}
+.lock .na{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:8px}
+.lock .na button{background:#1b1f29;border-radius:12px;min-height:48px;font:500 15px var(--f);color:#ece5d3;text-align:center}
+.lock .hint{margin-top:auto;font:400 13px var(--f);opacity:.65}
+/* one at a time */
+.oat{max-width:700px;margin:0 auto}
+.oatp{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 22px}
+.oatp .idb{cursor:default}
+.oatp .idb.cur{border-width:3px}
+.oatp .idb.dn{border-color:var(--dim);color:var(--dim);text-decoration:line-through}
+.oat .nm{font:500 34px/1.1 var(--f);margin:2px 0 6px}
+.phone .oat .nm{font-size:27px}
+.oat .ask{font:400 21px/1.35 var(--f);margin:12px 0 6px}
+.oat .said{font:400 15px/1.45 var(--f);color:var(--dim)}
+.ta{width:100%;min-height:104px;margin:14px 0;border:0;border-left:2px solid var(--ink);background:var(--shade);color:var(--ink);font:400 16px/1.5 var(--f);padding:10px 12px;resize:vertical;border-radius:0 4px 4px 0}
+.ta:focus{outline:2px solid var(--ink);outline-offset:1px}
+.swh{font:500 13px var(--mono);color:var(--dim);margin-top:14px;letter-spacing:.04em}
+/* slip (detail) */
+.slip .nm{font:500 30px/1.15 var(--f);margin:4px 0 4px}
+.phone .slip .nm{font-size:26px}
+.slip h4{font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:18px 0 6px}
+.slip .ask{font:400 19px/1.4 var(--f);margin:0}
+.slip .said{font:400 16px/1.45 var(--f);color:var(--ink2);margin:0}
+.rep{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:48px}
+.subh{font:500 30px/1.1 var(--f);margin:6px 0 4px}
+.phone .subh{font-size:26px}
+/* voice */
+.vo{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--sheet);z-index:4}
+.vo .top{display:flex;align-items:center;gap:16px;padding:16px 56px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.phone .vo .top{padding:10px 8px 10px 16px;gap:8px}
+.vo .secs{display:flex;gap:14px;font:500 13px var(--mono);letter-spacing:.08em}
+.vo .secs span{display:inline-flex;gap:6px;align-items:center;color:var(--dim)}
+.vo .secs span.on{color:var(--ink)}
+.vo .mid{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 56px;max-width:1000px}
+.phone .vo .mid{padding:0 18px}
+.vo .prev{font:400 20px/1.4 var(--f);color:var(--dim);margin-bottom:22px}
+.phone .vo .prev{font-size:16px}
+.vo .cur{font:400 38px/1.3 var(--f)}
+.phone .vo .cur{font-size:26px}
+.vo .fill{height:4px;background:var(--hair);margin-top:26px;border-radius:2px;overflow:hidden;max-width:520px}
+.vo .fill i{display:block;height:100%;background:var(--ink);transform-origin:0 50%;animation:fillv 5s linear both}
+.vo.paused .fill i{animation-play-state:paused}
+@keyframes fillv{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.vo .bot{padding:18px 56px 26px;border-top:1px solid var(--rule);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.phone .vo .bot{padding:14px 16px 22px;justify-content:center}
+.vo .bot .k{min-height:60px;min-width:110px;font-size:17px}
+.phone .vo .bot .k{min-width:96px}
+.vo .say{font:500 13px var(--mono);color:var(--dim);margin-left:auto}
+.phone .vo .say{margin:0;width:100%;text-align:center}
+/* overlays */
+.veil{position:absolute;inset:0;background:var(--veil);z-index:5}
+.pop{position:absolute;z-index:6;background:var(--sheet);border-top:6px solid var(--walnut);box-shadow:0 24px 60px #0006;border-radius:4px}
+.desk .pop{left:50%;top:84px;width:640px;margin-left:-320px}
+.phone .pop{left:10px;right:10px;top:64px}
+.pop .ph{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--rule)}
+.pop .ph b{font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.pop .ph .k{margin-left:auto}
+.pop .pb{padding:14px 18px 18px}
+.fin{width:100%;font:400 20px var(--f);background:transparent;border:0;border-bottom:2px solid var(--ink);color:var(--ink);padding:6px 0;outline:none}
+.fg{font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:14px 0 4px}
+.fo{display:flex;justify-content:space-between;gap:10px;width:100%;padding:10px 8px;border-radius:3px;font:400 16px var(--f);min-height:44px;align-items:center}
+.fo.top{background:var(--shade);box-shadow:inset 3px 0 0 var(--ink)}
+.fo .mono{font-size:13px;color:var(--dim)}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;padding:12px 4px;border-bottom:1px solid var(--hair);min-height:44px}
+.opt .sq{margin-top:5px}
+.opt small{display:block;font:400 14px var(--f);color:var(--dim)}
+.opt[disabled]{opacity:.55;cursor:not-allowed}
+.kl{display:grid;grid-template-columns:72px 1fr;gap:6px 10px;font:400 15px var(--f)}
+.kl .mono{font-size:13px}
+.toast{position:absolute;z-index:7;left:50%;transform:translateX(-50%);bottom:26px;background:var(--ink);color:var(--sheet);display:flex;align-items:center;gap:6px;padding:6px 6px 6px 16px;border-radius:5px;max-width:calc(100% - 24px);font:400 15px/1.35 var(--f);box-shadow:0 10px 30px #0005}
+.phone .toast{bottom:78px;width:calc(100% - 24px)}
+.toast span{flex:1;min-width:0;padding:6px 0}
+.toast .k{color:var(--sheet);border-color:transparent;min-height:44px}
+.toast .k.u{text-decoration:underline;text-underline-offset:4px}
+.ask .qb{display:flex;gap:10px;align-items:center;border-bottom:2px solid var(--ink);padding:6px 0;margin:16px 0}
+.ask .qb span{flex:1;font:400 20px var(--f);color:var(--dim)}
+.sugg{display:grid;gap:2px}
+.sugg button{text-align:left;padding:10px 0;border-bottom:1px solid var(--hair);font:400 16px var(--f);min-height:44px}
+.ans{margin-top:22px;border-top:2px solid var(--ink);padding-top:12px;max-width:40em}
+.ans .q{font:500 13px var(--mono);letter-spacing:.08em;color:var(--dim);text-transform:uppercase}
+.ans p{font:400 19px/1.45 var(--f);margin:8px 0}
+.prj{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule)}
+.prj b{font:500 17px var(--f);display:block}
+.prj .st{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.inv{padding:12px 0;border-bottom:1px solid var(--rule)}
+.inv b{font:500 17px var(--f);display:block}
+@media (prefers-reduced-motion:reduce){.wrule,.vo .fill i{animation:none}.app .k:active{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Jam design · pass 4 · Callsheet</div>
+  <h1 class="pt">Callsheet, pass 4: the day as a sheet you read</h1>
+  <p class="muted">Isaac's new direction: one shared language, but each app's design is built for its purpose. Callsheet's purpose is a daily brief you read in a minute and act on in a few taps, so this pass drops the cards and the black band. The day is printed like a film call sheet crossed with a 70s flight plan: a time column, a running order read top to bottom, a numbered roster of who needs you, and a sign-off when the day is done. The functional rules from pass 3 stay. All names, mail and events are made-up sample data.</p>
+</header>
+
+<section style="display:grid;gap:10px">
+  <h2 class="ps">What changed since pass 3</h2>
+  <ul class="lst">
+    <li><b>No cards, no black band, no accent.</b> The front door is one printed sheet with its own ground: a warm sheet by day, a deep navy sheet by night (the saved Mission palette). Hierarchy comes from type, rules and the time column, not from boxes.</li>
+    <li><b>The Next card became the roster's first row.</b> Who needs you is a numbered roster, like a call sheet's cast list. Row 01 opens out with its draft and keys. When an alert or a clash takes the cue, row 01 shrinks and is labelled <b>Then</b>, so the Then line from pass 3 is the roster itself, not an extra line.</li>
+    <li><b>The day is a running order.</b> Desktop prints the day down a time column with a NOW rule across it. Free time is printed too, as gaps, and the first gap says how many replies fit in it. On the phone the day folds into a one-line <b>day strip</b>; a tap unfolds it in Agenda, so the day is never drawn twice on one screen.</li>
+    <li><b>The sheet is the full brief.</b> Pass 3's separate Full brief page is gone. Worth knowing and Coming up are printed under the roster, and the summary's sources are footnotes.</li>
+    <li><b>Kept from pass 3:</b> the cue order (alert, offline, clash within 60 min, reply, calm), the red alert key, one orange per screen, "Just this one" for Not for me, Undo on everything, Read it to me, the single-letter keys, five places.</li>
+  </ul>
+</section>
+
+<section style="display:grid;gap:14px" id="flows">
+  <h2 class="ps">1 · The flows, playable</h2>
+  <p class="muted">Pick a flow and step through it. Each step sets both frames, and both stay live: click rows and keys. Desktop keys (click the desktop frame first): <b>C</b> copy, <b>D</b> done, <b>L</b> later, <b>O</b> open, <b>X</b> not for me, <b>W</b> work through them, <b>R</b> read it to me, <b>/</b> find or ask, <b>1–5</b> places, <b>J/K</b> move, <b>?</b> keys, <b>Esc</b> back.</p>
+  <div class="ctrls">
+    <div><span class="eyebrow">Lighting</span><div class="seg" id="c-light"><button data-v="day" aria-pressed="true">Day</button><button data-v="night">Night</button></div></div>
+    <div><span class="eyebrow">Day</span><div class="seg" id="c-day"><button data-v="normal" aria-pressed="true">Normal</button><button data-v="quiet">Quiet</button></div></div>
+    <div><span class="eyebrow">Desktop</span><div class="seg" id="c-w"><button data-v="1440" aria-pressed="true">1440</button><button data-v="1280">1280</button></div></div>
+  </div>
+  <div class="flows" id="flowbtns"></div>
+  <div class="stepbar"><div class="num" id="stepnums"></div><div class="sd" id="stepdesc"></div><button class="pbtn" id="sprev">← Back</button><button class="pbtn" id="snext">Next step →</button></div>
+  <div class="stage">
+    <figure><div class="frame" id="fd"></div><figcaption id="capd">Desktop 1440 × 900</figcaption></figure>
+    <figure><div class="frame ph" id="fp"></div><figcaption>Phone 390 × 844</figcaption></figure>
+  </div>
+</section>
+
+<section style="display:grid;gap:14px">
+  <h2 class="ps">2 · Day and night</h2>
+  <p class="muted">The same sheet at four moments of the day and in the failure cases. Every frame is live.</p>
+  <div class="gald" id="gald"></div>
+  <div class="gal" id="galp"></div>
+</section>
+
+<section style="display:grid;gap:14px">
+  <h2 class="ps">3 · New elements</h2>
+  <div class="elist">
+    <div><b>Running order</b>The day printed down a time column with a hairline rail and a tick per event, like a flight plan's timeline. A NOW rule (a lit cream slot and a full-width line) cuts across the sheet. Finished events fold into one line.</div>
+    <div><b>Gap cues</b>Free time is printed as a dashed stretch of the rail ("Free until 11:00 · 55 min"). The first gap says how many replies fit in it ("Room for the first 3 on the roster, about 6 min"), so replies are scheduled into the day instead of piling up.</div>
+    <div><b>The roster</b>Who needs you, as a call sheet's numbered cast list: an ID box, the name, one line for what they want, the reason in words (no colour dots), the age. Row 01 opens out with the draft. The numbering is the count, so nothing else counts them.</div>
+    <div><b>Then row</b>When an alert or clash takes the cue, row 01 is labelled THEN and keeps a quiet Copy draft. The pass 3 Then line now costs no extra line.</div>
+    <div><b>Clash bracket</b>Two overlapping events share one time and an amber bracket in the rail, with the round amber light and "▲ Clash · pick one".</div>
+    <div><b>Day strip</b>On the phone, the running order folds into one line: a strip-board bar of the day with a needle for now. A tap unfolds it in Agenda.</div>
+    <div><b>Source footnotes</b>Each sentence of the summary carries a small number. The numbers are explained at the foot of the sheet (which calendar or inbox it came from).</div>
+    <div><b>Wrap</b>When the roster is clear, the sheet signs off: "That's the day", three figures (answered, tomorrow, sent: always 0), a walnut double rule that draws in once, and tomorrow's first thing. No orange.</div>
+  </div>
+</section>
+
+<section style="display:grid;gap:14px">
+  <h2 class="ps">4 · Rules this pass broke</h2>
+  <p class="muted">Full reasons are in <code>notes/pass4-callsheet.md</code>.</p>
+  <div class="tblw"><table class="tbl">
+    <thead><tr><th>Rule</th><th>Instead</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>§2 Materials (alu ground, raised cards)</td><td>A flat sheet ground, no cards; navy ink</td><td>App-local</td></tr>
+      <tr><td>§2 Black ribbed band</td><td>None, not even in voice mode</td><td>Device family (TV, kiosk)</td></tr>
+      <tr><td>§2 Accents / D67 Stripes when calm</td><td>No accent; the Wrap rule is the reward</td><td>App-local (optional)</td></tr>
+      <tr><td>D65 / D137 Next card as a card</td><td>Roster row 01 opens out; order kept</td><td>Order language-wide, card form dropped</td></tr>
+      <tr><td>D6 / D141 Bar group for counts</td><td>The roster's numbering is the count</td><td>Device family (dashboards)</td></tr>
+      <tr><td>D8 Tuning scale on a band</td><td>Running order (desktop) and day strip (phone)</td><td>App-local</td></tr>
+      <tr><td>Reason dots (Callsheet)</td><td>Reason in words</td><td>Drop</td></tr>
+      <tr><td>D142 Warn triangle window</td><td>D158's amber round light + ▲ word, plus a bracket</td><td>Language-wide (D158)</td></tr>
+      <tr><td>Principle 5 "Three sizes a screen"</td><td>Four: headline, lede, body, mono labels</td><td>App-local (reading surfaces)</td></tr>
+      <tr><td>D145 Full brief as a separate reading page</td><td>The sheet is the full brief</td><td>Drop</td></tr>
+    </tbody>
+  </table></div>
+</section>
+</div>
+
+<script>
+/* ---------- data (sample only) ---------- */
+const REPLIES=[
+ {id:1,who:'Priya N.',area:'Co. A',ask:'Needs the Q4 budget sign-off today.',why:['Always counts','Due today'],vip:true,age:'07:40',min:2,
+  said:'“Could you sign off the Q4 budget by end of day? Finance closes the sheet tomorrow.”',
+  draft:'Hi Priya, signed off with one change: the contractor line moves to Q1. Thanks for chasing. Sam'},
+ {id:2,who:'School office',area:'Personal',ask:'Trip form for Friday, due tonight.',why:['Due today'],age:'Yesterday',min:2,
+  said:'“Please return the signed trip form by Thursday so we can confirm numbers.”',
+  draft:'Hello, Mia can go on Friday’s trip. The signed form comes in with her tomorrow morning. Thanks, Sam'},
+ {id:3,who:'Marco D.',area:'Co. B',ask:'Asks when the supplier contract ends.',why:['Asked you'],age:'2 days',min:2,
+  said:'“When does the current supplier contract end, and is there a notice period?”',
+  draft:'Hi Marco, it ends on 31 March with 60 days’ notice, so we’d need to decide by 30 January. Sam'},
+ {id:4,who:'A. Reyes',area:'Personal · landlord',ask:'Which morning suits the boiler visit?',why:['Asked you'],age:'3 days',min:1,
+  said:'“The engineer can come Tuesday or Wednesday morning. Which suits?”',
+  draft:'Hi, Wednesday morning works. Someone is in from 8. Thanks, Sam'},
+ {id:5,who:'Tom B.',area:'Personal',ask:'Dinner on Saturday?',why:['Asked you'],age:'Yesterday',min:1,
+  said:'“Are you two free for dinner Saturday? Thinking 7.”',draft:'Saturday at 7 sounds great. What can we bring? Sam'},
+ {id:6,who:'Lena K.',area:'Co. A',ask:'Wants an intro to Ben at Northwind.',why:['Waiting'],age:'5 days',min:3,
+  said:'“Would you mind introducing me to Ben? Happy to send a blurb.”',draft:'Hi Lena, happy to. Send me the blurb and I’ll write to Ben today. Sam'},
+ {id:7,who:'Northwind Store',area:'Personal',ask:'Asks you to review your last order.',why:['Waiting'],age:'6 days',min:1,
+  said:'“How did we do? Leave a review of your recent order.”',draft:null}
+];
+const EVENTS=[
+ {id:'su',t:570,d:15,title:'Stand-up',meta:'Co. A · video'},
+ {id:'rr',t:660,d:60,title:'Roadmap review',meta:'Co. A · Room 3',clash:'sc'},
+ {id:'sc',t:660,d:30,title:'Supplier call',meta:'Co. B · phone',clash:'rr'},
+ {id:'lj',t:780,d:45,title:'Lunch with Jo',meta:'Personal · Café Rosa'},
+ {id:'dc',t:900,d:60,title:'Design crit',meta:'Co. B · moved from 14:00'},
+ {id:'sw',t:1110,d:30,title:'Pick up Mia from swimming',meta:'Personal'}
+];
+const NOTES=[
+ {id:'si',txt:'New sign-in to your Co. A Google account from a Mac in Leeds, 06:12.',alert:true},
+ {id:'mv',txt:'Design crit moved from 14:00 to 15:00.'},
+ {id:'ex',txt:'Co. A’s expenses tool is down until noon.'}
+];
+const ADV=[{d:'Fri 6',t:'Dentist · 08:40'},{d:'Mon 9',t:'Co. B board pack due'},{d:'Thu 12',t:'Flu jab · 10:00'},{d:'Sat 21',t:'Jo’s birthday'}];
+const INV=[{t:'Q1 planning offsite',m:'Co. A · Tue 18 Nov · from Priya N.'},{t:'Supplier call (new time)',m:'Co. B · Fri 6 Nov 14:00 · from Marco D.'},{t:'Parents’ evening',m:'Personal · Wed 19 Nov 18:00'}];
+const VOICE=[
+ {s:0,t:'Good morning, Sam. Six things today, and two of them land at eleven, so you’ll need to pick one.'},
+ {s:1,t:'First on the roster is Priya. She needs the Q4 budget sign-off today, and there’s a draft ready.'},
+ {s:1,t:'Then the school office: the trip form for Friday is due tonight.'},
+ {s:2,t:'Worth knowing: the design crit moved to three o’clock.'},
+ {s:3,t:'Coming up: the dentist tomorrow at 8:40, and Co. B’s board pack is due Monday.'},
+ {s:3,t:'That’s the sheet. Nothing was sent.'}
+];
+const TABS=[['sheet','Today'],['replies','Replies'],['agenda','Agenda'],['ask','Ask'],['projects','Projects']];
+
+/* ---------- helpers ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const dur=m=>m<60?m+' min':(Math.floor(m/60)+' h'+(m%60?' '+(m%60):''));
+const kh=k=>`<span class="kh">${k}</span>`;
+function evs(s){return s.day==='quiet'?EVENTS.filter(e=>e.id==='dc'):EVENTS}
+function reps(s){return s.day==='quiet'?REPLIES.filter(r=>r.id===2):REPLIES}
+function openR(s){return reps(s).filter(r=>!s.done.has(r.id)&&!s.later.has(r.id)&&!s.nf.has(r.id))}
+function rep(id){return REPLIES.find(r=>r.id===id)}
+function nowS(s){return fmt(s.time+(s.tick||0))}
+function cue(s){
+  if(s.sit==='alert'&&!s.alertSeen) return 'alert';
+  const c=evs(s).find(e=>e.clash);
+  if(c&&s.time>=c.t-60&&s.time<c.t&&!s.clashAck) return 'clash';
+  return openR(s).length?'reply':'wrap';
+}
+function base(dev){return{dev,theme:'day',time:394,sit:'normal',day:'normal',view:'sheet',done:new Set(),copied:new Set(),later:new Set(),nf:new Set(),
+  alertSeen:false,clashAck:false,sel:1,oat:0,voice:0,playing:true,find:false,fq:'',keys:false,nfOpen:null,nfScope:'one',toast:null,more:false,retry:0,tick:0}}
+
+/* ---------- pieces ---------- */
+function keyCopy(s,r,orange){
+  if(!r.draft) return '';
+  if(s.copied.has(r.id)) return `<span class="copied"><span class="slot on"></span>Copied ${esc(s.copiedAt||nowS(s))}</span>`;
+  return `<button class="k ${orange?'go':''}" data-act="copy:${r.id}">Copy draft ${kh('C')}</button>`;
+}
+function rosterRow(s,r,i,mode){
+  const num=String(i+1).padStart(2,'0');
+  const why=r.why.map(w=>w==='Always counts'?`<span class="vip">${w}</span>`:w).join(' · ');
+  const sel=s.view==='replies'&&s.dev==='desk'&&s.sel===r.id?' sel':'';
+  let x='';
+  const c=cue(s), canOrange=s.sit!=='offline'&&c==='reply';
+  if(mode==='open'){
+    const copied=s.copied.has(r.id);
+    const doneK=`<button class="k ${copied&&canOrange?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button>`;
+    const openK=s.dev==='desk'?`<button class="k q" data-act="open:${r.id}">Open in Gmail ${kh('O')}</button>`:'';
+    let more='';
+    if(s.more) more=`<div class="keys" style="margin-top:6px">${s.dev==='phone'?`<button class="k q" data-act="open:${r.id}">Open in Gmail</button>`:''}<button class="k q" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="note:${r.id}">Note ${kh('N')}</button><button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button></div>`;
+    x=`<div class="rx" data-act="noop">${r.draft?`<div class="draft">${esc(r.draft)}</div>`:'<div class="draft dim">No draft: this looks like a shop mailing. Not for me?</div>'}<div class="keys">${keyCopy(s,r,canOrange)}${doneK}${openK}<button class="k q" data-act="more" aria-expanded="${s.more}">${s.more?'Less':'More'}</button></div>${more}</div>`;
+  } else if(mode==='then'){
+    x=`<div class="rx" data-act="noop" style="margin-top:4px">${keyCopy(s,r,false).replace('class="k ','class="k q ')}</div>`;
+  }
+  return `<div class="rrow${sel}" role="button" tabindex="0" data-act="slip:${r.id}"><span class="idb">${num}</span><div>${mode==='then'?'<span class="then">THEN</span>':''}<div class="rn">${esc(r.who)} <span class="dim">· ${esc(r.area)}</span></div><div class="ra">${esc(r.ask)}</div><div class="rw">${why}</div></div><span class="rage">${esc(r.age)}</span>${x}</div>`;
+}
+function roster(s,max){
+  const o=openR(s), c=cue(s);
+  const rows=o.slice(0,max).map((r,i)=>rosterRow(s,r,i,i===0?(c==='reply'?'open':'then'):'row')).join('');
+  const more=o.length>max?`<button class="morel" data-act="tab:replies">${o.length-max} more in Replies ›</button>`:'';
+  return `<div class="sh"><span class="n">02</span>Who needs you<span class="r"><button class="k q" data-act="oat">Work through them ${kh('W')}</button></span></div><div class="ros">${rows}</div>${more}`;
+}
+function cueBlock(s){
+  const c=cue(s);
+  if(c==='alert') return `<div class="cue al"><div class="lab"><span class="led al"></span>Alert · 06:12</div><p class="say">A new sign-in to your Co. A Google account, from a Mac in Leeds. Was it you?</p><div class="keys"><button class="k red" data-act="alertcheck">Check the sign-in ${kh('↵')}</button><button class="k q" data-act="alertseen">It was me</button></div></div>`;
+  if(c==='clash'){const e=evs(s).find(x=>x.clash);const mins=e.t-s.time;
+    return `<div class="cue wn"><div class="lab"><span class="led wn"></span>▲ Clash · ${fmt(e.t)} · in ${mins} min</div><p class="say">The roadmap review and the supplier call both start at ${fmt(e.t)}. Pick one.</p><div class="keys"><button class="k ${s.sit==='offline'?'':'go'}" data-act="tab:agenda">See the clash ${kh('↵')}</button><button class="k q" data-act="gotit">Got it</button></div></div>`;}
+  return '';
+}
+function wrapBlock(s){
+  const o=reps(s), ans=o.filter(r=>s.done.has(r.id)||s.nf.has(r.id)).length, lat=o.filter(r=>s.later.has(r.id)).length;
+    return `<div class="wrapo"><div class="lab">Wrap · ${nowS(s)}</div><div class="big">${s.time>=1020?'That’s the day.':'The roster is clear.'}</div>
+   <div class="tally"><div><b>${ans}</b><span>Answered</span></div><div><b>${lat}</b><span>Tomorrow</span></div><div><b>0</b><span>Sent</span></div></div>
+   <div class="wrule"></div><div class="tmr">Tomorrow’s first thing: Dentist, 08:40. Nothing was sent; the drafts you copied are yours.</div>
+   <div class="keys" style="margin-top:12px"><button class="k q" data-act="voice">Read it to me ${kh('R')}</button><button class="k q" data-act="tab:agenda">See tomorrow</button></div></div>`;
+}
+function orderRows(s,full){
+  const now=s.time, ev=[...evs(s)].sort((a,b)=>a.t-b.t), rows=[];
+  const past=ev.filter(e=>e.t+e.d<=now);
+  if(!full&&past.length) rows.push({k:-1,h:`<div class="orow fold"><div class="ot dim">${fmt(past[0].t)}</div><div class="orail"></div><div class="ob">Done: ${past.length>2?past.length+' things':past.map(e=>esc(e.title)).join(', ')}</div></div>`});
+  const show=full?ev:ev.filter(e=>e.t+e.d>now), seen=new Set();
+  const evh=(e,inner)=>{const isPast=e.t+e.d<=now, on=e.t<=now&&now<e.t+e.d;
+    const b=`<div class="tt">${esc(e.title)}${on?'<span class="onnow"><span class="slot on"></span>ON NOW</span>':''}</div><div class="mm">${esc(e.meta)} · <span class="mono">${dur(e.d)}</span>${isPast?' · done':''}</div>`;
+    return inner?`<div class="ce${isPast?' dim':''}">${b}</div>`:`<div class="orow${isPast?' past':''}"><div class="ot">${fmt(e.t)}</div><div class="orail"><span class="tick"></span></div><div class="ob">${b}</div></div>`;};
+  for(const e of show){ if(seen.has(e.id))continue; seen.add(e.id);
+    const o=e.clash&&show.find(x=>x.id===e.clash);
+    if(o){seen.add(o.id);
+      rows.push({k:e.t,h:`<div class="orow clash"><div class="ot">${fmt(e.t)}</div><div class="orail"></div><div class="ob"><div class="ch"><span class="led wn"></span>▲ Clash · pick one</div>${evh(e,1)}${evh(o,1)}</div></div>`});
+    } else rows.push({k:e.t,h:evh(e)}); }
+  let prev=Math.min(now,420), first=true; const c=cue(s), o=openR(s);
+  for(const e of ev){ if(e.t-prev>=30){const gs=Math.max(prev,now), ge=e.t;
+      if(ge-gs>=20&&ge>now){ let f='';
+        if(first&&o.length&&c!=='wrap'){let n=0,m=0;for(const r of o){if(n>=3||m+r.min>Math.min(ge-gs,12))break;m+=r.min;n++;}
+          if(n) f=`<div class="gf">Room for ${n===1?'the first one':'the first '+n} on the roster, about ${m} min.</div><button class="k q" style="padding-left:0" data-act="oat">Work through them</button>`; first=false;}
+        rows.push({k:gs+.5,h:`<div class="orow gap"><div class="ot dim">${gs===now?'':fmt(gs)}</div><div class="orail"></div><div class="ob"><div class="gl">Free until ${fmt(ge)} · ${dur(ge-gs)}</div>${f}</div></div>`}); } }
+    prev=Math.max(prev,e.t+e.d); }
+  rows.push({k:1e4,h:`<div class="orow end"><div class="ot dim">${fmt(prev)}</div><div class="orail"><span class="tick" style="width:12px"></span></div><div class="ob"><div class="gl">End of day · clear from ${fmt(prev)}</div></div></div>`});
+  if(now<prev) rows.push({k:now,h:`<div class="orow now"><div class="ot">${nowS(s)}</div><div class="orail"><span class="slot on"></span></div><div class="ob"><span class="lbl">NOW</span><span class="ln"></span></div></div>`});
+  rows.sort((a,b)=>a.k-b.k);
+  return `<div class="ro">${rows.map(r=>r.h).join('')}</div>`;
+}
+function dayStrip(s){
+  const S=420,E=1200,W=E-S,p=m=>Math.max(0,Math.min(100,(m-S)/W*100));
+  const ev=evs(s), now=s.time;
+  let bl='', cb='';
+  for(const e of ev){const cls=(e.t+e.d<=now?' past':'')+(e.clash?(e.id<e.clash?' c1':' c2'):'');
+    bl+=`<span class="bl${cls}" style="left:${p(e.t)}%;width:${Math.max(1.2,e.d/W*100)}%"></span>`;}
+  const ce=ev.find(e=>e.clash&&e.t>now); if(ce) cb=`<span class="cb" style="left:${p(ce.t)}%;width:${60/W*100}%"></span>`;
+  const nx=ev.filter(e=>e.t>now&&!e.clash).sort((a,b)=>a.t-b.t)[0];
+  let labs='';
+  const place=(m,txt,cls)=>{const x=p(m);return `<span class="${cls||''}" style="left:${x}%;transform:translateX(-${x}%)">${txt}</span>`};
+  if(ce) labs+=place(ce.t,`▲ ${fmt(ce.t)} clash`,'w');
+  if(nx&&(!ce||Math.abs(p(nx.t)-p(ce.t))>34)&&(!ce||nx.t<ce.t||true)) labs+=place(nx.t,`${esc(nx.title)} ${fmt(nx.t)}`);
+  const hrs=[480,660,840,1020,1200].map(m=>`<span style="left:${p(m)}%">${fmt(m).slice(0,2)}</span>`).join('');
+  return `<div class="sh"><span class="n">01</span>Your day<span class="r"><button class="k q" data-act="tab:agenda">Agenda ›</button></span></div>
+   <button class="strip" data-act="tab:agenda" aria-label="Your day: open Agenda"><div class="labs">${labs}</div><div class="trk">${bl}${cb}<span class="nd" style="left:${p(now)}%"><span class="slot on"></span></span></div><div class="hrs">${hrs}</div></button>`;
+}
+function notes(s){
+  return `<div class="sh"><span class="n">03</span>Worth knowing</div>`+NOTES.map(n=>{
+    if(n.alert){const unseen=s.sit==='alert'&&!s.alertSeen; if(unseen) return ''; // said once: it's the cue
+      return `<div class="nl"><span class="w"><span class="led"></span></span><div>${esc(n.txt)}<span class="seen">Seen ${esc(s.seenAt||'06:20')}</span></div></div>`;}
+    return `<div class="nl"><span class="w"><span class="led" style="visibility:hidden"></span></span><div>${esc(n.txt)}</div></div>`;}).join('');
+}
+function advance(s){return `<div class="sh"><span class="n">04</span>Coming up</div>`+ADV.filter((a,i)=>!(i===0&&s&&cue(s)==='wrap')).map(a=>`<div class="adv"><span class="d">${a.d.toUpperCase()}</span><span>${esc(a.t)}</span></div>`).join('')}
+function foot(s){
+  return `<div class="foot"><div class="srcs"><span>¹ Calendars · Co. A and Co. B</span><span>² Gmail · Co. A and Personal</span><span>³ All 8 calendars</span></div>
+   <div class="prom">Nothing was sent. Drafts wait for you.</div><div class="dim" style="font-size:14px">Written ${s.time>=1020?'17:00':'06:30'} by Careful · next ${s.time>=1020?'tomorrow 06:30':'12:30'} · <button class="k q" style="min-height:0;padding:0" data-act="refresh">Refresh</button></div></div>`;
+}
+function lede(s){
+  if(s.day==='quiet') return `Nothing booked until 15:00<span class="fn">³</span>, a clear run. One reply is due today<span class="fn">²</span>.`;
+  if(s.time>=1020) return `The 17:00 check-in found nothing new<span class="fn">²</span>. One thing left on the day: swimming at 18:30<span class="fn">¹</span>.`;
+  return `Six things today, and two of them land at 11:00<span class="fn">¹</span>. Two replies are due today<span class="fn">²</span>; the rest can wait. Clear after 16:00<span class="fn">³</span>.`;
+}
+function headline(s){return cue(s)==='wrap'&&s.time>=1020?'Evening, Sam.':'Good morning, Sam.'}
+function dateline(s){return `<div class="dline"><span>Thursday 5 November · sheet ${s.time>=1020?'17:00':'06:30'}</span>${s.dev==='desk'?`<button class="k q" data-act="voice">Read it to me ${kh('R')}</button>`:''}</div>`}
+function offbar(s){
+  if(s.sit!=='offline') return '';
+  const t=s.retry?`Tried ${nowS(s)}, still no answer. Check the phone is on home Wi-Fi or the VPN.`:'Showing the 06:30 sheet. Copy still works; the rest waits until it’s back.';
+  return `<div class="offbar"><span class="t"><b>Can’t reach Callsheet</b>${t}</span><button class="k go" data-act="retry">Try again</button></div>`;
+}
+
+/* ---------- views ---------- */
+function sheetDesk(s){
+  const c=cue(s);
+  const right=c==='wrap'?wrapBlock(s):cueBlock(s)+roster(s,5);
+  return `${dateline(s)}<h1 class="hl">${headline(s)}</h1><p class="lede">${lede(s)}</p>
+  <div class="cols"><section><div class="sh"><span class="n">01</span>Your day<span class="r"><button class="k q" data-act="tab:agenda">Agenda ${kh('3')}</button></span></div>${orderRows(s,false)}</section>
+  <section>${right}<div class="two"><div>${notes(s)}</div><div>${advance(s)}</div></div>${foot(s)}</section></div>`;
+}
+function sheetPhone(s){
+  const c=cue(s);
+  return `${dateline(s)}<h1 class="hl">${headline(s)}</h1><p class="lede">${lede(s)}</p>
+  <div class="blk">${cueBlock(s)}${c==='wrap'?wrapBlock(s):''}</div>
+  <div class="blk" style="margin-top:${c==='reply'?18:4}px">${dayStrip(s)}</div>
+  ${c==='wrap'?'':`<div class="blk">${roster(s,4)}</div>`}
+  <div class="blk">${notes(s)}</div><div class="blk">${advance(s)}</div>${foot(s)}`;
+}
+function slip(s,r){
+  if(!r) return `<p class="dim" style="margin-top:40px">Nobody is waiting on you.</p>`;
+  const vip=r.vip;
+  return `<div class="slip">${s.dev==='phone'?`<button class="back" data-act="back">‹ Back</button>`:''}
+   <div class="dline" style="margin-top:6px"><span>${esc(r.area)} · ${esc(r.age)}</span></div>
+   <div class="nm">${esc(r.who)}</div><div class="rw">${r.why.join(' · ')}</div>
+   <h4>What they want</h4><p class="ask">${esc(r.ask)}</p>
+   <h4>Their words</h4><p class="said">${esc(r.said)}</p>
+   <h4>Your draft</h4>${r.draft?`<textarea class="ta" aria-label="Draft reply">${esc(r.draft)}</textarea>`:'<p class="said">No draft: this looks like a shop mailing, so Not for me is probably right.</p>'}
+   <div class="keys">${keyCopy(s,r,s.sit!=='offline'&&!s.copied.has(r.id))}<button class="k ${s.copied.has(r.id)&&s.sit!=='offline'?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button><button class="k q" data-act="open:${r.id}">Open in Gmail ${kh('O')}</button></div>
+   <div class="keys" style="margin-top:6px"><button class="k q" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="note:${r.id}">Note ${kh('N')}</button><button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button></div>
+   ${vip?'<p class="dim" style="font-size:14px;margin:14px 0 0">Priya N. always counts, so her mail is never hidden.</p>':''}</div>`;
+}
+function repliesView(s){
+  const o=openR(s), done=reps(s).filter(r=>s.done.has(r.id)||s.nf.has(r.id));
+  const list=o.map((r,i)=>rosterRow(s,r,i,'row')).join('')||'<p class="dim">Nobody is waiting on you.</p>';
+  const dn=done.length?`<div class="sh" style="margin-top:22px"><span class="n">··</span>Done today</div>`+done.map(r=>`<div class="nl"><span class="w"><span class="slot"></span></span><div class="dim">${esc(r.who)} · ${s.nf.has(r.id)?'not for me':'done'}</div></div>`).join(''):'';
+  const head=`<div class="dline"><span>Thursday 5 November</span></div><h1 class="subh">Who needs you</h1>`;
+  if(s.dev==='phone') return `${head}<div class="keys" style="margin:10px 0 14px"><button class="k ${s.sit!=='offline'&&o.length?'go':''}" data-act="oat">Work through them</button></div><div class="ros">${list}</div>${dn}`;
+  const sel=o.find(r=>r.id===s.sel)||o[0];
+  return `<div class="rep"><div>${head}<div class="keys" style="margin:10px 0 14px"><button class="k" data-act="oat">Work through them ${kh('W')}</button></div><div class="ros">${list}</div>${dn}</div><div>${slip(s,sel)}</div></div>`;
+}
+function agendaView(s){
+  const inv=`<div class="sh"><span class="n">··</span>Invites to answer</div>`+INV.map(i=>`<div class="inv"><b>${esc(i.t)}</b><div class="dim" style="font-size:15px">${esc(i.m)}</div><button class="k q" style="padding-left:0" data-act="gcal">Answer in Google Calendar</button></div>`).join('');
+  const clashNote=cue(s)==='clash'?`<div class="keys" style="margin:8px 0 0"><button class="k q" style="padding-left:0" data-act="gotit">Got it, back to Today</button></div>`:'';
+  const head=`<div class="dline"><span>Thursday 5 November</span><button class="k q" data-act="tab:sheet">Today ›</button></div><h1 class="subh">Your day</h1>${clashNote}`;
+  if(s.dev==='phone') return `${head}<div class="blk" style="margin-top:14px">${orderRows(s,true)}</div><div class="blk">${inv}</div>`;
+  return `${head}<div class="cols" style="grid-template-columns:minmax(0,7fr) minmax(0,5fr)"><section>${orderRows(s,true)}</section><section>${inv}</section></div>`;
+}
+function askView(s){
+  return `<div class="ask" style="max-width:760px"><div class="dline"><span>Ask about your mail, chat, calendar and notes</span></div><h1 class="subh">Ask</h1>
+  <div class="qb"><span>When is the boiler visit?</span><button class="k ${s.sit==='offline'?'':'go'}" data-act="asked">Ask</button></div>
+  <div class="sugg"><button data-act="asked">What did Marco say about the contract last month?</button><button data-act="asked">Who have I not answered this week?</button><button data-act="tab:people">People and Know me ›</button></div>
+  <div class="ans"><div class="q">Earlier · what time is swimming?</div><p>Mia’s swimming ends at 18:30 on Thursdays<span class="fn">¹</span>; the pool asks for pick-up by 18:40<span class="fn">²</span>.</p><div class="srcs"><span>¹ Calendar · Personal</span><span>² Gmail · Personal · leisure centre, 2 Sep</span></div></div></div>`;
+}
+function projectsView(s){
+  const P=[['slot on','Q4 budget','Co. A · sign-off due today','On track'],['led wn','Kitchen refit','Personal · slipped a week','▲ Slipped'],['slot','Supplier switch','Co. B · waiting on Marco D.','Waiting']];
+  return `<div style="max-width:760px"><div class="dline"><span>3 projects</span><button class="k q" data-act="addp">Add project</button></div><h1 class="subh">Projects</h1><div class="ros" style="margin-top:12px">${P.map(p=>`<div class="prj"><span class="${p[0]}"></span><div><b>${p[1]}</b><span class="dim" style="font-size:15px">${p[2]}</span></div><span class="st">${p[3]}</span></div>`).join('')}</div><p class="dim" style="margin-top:14px;font-size:14px">Projects keeps pass 3’s structure; only the type and ground changed here.</p></div>`;
+}
+function oatView(s){
+  const all=reps(s), o=openR(s);
+  if(!o.length) return `<div class="oat">${wrapBlock(s)}<div class="keys"><button class="k" data-act="tab:sheet">Back to Today</button></div></div>`;
+  const r=o[0];
+  const boxes=all.map((x,i)=>`<span class="idb ${s.done.has(x.id)||s.nf.has(x.id)?'dn':''} ${s.later.has(x.id)?'x':''} ${x.id===r.id?'cur':''}">${String(i+1).padStart(2,'0')}</span>`).join('');
+  return `<div class="oat"><div class="dline"><span>One at a time</span><button class="k q" data-act="tab:sheet">Close ${kh('Esc')}</button></div>
+   <div class="oatp" aria-label="Roster progress">${boxes}</div>
+   <div class="nm">${esc(r.who)}</div><div class="rw">${esc(r.area)} · ${r.why.join(' · ')} · ${esc(r.age)}</div>
+   <p class="ask">${esc(r.ask)}</p><p class="said">${esc(r.said)}</p>
+   ${r.draft?`<textarea class="ta" aria-label="Draft reply">${esc(r.draft)}</textarea>`:'<p class="said" style="margin:14px 0">No draft: this looks like a shop mailing.</p>'}
+   <div class="keys">${keyCopy(s,r,s.sit!=='offline'&&!s.copied.has(r.id))}<button class="k ${s.copied.has(r.id)?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button><button class="k q" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="open:${r.id}">Open in Gmail ${kh('O')}</button><button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button></div>
+   ${s.dev==='phone'?'<div class="swh">Swipe right: done · swipe left: later</div>':''}</div>`;
+}
+function voiceView(s){
+  const i=Math.min(s.voice,VOICE.length-1), L=VOICE[i], end=i===VOICE.length-1;
+  const secs=['Your day','Who needs you','Worth knowing','Coming up'].map((n,j)=>`<span class="${j===L.s?'on':''}">${j===L.s?'<span class="slot on"></span>':''}${String(j+1).padStart(2,'0')}${s.dev==='desk'?' '+n:''}</span>`).join('');
+  return `<div class="vo ${s.playing?'':'paused'}"><div class="top"><span class="mono" style="font-size:13px;letter-spacing:.12em">${s.dev==='desk'?'READ IT TO ME · WHEATLEY':'WHEATLEY'}</span><span class="secs">${secs}</span><span style="margin-left:auto"></span><button class="k q" data-act="vclose">Close</button></div>
+   <div class="mid">${i?`<div class="prev">${esc(VOICE[i-1].t)}</div>`:''}<div class="cur">${esc(L.t)}</div>${end?'':`<div class="fill"><i data-act="vauto" data-i="${i}"></i></div>`}</div>
+   <div class="bot">${end?`<button class="k" data-act="vback">Back</button><button class="k" data-act="vagain">Play again</button><button class="k" data-act="vclose">Close</button>`:
+   `<button class="k" data-act="vback">‹ Back</button><button class="k go" data-act="vpause">${s.playing?'Pause':'Play'}</button><button class="k" data-act="vnext">Next ›</button>`}<span class="say">Say: next · back · later · repeat · stop</span></div></div>`;
+}
+function lockView(s){
+  return `<div class="lock"><div class="tm">${nowS(s)}</div><div class="dt">Thursday 5 November</div>
+   <div class="nt" data-act="tab:sheet"><div class="h"><span>CALLSHEET</span><span>NOW</span></div><b>Your sheet is ready</b><p>Two things land at 11:00. Priya needs the budget sign-off today.</p></div>
+   <div class="na"><button data-act="tab:sheet">Open</button><button data-act="voice">Read it to me</button></div><div class="hint">Tap the notification, or Read it to me in the car</div></div>`;
+}
+function overlays(s){
+  let h='';
+  if(s.find){const q=(s.fq||'pri').toLowerCase();
+    const ppl=REPLIES.filter(r=>r.who.toLowerCase().includes(q)).slice(0,3);
+    h+=`<div class="veil" data-act="close"></div><div class="pop" role="dialog" aria-label="Find or ask"><div class="ph"><b>Find or ask</b><button class="k q" data-act="close">Close ${kh('Esc')}</button></div><div class="pb">
+     <div class="fin" aria-label="Search">${esc(s.fq||'pri')}<span style="opacity:.5">|</span></div>
+     <div class="fg">People and threads</div>${ppl.map((r,i)=>`<button class="fo ${i===0?'top':''}" data-act="slip:${r.id}"><span>${esc(r.who)} · ${esc(r.ask)}</span><span class="mono">${i===0?'↵':''}</span></button>`).join('')||'<div class="dim">No one by that name.</div>'}
+     <div class="fg">Settings</div><button class="fo" data-act="close"><span>Brief times (Your day)</span><span class="mono">Setup</span></button>
+     <div class="fg">Ask</div><button class="fo" data-act="tab:ask"><span>Ask: “${esc(s.fq||'pri')}”</span><span class="mono">read-only</span></button></div></div>`;}
+  if(s.keys) h+=`<div class="veil" data-act="close"></div><div class="pop" role="dialog" aria-label="Keys"><div class="ph"><b>Keys</b><button class="k q" data-act="close">Close ${kh('Esc')}</button></div><div class="pb"><div class="kl">
+     ${[['C','Copy the draft'],['D','Done'],['L','Later'],['O','Open in Gmail'],['N','Note for Callsheet'],['X','Not for me'],['J / K','Move through the roster'],['W','Work through them'],['R','Read it to me'],['/ or ⌘K','Find or ask'],['1–5','Today, Replies, Agenda, Ask, Projects'],['Esc','Back']].map(k=>`<span class="mono">${k[0]}</span><span>${k[1]}</span>`).join('')}</div></div></div>`;
+  if(s.nfOpen){const r=rep(s.nfOpen), lock=!!r.vip;
+    h+=`<div class="veil" data-act="close"></div><div class="pop" role="dialog" aria-label="Not for me"><div class="ph"><b>Not for me · ${esc(r.who)}</b><button class="k q" data-act="close">Cancel</button></div><div class="pb">
+     <button class="opt" data-act="nfscope:one"><span class="sq ${s.nfScope==='one'?'on':''}"></span><span>Just this one<small>This message leaves Replies. Their next one still comes in.</small></span></button>
+     <button class="opt" data-act="nfscope:all" ${lock?'disabled':''}><span class="sq ${s.nfScope==='all'?'on':''}"></span><span>Everything from ${esc(r.who)}<small>${lock?esc(r.who)+' always counts, so only this message can move.':'Saved in Setup › Your day › Never needs a reply, with Remove.'}</small></span></button>
+     <div class="keys" style="margin-top:14px"><button class="k go" data-act="nfsave">Move it ${kh('↵')}</button></div></div></div>`;}
+  if(s.toast) h+=`<div class="toast" role="status"><span>${esc(s.toast.m)}</span>${s.toast.undo?'<button class="k u" data-act="undo">Undo</button>':''}<button class="k" data-act="toastx" aria-label="Close">✕</button></div>`;
+  return h;
+}
+
+/* ---------- render ---------- */
+function render(F){
+  const s=F.st, el=F.app, desk=s.dev==='desk';
+  const veiled=s.find||s.keys||s.nfOpen;
+  el.className=`app ${desk?'desk':'phone'} ${s.theme}${veiled?' veiled':''}`;
+  if(!desk&&s.view==='lock'){el.innerHTML=lockView(s);return}
+  const curTab=['slip'].includes(s.view)?'replies':s.view==='people'?'ask':s.view;
+  let body;
+  switch(s.view){
+    case 'replies': body=repliesView(s);break;
+    case 'slip': body=desk?repliesView(s):slip(s,rep(s.sel));break;
+    case 'agenda': body=agendaView(s);break;
+    case 'ask': case 'people': body=askView(s);break;
+    case 'projects': body=projectsView(s);break;
+    case 'oat': body=oatView(s);break;
+    default: body=desk?sheetDesk(s):sheetPhone(s);
+  }
+  const nav=TABS.map(([v,n])=>`<button data-act="tab:${v}" ${curTab===v?'aria-current="page"':''}>${n}</button>`).join('');
+  const off=s.sit==='offline';
+  const tools=desk?`<button class="k q" data-act="find" ${off?'disabled':''}>Find ${kh('/')}</button><button class="k q" data-act="refresh" ${off?'disabled':''}>Refresh</button><button class="k q" data-act="setup">Setup</button>`
+   :`<button class="k q" data-act="find" aria-label="Find or ask" ${off?'disabled':''}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button><button class="k q" data-act="setup">Setup</button>`;
+  el.innerHTML= desk?
+    `<div class="trim"></div><header class="mast"><span class="wm">Callsheet</span><nav class="nav">${nav}</nav><span class="tools">${tools}</span></header>${offbar(s)}<main class="pg">${body}</main>${s.view==='voice'?voiceView(s):''}${overlays(s)}`
+   :`<div class="trim"></div><header class="phead"><span class="wm">Callsheet</span><span class="tools">${tools}</span></header>${offbar(s)}<main class="pg">${body}</main><nav class="tabs">${nav}</nav>${s.view==='voice'?voiceView(s):''}${overlays(s)}`;
+  const pg=el.querySelector('.pg'); if(pg&&F.keepScroll==null) pg.scrollTop=0;
+  if(pg&&F.keepScroll!=null){pg.scrollTop=F.keepScroll;F.keepScroll=null}
+}
+
+/* ---------- actions ---------- */
+function snap(s){return{done:new Set(s.done),copied:new Set(s.copied),later:new Set(s.later),nf:new Set(s.nf),alertSeen:s.alertSeen,clashAck:s.clashAck,view:s.view}}
+function act(F,a){
+  const s=F.st, [n,arg]=a.split(':'), id=+arg;
+  const toast=(m,undo)=>{s.toast={m,undo};};
+  const keep=()=>{const pg=F.app.querySelector('.pg');F.keepScroll=pg?pg.scrollTop:null};
+  if(n==='noop') return;
+  if(n!=='undo'&&n!=='toastx') s.toast=null;
+  switch(n){
+    case 'tab': s.view=arg;s.find=false;s.more=false;break;
+    case 'slip': s.sel=id;s.view='slip';s.find=false;s.more=false;break;
+    case 'back': s.view=s.prev||'sheet';break;
+    case 'copy': keep();F.undo=snap(s);s.copied.add(id);s.copiedAt=nowS(s);toast(`Copied ${rep(id).who}’s draft. Nothing was sent.`,1);break;
+    case 'done': keep();F.undo=snap(s);s.done.add(id);s.more=false;toast(`${rep(id).who}: done.`,1);if(s.view==='slip'&&s.dev==='phone')s.view=s.prev||'sheet';{const o=openR(s);if(o[0])s.sel=o[0].id};break;
+    case 'later': keep();F.undo=snap(s);s.later.add(id);s.more=false;toast(`${rep(id).who} comes back at 12:30.`,1);if(s.view==='slip'&&s.dev==='phone')s.view=s.prev||'sheet';{const o=openR(s);if(o[0])s.sel=o[0].id};break;
+    case 'open': keep();toast('Opens the thread in Gmail, in a new tab.');break;
+    case 'note': keep();toast(`Note for Callsheet about ${rep(id).who}: opens a one-line box.`);break;
+    case 'notfor': keep();s.nfOpen=id;s.nfScope='one';break;
+    case 'nfscope': keep();s.nfScope=arg;break;
+    case 'nfsave': keep();F.undo=snap(s);{const r=rep(s.nfOpen);s.nf.add(r.id);toast(s.nfScope==='all'?`Everything from ${r.who} now skips Replies. Listed in Setup › Your day.`:`Moved. ${r.who}’s next mail still comes to Replies.`,1);}s.nfOpen=null;if(s.view==='slip'&&s.dev==='phone')s.view='replies';{const o=openR(s);if(o[0])s.sel=o[0].id};break;
+    case 'more': keep();s.more=!s.more;break;
+    case 'alertcheck': keep();toast('Opens Google’s security page for Co. A, in a new tab.');break;
+    case 'alertseen': keep();F.undo=snap(s);s.alertSeen=true;s.seenAt=nowS(s);toast(`Marked as you. Seen ${nowS(s)}.`,1);break;
+    case 'gotit': F.undo=snap(s);s.clashAck=true;s.view='sheet';toast('Got it. The clash stays in Agenda.',1);break;
+    case 'oat': s.view='oat';s.more=false;break;
+    case 'voice': s.prev=s.view==='lock'?'sheet':s.view;s.view='voice';s.voice=0;s.playing=true;break;
+    case 'vnext': s.voice=Math.min(VOICE.length-1,s.voice+1);s.playing=true;break;
+    case 'vback': s.voice=Math.max(0,s.voice-1);s.playing=true;break;
+    case 'vpause': s.playing=!s.playing;break;
+    case 'vagain': s.voice=0;s.playing=true;break;
+    case 'vclose': s.view=s.prev&&s.prev!=='voice'?s.prev:'sheet';break;
+    case 'find': s.find=true;s.fq='pri';break;
+    case 'close': s.find=false;s.keys=false;s.nfOpen=null;break;
+    case 'retry': keep();s.retry++;if(s.retry>=2){s.sit='normal';toast(`Back. Refreshed ${nowS(s)}; nothing new since 06:30.`);}break;
+    case 'refresh': keep();toast(`Refreshed ${nowS(s)}. Nothing new since the sheet.`);break;
+    case 'setup': keep();toast('Setup is unchanged from pass 3 (four places, quiet paddles).');break;
+    case 'gcal': keep();toast('Opens the invite in Google Calendar. Callsheet never answers for you.');break;
+    case 'asked': keep();toast('Ask reads your local index only. Nothing leaves this box.');break;
+    case 'addp': keep();toast('Add project: unchanged from pass 3.');break;
+    case 'undo': if(F.undo){Object.assign(s,F.undo);F.undo=null}keep();s.toast={m:'Undone.'};break;
+    case 'toastx': keep();s.toast=null;break;
+  }
+  if(!['back','voice','vnext','vback','vpause','vagain','vclose'].includes(n)&&s.view!=='slip'&&s.view!=='voice') s.prev=s.view;
+  render(F);
+}
+
+/* ---------- frames ---------- */
+const FR=[];
+function makeFrame(host,dev,st,w,h){
+  const W=w||(dev==='desk'?1440:390), H=h||(dev==='desk'?900:844);
+  host.innerHTML='';const scr=document.createElement('div');scr.className='screen';scr.tabIndex=0;
+  scr.setAttribute('aria-label',dev==='desk'?'Desktop frame':'Phone frame');
+  const sc=document.createElement('div');sc.className='scaler';sc.dataset.w=W;sc.style.width=W+'px';sc.style.height=H+'px';
+  const app=document.createElement('div');app.style.width=W+'px';app.style.height=H+'px';sc.appendChild(app);scr.appendChild(sc);host.appendChild(scr);
+  const F={host,scr,sc,app,W,H,st:Object.assign(base(dev),st||{})};
+  app.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t||t.disabled)return;e.stopPropagation();act(F,t.dataset.act)});
+  app.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('rrow')){e.preventDefault();act(F,e.target.dataset.act)}});
+  app.addEventListener('animationend',e=>{if(e.target.dataset&&e.target.dataset.act==='vauto'&&F.st.playing&&F.st.view==='voice'){F.st.voice=Math.min(VOICE.length-1,F.st.voice+1);render(F)}});
+  if(dev==='desk') scr.addEventListener('keydown',e=>deskKey(F,e));
+  FR.push(F);render(F);fitOne(F);return F;
+}
+function fitOne(F){const w=F.scr.clientWidth||F.host.clientWidth;const k=w/F.W;F.sc.style.transform=`scale(${k})`;F.scr.style.height=(F.H*k)+'px'}
+function fit(){FR.forEach(fitOne)}
+addEventListener('resize',fit);
+function deskKey(F,e){
+  const s=F.st,k=e.key;
+  if(e.target.tagName==='TEXTAREA'&&k!=='Escape')return;
+  if(e.metaKey||e.ctrlKey){if(k.toLowerCase()==='k'){e.preventDefault();act(F,'find')}return}
+  const o=openR(s);const cur=(s.view==='replies'||s.view==='slip')?(o.find(r=>r.id===s.sel)||o[0]):o[0];
+  const c=cue(s);
+  const map={'/':'find','?':'keys','r':'voice','w':'oat','1':'tab:sheet','2':'tab:replies','3':'tab:agenda','4':'tab:ask','5':'tab:projects'};
+  if(k==='Escape'){e.preventDefault();if(s.find||s.keys||s.nfOpen)act(F,'close');else if(s.view==='voice')act(F,'vclose');else act(F,'tab:sheet');return}
+  if(s.find&&k==='Enter'){e.preventDefault();act(F,'slip:1');return}
+  if(s.view==='voice'){if(k===' '){e.preventDefault();act(F,'vpause')}if(k==='ArrowRight')act(F,'vnext');if(k==='ArrowLeft')act(F,'vback');return}
+  if(k==='?'){e.preventDefault();s.keys=true;render(F);return}
+  if(map[k]){e.preventDefault();act(F,map[k]);return}
+  if(k==='Enter'&&s.view==='sheet'){e.preventDefault();if(c==='alert')act(F,'alertcheck');else if(c==='clash')act(F,'tab:agenda');else if(s.sit==='offline')act(F,'retry');else if(cur)act(F,(s.copied.has(cur.id)?'done:':'copy:')+cur.id);return}
+  if(s.nfOpen&&k==='Enter'){e.preventDefault();act(F,'nfsave');return}
+  if(!cur)return;
+  const L={c:'copy:',d:'done:',l:'later:',o:'open:',n:'note:',x:'notfor:'}[k.toLowerCase()];
+  if(L){e.preventDefault();act(F,L+cur.id);return}
+  if(k==='j'||k==='k'){e.preventDefault();const i=o.indexOf(cur);const nx=o[Math.max(0,Math.min(o.length-1,i+(k==='j'?1:-1)))];if(nx){s.sel=nx.id;if(s.view==='sheet')s.view='replies';render(F)}}
+}
+
+/* ---------- flows ---------- */
+const D=(...ids)=>new Set(ids);
+const FLOWS=[
+ {n:'A · Morning, from the push',steps:[
+  {d:'<b>06:34, phone.</b> The push says two things in one line. Open, or Read it to me in the car.',p:{view:'lock'},k:{}},
+  {d:'<b>The sheet.</b> Headline, a three-sentence summary with source numbers, the day strip, and the roster with row 01 open: the draft and one orange key. Desktop shows the full running order beside it.',p:{},k:{}},
+  {d:'<b>Copy draft.</b> The key turns into “Copied 06:41” and Done becomes the orange. The toast promises nothing was sent, with Undo.',p:{copied:D(1),copiedAt:'06:41',toast:{m:'Copied Priya N.’s draft. Nothing was sent.',undo:1}},k:{copied:D(1),copiedAt:'06:41',toast:{m:'Copied Priya N.’s draft. Nothing was sent.',undo:1}}},
+  {d:'<b>Done.</b> Priya leaves the roster, everyone moves up a number, and School office opens out. The first free gap now says how many replies fit before 09:30.',p:{done:D(1)},k:{done:D(1)}}]},
+ {n:'B · One at a time',steps:[
+  {d:'<b>Work through them.</b> Full screen, one person. The roster numbers across the top are the progress: current is heavy, done is struck, later is dashed.',p:{view:'oat'},k:{view:'oat'}},
+  {d:'<b>Copied, then Done.</b> Swipes on the phone do the same (right = done, left = later).',p:{view:'oat',copied:D(1)},k:{view:'oat',copied:D(1)}},
+  {d:'<b>Three in, one for later.</b>',p:{view:'oat',done:D(1,2,3),later:D(4)},k:{view:'oat',done:D(1,2,3),later:D(4)}},
+  {d:'<b>Roster clear: the wrap.</b> Three figures, the walnut rule draws in once, no orange. Sent by Callsheet is always 0.',p:{view:'oat',done:D(1,2,3,5,6,7),later:D(4)},k:{view:'oat',done:D(1,2,3,5,6,7),later:D(4)}}]},
+ {n:'C · Busy morning: an alert first',steps:[
+  {d:'<b>Alert takes the cue.</b> Red rule, ringed red light, the red key (D84); nothing on the screen is orange. Priya is still row 01, labelled THEN with a quiet Copy draft.',p:{sit:'alert'},k:{sit:'alert'}},
+  {d:'<b>It was me.</b> The cue hands back to Priya, the orange returns, and the sign-in sits in Worth knowing as “Seen 06:41”, word only.',p:{sit:'alert',alertSeen:true,seenAt:'06:41'},k:{sit:'alert',alertSeen:true,seenAt:'06:41'}}]},
+ {n:'D · The clash, within the hour',steps:[
+  {d:'<b>10:05.</b> The 11:00 clash is within 60 minutes, so it takes the cue (amber rule, round amber light + ▲ word). Stand-up folded into “Done”. The NOW rule sits between the stand-up and the free gap.',p:{time:605,done:D()},k:{time:605}},
+  {d:'<b>See the clash.</b> Agenda: the whole running order, with the clash bracket in the rail and invites to answer. No orange: answering happens in Google Calendar.',p:{time:605,view:'agenda'},k:{time:605,view:'agenda'}},
+  {d:'<b>Got it.</b> Back on Today, the cue returns to the roster. The clash stays printed in the running order.',p:{time:605,clashAck:true},k:{time:605,clashAck:true}}]},
+ {n:'E · A reply up close, and Not for me',steps:[
+  {d:'<b>The slip.</b> What they want, their words, your draft to edit, then Copy / Done / Open, and the quiet keys. Desktop keeps list + slip (pass 3).',p:{view:'slip',sel:1,prev:'sheet'},k:{view:'replies',sel:1}},
+  {d:'<b>Not for me on a shop mailing.</b> “Just this one” is chosen (square window); the sender rule is a second press.',p:{view:'slip',sel:7,prev:'replies',nfOpen:7},k:{view:'replies',sel:7,nfOpen:7}},
+  {d:'<b>Locked for people who always count.</b> For Priya the sender option is off, with the reason.',p:{view:'slip',sel:1,nfOpen:1},k:{view:'replies',sel:1,nfOpen:1}},
+  {d:'<b>Moved, with Undo.</b>',p:{view:'replies',nf:D(7),toast:{m:'Moved. Northwind Store’s next mail still comes to Replies.',undo:1}},k:{view:'replies',nf:D(7),toast:{m:'Moved. Northwind Store’s next mail still comes to Replies.',undo:1}}}]},
+ {n:'F · Today’s schedule and invites',steps:[
+  {d:'<b>Agenda at 12:40.</b> Past things dimmed with “done”, lunch ON NOW with a lit slot, free stretches printed, invites to answer beside it.',p:{time:760,view:'agenda',clashAck:true},k:{time:760,view:'agenda',clashAck:true}},
+  {d:'<b>Phone: the strip unfolds.</b> Tapping the day strip opens this same running order. The strip and the order never share a screen.',p:{time:760,clashAck:true},k:{time:760,clashAck:true,view:'agenda'}}]},
+ {n:'G · Find or ask',steps:[
+  {d:'<b>/ or ⌘K.</b> The page behind loses its orange (D97). Enter opens the top person.',p:{find:true},k:{find:true}},
+  {d:'<b>Enter.</b> Priya’s slip.',p:{view:'slip',sel:1},k:{view:'replies',sel:1}}]},
+ {n:'H · Read it to me',steps:[
+  {d:'<b>Wheatley.</b> The sheet read aloud, one line at a time: the current line large, the last one dimmed, a line fill that runs once (no waveform, no loop). Pause is the one orange.',p:{view:'voice',voice:0},k:{view:'voice',voice:0}},
+  {d:'<b>Who needs you.</b> Section numbers match the sheet’s 01–04.',p:{view:'voice',voice:1},k:{view:'voice',voice:1}},
+  {d:'<b>The end.</b> No orange: Back, Play again, Close.',p:{view:'voice',voice:5},k:{view:'voice',voice:5}}]},
+ {n:'I · The wrap, 17:40',steps:[
+  {d:'<b>17:40.</b> The roster is clear (two moved to tomorrow). The sheet signs off; the running order folds the day to one line and keeps swimming at 18:30.',p:{time:1060,done:D(1,2,3,5,7),later:D(4,6),clashAck:true},k:{time:1060,done:D(1,2,3,5,7),later:D(4,6),clashAck:true}}]},
+ {n:'J · Can’t reach Callsheet',steps:[
+  {d:'<b>Away from home.</b> A dashed bar over the 06:30 sheet. Try again is the orange; Copy still works as a plain key; Find and Refresh dim.',p:{sit:'offline'},k:{sit:'offline'}},
+  {d:'<b>First try fails</b> and says what to check.',p:{sit:'offline',retry:1},k:{sit:'offline',retry:1}},
+  {d:'<b>Second try works</b> and says what changed.',p:{toast:{m:'Back. Refreshed 06:36; nothing new since 06:30.'}},k:{toast:{m:'Back. Refreshed 06:36; nothing new since 06:30.'}}}]}
+];
+let G={light:'day',day:'normal',w:1440,flow:0,step:0};
+let FD,FP;
+function applyStep(){
+  const st=FLOWS[G.flow].steps[G.step];
+  FD=makeFrame(document.getElementById('fd'),'desk',Object.assign({theme:G.light,day:G.day},st.k),G.w,900);
+  FP=makeFrame(document.getElementById('fp'),'phone',Object.assign({theme:G.light,day:G.day},st.p));
+  FR.splice(0,FR.length-0);FR.length=0;FR.push(FD,FP,...GAL);
+  document.getElementById('capd').textContent=`Desktop ${G.w} × 900`;
+  document.getElementById('stepdesc').innerHTML=`<span class="eyebrow">${FLOWS[G.flow].n.split(' · ')[0]} · step ${G.step+1} of ${FLOWS[G.flow].steps.length}</span><br>${st.d}`;
+  document.getElementById('stepnums').innerHTML=FLOWS[G.flow].steps.map((_,i)=>`<button aria-pressed="${i===G.step}" data-i="${i}">${i+1}</button>`).join('');
+  document.querySelectorAll('#flowbtns button').forEach((b,i)=>b.setAttribute('aria-pressed',i===G.flow));
+  fit();
+}
+document.getElementById('flowbtns').innerHTML=FLOWS.map((f,i)=>`<button data-i="${i}">${f.n}</button>`).join('');
+document.getElementById('flowbtns').onclick=e=>{const b=e.target.closest('button');if(!b)return;G.flow=+b.dataset.i;G.step=0;applyStep()};
+document.getElementById('stepnums').onclick=e=>{const b=e.target.closest('button');if(!b)return;G.step=+b.dataset.i;applyStep()};
+document.getElementById('sprev').onclick=()=>{if(G.step>0)G.step--;else if(G.flow>0){G.flow--;G.step=FLOWS[G.flow].steps.length-1}applyStep()};
+document.getElementById('snext').onclick=()=>{if(G.step<FLOWS[G.flow].steps.length-1)G.step++;else{G.flow=(G.flow+1)%FLOWS.length;G.step=0}applyStep()};
+function seg(id,key,cb){const el=document.getElementById(id);el.onclick=e=>{const b=e.target.closest('button');if(!b)return;el.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));G[key]=key==='w'?+b.dataset.v:b.dataset.v;cb&&cb()}}
+seg('c-light','light',applyStep);seg('c-day','day',applyStep);seg('c-w','w',applyStep);
+
+/* ---------- gallery ---------- */
+const GAL=[];
+function gal(hostId,dev,cap,st,w){const fig=document.createElement('figure');const fr=document.createElement('div');fr.className='frame'+(dev==='phone'?' ph':'');fig.appendChild(fr);const fc=document.createElement('figcaption');fc.textContent=cap;fig.appendChild(fc);document.getElementById(hostId).appendChild(fig);GAL.push(makeFrame(fr,dev,st,w||(dev==='desk'?1280:390),dev==='desk'?800:844))}
+gal('gald','desk','Desktop 1280 · Day · 06:34, a reply on cue',{theme:'day'});
+gal('gald','desk','Desktop 1280 · Night · 10:05, the clash takes the cue',{theme:'night',time:605});
+gal('galp','phone','Day · 06:34',{theme:'day'});
+gal('galp','phone','Night · 06:34',{theme:'night'});
+gal('galp','phone','Day · 10:05 clash',{theme:'day',time:605});
+gal('galp','phone','Night · 10:05 clash',{theme:'night',time:605});
+gal('galp','phone','Day · alert, Priya on Then',{theme:'day',sit:'alert'});
+gal('galp','phone','Night · alert',{theme:'night',sit:'alert'});
+gal('galp','phone','Day · 17:40 wrap',{theme:'day',time:1060,done:D(1,2,3,5,7),later:D(4,6),clashAck:true});
+gal('galp','phone','Night · 17:40 wrap',{theme:'night',time:1060,done:D(1,2,3,5,7),later:D(4,6),clashAck:true});
+gal('galp','phone','Night · can’t reach Callsheet',{theme:'night',sit:'offline'});
+gal('galp','phone','Day · one at a time',{theme:'day',view:'oat'});
+gal('galp','phone','Night · Read it to me',{theme:'night',view:'voice',voice:1});
+gal('galp','phone','Day · Agenda at 12:40',{theme:'day',time:760,view:'agenda',clashAck:true});
+gal('galp','phone','Day · quiet day',{theme:'day',day:'quiet'});
+gal('galp','phone','Night · the slip',{theme:'night',view:'slip',sel:2});
+applyStep();
+addEventListener('load',fit);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+</script>
+</body>
+</html>
