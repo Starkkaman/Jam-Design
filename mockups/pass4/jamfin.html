@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JamFin Pass 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Pass 4 (the cinema). Same family language as passes 1-3 (Jost + Plex Mono, indicator windows, state words, one orange, walnut,
+   calm transform-only motion), but a layout of its own: a marquee instead of a band, tickets for profiles, a printed programme
+   for pages, house lights for Play, and an intermission card. TV = 1920x1080 design px written as cqw; phones at 390. */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5b5e5d;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--decel:cubic-bezier(.16,1,.3,1);--leave:cubic-bezier(.4,0,1,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}h2{font:600 20px var(--f);margin:0}
+p{margin:0;max-width:80ch}.muted{color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end}
+.ctl>div{display:grid;gap:6px;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 12px;border-radius:9px;cursor:pointer;min-height:36px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}}
+.seg button:focus-visible,.kb:focus-visible,.jb:focus-visible,.tourb:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kb,.jb{font:500 13px var(--mono);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer;min-height:34px}
+.jb{font-family:var(--f);font-size:14px}
+.tourb{font:600 15px var(--f);border:0;background:#ec7c22;color:#1b1206;border-radius:10px;padding:9px 16px;cursor:pointer;min-height:40px}
+.tourb[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend kbd{font:500 12px var(--mono);border:1px solid var(--line);border-radius:5px;padding:1px 6px;background:var(--chip);color:var(--fg)}
+.status{font:500 13px var(--mono);color:var(--muted);display:flex;gap:6px 18px;flex-wrap:wrap}
+.status b{color:var(--fg);font-weight:500}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}@media (max-width:900px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px;align-content:start}
+.phones{display:grid;grid-template-columns:repeat(2,minmax(0,390px)) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:1100px){.phones{grid-template-columns:repeat(2,minmax(0,1fr))}.phones>.note{grid-column:1/-1}}
+@media (max-width:700px){.phones{grid-template-columns:minmax(0,1fr)}}
+figure{margin:0;display:grid;gap:8px;min-width:0}
+figcaption{font-size:13px;color:var(--muted)}
+
+
+.tvf{position:relative;width:100%;aspect-ratio:16/9;border-radius:12PX;overflow:hidden;background:#000;container-type:inline-size;box-shadow:0 0 0 10PX #0d0d0c,0 20PX 50PX #0000004d;outline:none}
+.tvf:focus-visible{box-shadow:0 0 0 10PX #0d0d0c,0 0 0 13PX #f08a2c}
+.stage{position:absolute;inset:0;overflow:hidden;background:#000;font-family:var(--f);
+  --ground:#161513;--ink:#ece6da;--lab:#d3ccbf;--dim:#a9a397;--foc:#f3e6c8;--board:#0e0d0c;--rail:#ffffff12;
+  --cream:#f3e6c8;--orange:#f08a2c;--deep:#8f4510;--walnut:#6b4428;--win:#080807;--key:#22211e;--key-f:#33312c;--pressed:#121110;
+  --spill:#f3d9a64d;--ticket:#26241f;--stub:#1d1c19;--dash:#625e55;--mqi:#efe6d1;--mqd:#b8af9c;
+  color:var(--ink)}
+.stage.day{--ground:#c9c4ba;--ink:#1c1a17;--lab:#2a2723;--dim:#48443d;--foc:#0f0d0a;--board:#e3dac8;--rail:#00000017;
+  --orange:#ec7c22;--deep:#a85410;--key:#d9d4ca;--key-f:#ece7dd;--pressed:#bdb7ac;--spill:#ffffff99;--ticket:#ddd8ce;--stub:#d0cabf;--dash:#7c776d;--mqi:#1c1a17;--mqd:#4a453c}
+.scr{position:absolute;inset:0;background:var(--ground);opacity:0;visibility:hidden;z-index:1;transition:opacity 0s 260ms,visibility 0s 260ms}
+.scr.on{opacity:1;visibility:visible;z-index:2;transition:opacity 220ms var(--decel)}
+.scr.dim1{opacity:.42!important;transition:opacity 180ms var(--leave)!important}
+.scr.dim2{opacity:0!important;transition:opacity 220ms var(--leave)!important}
+.scr.up{transition:opacity 240ms var(--decel)!important}
+.calm .scr.on{transition-duration:140ms}
+.calm .scr.dim1,.calm .scr.dim2{transition-duration:140ms!important}
+
+/* indicator windows (family vocabulary): always a dark recess, lit = flat colour */
+.ind{position:relative;display:inline-block;flex:none;background:var(--win);box-shadow:inset 0 0.0521cqw 0.1042cqw #000}
+.ind::after{content:"";position:absolute;inset:0.1563cqw;border-radius:inherit;background:var(--c,var(--cream));opacity:0}
+.ind.on::after{opacity:1}
+.ind.led{width:0.9375cqw;height:0.9375cqw;border-radius:50%}.ind.sq{width:1.0417cqw;height:1.0417cqw;border-radius:0.1563cqw}.ind.slot{width:2.0833cqw;height:0.7292cqw;border-radius:0.1563cqw}
+.ind.offl{background:transparent;box-shadow:inset 0 0 0 0.1042cqw var(--dim)}
+.ind.offl::before{content:"";position:absolute;left:50%;top:-0.1042cqw;bottom:-0.1042cqw;width:0.1042cqw;margin-left:-0.0521cqw;background:var(--dim);transform:rotate(45deg)}
+.w{position:relative;height:0.625cqw;border-radius:0.1563cqw;background:var(--win);box-shadow:inset 0 0.0521cqw 0.1042cqw #000}
+.w::after{content:"";position:absolute;inset:0.1563cqw 0.1563cqw 0;border-radius:0.1042cqw 0.1042cqw 0 0;background:var(--cream);opacity:0}
+.day .w{background:transparent;box-shadow:inset 0 -0.1042cqw 0 #0000004d}
+.f>.face>.w,.f>.w{background:var(--win);box-shadow:none}
+.f>.face>.w::after,.f>.w::after{opacity:1}
+.wl{position:absolute;left:0;top:0.625cqw;bottom:0.625cqw;width:0.5208cqw;border-radius:0 0.1563cqw 0.1563cqw 0;background:var(--win)}
+.wl::after{content:"";position:absolute;inset:0.1563cqw 0.1563cqw 0.1563cqw 0;border-radius:0 0.1042cqw 0.1042cqw 0;background:var(--cream);opacity:0}
+.day .wl{background:transparent;box-shadow:inset 0.1042cqw 0 0 #0000004d}
+.f>.wl{background:var(--win);box-shadow:none}.f>.wl::after{opacity:1}
+
+/* top line (nav + time) */
+.top{position:absolute;left:5cqw;right:5cqw;top:2.7083cqw;height:2.5cqw;display:flex;align-items:center;gap:1.4583cqw;z-index:4}
+.brand{font:600 1.3542cqw var(--f);letter-spacing:.02em;color:var(--ink);margin-right:0.625cqw}
+.tabs{display:flex;gap:0.4167cqw}
+.tab{position:relative;font:500 1.25cqw var(--f);color:var(--dim);padding:0.2083cqw 0.8333cqw 0.5208cqw;border-radius:0.4167cqw}
+.tab.cur{color:var(--ink)}
+.tab .ts{position:absolute;left:50%;bottom:0;width:1.4583cqw;margin-left:-0.7292cqw;height:0.4167cqw;border-radius:0.1042cqw;background:var(--cream);opacity:0}
+.tab.cur .ts{opacity:1}
+.tab.f{background:var(--key-f);color:var(--foc)}
+.top .sp{flex:1}
+.top.solid{left:0;right:0;top:-0.625cqw;height:6.25cqw;padding:3.3333cqw 5cqw 0.4167cqw;background:var(--ground)}
+.pchip{display:flex;align-items:center;gap:0.625cqw;font:500 1.25cqw var(--f);color:var(--lab)}
+.pchip i{width:1.5625cqw;height:1.1458cqw;border-radius:0.2083cqw;background:var(--pc,#2f4a6a);position:relative}
+.pchip i::after{content:"";position:absolute;right:0.3646cqw;top:0.1563cqw;bottom:0.1563cqw;border-left:0.1042cqw dotted #ffffff80}
+.clock{font:500 1.3542cqw var(--f);font-variant-numeric:tabular-nums;color:var(--ink)}
+.crumb{display:flex;gap:0.8333cqw;align-items:center;font:500 1.25cqw var(--f);color:var(--dim)}
+.crumb kbd{font:500 1.1458cqw var(--mono);color:var(--ink);background:var(--key);border-radius:0.3125cqw;padding:0.1042cqw 0.5208cqw}
+
+/* ===== the marquee (new) ===== */
+.mq{position:absolute;left:5cqw;right:5cqw;top:5.8333cqw;height:12.5cqw;background:var(--board);border-top:0.2083cqw solid var(--walnut);border-bottom:0.2083cqw solid var(--walnut);overflow:hidden;z-index:3}
+.mq::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 0.4688cqw,var(--rail) 0.4688cqw 0.5208cqw)}
+.mq .blk{position:absolute;left:0;top:0;bottom:0;width:61.4583cqw;background:var(--hc,#3a2340);clip-path:polygon(0 0,100% 0,calc(100% - 4.375cqw) 100%,0 100%)}
+.mq .eb{position:absolute;left:2.0833cqw;top:1.25cqw;font:500 1.1458cqw var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#d8ccb3;white-space:nowrap}
+.mq .tt{position:absolute;left:2.0833cqw;top:3.125cqw;width:55.2083cqw;font:600 3.9583cqw/1 var(--f);letter-spacing:.05em;text-transform:uppercase;color:#f3e9d4;white-space:nowrap;overflow:hidden}
+.mq .tt.long{font-size:3.0208cqw;top:3.6458cqw;letter-spacing:.04em}
+.mq .fx{position:absolute;left:2.0833cqw;top:8.5417cqw;font:400 1.3542cqw var(--f);color:#d8ccb3;white-space:nowrap}
+.mq .fx b{font-weight:500;color:#f3e9d4}
+.bulbs{position:absolute;right:2.2917cqw;bottom:1.5625cqw;display:flex;gap:0.7292cqw;align-items:center}
+.bulbs .ind{width:1.0417cqw;height:1.0417cqw}
+/* Day (D173): an unlit window on a light surface is a groove; lit opens to the full dark-rimmed window */
+.day .ind:not(.offl){background:transparent;box-shadow:inset 0 0 0 0.1042cqw #00000059}
+.day .ind.on{background:var(--win);box-shadow:none}
+.day .key.pri .wl{background:#5a2c08;box-shadow:none}
+.bulbs em{font:500 1.1458cqw var(--mono);font-style:normal;color:var(--mqd);margin-left:0.3125cqw}
+.acc{position:absolute;right:2.0833cqw;top:1.5625cqw;width:15.625cqw;height:5.7292cqw;transition:opacity 150ms}
+.acc i{position:absolute;display:block}
+.acc .b1{left:0.8333cqw;top:1.1458cqw;width:10.4167cqw;height:3.0208cqw;background:#21406c;transform:skewX(-14deg)}
+.acc .b2{left:6.1458cqw;top:0.3125cqw;width:8.75cqw;height:0.625cqw;background:#e3b02f}
+.acc .b3{left:12.5cqw;top:2.5cqw;width:2.0833cqw;height:2.0833cqw;background:#c23a2b}
+.acc .b4{left:1.5625cqw;top:4.7917cqw;width:11.4583cqw;height:0.1563cqw;background:#e9e2d0}
+.mq.calm-acc .acc{opacity:0}
+.mq .offw{display:flex;gap:0.7292cqw;align-items:center}
+
+/* ===== rows ===== */
+.rows{position:absolute;left:0;right:0;top:19.375cqw;bottom:0;overflow:hidden}
+.rows-in{position:absolute;left:0;right:0;top:0;transition:transform 240ms var(--glide)}
+.row{position:relative;padding:0.625cqw 0 1.7708cqw}
+.rl{margin-left:5cqw;font:500 1.3542cqw/1.875cqw var(--f);color:var(--lab);height:1.875cqw}
+.trk{display:flex;gap:1.4583cqw;padding-left:5cqw;margin-top:0.7292cqw;transition:transform 200ms var(--glide);align-items:flex-start}
+.cd{flex:none;position:relative;width:20.8333cqw}
+.row.po .cd{width:11.25cqw}
+.cd .face{position:relative;transition:transform 150ms var(--glide)}
+.cd.f .face{transform:translateY(-0.7292cqw)}
+.cd .art{position:relative;width:100%;height:11.7188cqw;border-radius:0.5208cqw;overflow:hidden;background:#000}
+.row.po .cd .art{height:16.875cqw}
+.cd .art svg{display:block;width:100%;height:100%}
+.pg{position:absolute;left:0;right:0;bottom:0;height:0.4167cqw;background:#000000a0}
+.pg i{display:block;height:100%;background:#f3e6c8b3}
+.cd .w{width:50%;margin:0.4167cqw auto 0}
+.spill{position:absolute;left:-8%;right:-8%;top:100%;height:2.2917cqw;margin-top:-1.5625cqw;background:radial-gradient(50% 60% at 50% 0,var(--spill),transparent 100%);opacity:0;pointer-events:none;transition:opacity 150ms}
+.cd.f .spill{opacity:1}
+.cap{margin-top:0.625cqw}
+.cap b{display:block;font:500 1.3542cqw/1.24 var(--f);color:var(--lab);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.po .cap b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cap span{display:block;font:400 1.1458cqw/1.3 var(--f);color:var(--dim);white-space:nowrap}
+.cd.f .cap b{color:var(--foc)}
+.allc .art{background:var(--board);display:grid;place-content:center;text-align:center;gap:0.3125cqw;border:0.1042cqw solid var(--walnut)}
+.allc .art b{font:600 1.5625cqw var(--f);color:var(--ink)}
+.allc .art span{font:500 1.1458cqw var(--mono);color:var(--dim)}
+.em{flex:none;width:0.5208cqw;border-radius:0.2083cqw;background:var(--walnut);height:11.7188cqw;margin-left:0.2083cqw}
+.row.po .em{height:16.875cqw}
+.cd.nudge .face{animation:nudge 220ms var(--glide)}
+@keyframes nudge{50%{translate:0.7292cqw 0}}
+.calm .cd.nudge .face{animation:none}
+.calm .cd .face,.calm .trk,.calm .rows-in,.calm .ro-in,.calm .pscroll{transition:none}
+
+/* ===== tickets (new) ===== */
+.who{position:absolute;left:0;right:0;top:7.2917cqw;text-align:center;font:600 2.7083cqw var(--f);color:var(--ink)}
+.whos{position:absolute;left:0;right:0;top:11.1458cqw;text-align:center;font:400 1.3542cqw var(--f);color:var(--dim)}
+.tix{position:absolute;left:0;right:0;top:15.1042cqw;display:flex;justify-content:center;gap:2.9167cqw}
+.tk{position:relative;width:15.625cqw}
+.tk .face{position:relative;transition:transform 150ms var(--glide)}
+.tk.f .face{transform:translateY(-0.7292cqw)}
+.tk .tm{position:relative;height:17.1875cqw;background:var(--ticket);border-radius:0.7292cqw 0.7292cqw 0 0;display:grid;justify-items:center;align-content:center;gap:1.1458cqw}
+.tk .tm b{font:500 1.7708cqw var(--f);color:var(--lab)}
+.tk.f .tm b{color:var(--foc)}
+.tk .perf{height:0.2083cqw;background-color:var(--stub);background-image:radial-gradient(circle,var(--ground) 0.125cqw,transparent 0.1563cqw);background-size:0.8333cqw 0.2083cqw;background-position:0.4167cqw 0}
+.tk .notch{position:absolute;top:17.1875cqw;width:1.5625cqw;height:1.5625cqw;margin-top:-0.7813cqw;border-radius:50%;background:var(--ground);z-index:2}
+.tk .notch.l{left:-0.7813cqw}.tk .notch.r{right:-0.7813cqw}
+.tk .stub{height:7.6042cqw;background:var(--stub);border-radius:0 0 0.7292cqw 0.7292cqw;padding:1.1458cqw 1.3542cqw;font:500 1.1458cqw/1.45 var(--mono);color:var(--dim);letter-spacing:.06em;text-transform:uppercase;transition:transform 300ms var(--decel),opacity 300ms var(--leave)}
+.tk.tear .stub{transform:translateY(2.0833cqw);opacity:0}
+.calm .tk.tear .stub{transform:none;transition-duration:140ms}
+.tk .w{width:50%;margin:0.5208cqw auto 0}
+.tk .spill{top:auto;bottom:-1.5625cqw}
+.tk.f .spill{opacity:1}
+.fig{width:8.8542cqw;height:8.8542cqw;border-radius:50%;background:var(--pc);position:relative;overflow:hidden;box-shadow:inset 0 0 0 0.4167cqw #0000002e}
+.fig::before{content:"";position:absolute;left:50%;top:1.5625cqw;width:3.0208cqw;height:3.0208cqw;margin-left:-1.5104cqw;border-radius:50%;background:#e9d9b6}
+.fig::after{content:"";position:absolute;left:1.4583cqw;right:1.4583cqw;bottom:-0.5208cqw;height:3.6458cqw;border-radius:50% 50% 0 0;background:#1b1a17cc}
+.tk.add .tm,.tk.add .stub{background:transparent;border:0.1563cqw dashed var(--dash)}
+.tk.add .tm{border-bottom:0}.tk.add .stub{border-top:0}
+.tk.add .plus{font:300 6.25cqw/1 var(--f);color:var(--dim)}
+
+/* ===== the programme (new) ===== */
+.pscroll{position:absolute;inset:0;transition:transform 260ms var(--glide)}
+.tblk{position:absolute;left:5cqw;top:5.8333cqw;width:43.75cqw;height:7.9167cqw;background:var(--hc);clip-path:polygon(0 0,100% 0,calc(100% - 3.3333cqw) 100%,0 100%)}
+.tblk .eb{position:absolute;left:1.6667cqw;top:1.0417cqw;font:500 1.1458cqw var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#d8ccb3}
+.tblk .tt{position:absolute;left:1.6667cqw;top:2.9167cqw;width:38.5417cqw;font:600 3.125cqw/1.08 var(--f);letter-spacing:.04em;text-transform:uppercase;color:#f3e9d4;white-space:nowrap;overflow:hidden}
+.tblk .tt.long{font-size:2.5cqw;top:3.3333cqw}
+.pfx{position:absolute;left:5cqw;top:14.6875cqw;font:400 1.3542cqw var(--f);color:var(--dim);white-space:nowrap}
+.pfx b{font-weight:500;color:var(--ink)}
+.acts{position:absolute;left:5cqw;top:17.5cqw;width:33.3333cqw;display:grid;gap:0.4167cqw}
+.key{position:relative;height:3.125cqw;border-radius:0.5208cqw;background:var(--key);display:flex;align-items:center;gap:0.8333cqw;padding:0 1.25cqw 0 1.875cqw;font:500 1.3542cqw var(--f);color:var(--lab);white-space:nowrap;transition:transform 150ms var(--glide)}
+.key .sp{flex:1}
+.key.f{background:var(--key-f);color:var(--foc)}
+.key.pri{background:var(--orange);color:#1d1206;box-shadow:0 0.2083cqw 0 var(--deep)}
+.key.pri .wl{background:#5a2c08}
+.key.pri.f{transform:translateY(-0.3125cqw);box-shadow:0 0.5208cqw 0 var(--deep);color:#0c0702}
+.key.pri.f .wl::after{opacity:1}
+.fold{position:absolute;left:50.4167cqw;top:5.8333cqw;height:47.6042cqw;width:0.1042cqw;background:var(--walnut)}
+.fold::before,.fold::after{content:"";position:absolute;left:-0.2604cqw;width:0.625cqw;height:0.1042cqw;background:var(--walnut)}
+.fold::before{top:0}.fold::after{bottom:0}
+.pa{position:absolute;left:52.0833cqw;top:5.8333cqw;width:42.9167cqw;height:24.1667cqw;border-radius:0.5208cqw;overflow:hidden;background:#000}
+.pa svg{display:block;width:100%;height:100%}
+.syn{position:absolute;left:52.0833cqw;top:31.25cqw;width:42.9167cqw;font:400 1.3542cqw/1.42 var(--f);color:var(--lab)}
+.cr{position:absolute;left:52.0833cqw;top:38.9583cqw;width:42.9167cqw;display:grid;gap:0.3125cqw}
+.ld{display:flex;align-items:baseline;font:400 1.25cqw var(--f);color:var(--dim);white-space:nowrap}
+.ld i{flex:1;border-bottom:0.1563cqw dotted var(--dash);margin:0 0.7292cqw;transform:translateY(-0.3125cqw)}
+.ld b{font-weight:500;color:var(--ink)}
+.morel{position:absolute;left:5cqw;top:50cqw;font:500 1.3542cqw var(--f);color:var(--lab)}
+.morel span{font:500 1.1458cqw var(--mono);color:var(--dim);margin-left:0.625cqw}
+.morer{position:absolute;left:0;right:0;top:52.2917cqw}
+.morer .trk{margin-top:0}
+/* series: key row, season row and running order */
+.keyrow{position:absolute;left:5cqw;top:17.5cqw;display:flex;gap:0.8333cqw}
+.keyrow .key{padding-right:1.4583cqw}
+.srow{position:absolute;left:5cqw;top:21.875cqw;display:flex;gap:0.5208cqw;align-items:center}
+.skey{position:relative;height:2.7083cqw;padding:0 0.8333cqw;gap:0.5208cqw;border-radius:0.4167cqw;background:var(--key);display:flex;align-items:center;font:500 1.25cqw var(--f);color:var(--lab);white-space:nowrap}
+.skey .ind.sq{width:0.8333cqw;height:0.8333cqw}
+.skey .w{position:absolute;left:28%;right:28%;bottom:0;height:0.5208cqw;border-radius:0.1563cqw 0.1563cqw 0 0}
+.skey.pr{background:var(--pressed);box-shadow:inset 0 0.1563cqw 0.2604cqw #00000080;color:var(--ink)}
+.skey.f{background:var(--key-f);color:var(--foc)}
+.skey.f.pr{box-shadow:inset 0 0.1563cqw 0.2083cqw #00000066}
+.divl{width:0.2083cqw;height:2.0833cqw;border-radius:0.1042cqw;background:var(--walnut);margin:0 0.4167cqw}
+.ro{position:absolute;left:5cqw;top:25.8333cqw;width:43.75cqw;height:27.1875cqw;overflow:hidden}
+.ro-in{transition:transform 180ms var(--glide)}
+.ro.pend .ro-in{opacity:.35}
+.ro .pnote{position:absolute;left:0;right:0;top:0;height:3.5417cqw;padding-left:1.5625cqw;align-items:center;background:var(--ground);border-bottom:0.1042cqw solid var(--walnut);font:500 1.3542cqw var(--f);color:var(--ink);display:none}
+.ro.pend .pnote{display:flex}
+.ep{position:relative;height:3.5417cqw;display:grid;grid-template-columns:3.3333cqw minmax(0,1fr) auto 1.5625cqw;align-items:center;gap:0.8333cqw;padding:0 1.1458cqw 0 1.5625cqw;border-radius:0.4167cqw;margin-bottom:0.3125cqw;background:transparent}
+.ep .n{font:500 1.25cqw var(--mono);color:var(--dim)}
+.ep .et{font:500 1.3542cqw var(--f);color:var(--lab);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep .rt{font:400 1.1458cqw var(--f);color:var(--dim)}
+.ep .epg{position:absolute;left:1.5625cqw;right:1.1458cqw;bottom:0.2083cqw;height:0.2604cqw;background:#00000060;border-radius:0.1042cqw}
+.ep .epg i{display:block;height:100%;background:#f3e6c8b3;border-radius:0.1042cqw}
+.ep.f{background:var(--key-f)}
+.ep.f .et{color:var(--foc)}
+.epi{position:absolute;left:52.0833cqw;top:31.25cqw;width:42.9167cqw}
+#s-series .fold{left:55.2083cqw}#s-series .pa{left:56.875cqw;width:38.125cqw;height:21.4583cqw}#s-series .epi{left:56.875cqw;width:38.125cqw;top:28.3333cqw}
+.epi .cr{width:auto}
+.keyrow .key:not(.pri){font-size:1.1458cqw;padding:0 1.0417cqw 0 1.5625cqw}
+.epi .eb{font:500 1.1458cqw var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.epi h3{margin:0.3125cqw 0 0.2083cqw;font:600 1.875cqw var(--f);color:var(--ink)}
+.epi .l{font:400 1.3542cqw var(--f);color:var(--dim)}
+.epi p{margin-top:0.625cqw;font:400 1.3542cqw/1.42 var(--f);color:var(--lab);max-width:none}
+
+/* ===== house lights + title card (new) ===== */
+#s-card{background:#000}
+.tc-b{position:absolute;left:0;top:18.5417cqw;width:67.7083cqw;height:19.1667cqw;background:var(--hc);clip-path:polygon(0 0,100% 0,calc(100% - 5.7292cqw) 100%,0 100%);transform:translateX(-3.125cqw);opacity:0;transition:transform 320ms var(--decel),opacity 200ms var(--decel)}
+#s-card.go .tc-b{transform:none;opacity:1}
+.tc-y{position:absolute;left:8.3333cqw;top:17.1875cqw;width:13.5417cqw;height:0.7292cqw;background:#e3b02f;transform:translateX(-2.0833cqw);opacity:0;transition:transform 360ms var(--decel) 60ms,opacity 200ms 60ms}
+.tc-r{position:absolute;left:64.375cqw;top:33.3333cqw;width:2.9167cqw;height:2.9167cqw;background:#c23a2b;opacity:0;transition:opacity 200ms 120ms}
+#s-card.go .tc-y,#s-card.go .tc-r{transform:none;opacity:1}
+.calm #s-card .tc-b,.calm #s-card .tc-y{transform:none;transition-duration:120ms}
+.tc-eb{position:absolute;left:8.3333cqw;top:20.8333cqw;font:500 1.3542cqw var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#d8ccb3}
+.tc-tt{position:absolute;left:8.3333cqw;top:23.3333cqw;width:55.2083cqw;font:600 5cqw/1 var(--f);letter-spacing:.05em;text-transform:uppercase;color:#f3e9d4;white-space:nowrap}
+.tc-tt.long{font-size:3.75cqw;top:23.9583cqw}
+.tc-sub{position:absolute;left:8.3333cqw;top:29.5833cqw;font:400 1.6667cqw var(--f);color:#e2d6bd}
+.slats{position:absolute;left:8.3333cqw;top:33.8542cqw;display:flex;gap:0.4167cqw}
+.slats i{width:1.9792cqw;height:0.7292cqw;border-radius:0.1042cqw;background:#ffffff1a}
+.slats i.on{background:#f3e6c8}
+.tc-l{position:absolute;left:43.75cqw;top:33.75cqw;font:500 1.1458cqw var(--mono);color:#b8af9c;letter-spacing:.08em}
+
+/* ===== player ===== */
+#s-player{background:#000}
+.pic{position:absolute;inset:0;transition:filter 0s}
+.pic svg{display:block;width:100%;height:100%}
+.pic.dim{filter:brightness(.4) saturate(.8)}
+.pband{position:absolute;left:0;right:0;bottom:0;height:8.8542cqw;background:#0c0c0b;transition:transform 200ms var(--glide)}
+.pband::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 0.2083cqw,#ffffff0d 0.2083cqw 0.2604cqw)}
+.pband.lift{transform:translateY(-5.7292cqw)}
+.tl{position:absolute;left:5cqw;right:5cqw;top:-0.2083cqw;height:0.4167cqw;background:#3d3a34;border-radius:0.1042cqw}
+.tl .fill{position:absolute;left:0;top:0;bottom:0;background:#f3e6c8b3;border-radius:0.1042cqw}
+.tl .stop{position:absolute;top:-0.1042cqw;bottom:-0.1042cqw;width:0.2083cqw;background:#0c0c0b}
+.tl .head{position:absolute;top:50%;width:1.1458cqw;height:1.1458cqw;margin:-0.5729cqw 0 0 -0.5729cqw;border-radius:0.1563cqw;background:var(--win);box-shadow:0 0 0 0.1563cqw #0c0c0b}
+.tl .head::after{content:"";position:absolute;inset:0.2083cqw;border-radius:0.1042cqw;background:#f3e6c8;opacity:.35}
+.tl.f .head::after{opacity:1}
+.pl-t{position:absolute;left:5cqw;top:1.5625cqw;line-height:1.875cqw;display:flex;align-items:center;gap:0.8333cqw;font:500 1.3542cqw var(--f);color:#ece6da;white-space:nowrap}
+.pl-t .ind{--win:#050505}
+.pl-r{position:absolute;right:5cqw;top:1.5625cqw;line-height:1.875cqw;font:400 1.3542cqw var(--f);color:#bdb6a8;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pl-r b{color:#ece6da;font-weight:500}
+.pl-h{position:absolute;left:5cqw;top:4.1667cqw;font:400 1.1458cqw/1.5625cqw var(--f);color:#a9a397;white-space:nowrap}
+.pl-h kbd{font:500 1.1458cqw var(--mono);color:#ece6da}
+.strip{position:absolute;left:5cqw;right:5cqw;bottom:2.8125cqw;display:flex;gap:0.625cqw;opacity:0;transition:opacity 150ms}
+.strip.on{opacity:1}
+.strip .skey{--key:#22211e;--key-f:#33312c;--lab:#d3ccbf;--foc:#f3e6c8;--win:#080807}
+.chaps{position:absolute;left:5cqw;right:5cqw;bottom:10.625cqw;display:flex;gap:1.25cqw;opacity:0;transition:opacity 150ms}
+.chaps.on{opacity:1}
+.ch{width:13.5417cqw;--win:#080807}
+.ch .face{transition:transform 150ms var(--glide)}
+.ch.f .face{transform:translateY(-0.5208cqw)}
+.ch .art{height:7.6042cqw;border-radius:0.4167cqw;overflow:hidden}
+.ch .art svg{display:block;width:100%;height:100%}
+.ch .w{width:50%;margin:0.3125cqw auto 0}
+.ch b{display:block;margin-top:0.4167cqw;font:500 1.1458cqw var(--f);color:#d3ccbf;white-space:nowrap}
+.ch.f b{color:#f3e6c8}
+.prompt{position:absolute;right:5cqw;bottom:10.625cqw;display:grid;justify-items:end;gap:0.5208cqw;opacity:0;transition:opacity 150ms}
+.prompt.on{opacity:1}
+.prompt .pn{font:400 1.1458cqw var(--f);color:#d3ccbf;background:#0c0c0bd9;padding:0.2083cqw 0.625cqw;border-radius:0.3125cqw}
+.pk{position:relative;display:flex;align-items:center;gap:0.9375cqw;height:3.5417cqw;padding:0 1.3542cqw 0 2.0833cqw;border-radius:0.5208cqw;background:#22211e;font:500 1.3542cqw var(--f);color:#ece6da;white-space:nowrap;overflow:hidden;transition:transform 150ms var(--glide)}
+.pk .wl{--win:#080807}
+.pk kbd{font:500 1.1458cqw var(--mono);color:#a9a397;border:0.1042cqw solid #4a4741;border-radius:0.3125cqw;padding:0 0.4167cqw}
+.pk.f{background:#f08a2c;color:#0c0702;transform:translateY(-0.3125cqw);box-shadow:0 0.4167cqw 0 #8f4510}
+.pk.f kbd{color:#0c0702;border-color:#0c070266}
+.pk.f .wl{background:#5a2c08}.pk.f .wl::after{opacity:1}
+.drain{position:absolute;left:0;right:0;bottom:0;height:0.3125cqw;background:#0c070233;transform-origin:left;transform:scaleX(0)}
+.pk.f .drain.run{animation:drain 8s linear forwards}
+@keyframes drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.nx{display:flex;gap:0.9375cqw;align-items:center}
+.nx .th{width:10cqw;height:5.625cqw;border-radius:0.4167cqw;overflow:hidden}
+.nx .th svg{display:block;width:100%;height:100%}
+.nx .tx{display:grid;gap:0.1042cqw}
+.nx .tx b{font:500 1.3542cqw var(--f);color:#ece6da}
+.nx .tx span{font:400 1.1458cqw var(--f);color:#bdb6a8}
+.nxw{background:#0c0c0bd9;padding:0.7292cqw 0.8333cqw;border-radius:0.5208cqw;display:grid;gap:0.625cqw;justify-items:end}
+/* ===== intermission card (new) ===== */
+.inter{position:absolute;left:20.8333cqw;top:13.6458cqw;width:58.3333cqw;height:23.75cqw;border-radius:0.7292cqw;overflow:hidden;background:#1a1916;display:grid;grid-template-columns:22.3958cqw 1fr;opacity:0;visibility:hidden;transition:opacity 200ms var(--decel),visibility 0s 200ms}
+.inter.on{opacity:1;visibility:visible;transition:opacity 200ms var(--decel)}
+.inter .ib{position:relative;background:var(--hc);clip-path:polygon(0 0,100% 0,calc(100% - 3.125cqw) 100%,0 100%)}
+.inter .ib .y{position:absolute;left:2.2917cqw;top:2.9167cqw;width:9.375cqw;height:0.625cqw;background:#e3b02f}
+.inter .ib .r{position:absolute;right:3.9583cqw;bottom:2.7083cqw;width:2.0833cqw;height:2.0833cqw;background:#c23a2b}
+.inter .ib b{position:absolute;left:2.2917cqw;top:5.2083cqw;font:600 1.7708cqw/1.15 var(--f);letter-spacing:.05em;text-transform:uppercase;color:#f3e9d4}
+.inter .ib span{position:absolute;left:2.2917cqw;top:10.4167cqw;font:500 1.1458cqw var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#d8ccb3}
+.inter .ic{padding:2.7083cqw 2.7083cqw 0 1.7708cqw;display:grid;align-content:start;gap:0.5208cqw}
+.inter .ic .eb{font:500 1.1458cqw var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#a9a397;display:flex;gap:0.7292cqw;align-items:center}
+.inter .ic h3{margin:0.2083cqw 0 0;font:600 2.0833cqw var(--f);color:#ece6da}
+.inter .ic .l{font:400 1.3542cqw/1.4 var(--f);color:#c9c2b4}
+.inter .ik{display:flex;gap:0.8333cqw;margin-top:1.1458cqw}
+.inter .ik .key{--key:#22211e;--key-f:#33312c;--lab:#d3ccbf;--foc:#f3e6c8;--win:#080807;--orange:#f08a2c;--deep:#8f4510;padding-right:1.5625cqw}
+/* ===== offline ===== */
+.offk{position:absolute;left:5cqw;top:20.8333cqw;display:flex;gap:0.8333cqw}
+.offk .key{padding-right:1.5625cqw}
+.offl{position:absolute;left:5cqw;right:5cqw;top:25.625cqw;height:22.9167cqw;border:0.1563cqw dashed var(--dash);border-radius:0.7292cqw;padding:1.1458cqw 1.25cqw;overflow:hidden}
+.offl .ol{font:500 1.25cqw var(--f);color:var(--dim)}
+.offl .trk{padding-left:0;margin-top:0.8333cqw;filter:saturate(.25) brightness(.55)}
+/* toast */
+.toast{position:absolute;left:5cqw;top:3.125cqw;z-index:20;max-width:67.7083cqw;font:500 1.25cqw var(--f);color:#ece6da;background:#0c0c0bf2;border:0.1042cqw solid #3a3833;border-radius:0.5208cqw;padding:0.5208cqw 0.9375cqw;opacity:0;transition:opacity 150ms}
+.toast.on{opacity:1}
+
+
+/* ===== phones (real px) ===== */
+.phone{width:100%;max-width:390px;height:844px;border-radius:36px;background:var(--pg,#141311);color:var(--pi,#ece6da);overflow:hidden;position:relative;box-shadow:0 0 0 8px #0d0d0c;font-family:var(--f);margin:8px auto 0;display:flex;flex-direction:column}
+.ph-sb{height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 26px;font:600 14px var(--f)}
+.ph-sc{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:20px;scrollbar-width:none}
+.ph-hd{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 10px}
+.ph-hd .br{font:600 20px var(--f)}
+.ph-chip{display:flex;align-items:center;gap:8px;border:0;background:#26241f;color:#ece6da;font:500 15px var(--f);padding:6px 12px 6px 8px;border-radius:10px;min-height:44px;cursor:pointer}
+.ph-chip i{width:24px;height:18px;border-radius:3px;background:#2f4a6a;position:relative}
+.ph-chip i::after{content:"";position:absolute;right:5px;top:2px;bottom:2px;border-left:2px dotted #ffffff80}
+.ph-mq{position:relative;margin:0 16px;height:196px;background:#0e0d0c;border-top:3px solid #6b4428;border-bottom:3px solid #6b4428;overflow:hidden}
+.ph-mq::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 6px,#ffffff12 6px 7px)}
+.ph-mq .blk{position:absolute;inset:0 18% 0 0;background:#3a2340;clip-path:polygon(0 0,100% 0,calc(100% - 30px) 100%,0 100%)}
+.ph-mq .eb{position:absolute;left:14px;top:12px;font:500 11px var(--mono);letter-spacing:.12em;color:#d8ccb3}
+.ph-mq .tt{position:absolute;left:14px;top:32px;right:22%;font:600 27px/1.02 var(--f);letter-spacing:.04em;text-transform:uppercase;color:#f3e9d4}
+.ph-mq .fx{position:absolute;left:14px;top:96px;right:22%;font:400 13px/1.35 var(--f);color:#d8ccb3}
+.ph-mq .go{position:absolute;left:14px;bottom:14px;height:44px;padding:0 16px;border:0;border-radius:10px;background:#f08a2c;color:#1d1206;font:600 15px var(--f);box-shadow:0 3px 0 #8f4510;cursor:pointer}
+.ph-mq .bl{position:absolute;right:12px;bottom:16px;display:grid;grid-template-columns:repeat(3,12px);gap:7px}
+.ph-mq .bl i{width:12px;height:12px;border-radius:50%;background:#080807;position:relative}
+.ph-mq .bl i.on::after{content:"";position:absolute;inset:2px;border-radius:50%;background:#f3e6c8}
+.ph-mq .acc2{position:absolute;right:12px;top:14px;width:48px;height:56px}
+.ph-mq .acc2 i{position:absolute;display:block}
+.ph-rl{display:flex;justify-content:space-between;align-items:baseline;padding:20px 16px 8px;font:500 17px var(--f)}
+.ph-rl span{font:400 13px var(--f);color:#a9a397}
+.ph-row{display:flex;gap:12px;overflow-x:auto;padding:0 16px 4px;scrollbar-width:none;scroll-snap-type:x mandatory;scroll-padding-inline:16px}
+.ph-c{flex:none;width:220px;scroll-snap-align:start;cursor:pointer}
+.ph-c.po{width:112px}
+.ph-c .a{position:relative;height:124px;border-radius:8px;overflow:hidden}
+.ph-c.po .a{height:168px}
+.ph-c .a svg{display:block;width:100%;height:100%}
+.ph-c .a .pg{height:5px}
+.ph-c b{display:block;margin-top:7px;font:500 15px/1.25 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-c.po b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ph-c span{display:block;font:400 13px var(--f);color:#a9a397}
+.ph-tabs{flex:none;height:76px;display:grid;grid-template-columns:repeat(5,1fr);background:#0e0d0c;border-top:1px solid #2a2925;padding-bottom:10px}
+.ph-tabs button{border:0;background:transparent;color:#a9a397;font:500 13px var(--f);display:grid;justify-items:center;align-content:center;gap:6px;cursor:pointer;min-height:44px}
+.ph-tabs button i{width:22px;height:6px;border-radius:2px;background:#080807}
+.ph-tabs button.cur{color:#ece6da}.ph-tabs button.cur i{background:#f3e6c8}
+.ph-veil{position:absolute;inset:0;background:#000a;opacity:0;visibility:hidden;transition:opacity 180ms,visibility 0s 180ms;z-index:5}
+.ph-sheet{position:absolute;left:8px;right:8px;bottom:8px;z-index:6;transform:translateY(110%);transition:transform 240ms var(--decel)}
+.phone.sheet .ph-veil{opacity:1;visibility:visible;transition:opacity 180ms}
+.phone.sheet .ph-sheet{transform:none}
+.phone.sheet .ph-mq .go{background:#3a3833;color:#ece6da;box-shadow:none}
+.ph-st{background:#26241f;border-radius:16px 16px 0 0;padding:18px 18px 16px;display:flex;gap:14px;align-items:center}
+.ph-st .fg{width:52px;height:52px;border-radius:50%;background:#2f4a6a;flex:none;position:relative;overflow:hidden}
+.ph-st .fg::before{content:"";position:absolute;left:50%;top:9px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#e9d9b6}
+.ph-st .fg::after{content:"";position:absolute;left:9px;right:9px;bottom:-4px;height:22px;border-radius:50% 50% 0 0;background:#1b1a17cc}
+.ph-st b{display:block;font:600 18px var(--f)}
+.ph-st span{display:block;font:500 12px var(--mono);letter-spacing:.08em;color:#a9a397;text-transform:uppercase}
+.ph-pf{height:0;border-top:3px dotted #141311;margin:0 14px;position:relative}
+.ph-sb2{background:#1d1c19;border-radius:0 0 16px 16px;padding:6px 8px 10px}
+.ph-sb2 button{display:flex;width:100%;justify-content:space-between;align-items:center;border:0;background:transparent;color:#ece6da;font:500 16px var(--f);padding:0 12px;min-height:50px;border-radius:10px;cursor:pointer;text-align:left}
+.ph-sb2 button span{font:400 13px var(--f);color:#a9a397}
+.ph-sb2 button+button{border-top:1px solid #2a2925}
+/* phone programme */
+.ph-back{display:flex;align-items:center;justify-content:space-between;padding:4px 16px 10px;font:500 15px var(--f);color:#a9a397}
+.ph-back button{border:0;background:transparent;color:#ece6da;font:500 15px var(--f);min-height:44px;padding:0;cursor:pointer}
+.ph-tb{position:relative;margin:0 16px;height:96px;background:#183039;clip-path:polygon(0 0,100% 0,calc(100% - 28px) 100%,0 100%)}
+.ph-tb .eb{position:absolute;left:14px;top:12px;font:500 11px var(--mono);letter-spacing:.12em;color:#d8ccb3}
+.ph-tb .tt{position:absolute;left:14px;top:34px;font:600 28px/1.05 var(--f);letter-spacing:.04em;text-transform:uppercase;color:#f3e9d4}
+.ph-fx{padding:10px 16px 0;font:400 14px var(--f);color:#a9a397}
+.ph-art{margin:12px 16px 0;height:200px;border-radius:10px;overflow:hidden}
+.ph-art svg{display:block;width:100%;height:100%}
+.ph-pri{display:block;margin:14px 16px 0;width:calc(100% - 32px);min-height:50px;border:0;border-radius:12px;background:#f08a2c;color:#1d1206;font:600 16px var(--f);box-shadow:0 3px 0 #8f4510;cursor:pointer}
+.ph-sec{display:flex;gap:8px;padding:10px 16px 0}
+.ph-sec button{flex:1;min-height:44px;border:0;border-radius:10px;background:#26241f;color:#ece6da;font:500 14px var(--f);display:flex;gap:8px;align-items:center;justify-content:center;cursor:pointer}
+.ph-sec button i{width:12px;height:12px;border-radius:2px;background:#080807}
+.ph-chips{display:flex;gap:8px;overflow-x:auto;padding:18px 16px 4px;scrollbar-width:none;align-items:center}
+.ph-chips button{flex:none;min-height:40px;padding:0 14px;border:0;border-radius:9px;background:#26241f;color:#d3ccbf;font:500 14px var(--f);cursor:pointer}
+.ph-chips button.pr{background:#0e0d0c;box-shadow:inset 0 2px 3px #000;color:#ece6da}
+.ph-chips em{flex:none;font:500 11px var(--mono);font-style:normal;letter-spacing:.1em;color:#a9a397;margin:0 2px 0 6px}
+.ph-ro{margin:8px 16px 0;height:290px;overflow-y:auto;border-top:1px solid #2a2925;scrollbar-width:thin}
+.ph-ep{display:grid;grid-template-columns:30px minmax(0,1fr) auto 14px;gap:10px;align-items:center;min-height:56px;border-bottom:1px solid #2a2925;position:relative}
+.ph-ep .n{font:500 13px var(--mono);color:#a9a397}
+.ph-ep b{font:500 15px var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-ep span{font:400 13px var(--f);color:#a9a397}
+.ph-ep i{width:12px;height:12px;border-radius:50%;background:#080807;position:relative}
+.ph-ep i.on::after{content:"";position:absolute;inset:2px;border-radius:50%;background:#f3e6c8}
+.ph-ep .pgb{position:absolute;left:40px;right:24px;bottom:6px;height:3px;background:#00000080}
+.ph-ep .pgb s{display:block;height:100%;background:#f3e6c8b3}
+.ph-rohd{padding:16px 16px 0;font:500 15px var(--f);display:flex;justify-content:space-between}
+.ph-rohd span{font:400 13px var(--f);color:#a9a397}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Jam design · JamFin (Jellyfin client) · pass 4 · same language, bespoke design</div>
+    <h1>JamFin, pass 4: the cinema</h1>
+    <p class="muted">JamFin's job is to help the household choose something to watch together and then get out of the way. The art is the star. Pass 4 drops the shared band-and-tiles template and borrows from a cinema instead: a <b>marquee</b> names whatever you are on, profiles are <b>tickets</b>, a title's page is a printed <b>programme</b>, Play brings the <b>house lights</b> down before a Bebop-style title card, and a long pause becomes an <b>intermission</b>. Pass 3's behaviour is kept: OK presses what is lit, the 500 ms rest, range keys, row ends, and Guide belongs to the launcher. All titles, people and art are made up.</p>
+  </header>
+
+  <div class="ctl">
+    <div><span class="eyebrow">Review</span><div class="keys"><button class="tourb" id="tour" aria-pressed="false">▶ Tour</button><button class="kb" id="stepb">Next step ›</button></div></div>
+    <div><span class="eyebrow">Lighting (the profile's)</span><div class="seg" data-k="light"><button data-v="night" aria-pressed="true">Night</button><button data-v="day" aria-pressed="false">Day</button></div></div>
+    <div><span class="eyebrow">Motion</span><div class="seg" data-k="motion"><button data-v="full" aria-pressed="true">Full</button><button data-v="calm" aria-pressed="false">Calm</button></div></div>
+    <div><span class="eyebrow">Stream ready after</span><div class="seg" data-k="load"><button data-v="400" aria-pressed="false">0.4 s</button><button data-v="1200" aria-pressed="true">1.2 s</button><button data-v="3000" aria-pressed="false">3 s</button></div></div>
+    <div><span class="eyebrow">Page</span><div class="seg" data-k="theme"><button data-v="auto" aria-pressed="true">Auto</button><button data-v="light" aria-pressed="false">Light</button><button data-v="dark" aria-pressed="false">Dark</button></div></div>
+  </div>
+  <div><span class="eyebrow">Jump to</span>
+    <div class="keys" id="jumps" style="margin-top:6px"></div></div>
+  <div class="legend">
+    <span><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> Move</span><span><kbd>Enter</kbd> OK</span><span><kbd>Esc</kbd> / <kbd>Backspace</kbd> Back</span><span><kbd>M</kbd> ≡ JamFin menu</span><span><kbd>G</kbd> Guide (belongs to the launcher)</span><span>Click the TV first. Any real key stops the Tour.</span>
+  </div>
+  <div class="keys" aria-label="Remote"><span class="eyebrow">Remote</span>
+    <button class="kb" data-key="ArrowUp">↑</button><button class="kb" data-key="ArrowDown">↓</button><button class="kb" data-key="ArrowLeft">←</button><button class="kb" data-key="ArrowRight">→</button><button class="kb" data-key="Enter">OK</button><button class="kb" data-key="Escape">Back</button><button class="kb" data-key="m">≡</button><button class="kb" data-key="g">Guide</button>
+  </div>
+  <div class="status"><span>Screen <b id="st-scr">Tickets</b></span><span>Presses since Home <b id="st-pr">0</b></span><span>House lights <b id="st-lum">not yet</b></span></div>
+
+  <div class="tvf" id="tv" tabindex="0" aria-label="TV, 1920 by 1080. Click, then use the arrow keys, Enter and Escape.">
+    <div class="stage" id="stage">
+
+      <section class="scr on" id="s-tickets">
+        <div class="top"><span class="brand">JamFin</span><span class="sp"></span><span class="clock">9:47 PM</span></div>
+        <div class="who">Who's watching?</div>
+        <div class="whos">Each ticket keeps its own look</div>
+        <div class="tix" id="tix"></div>
+      </section>
+
+      <section class="scr" id="s-home">
+        <div class="top" id="nav"></div>
+        <div class="mq" id="mq"><div class="blk"></div><div class="eb"></div><div class="tt"></div><div class="fx"></div><div class="acc"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i></div><div class="bulbs"></div></div>
+        <div class="rows"><div class="rows-in" id="rows"></div></div>
+      </section>
+
+      <section class="scr" id="s-film"><div class="pscroll" id="fscroll"></div><div class="top solid"><span class="crumb"><kbd>Back</kbd> Home</span><span class="sp"></span><span class="clock">9:47 PM</span></div></section>
+      <section class="scr" id="s-series"><div class="pscroll" id="sscroll"></div><div class="top solid"><span class="crumb"><kbd>Back</kbd> Home</span><span class="sp"></span><span class="clock">9:47 PM</span></div></section>
+
+      <section class="scr" id="s-card">
+        <div class="tc-b"></div><div class="tc-y"></div><div class="tc-r"></div>
+        <div class="tc-eb"></div><div class="tc-tt"></div><div class="tc-sub"></div>
+        <div class="slats" id="slats"></div><div class="tc-l" id="tcl"></div>
+      </section>
+
+      <section class="scr" id="s-player">
+        <div class="pic" id="pic"></div>
+        <div class="chaps" id="chaps"></div>
+        <div class="prompt" id="prompt"></div>
+        <div class="pband" id="pband"><div class="tl" id="tl"></div><div class="pl-t" id="plt"></div><div class="pl-r" id="plr"></div><div class="pl-h" id="plh"></div></div>
+        <div class="strip" id="strip"></div>
+        <div class="inter" id="inter"></div>
+      </section>
+
+      <section class="scr" id="s-offline">
+        <div class="top" id="nav2"></div>
+        <div class="mq calm-acc" id="mq2"><div class="blk" style="--hc:#2a2724"></div><div class="eb"></div><div class="tt long"></div><div class="fx"></div><div class="acc"></div><div class="bulbs"></div></div>
+        <div class="offk" id="offk"></div>
+        <div class="offl"><div class="ol">Waiting for the server · last synced 9:12 PM · nothing here can play until it answers</div><div class="trk" id="offrow"></div></div>
+      </section>
+
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>Marquee (Home)</b><span class="muted">A letter-rail board names the focused title. The title block takes the title's own colour, pulled dark so it can change on every move. The round windows on the right are the row's seats: one per card, the focused one lit. No "1 of 6" text. Session blocks sit in the marquee's right end and never touch art.</span></div>
+    <div class="note"><b>Programme (pages)</b><span class="muted">A folded programme: title, facts and keys on the left page (the fixed zone), art, synopsis and credits with dotted leaders on the right. Shows get a running order instead of an episode row; the right page follows the focused episode after a 500 ms rest.</span></div>
+    <div class="note"><b>House lights, title card, intermission</b><span class="muted">Play dims the page in two steps (the screen layer's alpha over black, not a rect), then a colour-block title card cuts in with the slatted bar showing the real load. A pause longer than a minute, or "Still watching?", becomes an intermission card over a colour-filtered picture.</span></div>
+  </div>
+
+  <h2>Phone (390 × 844)</h2>
+  <div class="phones">
+    <figure><div class="phone" id="ph1"></div><figcaption>Home: the marquee holds the phone's one orange action. Tap the ticket chip for the profile sheet.</figcaption></figure>
+    <figure><div class="phone" id="ph2"></div><figcaption>Programme for a show, with season and range chips over the running order. Tap a range to jump.</figcaption></figure>
+    <div class="note"><b>Same parts, by touch</b><span class="muted">The phone keeps the tickets (the profile sheet is a ticket with its stub), the marquee and the programme, but drops what only a remote needs: no focus windows, no lift, no 500 ms rest. Five tabs, no "More" (D116). The orange is on the one main action, and it goes quiet while a sheet is open (D97).</span></div>
+  </div>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const U=n=>(n/19.2)+'cqw';
+const NOW=21*60+47;
+const clock=m=>{m=((Math.round(m)%1440)+1440)%1440;let h=Math.floor(m/60),mi=m%60,ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+String(mi).padStart(2,'0')+' '+ap};
+const hm=min=>{const h=Math.floor(min/60),m=Math.round(min%60);return h?`${h} h ${m} min`:`${m} min`};
+const ts=sec=>{sec=Math.max(0,Math.round(sec));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0')};
+
+/* ---------- placeholder art: flat generated shapes, no people, no logos ---------- */
+const PAL=[
+ {bg:'#4a2f52',a:'#e39a3b',b:'#2f5b63',c:'#1e1626',blk:'#3a2340'},
+ {bg:'#1f3a44',a:'#d9d2bd',b:'#b07a2c',c:'#132126',blk:'#183039'},
+ {bg:'#6e3a22',a:'#e2b04a',b:'#2b2a4a',c:'#2a1710',blk:'#4a2716'},
+ {bg:'#24324f',a:'#e7c46a',b:'#9a3f2c',c:'#121a2c',blk:'#1d2944'},
+ {bg:'#3f4a2a',a:'#e8dcc0',b:'#c45d22',c:'#1f2614',blk:'#2f3820'},
+ {bg:'#5a2430',a:'#f0c27a',b:'#28465a',c:'#2a0f16',blk:'#45202a'},
+ {bg:'#2e2a4a',a:'#e05a3a',b:'#d9b45a',c:'#171428',blk:'#26223e'},
+ {bg:'#7a5a2a',a:'#2a3f5c',b:'#e9dcc0',c:'#3a2a14',blk:'#4a3618'}];
+function art(p,kind,w,h,seed=1){
+  const P=PAL[p%PAL.length];const r=k=>{const x=Math.sin(seed*12.9898+k*78.233)*43758.5453;return x-Math.floor(x)};
+  let s=`<rect width="${w}" height="${h}" fill="${P.bg}"/>`;const m=Math.min(w,h);
+  if(kind==='sun'){s+=`<circle cx="${w*(.25+r(1)*.5)}" cy="${h*.36}" r="${m*.17}" fill="${P.a}"/><polygon points="0,${h*.68} ${w*(.4+r(2)*.25)},${h*.44} ${w},${h*.62} ${w},${h} 0,${h}" fill="${P.b}"/><rect y="${h*.82}" width="${w}" height="${h*.18}" fill="${P.c}"/>`}
+  else if(kind==='grid'){s+=`<rect x="${w*.12}" y="${h*.22}" width="${w*.42}" height="${h*.78}" fill="${P.c}"/><rect x="${w*.6}" y="${h*.4}" width="${w*.3}" height="${h*.6}" fill="${P.b}"/>`;for(let i=0;i<4;i++)for(let j=0;j<5;j++){if(r(i*7+j)>.55)s+=`<rect x="${w*(.16+i*.09)}" y="${h*(.3+j*.12)}" width="${w*.05}" height="${h*.06}" fill="${P.a}"/>`}s+=`<circle cx="${w*.78}" cy="${h*.2}" r="${m*.08}" fill="${P.a}"/>`}
+  else if(kind==='cut'){s+=`<polygon points="0,0 ${w*(.55+r(3)*.2)},0 ${w*(.35+r(4)*.2)},${h} 0,${h}" fill="${P.b}"/><circle cx="${w*(.6+r(5)*.15)}" cy="${h*.5}" r="${m*.22}" fill="${P.a}"/><rect x="${w*.08}" y="${h*.78}" width="${w*.5}" height="${h*.05}" fill="${P.c}"/>`}
+  else if(kind==='sea'){s+=`<circle cx="${w*(.2+r(6)*.6)}" cy="${h*.32}" r="${m*.12}" fill="${P.a}"/><rect y="${h*.55}" width="${w}" height="${h*.45}" fill="${P.c}"/><rect y="${h*.62}" width="${w}" height="${h*.03}" fill="${P.b}"/><rect y="${h*.74}" width="${w}" height="${h*.02}" fill="${P.b}" opacity=".6"/><polygon points="${w*.55},${h*.55} ${w*.62},${h*.42} ${w*.66},${h*.55}" fill="${P.a}"/>`}
+  else {s+=`<rect y="${h*.25}" width="${w}" height="${h*.16}" fill="${P.a}"/><rect y="${h*.41}" width="${w}" height="${h*.14}" fill="${P.b}"/><rect y="${h*.55}" width="${w}" height="${h*.45}" fill="${P.c}"/><rect x="${w*(.55+r(8)*.2)}" y="${h*.12}" width="${w*.08}" height="${h*.88}" fill="${P.c}"/>`}
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${s}</svg>`;
+}
+
+/* ---------- made-up library ---------- */
+const T={
+ copper:{t:'The Copper City',k:'film',y:1984,run:151,rat:'Rated 12',fmt:'4K',p:0,a:'sun',prog:.48,syn:'Every morning the survey is wrong. Hal Prentice has thirty days to map a city that rebuilds itself while it sleeps, before the people who hired him decide it should stop.',cr:[['Directed by','Mara Lindqvist'],['Written by','Mara Lindqvist, Oren Pike'],['With','Theo Varga, June Okoro, Ilse Brandt'],['Music','Ines Calloway']]},
+ signal:{t:'Signal Street',k:'show',yrs:'2020–2024',rat:'Rated 15',fmt:'HD',p:3,a:'grid',prog:.7,cur:[1,3],run:44,seasons:[8,10]},
+ harbour:{t:'The Harbour Hour',k:'show',yrs:'2019–2023',rat:'Rated 12',fmt:'4K',p:1,a:'sea',prog:.26,cur:[2,0],run:47,seasons:[8,10,22]},
+ velvet:{t:'The Velvet Machine',k:'film',y:1979,run:118,rat:'Rated 15',fmt:'HD',p:5,a:'cut',prog:.15},
+ kestrel:{t:'Kestrel Bay',k:'show',yrs:'2025',rat:'Rated 12',fmt:'4K',p:4,a:'sea',prog:.6,cur:[0,2],run:52,seasons:[6]},
+ saturn:{t:'Saturn Boulevard',k:'film',y:2023,run:104,rat:'Rated 12',fmt:'4K',p:6,a:'bands',prog:.9},
+ glass:{t:'The Glass Orchard',k:'film',y:2024,run:126,rat:'Rated PG',fmt:'4K',p:4,a:'sun'},
+ paper:{t:'Paper Moon Motel',k:'film',y:2022,run:97,rat:'Rated 15',fmt:'HD',p:7,a:'grid'},
+ lowtide:{t:'Low Tide Radio',k:'film',y:2021,run:112,rat:'Rated 12',fmt:'4K',p:1,a:'bands'},
+ bells:{t:'Twelve Quiet Bells',k:'film',y:2023,run:133,rat:'Rated 12',fmt:'4K',p:3,a:'cut'},
+ rink:{t:'A Room Above the Rink',k:'film',y:2019,run:101,rat:'Rated PG',fmt:'HD',p:2,a:'grid'},
+ lantern:{t:'The Lantern Keeper',k:'film',y:2020,run:119,rat:'Rated 12',fmt:'4K',p:0,a:'sea'},
+ orbit:{t:'Orbit Diner',k:'film',y:2024,run:92,rat:'Rated PG',fmt:'HD',p:6,a:'sun'},
+ ferry:{t:'Night Ferry',k:'film',y:2018,run:108,rat:'Rated 15',fmt:'HD',p:5,a:'sea'},
+ static:{t:'The Static Protocol',k:'show',yrs:'2023–',rat:'Rated 15',fmt:'4K',p:7,a:'bands',run:50,seasons:[8,8]},
+ moth:{t:'Moth & Meridian',k:'show',yrs:'2022',rat:'Rated 12',fmt:'HD',p:2,a:'cut',run:40,seasons:[10]},
+ small:{t:'Small Hours',k:'show',yrs:'2017–2019',rat:'Rated 15',fmt:'HD',p:0,a:'grid',run:30,seasons:[12,12,12]},
+};
+Object.entries(T).forEach(([id,o],i)=>{o.id=id;o.seed=i+3;o.hc=PAL[o.p].blk});
+const EPN=[['The Mooring','Tide Tables','Pier Lights','Driftwood','Signal Fire','Shore Leave','Landfall','Harbour Master'],
+ ['Arrivals','The Ledger','Open Water','Kettle Point','Gull Season','North Pier','The Diver','Small Craft','Half Tide','Moorings'],
+ ['Fog Warning','The Night Shift','Cold Front','Tidewater','Lamp Room','Salt Hours','Pilot Boat','The Breakwater','Slack Water','Second Bell','Ferry Strike','Weather Side','Low Pressure','The Quay Light','Harbour Dues','Dead Reckoning','The Long Swell','Sound Signal','Night Pilot','Last Orders','The Long Low Tide','Lights Out at Eight']];
+const GEN=['Two Keys','The Long Shift','Night Market','Small Change','Back Rooms','The Last Bus','Glass Houses','Cold Open','Spare Parts','Overtime','Blue Hour','Fair Weather'];
+const SYN=['The fog comes in early and the ferry stays tied up, so everyone who meant to leave town has one more night to settle up.','A new keeper takes the lamp room, and finds the logbook stops in the middle of a sentence.','Nobody agrees on what the harbour master saw, and the tide will not wait for them to decide.','A storm warning empties the quay, except for one boat that should not be there at all.','The night shift trades stories until one of them turns out to be true.'];
+function epName(o,s,e){return o.id==='harbour'?EPN[s][e]:GEN[(e+s*3+o.seed)%GEN.length]}
+function curLabel(o){if(o.k!=='show')return '';const[s,e]=o.cur;return `S${s+1} E${e+1} · ${epName(o,s,e)}`}
+function resumeAt(o){return o.k==='film'?ts(o.run*60*(o.prog||0)):ts(o.run*60*(o.prog||0))}
+function priLabel(o){if(o.k==='film')return o.prog?`Resume from ${resumeAt(o)}`:'Play';if(o.cur){const[s,e]=o.cur;return `Resume S${s+1} E${e+1} from ${resumeAt(o)}`}return 'Play S1 E1'}
+
+/* ---------- state ---------- */
+const S={scr:'tickets',light:'night',calm:false,load:1200,presses:0,firstPlay:true,
+  tk:0,h:{zone:'rows',r:0,c:[0,0,0],n:0},f:{id:'copper',zone:'act',i:0,m:0,sub:0,w:false,fav:false},
+  se:{id:'harbour',zone:'keys',k:0,si:2,shown:2,ep:0,pend:null,fv:0,show:null},pl:null,of:0,back:null};
+const stage=$('#stage'),tv=$('#tv');
+const PROFILES=[{n:'Ada',c:'#2f4a6a',light:'night',look:['Night','Full colour','Full motion']},{n:'Ben',c:'#3e5a35',light:'day',look:['Day','Toned','Full motion']},{n:'Cleo',c:'#5a3550',light:'night',look:['Night','Toned','Calm motion']}];
+let prof=0;
+
+const toastEl=$('#toast');let toastT;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),2600)}
+const NAMES={tickets:'Tickets',home:'Home · marquee',film:'Programme · film',series:'Programme · show',card:'Title card',player:'Player',offline:'Offline Home'};
+function show(id,opts={}){
+  $$('.scr').forEach(s=>{const on=s.id==='s-'+id;if(on&&!s.classList.contains('on')){s.classList.remove('dim1','dim2')}s.classList.toggle('on',on);if(opts.up&&on)s.classList.add('up');else s.classList.remove('up')});
+  S.scr=id;$('#st-scr').textContent=NAMES[id];
+  if(id==='home')S.presses=0;$('#st-pr').textContent=S.presses;
+}
+function setLight(v){S.light=v;stage.classList.toggle('day',v==='day');segSet('light',v)}
+function setCalm(v){S.calm=v;stage.classList.toggle('calm',v);segSet('motion',v?'calm':'full')}
+
+/* ---------- tickets ---------- */
+function buildTickets(){
+  const h=PROFILES.map((p,i)=>`<div class="tk" data-i="${i}" style="--pc:${p.c}"><div class="face"><div class="tm"><div class="fig"></div><b>${p.n}</b></div><div class="perf"></div><div class="stub">${p.look.join('<br>')}</div><div class="w"></div><div class="spill"></div><i class="notch l"></i><i class="notch r"></i></div></div>`).join('')+
+   `<div class="tk add" data-i="3"><div class="face"><div class="tm"><div class="plus">+</div><b>Add profile</b></div><div class="stub">Quick Connect<br>or password</div><div class="w"></div><div class="spill"></div></div></div>`;
+  $('#tix').innerHTML=h;
+}
+function renderTickets(){$$('#tix .tk').forEach((t,i)=>{t.classList.toggle('f',i===S.tk);t.classList.remove('tear');t.querySelector('.face').classList.toggle('f',i===S.tk)})}
+function pickTicket(){
+  if(S.tk===3){toast('Add profile: Quick Connect or a password (not drawn in pass 4)');return}
+  const t=$$('#tix .tk')[S.tk];t.classList.add('tear');prof=S.tk;
+  setTimeout(()=>{setLight(PROFILES[prof].light);setCalm(prof===2);buildNav();S.h={zone:'rows',r:0,c:[0,0,0],n:0};show('home');renderHome()},S.calm?160:380);
+}
+
+/* ---------- home ---------- */
+const ROWS=[
+ {name:'Continue watching',wide:true,items:['copper','signal','harbour','velvet','kestrel','saturn']},
+ {name:'Latest films',items:['glass','paper','lowtide','bells','rink','lantern','orbit','ferry'],all:['All films',214]},
+ {name:'Latest shows',items:['harbour','signal','kestrel','static','moth','small'],all:['All shows',38]}];
+const TABS=['Home','Movies','Shows','Blu-ray','Discover','Search','Settings'];
+function navHTML(){const p=PROFILES[prof];return `<span class="brand">JamFin</span><span class="tabs">${TABS.map((t,i)=>`<span class="tab${i===0?' cur':''}" data-i="${i}">${t}<i class="ts"></i></span>`).join('')}</span><span class="sp"></span><span class="pchip" style="--pc:${p.c}"><i></i>${p.n}</span><span class="clock">9:47 PM</span>`}
+function buildNav(){$('#nav').innerHTML=navHTML();$('#nav2').innerHTML=navHTML()}
+function capSub(o,row){if(row===0)return o.k==='film'?o.y:curLabel(o);return o.k==='film'?o.y:`${o.seasons.length} season${o.seasons.length>1?'s':''}`}
+function cardHTML(o,row,wide){const w=wide?400:216,h=wide?225:324;
+  return `<div class="cd" data-id="${o.id}"><div class="face"><div class="art">${art(o.p,o.a,w,h,o.seed)}${row===0&&o.prog?`<div class="pg"><i style="width:${o.prog*100}%"></i></div>`:''}</div><div class="w"></div><div class="spill"></div><div class="cap"><b>${o.t}</b><span>${capSub(o,row)}</span></div></div></div>`}
+function buildRows(){
+  $('#rows').innerHTML=ROWS.map((R,ri)=>`<div class="row${R.wide?'':' po'}" data-r="${ri}"><div class="rl">${R.name}</div><div class="trk">${R.items.map(id=>cardHTML(T[id],ri,R.wide)).join('')}${R.all?`<div class="cd allc" data-all="1"><div class="face"><div class="art"><b>${R.all[0]}</b><span>${R.all[1]}</span></div><div class="w"></div><div class="spill"></div><div class="cap"><b>${R.all[0]}</b><span>Every title, A–Z</span></div></div></div>`:''}<div class="em"></div></div></div>`).join('');
+}
+function rowLen(r){return ROWS[r].items.length+(ROWS[r].all?1:0)}
+function mqFacts(o,ri){
+  if(o.k==='film'){const left=o.run*(1-(ri===0?o.prog||0:0));return `${hm(o.run)} · ${o.rat} · ${o.fmt} · Ends at <b>${clock(NOW+left)}</b>`}
+  if(ri===0)return `${o.rat} · ${o.fmt} · Ends at <b>${clock(NOW+o.run*(1-o.prog))}</b>`;
+  return o.cur?`Next up ${curLabel(o)} · ${o.rat}`:`${o.yrs} · ${o.rat} · ${o.fmt}`;
+}
+function renderMarquee(){
+  const mq=$('#mq'),r=S.h.r,c=S.h.c[r],R=ROWS[r];const n=rowLen(r);
+  let eb,tt,fx,hc;
+  if(S.h.zone==='nav'){eb='Now showing';const o=T[ROWS[0].items[0]];tt=o.t;fx=mqFacts(o,0);hc=o.hc}
+  else if(c>=R.items.length){eb=R.name;tt=R.all[0];fx=`${R.all[1]} titles · newest first · OK opens the grid`;hc='#2a2724'}
+  else{const o=T[R.items[c]];eb=`${R.name} · ${o.k==='film'?'Film':'Series'}`;tt=o.t;fx=mqFacts(o,r);hc=o.hc}
+  mq.style.setProperty('--hc',hc);
+  mq.querySelector('.eb').textContent=eb;const t=mq.querySelector('.tt');t.textContent=tt;t.classList.toggle('long',tt.length>17);
+  mq.querySelector('.fx').innerHTML=fx;
+  const lit=S.h.zone==='nav'?-1:c;
+  mq.querySelector('.bulbs').innerHTML=n<=12?Array.from({length:n},(_,i)=>`<span class="ind led${i===lit?' on':''}"></span>`).join(''):`<em>${c+1} of ${n}</em>`;
+}
+function renderHome(nudge){
+  $$('#nav .tab').forEach((t,i)=>t.classList.toggle('f',S.h.zone==='nav'&&i===S.h.n));
+  const rows=$$('#rows .row');
+  rows.forEach((row,ri)=>{const cds=[...row.querySelectorAll('.cd')];cds.forEach((cd,ci)=>{const f=S.h.zone==='rows'&&ri===S.h.r&&ci===S.h.c[ri];cd.classList.toggle('f',f);cd.querySelector('.face').classList.toggle('f',f)});
+    const trk=row.querySelector('.trk'),first=cds[0],cur=cds[S.h.c[ri]],em=row.querySelector('.em');
+    const vis=tv.clientWidth*(1824-96)/1920;const maxS=Math.max(0,em.offsetLeft+em.offsetWidth-first.offsetLeft-vis);
+    const sh=Math.min(cur.offsetLeft-first.offsetLeft,maxS);trk.style.transform=`translateX(${-sh}px)`;});
+  const rr=S.h.zone==='nav'?0:S.h.r;$('#rows').style.transform=`translateY(${-rows[rr].offsetTop}px)`;
+  if(nudge){const cd=rows[S.h.r].querySelectorAll('.cd')[S.h.c[S.h.r]];cd.classList.remove('nudge');void cd.offsetWidth;cd.classList.add('nudge')}
+  renderMarquee();
+}
+function homeKey(k){
+  const H=S.h;
+  if(H.zone==='nav'){
+    if(k==='left')H.n=Math.max(0,H.n-1);else if(k==='right')H.n=Math.min(TABS.length-1,H.n+1);
+    else if(k==='down'){H.zone='rows';H.r=0}
+    else if(k==='ok'){if(H.n===0){H.zone='rows';H.r=0}else toast(`${TABS[H.n]}: not drawn in pass 4 (pass 3 has the grids, Discover and Settings)`)}
+    else if(k==='back'){S.tk=prof;show('tickets');renderTickets();return}
+    renderHome();return;
+  }
+  const n=rowLen(H.r);
+  if(k==='left'){if(H.c[H.r]>0)H.c[H.r]--}
+  else if(k==='right'){if(H.c[H.r]<n-1)H.c[H.r]++;else{renderHome(!S.calm);return}}
+  else if(k==='up'){if(H.r>0)H.r--;else{H.zone='nav';H.n=0}}
+  else if(k==='down'){if(H.r<ROWS.length-1)H.r++}
+  else if(k==='back'){H.zone='nav';H.n=0}
+  else if(k==='ok'){const R=ROWS[H.r],c=H.c[H.r];if(c>=R.items.length){toast(`${R.all[0]}: the library grid (not drawn in pass 4)`);return}openTitle(R.items[c]);return}
+  renderHome();
+}
+
+/* ---------- programme pages ---------- */
+function openTitle(id,from){clearTimeout(restT);clearTimeout(panelT);const o=T[id];S.back='home';if(o.k==='film'){S.f={id,zone:'act',i:0,m:0,sub:0,w:false,fav:false};buildFilm();show('film');renderFilm()}else{const sh=o.cur?o.cur[0]:0;S.se={id,zone:'keys',k:0,si:sh,shown:sh,ep:o.cur?o.cur[1]:0,pend:null,fv:0,show:null};buildSeries();show('series');renderSeries()}S.presses++;$('#st-pr').textContent=S.presses}
+function tblk(o,eb){return `<div class="tblk" style="--hc:${o.hc}"><div class="eb">${eb}</div><div class="tt${o.t.length>18?' long':''}">${o.t}</div></div>`}
+const SUBS=['Off','English','Español'];
+function filmActs(o){const F=S.f;return [{t:priLabel(o),pri:1},{t:'Play from the start'},{t:'Audio: English 5.1'},{t:`Subtitles: ${SUBS[F.sub]}`},{t:'Mark as watched',sq:F.w},{t:'Add to favourites',sq:F.fav}]}
+function buildFilm(){const o=T[S.f.id];
+  const more=['glass','lowtide','bells','lantern','ferry','orbit'].filter(x=>x!==o.id).slice(0,6);
+  $('#fscroll').innerHTML=tblk(o,`Programme · Film · ${o.y}`)+
+   `<div class="pfx">${hm(o.run)} · ${o.rat} · ${o.fmt} HDR10 · 5.1 · Ends at <b>${clock(NOW+o.run*(1-(o.prog||0)))}</b></div><div class="acts" id="facts"></div>`+
+   `<div class="fold"></div><div class="pa">${art(o.p,o.a,824,464,o.seed)}</div><div class="syn">${o.syn||SYN[o.seed%SYN.length]}</div>`+
+   `<div class="cr">${(o.cr||[['Directed by','Ana Ferreira'],['With','Paul Osei, Rhea Lund'],['Music','Tomas Varga']]).map(([a,b])=>`<div class="ld"><span>${a}</span><i></i><b>${b}</b></div>`).join('')}</div>`+
+   `<div class="morel">More like this<span>↓</span></div><div class="morer"><div class="row po"><div class="trk" id="fmore">${more.map(id=>cardHTML(T[id],1,false)).join('')}<div class="em"></div></div></div></div>`;
+}
+function renderFilm(){const o=T[S.f.id],F=S.f;
+  $('#facts').innerHTML=filmActs(o).map((a,i)=>`<div class="key${a.pri?' pri':''}${F.zone==='act'&&F.i===i?' f':''}"><i class="wl"></i>${a.t}${'sq' in a?`<span class="sp"></span><span class="ind sq${a.sq?' on':''}"></span>`:''}</div>`).join('');
+  const cds=$$('#fmore .cd');cds.forEach((c,i)=>{const f=F.zone==='more'&&i===F.m;c.classList.toggle('f',f);c.querySelector('.face').classList.toggle('f',f)});
+  $('#fscroll').style.transform=F.zone==='more'?`translateY(${-tv.clientWidth*560/1920}px)`:'none';
+  
+}
+function filmKey(k){const F=S.f,o=T[F.id];
+  if(F.zone==='act'){
+    if(k==='up')F.i=Math.max(0,F.i-1);else if(k==='down'){if(F.i<5)F.i++;else{F.zone='more';F.m=0}}
+    else if(k==='ok'){if(F.i===0)return play(o.id,{from:o.prog?o.prog*o.run*60:0});if(F.i===1)return play(o.id,{from:0});
+      if(F.i===2)toast('Audio chooser drops below its key (pass 3, five rows at most)');if(F.i===3)F.sub=(F.sub+1)%3;if(F.i===4)F.w=!F.w;if(F.i===5)F.fav=!F.fav}
+    else if(k==='back'){goBack();return}
+  }else{
+    if(k==='left')F.m=Math.max(0,F.m-1);else if(k==='right'){const n=$$('#fmore .cd').length;if(F.m<n-1)F.m++}
+    else if(k==='up'||k==='back'){F.zone='act';F.i=5}
+    else if(k==='ok'){const id=$$('#fmore .cd')[F.m].dataset.id;openTitle(id);return}
+  }
+  renderFilm();
+}
+function goBack(){S.pl=null;show('home',{up:true});renderHome()}
+
+/* series */
+function seasonsOf(o){return o.seasons}
+function epState(o,s,e){if(!o.cur)return{w:false,p:0};const[cs,ce]=o.cur;if(s<cs||(s===cs&&e<ce))return{w:true,p:0};if(s===cs&&e===ce)return{w:false,p:o.prog};return{w:false,p:0}}
+function sItems(o,shown){const n=o.seasons[shown];const it=o.seasons.map((_,i)=>({t:`Season ${i+1}`,s:i}));if(n>12)for(let a=0;a<n;a+=10)it.push({t:`${a+1}–${Math.min(n,a+10)}`,r:a});return it}
+function buildSeries(){const o=T[S.se.id];
+  $('#sscroll').innerHTML=tblk(o,`Programme · Series · ${o.yrs}`)+
+   `<div class="pfx">${o.seasons.length} season${o.seasons.length>1?'s':''} · ${o.rat} · ${o.fmt} · about ${o.run} min an episode</div><div class="keyrow" id="skeys"></div><div class="srow" id="srow"></div>`+
+   `<div class="ro" id="ro"><div class="ro-in" id="roin"></div><div class="pnote" id="pnote"></div></div><div class="fold"></div><div class="pa" id="spa"></div><div class="epi" id="epi"></div>`;
+  S.se.show=null;
+}
+function renderEps(){const o=T[S.se.id],s=S.se.shown;const n=o.seasons[s];
+  $('#roin').innerHTML=Array.from({length:n},(_,e)=>{const st=epState(o,s,e);return `<div class="ep"><i class="wl"></i><span class="n">${String(e+1).padStart(2,'0')}</span><span class="et">${epName(o,s,e)}</span><span class="rt">${o.run+((e*7+s)%5)-2} min</span><span class="ind led${st.w?' on':''}"></span>${st.p?`<span class="epg"><i style="width:${st.p*100}%"></i></span>`:''}</div>`}).join('');
+}
+let restT=null,panelT=null;
+function renderSeries(){const o=T[S.se.id],E=S.se;
+  if(!$('#roin').children.length||$('#roin').dataset.s!=E.shown+''){renderEps();$('#roin').dataset.s=E.shown}
+  const keys=[{t:priLabel(o),pri:1},{t:'Mark as watched',sq:false},{t:'Add to favourites',sq:false}];
+  $('#skeys').innerHTML=keys.map((a,i)=>`<div class="key${a.pri?' pri':''}${E.zone==='keys'&&E.k===i?' f':''}"><i class="wl"></i>${a.t}${'sq' in a?`<span class="ind sq"></span>`:''}</div>`).join('');
+  const items=sItems(o,E.shown);const n=o.seasons[E.shown];
+  const inRange=a=>E.ep>=a&&E.ep<a+10;
+  $('#srow').innerHTML=items.map((it,i)=>(it.r===0?'<span class="divl" title="Episodes"></span>':'')+(()=>{const pr=(it.s===E.shown)||('r' in it&&inRange(it.r));return `<div class="skey${pr?' pr':''}${E.zone==='srow'&&E.si===i?' f':''}"><span class="ind sq${pr?' on':''}"></span>${it.t}<i class="w"></i></div>`})()).join('');
+  const ro=$('#ro');ro.classList.toggle('pend',E.pend!==null);
+  $('#pnote').textContent=E.pend!==null?`Season ${E.pend+1} · rest here, or press ↓, to show it`:'';
+  const eps=$$('#roin .ep');eps.forEach((el,i)=>el.classList.toggle('f',E.zone==='list'&&i===E.ep));
+  if(E.ep<E.fv)E.fv=E.ep;if(E.ep>E.fv+6)E.fv=E.ep-6;E.fv=Math.max(0,Math.min(E.fv,Math.max(0,n-7)));
+  $('#roin').style.transform=`translateY(${-(eps[E.fv]?eps[E.fv].offsetTop:0)}px)`;
+  // right page follows focus after a 500 ms rest (D169)
+  const want=E.zone==='list'?'ep:'+E.shown+':'+E.ep:'series';
+  if(E.show===null){setPanel(want)}else if(E.show!==want){clearTimeout(panelT);panelT=setTimeout(()=>setPanel(want),S.instant?0:500)}
+}
+function setPanel(w){const o=T[S.se.id],E=S.se;E.show=w;
+  if(w==='series'){$('#spa').innerHTML=art(o.p,o.a,732,412,o.seed);
+    $('#epi').innerHTML=`<p style="margin-top:0">${SYN[o.seed%SYN.length]} A small harbour town, one season at a time.</p><div class="cr" style="position:static;margin-top:22px">${[['Created by','Nadia Holm'],['With','Joel Mbeki, Petra Sand, Ruth Calder'],['Music','The Quay Players']].map(([a,b])=>`<div class="ld"><span>${a}</span><i></i><b>${b}</b></div>`).join('')}</div>`;}
+  else{const[,s,e]=w.split(':').map(Number);const st=epState(o,s,e);const run=o.run+((e*7+s)%5)-2;
+    $('#spa').innerHTML=art((o.p+e+s)%8,['sea','sun','bands','cut','grid'][(e+s)%5],732,412,o.seed*31+e*7+s);
+    $('#epi').innerHTML=`<div class="eb">Season ${s+1} · Episode ${e+1}</div><h3>${epName(o,s,e)}</h3><div class="l">${run} min · ${st.w?'Watched':st.p?`Resume from ${ts(run*60*st.p)}`:'Not started'} · Ends at ${clock(NOW+run*(1-st.p))}</div><p>${SYN[(e+s)%SYN.length]}</p>`;}
+}
+function seriesKey(k){const o=T[S.se.id],E=S.se;const items=sItems(o,E.shown);
+  if(E.zone==='keys'){
+    if(k==='left')E.k=Math.max(0,E.k-1);else if(k==='right')E.k=Math.min(2,E.k+1);
+    else if(k==='down'){E.zone='srow';E.si=E.shown}
+    else if(k==='ok'){if(E.k===0){const[s,e]=o.cur||[0,0];return play(o.id,{s,e,from:(o.prog||0)*o.run*60})}toast(E.k===1?'Press OK again to mark all 40 episodes watched':'Added to favourites')}
+    else if(k==='back')return goBack();
+  }else if(E.zone==='srow'){
+    if(k==='left'||k==='right'){E.si=Math.max(0,Math.min(items.length-1,E.si+(k==='left'?-1:1)));const it=items[E.si];
+      clearTimeout(restT);if('s' in it&&it.s!==E.shown){E.pend=it.s;restT=setTimeout(()=>{commitSeason(it.s);renderSeries()},500)}else E.pend=null}
+    else if(k==='up'){E.zone='keys';E.pend=null;clearTimeout(restT)}
+    else if(k==='down'||k==='ok'){const it=items[E.si];clearTimeout(restT);
+      if('s' in it){if(it.s!==E.shown)commitSeason(it.s);E.zone='list'}else{E.ep=it.r;E.zone='list';E.fv=it.r}}
+    else if(k==='back')return goBack();
+  }else{
+    const n=o.seasons[E.shown];
+    if(k==='up'){if(E.ep>0)E.ep--;else{E.zone='srow';E.si=E.shown}}
+    else if(k==='down'){if(E.ep<n-1)E.ep++}
+    else if(k==='back'){E.zone='srow';const its=sItems(o,E.shown);const ri=its.findIndex(it=>'r' in it&&E.ep>=it.r&&E.ep<it.r+10);E.si=ri>=0?ri:E.shown}
+    else if(k==='ok'){const st=epState(o,E.shown,E.ep);return play(o.id,{s:E.shown,e:E.ep,from:st.p?st.p*o.run*60:0})}
+  }
+  renderSeries();
+}
+function commitSeason(s){const E=S.se,o=T[E.id];E.shown=s;E.pend=null;E.ep=(o.cur&&o.cur[0]===s)?o.cur[1]:0;E.fv=0;const its=sItems(o,s);if(E.si>=its.length)E.si=s;$('#roin').dataset.s='x'}
+
+/* ---------- house lights, title card, player ---------- */
+let playT=[];
+function clearPlay(){playT.forEach(clearTimeout);playT=[]}
+function play(id,opt={}){
+  clearPlay();const o=T[id];const cur=$('#s-'+S.scr);const t0=performance.now();
+  const ep=o.k==='show'?{s:opt.s??(o.cur||[0,0])[0],e:opt.e??(o.cur||[0,0])[1]}:null;
+  const dimA=S.calm?0:180,dimB=S.calm?140:220,gap=S.calm?0:60;
+  // 1) house lights: two steps down (the screen layer's alpha over black)
+  if(!S.calm){cur.classList.add('dim1');playT.push(setTimeout(()=>cur.classList.add('dim2'),dimA+gap))}else cur.classList.add('dim2');
+  const lightsOut=S.calm?dimB:dimA+gap+dimB;
+  // 2) title card
+  playT.push(setTimeout(()=>{
+    const c=$('#s-card');c.classList.remove('go');c.style.setProperty('--hc',o.hc);
+    c.querySelector('.tc-eb').textContent=ep?`Season ${ep.s+1} · Episode ${ep.e+1}`:`Film · ${o.y}`;
+    const tt=c.querySelector('.tc-tt');tt.textContent=o.t;tt.classList.toggle('long',o.t.length>17);
+    c.querySelector('.tc-sub').textContent=ep?epName(o,ep.s,ep.e):(opt.from?`From ${ts(opt.from)}`:'From the start');
+    show('card');requestAnimationFrame(()=>requestAnimationFrame(()=>c.classList.add('go')));
+    const floor=S.firstPlay?600:300;const hold=Math.max(S.load,floor);S.firstPlay=false;
+    const sl=$('#slats');sl.innerHTML='<i></i>'.repeat(16);const tcl=$('#tcl');const st=performance.now();
+    const tick=()=>{const p=Math.min(1,(performance.now()-st)/S.load);sl.querySelectorAll('i').forEach((x,i)=>x.classList.toggle('on',i<Math.round(p*16)));tcl.textContent=p<1?'Loading':'Ready';if(p<1&&S.scr==='card')playT.push(setTimeout(tick,80))};tick();
+    // 3) picture
+    playT.push(setTimeout(()=>{startPlayer(o,ep,opt.from||0,opt);const dt=Math.round(performance.now()-t0);
+      $('#st-lum').textContent=`2 big changes (lights down, then picture), ${dt-lightsOut} ms apart · hold ${hold} ms (floor ${floor})`},hold));
+  },lightsOut));
+}
+const CHN=['Opening','The Quay','Fog Bank','Lamp Room','Morning'];
+function startPlayer(o,ep,from,opt){
+  const run=ep?o.run+((ep.e*7+ep.s)%5)-2:o.run;
+  S.pl={id:o.id,ep,dur:run*60,pos:from,playing:true,focus:'tl',ci:0,sti:0,skip:0,skipUntil:0,skipDone:false,next:false,nextHidden:false,inter:null,ik:0,still:false};
+  $('#pic').innerHTML=art(ep?(o.p+ep.e+ep.s)%8:o.p,ep?['sea','sun','bands','cut','grid'][(ep.e+ep.s)%5]:o.a,1920,1080,ep?o.seed*31+ep.e*7+ep.s:o.seed);
+  $('#chaps').innerHTML=CHN.map((n,i)=>`<div class="ch"><div class="face"><div class="art">${art((o.p+i)%8,['sea','sun','bands','cut','grid'][i],260,146,o.seed+i)}</div><div class="w"></div><b>${i+1} · ${n}</b></div></div>`).join('');
+  $('#strip').innerHTML=['Subtitles: Off','Audio: English 5.1','Speed: 1×','Info','Stop'].map(t=>`<div class="skey">${t}<i class="w"></i></div>`).join('');
+  show('player');$('#pic').classList.remove('dim');renderPlayer();
+}
+function pTitle(){const P=S.pl,o=T[P.id];return P.ep?`${o.t} · S${P.ep.s+1} E${P.ep.e+1} · ${epName(o,P.ep.s,P.ep.e)}`:o.t}
+function renderPlayer(){const P=S.pl;if(!P)return;const o=T[P.id];
+  const tl=$('#tl');const pct=P.pos/P.dur*100;
+  tl.innerHTML=`<div class="fill" style="width:${pct}%"></div>${[.2,.4,.6,.8].map(x=>`<i class="stop" style="left:${x*100}%"></i>`).join('')}<i class="head" style="left:${pct}%"></i>`;
+  tl.classList.toggle('f',P.focus==='tl'&&!P.inter);
+  $('#plt').innerHTML=`<span class="ind slot${P.playing?' on':''}"></span><span>${P.playing?'Playing':'Paused'}</span><span style="color:#a9a397">·</span><span>${pTitle()}</span>`;
+  $('#plr').innerHTML=`${ts(P.pos)} / ${ts(P.dur)} · Ends at <b>${clock(NOW+(P.dur-P.pos)/60)}</b>`;
+  const skipOn=P.skip>0,nextOn=P.next&&!P.nextHidden;
+  let hint;
+  if(P.focus==='skip')hint='<kbd>OK</kbd> Skip intro · <kbd>↓</kbd> Timeline';
+  else if(P.focus==='next')hint='<kbd>OK</kbd> Next episode now · <kbd>↓</kbd> Timeline';
+  else if(P.focus==='chap')hint='<kbd>OK</kbd> Jump to chapter · <kbd>↓</kbd> Timeline';
+  else if(P.focus==='strip')hint='<kbd>OK</kbd> Open · <kbd>↑</kbd> Timeline';
+  else hint=`<kbd>OK</kbd> ${P.playing?'Pause':'Play'} · <kbd>←</kbd><kbd>→</kbd> 10 s · <kbd>↑</kbd> ${skipOn?'Skip intro':nextOn?'Next episode':'Chapters'} · <kbd>↓</kbd> Options`;
+  $('#plh').innerHTML=hint;
+  $('#chaps').classList.toggle('on',P.focus==='chap');$$('#chaps .ch').forEach((c,i)=>{const f=P.focus==='chap'&&i===P.ci;c.classList.toggle('f',f);c.querySelector('.face').classList.toggle('f',f)});
+  $('#pband').classList.toggle('lift',P.focus==='strip');$('#strip').classList.toggle('on',P.focus==='strip');
+  $$('#strip .skey').forEach((k,i)=>k.classList.toggle('f',P.focus==='strip'&&i===P.sti));
+  const pr=$('#prompt');
+  if(skipOn&&!P.inter){const taken=P.focus==='skip';pr.innerHTML=`${taken&&P.skip===2?'<div class="pn">↓ keeps OK on the timeline</div>':''}<div class="pk${taken?' f':''}"><i class="wl"></i>Skip intro<kbd>${taken?'OK':'↑'}</kbd><i class="drain${taken&&P.skip===2?' run':''}"></i></div>`;pr.classList.add('on')}
+  else if(nextOn&&!P.inter){const left=Math.max(0,Math.round(P.dur-P.pos));const ne=P.ep?{s:P.ep.s,e:P.ep.e+1}:null;const taken=P.focus==='next';
+    pr.innerHTML=`<div class="nxw"><div class="nx"><div class="th">${art((o.p+ne.e+ne.s)%8,['sea','sun','bands','cut','grid'][(ne.e+ne.s)%5],192,108,o.seed*31+ne.e*7+ne.s)}</div><div class="tx"><b>Next episode${P.playing?` in ${left} s`:' · waiting for you'}</b><span>E${ne.e+1} · ${epName(o,ne.s,ne.e)}</span></div></div><div class="pk${taken?' f':''}"><i class="wl"></i>Start it now<kbd>${taken?'OK':'↑'}</kbd></div></div>`;pr.classList.add('on')}
+  else pr.classList.remove('on');
+  const it=$('#inter');
+  if(P.inter){const still=P.inter==='still';const ne=P.ep?{s:P.ep.s,e:P.ep.e+(still?1:0)}:null;
+    it.style.setProperty('--hc',o.hc);
+    it.innerHTML=`<div class="ib"><i class="y"></i><b>${still?'Still<br>watching?':'Intermission'}</b><span>${still?'After 3 episodes':'A long pause'}</span><i class="r"></i></div><div class="ic"><div class="eb"><span class="ind slot"></span>${still?'Paused before the next episode':`Paused at ${ts(P.pos)}`}</div><h3>${still?`E${ne.e+1} · ${epName(o,ne.s,ne.e)}`:pTitle()}</h3><div class="l">${still?`${o.t} · Season ${ne.s+1}. It waits here until you choose.`:`Resume now and it ends at ${clock(NOW+(P.dur-P.pos)/60)}.`}</div><div class="ik">${[still?'Keep watching':`Resume from ${ts(P.pos)}`,'Stop for tonight'].map((t,i)=>`<div class="key${i===0?' pri':''}${P.ik===i?' f':''}"><i class="wl"></i>${t}</div>`).join('')}</div></div>`;
+    it.classList.add('on');$('#pic').classList.add('dim');$('#pband').style.opacity=0}
+  else{it.classList.remove('on');$('#pic').classList.remove('dim');$('#pband').style.opacity=1}
+}
+let pClock=setInterval(()=>{const P=S.pl;if(!P||S.scr!=='player'||!P.playing||P.inter)return;P.pos+=1;
+  if(P.ep&&!P.skipDone&&P.pos>=40&&P.pos<130&&!P.skip){P.skip=2;P.focus='skip';P.skipUntil=Date.now()+8000}
+  if(P.skip===2&&Date.now()>P.skipUntil){P.skip=1;if(P.focus==='skip')P.focus='tl'}
+  if(P.skip&&P.pos>=130){P.skip=0;P.skipDone=true;if(P.focus==='skip')P.focus='tl'}
+  if(P.ep&&P.pos>=P.dur-20&&!P.next){P.next=true}
+  if(P.pos>=P.dur){if(P.ep){nextEp();return}stopPlayer();return}
+  renderPlayer()},1000);
+function nextEp(){const P=S.pl,o=T[P.id];const s=P.ep.s,e=P.ep.e+1;if(e>=o.seasons[s]){stopPlayer();return}play(o.id,{s,e,from:0})}
+function stopPlayer(){clearPlay();const P=S.pl;S.pl=null;
+  const back=S.back==='home'?'home':S.back;const target=T[P?P.id:'copper'].k==='film'?'film':'series';
+  show(target,{up:true});if(target==='film')renderFilm();else renderSeries();
+  $('#st-lum').textContent='House lights up: a 240 ms fade back to the programme'}
+function playerKey(k){const P=S.pl;if(!P)return;
+  if(P.inter){if(k==='left'||k==='right')P.ik=P.ik?0:1;else if(k==='ok'){if(P.ik===1)return stopPlayer();if(P.inter==='still'){P.inter=null;return nextEp()}P.inter=null;P.playing=true}else if(k==='back'){P.inter=null}renderPlayer();return}
+  const skipOn=P.skip>0,nextOn=P.next&&!P.nextHidden;
+  switch(P.focus){
+   case 'tl':
+    if(k==='ok')P.playing=!P.playing;
+    else if(k==='left')P.pos=Math.max(0,P.pos-10);else if(k==='right')P.pos=Math.min(P.dur-1,P.pos+10);
+    else if(k==='up'){P.focus=skipOn?'skip':nextOn?'next':'chap';if(P.focus==='chap')P.ci=Math.min(4,Math.floor(P.pos/P.dur*5));if(P.skip===2)P.skip=1}
+    else if(k==='down'){P.focus='strip';P.sti=0}
+    else if(k==='back')return stopPlayer();
+    break;
+   case 'skip':
+    if(k==='ok'){P.pos=130;P.skip=0;P.skipDone=true;P.focus='tl';toast('Intro skipped · it is still in Chapters')}
+    else if(k==='back'){P.skip=0;P.skipDone=true;P.focus='tl'}
+    else{P.focus='tl';if(P.skip===2)P.skip=1}
+    break;
+   case 'next':
+    if(k==='ok')return nextEp();
+    if(k==='back'){P.nextHidden=true;toast('Staying for the credits')}
+    P.focus='tl';break;
+   case 'chap':
+    if(k==='left')P.ci=Math.max(0,P.ci-1);else if(k==='right')P.ci=Math.min(4,P.ci+1);
+    else if(k==='ok'){P.pos=Math.round(P.dur*P.ci/5);P.focus='tl'}else P.focus='tl';
+    break;
+   case 'strip':
+    if(k==='left')P.sti=Math.max(0,P.sti-1);else if(k==='right')P.sti=Math.min(4,P.sti+1);
+    else if(k==='ok'){if(P.sti===4)return stopPlayer();toast('Lists rise above the band (pass 3); not redrawn in pass 4')}
+    else if(k==='up'||k==='back')P.focus='tl';
+    break;
+  }
+  renderPlayer();
+}
+
+/* ---------- offline ---------- */
+let offLeft=24;
+function buildOffline(){const mq=$('#mq2');mq.querySelector('.eb').innerHTML='<span class="offw"><span class="ind led offl"></span>Server · Offline</span>';
+  mq.querySelector('.tt').textContent='Not answering';mq.querySelector('.tt').classList.remove('long');
+  mq.querySelector('.bulbs').innerHTML=Array.from({length:6},()=>'<span class="ind led"></span>').join('');
+  $('#offrow').innerHTML=ROWS[0].items.map(id=>cardHTML(T[id],0,true)).join('');}
+function renderOffline(){$('#mq2 .fx').innerHTML=`The server at home isn't answering. Tries again by itself in <b>${offLeft} s</b>.`;
+  $('#offk').innerHTML=['Try again','TV Home'].map((t,i)=>`<div class="key${i===0?' pri':''}${S.of===i?' f':''}"><i class="wl"></i>${t}</div>`).join('')}
+setInterval(()=>{if(S.scr==='offline'){offLeft=offLeft<=1?30:offLeft-1;renderOffline()}},1000);
+function offKey(k){if(k==='left')S.of=0;else if(k==='right')S.of=1;else if(k==='ok'){if(S.of===0){offLeft=30;toast('Still not answering. Tries again by itself in 30 s.')}else toast('TV Home: back to the launcher, where other apps and inputs still work')}renderOffline()}
+
+/* ---------- keys ---------- */
+const KM={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',Enter:'ok',Escape:'back',Backspace:'back',m:'menu',M:'menu',g:'guide',G:'guide'};
+function press(k){
+  if(k==='guide'){toast('Guide belongs to the TV launcher. JamFin never takes it.');return}
+  if(k==='menu'){toast(S.scr==='player'?'≡ opens Options below the band, like ↓':'≡ JamFin menu: Switch profile · Settings · Calm motion (not drawn in pass 4)');if(S.scr==='player'&&S.pl&&!S.pl.inter){S.pl.focus='strip';renderPlayer()}return}
+  if(S.scr!=='home'&&S.scr!=='tickets'){S.presses++;$('#st-pr').textContent=S.presses}
+  if(S.scr==='tickets'){if(k==='left')S.tk=Math.max(0,S.tk-1);else if(k==='right')S.tk=Math.min(3,S.tk+1);else if(k==='ok')return pickTicket();renderTickets()}
+  else if(S.scr==='home')homeKey(k);else if(S.scr==='film')filmKey(k);else if(S.scr==='series')seriesKey(k);
+  else if(S.scr==='player')playerKey(k);else if(S.scr==='offline')offKey(k);
+}
+tv.addEventListener('keydown',e=>{const k=KM[e.key];if(!k)return;e.preventDefault();stopTour();press(k)});
+tv.addEventListener('click',()=>tv.focus());
+$$('[data-key]').forEach(b=>b.addEventListener('click',()=>{stopTour();press(KM[b.dataset.key]);tv.focus({preventScroll:true})}));
+
+/* ---------- page controls ---------- */
+function segSet(k,v){$$(`.seg[data-k="${k}"] button`).forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v))}
+$$('.seg button').forEach(b=>b.addEventListener('click',()=>{const k=b.parentElement.dataset.k,v=b.dataset.v;segSet(k,v);
+  if(k==='light')setLight(v);if(k==='motion')setCalm(v==='calm');if(k==='load')S.load=+v;
+  if(k==='theme'){if(v==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',v)}
+  if(S.scr==='home')renderHome()}));
+
+/* ---------- jumps + tour ---------- */
+function reset(){clearPlay();clearTimeout(restT);clearTimeout(panelT);$$('.scr').forEach(s=>s.classList.remove('dim1','dim2'));$('#s-card').classList.remove('go');S.pl=null;}
+const J={
+ 'Tickets':()=>{reset();S.tk=0;show('tickets');renderTickets()},
+ 'Ticket torn':()=>{reset();S.tk=0;show('tickets');renderTickets();pickTicket()},
+ 'Home':()=>{reset();prof=0;setLight(S.light);buildNav();S.h={zone:'rows',r:0,c:[0,0,0],n:0};show('home');renderHome()},
+ 'Marquee · 3rd card':()=>{J['Home']();S.h.c[0]=2;renderHome()},
+ 'Posters row':()=>{J['Home']();S.h.r=1;S.h.c[1]=1;renderHome()},
+ 'Row end':()=>{J['Home']();S.h.r=1;S.h.c[1]=8;renderHome();setTimeout(()=>renderHome(!S.calm),300)},
+ 'Programme · film':()=>{J['Home']();openTitle('copper')},
+ 'Film · lower view':()=>{J['Programme · film']();S.f.zone='more';S.f.m=1;renderFilm()},
+ 'Programme · show':()=>{J['Home']();openTitle('harbour');S.se.zone='srow';S.se.si=2;renderSeries()},
+ 'Season 2 resting':()=>{J['Programme · show']();seriesKey('left')},
+ 'Long season · E21':()=>{J['Programme · show']();S.se.zone='list';S.se.ep=20;S.instant=true;renderSeries();S.instant=false;S.se.si=5},
+ 'House lights (Play)':()=>{J['Programme · show']();S.se.zone='keys';S.se.k=0;renderSeries();setTimeout(()=>seriesKey('ok'),350)},
+ 'Player · Skip intro':()=>{reset();startPlayer(T.harbour,{s:2,e:0},41,{});const P=S.pl;P.skip=2;P.focus='skip';P.skipUntil=Date.now()+8000;renderPlayer()},
+ 'Player · Next episode':()=>{reset();startPlayer(T.harbour,{s:2,e:0},0,{});const P=S.pl;P.pos=P.dur-14;P.skipDone=true;P.next=true;renderPlayer()},
+ 'Player · chapters':()=>{reset();startPlayer(T.copper,null,4349,{});S.pl.focus='chap';S.pl.ci=2;renderPlayer()},
+ 'Intermission':()=>{reset();startPlayer(T.copper,null,4349,{});S.pl.playing=false;S.pl.inter='pause';renderPlayer()},
+ 'Still watching':()=>{reset();startPlayer(T.harbour,{s:2,e:2},2780,{});const P=S.pl;P.skipDone=true;P.playing=false;P.inter='still';renderPlayer()},
+ 'Day Home (Ben)':()=>{reset();prof=1;setLight('day');buildNav();S.h={zone:'rows',r:0,c:[1,0,0],n:0};show('home');renderHome()},
+ 'Day programme':()=>{J['Day Home (Ben)']();openTitle('signal');S.se.zone='list';S.se.ep=3;S.instant=true;renderSeries();S.instant=false},
+ 'Offline Home':()=>{reset();buildNav();S.of=0;offLeft=24;show('offline');renderOffline()},
+};
+$('#jumps').innerHTML=Object.keys(J).map(n=>`<button class="jb">${n}</button>`).join('');
+$$('#jumps .jb').forEach(b=>b.addEventListener('click',()=>{stopTour();const l=S.light;J[b.textContent]();tv.focus({preventScroll:true})}));
+const TOUR=['Tickets','Ticket torn','Marquee · 3rd card','Posters row','Row end','Programme · film','Film · lower view','Programme · show','Season 2 resting','Long season · E21','House lights (Play)','Player · Skip intro','Player · Next episode','Intermission','Still watching','Day Home (Ben)','Offline Home'];
+let tourI=-1,tourT=null;
+function step(){tourI=(tourI+1)%TOUR.length;if(TOUR[tourI]!=='Day Home (Ben)'&&TOUR[tourI]!=='Day programme')setLight('night');J[TOUR[tourI]]();$('#st-scr').textContent=`${NAMES[S.scr]} · Tour ${tourI+1}/${TOUR.length}: ${TOUR[tourI]}`}
+function stopTour(){if(tourT){clearInterval(tourT);tourT=null;$('#tour').setAttribute('aria-pressed','false');$('#tour').textContent='▶ Tour'}}
+$('#tour').addEventListener('click',()=>{if(tourT)return stopTour();tourI=-1;step();tourT=setInterval(step,3200);$('#tour').setAttribute('aria-pressed','true');$('#tour').textContent='■ Stop tour'});
+$('#stepb').addEventListener('click',()=>{stopTour();step()});
+window.__jf={J,S,press,TOUR};
+
+/* ---------- phones ---------- */
+function phHome(){const o=T.copper;
+  return `<div class="ph-sb"><span>9:47</span><span>●●● ▮</span></div><div class="ph-sc">
+  <div class="ph-hd"><span class="br">JamFin</span><button class="ph-chip" data-sheet><i></i>Ada</button></div>
+  <div class="ph-mq"><div class="blk"></div><div class="eb">CONTINUE WATCHING · FILM</div><div class="tt">The Copper City</div><div class="fx">2 h 31 min · Rated 12 · Ends at 11:06 PM</div><button class="go">Resume from ${resumeAt(o)}</button>
+   <div class="acc2"><i style="left:0;top:10px;width:34px;height:22px;background:#21406c;transform:skewX(-14deg)"></i><i style="left:16px;top:2px;width:30px;height:5px;background:#e3b02f"></i><i style="left:34px;top:30px;width:12px;height:12px;background:#c23a2b"></i></div>
+   <div class="bl">${Array.from({length:6},(_,i)=>`<i class="${i===0?'on':''}"></i>`).join('')}</div></div>
+  <div class="ph-rl">Continue watching<span>6</span></div>
+  <div class="ph-row">${ROWS[0].items.map(id=>{const t=T[id];return `<div class="ph-c"><div class="a">${art(t.p,t.a,220,124,t.seed)}<div class="pg"><i style="width:${t.prog*100}%"></i></div></div><b>${t.t}</b><span>${t.k==='film'?t.y:curLabel(t)}</span></div>`}).join('')}</div>
+  <div class="ph-rl">Latest films<span>214</span></div>
+  <div class="ph-row">${ROWS[1].items.map(id=>{const t=T[id];return `<div class="ph-c po"><div class="a">${art(t.p,t.a,112,168,t.seed)}</div><b>${t.t}</b><span>${t.y}</span></div>`}).join('')}</div>
+  <div class="ph-rl">Latest shows<span>38</span></div>
+  <div class="ph-row">${ROWS[2].items.map(id=>{const t=T[id];return `<div class="ph-c po"><div class="a">${art(t.p,t.a,112,168,t.seed)}</div><b>${t.t}</b><span>${t.seasons.length} season${t.seasons.length>1?'s':''}</span></div>`}).join('')}</div>
+  </div>
+  <nav class="ph-tabs">${['Home','Movies','Shows','Search','Downloads'].map((t,i)=>`<button class="${i===0?'cur':''}"><i></i>${t}</button>`).join('')}</nav>
+  <div class="ph-veil" data-close></div>
+  <div class="ph-sheet" role="dialog" aria-label="Profile"><div class="ph-st"><span class="fg"></span><div><b>Ada</b><span>Night · Full colour · Full motion</span></div></div><div class="ph-pf"></div>
+   <div class="ph-sb2">${[['Switch profile','Ben, Cleo'],['Discover','Requests'],['Settings',''],['Download quality','Original']].map(([a,b])=>`<button data-close>${a}<span>${b}</span></button>`).join('')}</div></div>`;
+}
+function phShow(){const o=T.harbour;
+  return `<div class="ph-sb"><span>9:47</span><span>●●● ▮</span></div><div class="ph-sc" id="ph2sc">
+  <div class="ph-back"><button>‹ Shows</button><span>Programme</span></div>
+  <div class="ph-tb"><div class="eb">SERIES · 2019–2023</div><div class="tt">The Harbour Hour</div></div>
+  <div class="ph-fx">3 seasons · Rated 12 · 4K · about 47 min an episode</div>
+  <div class="ph-art">${art(o.p,o.a,358,200,o.seed)}</div>
+  <button class="ph-pri">${priLabel(o)}</button>
+  <div class="ph-sec"><button><i></i>Mark as watched</button><button><i></i>Add to favourites</button></div>
+  <div class="ph-chips" id="ph2chips"><button>Season 1</button><button>Season 2</button><button class="pr">Season 3</button><em>EPISODES</em><button class="pr" data-r="0">1–10</button><button data-r="10">11–20</button><button data-r="20">21–22</button></div>
+  <div class="ph-rohd">Running order<span>22 episodes · 1 started</span></div>
+  <div class="ph-ro" id="ph2ro">${EPN[2].map((n,e)=>{const st=epState(o,2,e);return `<div class="ph-ep"><span class="n">${String(e+1).padStart(2,'0')}</span><b>${n}</b><span>${o.run+((e*7+2)%5)-2} min</span><i class="${st.w?'on':''}"></i>${st.p?`<span class="pgb"><s style="width:${st.p*100}%"></s></span>`:''}</div>`}).join('')}</div>
+  </div>
+  <nav class="ph-tabs">${['Home','Movies','Shows','Search','Downloads'].map((t,i)=>`<button class="${i===2?'cur':''}"><i></i>${t}</button>`).join('')}</nav>`;
+}
+const ph1=$('#ph1'),ph2=$('#ph2');ph1.innerHTML=phHome();ph2.innerHTML=phShow();
+ph1.querySelector('[data-sheet]').addEventListener('click',()=>ph1.classList.add('sheet'));
+ph1.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>ph1.classList.remove('sheet')));
+ph2.querySelectorAll('#ph2chips [data-r]').forEach(b=>b.addEventListener('click',()=>{const r=+b.dataset.r;ph2.querySelectorAll('#ph2chips [data-r]').forEach(x=>x.classList.toggle('pr',x===b));const ro=ph2.querySelector('#ph2ro');ro.scrollTo({top:ro.children[r].offsetTop-ro.offsetTop,behavior:'smooth'})}));
+
+/* ---------- boot ---------- */
+buildTickets();renderTickets();buildNav();buildRows();buildOffline();renderOffline();renderHome();
+window.addEventListener('resize',()=>{if(S.scr==='home')renderHome();if(S.scr==='film')renderFilm();if(S.scr==='series')renderSeries()});
+})();
+</script>
+</body>
+</html>
