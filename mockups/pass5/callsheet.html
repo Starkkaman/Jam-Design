@@ -1,0 +1,1431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Callsheet Day Sheet</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Callsheet pass 5: the whole app as one printed sheet. Pass 4's call sheet (running order, gap cues, roster,
+   THEN row, clash bracket, day strip, footnotes, sign-off) carried into Setup, Know me, People, Projects, Ask and
+   voice. Shared language: Jost + Plex Mono, indicator windows, state words, one orange, red alert key, walnut.
+   Sample data only (Sam, Co. A/B, example.com addresses, 07700 900xxx drama numbers). */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5a5d5c;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a3a5a1;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a3a5a1;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding:32px 16px 64px;display:grid;gap:30px}
+@media (min-width:700px){.wrap{padding-inline:28px}}
+.eyebrow{font:500 13px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1.pt{font:600 clamp(28px,4vw,40px)/1.1 var(--f);margin:6px 0 10px}
+h2.ps{font:600 22px var(--f);margin:0}
+.wrap p{margin:0;max-width:80ch}
+.muted{color:var(--muted)}
+ul.lst{margin:0;padding-left:20px;max-width:92ch;display:grid;gap:6px}
+.ctrls{display:flex;gap:12px 22px;flex-wrap:wrap;align-items:center}
+.ctrls>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line);flex-wrap:wrap}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 13px;border-radius:9px;cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111213}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111213}}
+.flows{display:flex;gap:6px;flex-wrap:wrap}
+.flows button{font:500 14px var(--f);border:1px solid var(--line);background:var(--chip);color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer;min-height:40px;text-align:left}
+.flows button[aria-pressed="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.flows button.nw::after{content:" · new";color:var(--muted);font:500 13px var(--mono)}
+.stepbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--chip)}
+.stepbar .num{display:flex;gap:6px;flex-wrap:wrap}
+.stepbar .num button{width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--fg);font:500 14px var(--mono);cursor:pointer}
+.stepbar .num button[aria-pressed="true"]{background:#1d1c1a;border-color:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .stepbar .num button[aria-pressed="true"]{background:#e9e7e2;color:#111213}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stepbar .num button[aria-pressed="true"]{background:#e9e7e2;color:#111213}}
+.stepbar .sd{flex:1 1 280px;min-width:0}
+.stepbar .sd b{font-weight:600}
+.pbtn{font:500 14px var(--f);border:1px solid var(--line);background:transparent;color:var(--fg);padding:8px 14px;border-radius:9px;cursor:pointer;min-height:40px}
+.stage{display:grid;gap:22px;align-items:start}
+@media (min-width:1100px){.stage{grid-template-columns:minmax(0,1fr) 340px}}
+figure{margin:0;display:grid;gap:8px;min-width:0;align-content:start}
+figcaption{font-size:14px;color:var(--muted)}
+.frame{position:relative;width:100%;border-radius:14px;background:#0b0c0e;padding:8px;box-shadow:0 18px 44px #0000004a}
+.frame.ph{border-radius:40px;padding:10px;max-width:400px;justify-self:center}
+.screen{position:relative;overflow:hidden;border-radius:7px;outline:none}
+.frame.ph .screen{border-radius:31px}
+.screen:focus-visible{box-shadow:0 0 0 3px #ec7c22}
+.scaler{position:absolute;top:0;left:0;transform-origin:0 0}
+.gal{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.gald{display:grid;gap:22px}
+@media (min-width:1100px){.gald{grid-template-columns:1fr 1fr}}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th,.tbl td{text-align:left;vertical-align:top;padding:9px 10px;border-top:1px solid var(--line)}
+.tbl th{font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tblw{overflow-x:auto;max-width:100%}
+.elist{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.elist div{border-top:2px solid var(--fg);padding-top:10px}
+.elist b{display:block;font-weight:600;margin-bottom:4px}
+
+/* ============ THE APP (Callsheet sheet) ============ */
+.app{--sheet:#f6f3ec;--ink:#19202e;--ink2:#343b4a;--dim:#5b606d;--rule:#d6cfbf;--hair:#e7e1d4;--shade:#ece6d8;
+  --walnut:#6b4428;--orange:#ec7c22;--on-orange:#1a1206;--alert:#ff5a48;--on-alert:#1c0804;--alert-ink:#b3261b;
+  --warn:#f2c14e;--warn-ink:#7a5300;--warn-line:#a87a12;--win:#151413;--lit:#f3e6c8;--veil:#10141d80;--trk:.16em;
+  position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--sheet);color:var(--ink);
+  font:400 16px/1.45 var(--f);-webkit-font-smoothing:antialiased}
+.app.night{--sheet:#10141d;--ink:#ece5d3;--ink2:#d2cbb9;--dim:#9f9a8b;--rule:#2a3244;--hair:#1c2230;--shade:#181f2c;
+  --orange:#f08a2c;--alert-ink:#ff8a7a;--warn-line:#f2c14e;--warn-ink:#f2c14e;--win:#06080c;--veil:#000000a0}
+:where(.app) :where(button,input){font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+.app .mono{font-family:var(--mono)}
+.app .dim{color:var(--dim)}
+.trim{height:6px;background:var(--walnut);flex:none}
+/* keys */
+.app .k{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:36px;padding:0 14px;border:1.5px solid var(--ink);
+  border-radius:5px;font:500 15px/1.15 var(--f);color:var(--ink);white-space:nowrap;transition:transform .15s cubic-bezier(.16,1,.3,1)}
+.app .k:active{transform:translateY(2px)}
+.app .k.go{background:var(--orange);border-color:var(--orange);color:var(--on-orange)}
+.app .k.red{background:var(--alert);border-color:var(--alert);color:var(--on-alert)}
+.app .k.dark{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.app.night .k.dark{background:var(--win);border-color:var(--ink);color:var(--ink)}
+.app .k.q{border-color:transparent;padding:0 8px;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px;text-decoration-color:var(--dim)}
+.app .k.q0{padding-left:0}
+.app .k[disabled]{opacity:.5;cursor:not-allowed}
+.kh{font:500 12px/1 var(--mono);border:1px solid currentColor;border-radius:3px;padding:2px 4px;opacity:.7}
+.phone .kh{display:none}
+.phone .k{min-height:44px;padding:0 16px;font-size:16px}
+.phone .k.q{padding:0 10px}
+.phone .k.q0{padding-left:0}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.veiled .pg .k.go{background:transparent;border-color:var(--ink);color:var(--ink)}
+/* windows. Night: dark recess, lit = flat cream in a thin dark rim.
+   Day: the unlit groove sits at the bezel's outer edge, so a window never changes size when it lights (IN2).
+   Day on the light sheet (conflict 3, form B): unlit = a 1 px groove in the paper; lit = flat cream in a 3 px dark bezel,
+   so a lit window is a dark mass with light in it and an unlit one is an outline. The word beside it carries the state too. */
+.led{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--win);flex:none;vertical-align:middle}
+.led.on{background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.led.al{background:var(--alert);box-shadow:0 0 0 2px var(--win),0 0 0 3.5px var(--alert)}
+.led.wn{background:var(--warn);box-shadow:0 0 0 2px var(--win)}
+.led.off{background:transparent!important;box-shadow:none!important;border:1.5px dashed var(--dim)}
+.slot{display:inline-block;width:18px;height:6px;border-radius:3px;background:var(--win);flex:none;vertical-align:middle}
+.slot.on{background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.sq{display:inline-block;width:11px;height:11px;border-radius:2px;background:var(--win);flex:none}
+.sq.on{background:var(--lit);box-shadow:0 0 0 2px var(--win)}
+.app.day .led:not(.al):not(.wn):not(.on):not(.off),.app.day .sq:not(.on),.app.day .slot:not(.on){background:transparent;box-shadow:none;outline:1px solid var(--dim);outline-offset:2px}
+.app.day .sq.on,.app.day .slot.on,.app.day .led.on{box-shadow:0 0 0 3px var(--win)}
+/* Night: the recess is 1.1:1 on the navy sheet, so unlit windows get a 1 px rim (3.0:1) */
+.app.night .led:not(.al):not(.wn):not(.on):not(.off),.app.night .sq:not(.on),.app.night .slot:not(.on),.app.night .lstrip i:not(.cur):not(.past):not(.gap){box-shadow:inset 0 0 0 1px #5c6273}
+/* masthead */
+.mast{height:62px;flex:none;display:flex;align-items:stretch;gap:36px;padding:0 56px;border-bottom:1px solid var(--rule)}
+.wm{display:flex;align-items:center;font:600 19px var(--f);letter-spacing:.01em}
+.nav{display:flex;gap:6px}
+.nav button,.tools .tl{position:relative;padding:0 12px;font:500 15px var(--f);color:var(--dim);display:flex;align-items:center}
+.nav button[aria-current="page"],.tools .tl[aria-current="page"]{color:var(--ink)}
+.nav button[aria-current="page"]::after,.tools .tl[aria-current="page"]::after{content:"";position:absolute;left:50%;bottom:9px;width:18px;height:5px;margin-left:-9px;border-radius:3px;background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.app.day .nav button[aria-current="page"]::after,.app.day .tools .tl[aria-current="page"]::after{box-shadow:0 0 0 3px var(--win)}
+.tools{margin-left:auto;display:flex;align-items:stretch;gap:4px}
+.tools .k{align-self:center}
+.pg{flex:1;overflow:auto;min-height:0}
+.desk .pg{padding:22px 56px 44px}
+.phone .pg{padding:14px 16px 28px}
+.dline{display:flex;justify-content:space-between;align-items:center;gap:12px;font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);min-height:36px}
+.phone .dline{min-height:28px}
+.hl{font:500 46px/1.05 var(--f);letter-spacing:-.012em;margin:4px 0 0}
+.phone .hl{font-size:31px;margin:6px 0 8px}
+.lede{font:400 21px/1.42 var(--f);color:var(--ink2);max-width:34em;margin:0}
+.phone .lede{font-size:18px}
+.fn{font:500 12px/1 var(--mono);color:var(--dim);vertical-align:super;margin-left:2px;position:relative}
+.phone button.fn{color:var(--ink)}
+.phone button.fn::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px}
+.fnx{display:flex;gap:10px;align-items:center;margin-top:8px;padding:4px 0 4px 12px;border-left:2px solid var(--rule);font:400 14px var(--mono);color:var(--dim)}
+.fnx .k{margin-left:auto}
+.top{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:end}
+.cols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;margin-top:22px;border-top:2px solid var(--ink);padding-top:14px}
+.sh{display:flex;align-items:baseline;gap:10px;font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;margin:0 0 8px}
+.sh .n{color:var(--dim)}
+.sh .r{margin-left:auto;letter-spacing:0;text-transform:none}
+.blk{margin-top:26px}
+.phone .blk{margin-top:22px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:26px;border-top:1px solid var(--rule);padding-top:14px}
+/* offline bar */
+.offbar{flex:none;display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 56px;border-bottom:1.5px dashed var(--dim);background:var(--shade)}
+.phone .offbar{padding:10px 16px}
+.offbar .t{flex:1 1 220px;min-width:0}
+.offbar b{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;display:block}
+/* cue (alert / clash) */
+.cue{border-top:2px solid var(--ink);padding-top:10px;margin-bottom:18px}
+.cue.al{border-top-color:var(--alert)}
+.cue.wn{border-top-color:var(--warn-line)}
+.cue .lab{display:flex;align-items:center;gap:10px;font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;flex-wrap:wrap}
+.cue.al .lab{color:var(--alert-ink)}
+.cue.wn .lab{color:var(--warn-ink)}
+.cue .say{font:400 21px/1.35 var(--f);margin:6px 0 12px;max-width:30em}
+.phone .cue .say{font-size:19px}
+/* roster */
+.ros{border-top:1px solid var(--rule)}
+.rrow{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:2px 14px;padding:10px 0;border-bottom:1px solid var(--rule);align-items:start;cursor:pointer;width:100%}
+.phone .rrow{grid-template-columns:34px minmax(0,1fr) auto;gap:4px 10px;min-height:44px;padding:12px 0}
+.rrow:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.rrow.sel{box-shadow:inset 3px 0 0 var(--ink)}
+.idb{width:30px;height:30px;border:1.5px solid var(--ink);display:grid;place-items:center;font:500 13px var(--mono);border-radius:2px;margin-top:1px}
+.idb.x{border-style:dashed;color:var(--dim);border-color:var(--dim)}
+.rh{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px}
+.rn{font:600 17px/1.3 var(--f)}
+.rn .dim{font-weight:400}
+.ra{font:400 16px/1.35 var(--f);margin-top:2px}
+.rw{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim)}
+.phone .rw{margin-top:5px}
+.rw .vip{color:var(--ink)}
+.rage{font:400 13px var(--mono);color:var(--dim);padding-top:3px;white-space:nowrap}
+.then{font:600 13px var(--mono);letter-spacing:var(--trk);color:var(--dim);display:block;margin-bottom:2px}
+.rx{grid-column:2 / -1}
+.draft{margin:8px 0 10px;padding:2px 0 2px 14px;border-left:2px solid var(--ink);font:400 16px/1.45 var(--f);color:var(--ink2);max-width:38em}
+.copied{font:500 13px var(--mono);color:var(--dim);display:inline-flex;align-items:center;gap:8px;letter-spacing:.06em}
+.morel{display:block;padding:10px 0;font:500 15px var(--f);min-height:44px}
+.morel:hover{text-decoration:underline}
+/* struck line: done, later or moved stays in place, crossed through, with Undo */
+.strk{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--rule);color:var(--dim);font:400 15px var(--f)}
+.strk .w{position:relative;padding-left:54px}
+.phone .strk .w{padding-left:44px}
+.strk .w::after{content:"";position:absolute;left:54px;right:0;top:54%;height:1.5px;background:var(--dim);transform-origin:0 50%;animation:draw .25s cubic-bezier(.16,1,.3,1) both}
+.phone .strk .w::after{left:44px}
+.strk .k{margin-left:auto}
+/* running order */
+.ro{position:relative}
+.ro::before{content:"";position:absolute;left:79px;top:6px;bottom:6px;width:1px;background:var(--rule)}
+.phone .ro::before{left:65px}
+.orow{display:grid;grid-template-columns:64px 30px minmax(0,1fr);align-items:start;position:relative;width:100%}
+.phone .orow{grid-template-columns:52px 28px minmax(0,1fr)}
+[role=button].orow,button.orow{min-height:44px;cursor:pointer}
+[role=button].orow:hover .tt,button.orow:hover .tt{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.ot{font:500 15px var(--mono);padding-top:8px}
+.orail{position:relative;align-self:stretch}
+.tick{position:absolute;left:9px;top:18px;width:12px;height:1.5px;background:var(--ink)}
+.phone .tick{left:8px}
+.ob{padding:7px 0 10px}
+.ob .tt{font:500 18px/1.3 var(--f)}
+.ob .mm{font:400 14px/1.4 var(--f);color:var(--dim)}
+.ob .mm .mono{font-size:13px}
+.orow.past{color:var(--dim)}
+.orow.past .tick{background:var(--dim)}
+.orow.past .tt{font-weight:400}
+.onnow{display:inline-flex;gap:8px;align-items:center;font:500 13px var(--mono);letter-spacing:var(--trk);margin-left:10px;color:var(--ink)}
+.orow.now .ot{font-weight:600;color:var(--ink)}
+.orow.now .ob{display:flex;align-items:center;gap:10px;padding:9px 0}
+.orow.now .ln{flex:1;height:1.5px;background:var(--ink)}
+.app.night .orow.now .ln{background:var(--lit)}
+.orow.now .orail .slot{position:absolute;left:6px;top:14px}
+.phone .orow.now .orail .slot{left:5px}
+.orow.now .lbl{font:600 13px var(--mono);letter-spacing:var(--trk)}
+.orow.gap .orail::before{content:"";position:absolute;left:14px;top:8px;bottom:8px;border-left:1.5px dashed var(--dim);background:var(--sheet);width:3px}
+.phone .orow.gap .orail::before{left:13px}
+.orow.gap .ob{padding:8px 0 12px}
+.gl{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim)}
+.gf{font:400 15px/1.4 var(--f);margin:3px 0 2px}
+.orow.fold .ob{font:400 15px var(--f);color:var(--dim);padding:8px 0 9px}
+.orow.end .gl{padding:8px 0}
+.clash .orail::after{content:"";position:absolute;left:8px;top:12px;bottom:12px;width:9px;border:3px solid var(--warn-line);border-right:0}
+.clash .ch{display:flex;align-items:center;gap:9px;font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--warn-ink);padding:8px 0 2px;flex-wrap:wrap}
+.clash .ce{padding:4px 0 2px}
+/* day strip (phone) */
+.strip{display:block;width:100%;padding:2px 0 4px}
+.strip .labs{position:relative;height:20px;font:500 13px var(--f);white-space:nowrap}
+.strip .labs span{position:absolute;top:0}
+.strip .labs .w{color:var(--warn-ink)}
+.strip .trk{position:relative;height:26px;margin-top:14px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.strip .bl{position:absolute;top:4px;bottom:4px;background:var(--ink);border-radius:1px}
+.strip .bl.past{background:transparent;border:1.5px solid var(--dim)}
+.strip .bl.c1{bottom:50%;margin-bottom:1px}
+.strip .bl.c2{top:50%;margin-top:1px}
+.strip .cb{position:absolute;bottom:-5px;height:3px;background:var(--warn-line)}
+.strip .nd{position:absolute;top:-7px;bottom:-7px;width:2px;margin-left:-1px;background:var(--ink)}
+.strip .nd .slot{position:absolute;top:-6px;left:-8px}
+.strip .hrs{position:relative;height:18px;font:400 12px var(--mono);color:var(--dim);margin-top:5px}
+.strip .hrs span{position:absolute;transform:translateX(-50%)}
+/* notes + coming up */
+.nl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;padding:8px 0;border-bottom:1px solid var(--hair);font:400 15px/1.4 var(--f)}
+.nl .w{padding-top:5px}
+.nl .seen{font:500 13px var(--mono);letter-spacing:.06em;color:var(--dim);display:flex;align-items:center;gap:4px;margin-top:2px}
+.adv{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:7px 0;border-bottom:1px solid var(--hair);font:400 15px var(--f)}
+.adv .d{font:500 13px var(--mono);letter-spacing:.06em;padding-top:2px}
+.foot{margin-top:24px;padding-top:12px;border-top:1px solid var(--rule);display:grid;gap:8px}
+.srcs{display:grid;gap:2px;font:400 13px var(--mono);color:var(--dim)}
+.prom{font:500 15px var(--f)}
+/* sign-off at the end of the day */
+.wrapo{padding:4px 0 4px}
+.wrapo .lab{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim)}
+.tally{display:flex;gap:34px;flex-wrap:wrap;margin-top:10px}
+.tally div{display:grid}
+.tally b{font:300 44px/1 var(--f)}
+.phone .tally b{font-size:36px}
+.tally span{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);margin-top:6px}
+.wrule{margin:20px 0 14px;height:8px;border-top:3px solid var(--walnut);border-bottom:1px solid var(--walnut);transform-origin:0 50%;animation:draw .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.wrapo .tmr{font:400 17px/1.4 var(--f)}
+/* tab bar (phone) */
+.tabs{flex:none;height:64px;display:flex;border-top:1px solid var(--rule);background:var(--sheet)}
+.tabs button{flex:1;display:grid;place-items:center;font:500 13px var(--f);color:var(--dim);position:relative}
+.tabs button[aria-current="page"]{color:var(--ink)}
+.tabs button[aria-current="page"]::before{content:"";position:absolute;top:9px;left:50%;width:18px;height:5px;margin-left:-9px;border-radius:3px;background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.app.day .tabs button[aria-current="page"]::before{box-shadow:0 0 0 3px var(--win)}
+.phead{height:54px;flex:none;display:flex;align-items:center;padding:0 6px 0 16px;border-bottom:1px solid var(--rule)}
+.phead .wm{font-size:18px}
+.phead .tools{align-items:center}
+.phead .tools .k{min-width:44px;padding:0 8px}
+.back{display:inline-flex;align-items:center;gap:6px;font:500 15px var(--f);min-height:44px}
+/* sub row (Ask · People · Know me; Projects views) */
+.subnav{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 4px}
+.subnav button{position:relative;min-height:40px;padding:0 10px 6px;font:500 15px var(--f);color:var(--dim)}
+.subnav button:first-child{padding-left:0}
+.phone .subnav button{min-height:44px}
+.subnav button[aria-current="true"]{color:var(--ink)}
+.subnav button[aria-current="true"]::after{content:"";position:absolute;left:50%;bottom:4px;width:14px;height:4px;margin-left:-7px;border-radius:2px;background:var(--lit);box-shadow:0 0 0 1.5px var(--win)}
+.subnav button:first-child[aria-current="true"]::after{margin-left:-12px}
+.app.day .subnav button[aria-current="true"]::after{box-shadow:0 0 0 3px var(--win)}
+/* lock screen */
+.lock{position:absolute;inset:0;background:#0b0d12;color:#ece5d3;display:flex;flex-direction:column;align-items:center;padding:70px 16px 30px}
+.lock .tm{font:300 78px/1 var(--f)}
+.lock .dt{font:400 18px var(--f);margin-top:6px;opacity:.85}
+.lock .nt{margin-top:46px;width:100%;background:#1b1f29;border-radius:16px;padding:14px 16px;cursor:pointer}
+.lock .nt .h{display:flex;justify-content:space-between;font:500 13px var(--mono);letter-spacing:.12em;opacity:.8}
+.lock .nt b{display:block;font:600 16px var(--f);margin:6px 0 2px}
+.lock .nt p{margin:0;font:400 15px/1.4 var(--f)}
+.lock .na{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:8px}
+.lock .na button{background:#1b1f29;border-radius:12px;min-height:48px;font:500 15px var(--f);color:#ece5d3;text-align:center}
+.lock .hint{margin-top:auto;font:400 13px var(--f);opacity:.65}
+/* one at a time, steps */
+.oat{max-width:760px;margin:0 auto}
+.desk .oat.wide{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:56px}
+.oatp{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 20px}
+.oatp .idb{cursor:default}
+.oatp .idb.cur{border-width:3px}
+.oatp .idb.dn{border-color:var(--dim);color:var(--dim);text-decoration:line-through}
+.oat .nm{font:500 34px/1.1 var(--f);margin:2px 0 6px}
+.phone .oat .nm{font-size:27px}
+.oat .ask{font:400 21px/1.35 var(--f);margin:12px 0 6px}
+.oat .said{font:400 15px/1.45 var(--f);color:var(--dim)}
+.ta{width:100%;min-height:96px;margin:14px 0;border:0;border-left:2px solid var(--ink);background:var(--shade);color:var(--ink);font:400 16px/1.5 var(--f);padding:10px 12px;resize:vertical;border-radius:0 4px 4px 0}
+.ta:focus{outline:2px solid var(--ink);outline-offset:1px}
+.swh{font:500 13px var(--mono);color:var(--dim);margin-top:14px;letter-spacing:.04em}
+.aside{border-left:1px solid var(--rule);padding-left:22px;font:400 15px/1.45 var(--f);color:var(--dim)}
+.aside b{display:block;font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--ink);margin-bottom:6px}
+/* reply page */
+.slip .nm{font:500 30px/1.15 var(--f);margin:4px 0 4px}
+.phone .slip .nm{font-size:26px}
+.slip h4,.h4{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);margin:18px 0 6px}
+.slip .ask{font:400 19px/1.4 var(--f);margin:0}
+.slip .said{font:400 16px/1.45 var(--f);color:var(--ink2);margin:0}
+.rep{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:48px}
+.subh{font:500 34px/1.1 var(--f);margin:4px 0 6px}
+.phone .subh{font-size:27px}
+.intro{font:400 18px/1.45 var(--f);color:var(--ink2);max-width:36em;margin:0 0 6px}
+.phone .intro{font-size:16px}
+/* voice: the reading rail */
+.vo{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--sheet);z-index:4}
+.vo .top{display:flex;align-items:center;gap:16px;padding:12px 56px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.phone .vo .top{padding:8px 8px 8px 16px;gap:8px}
+.vo .body{flex:1;display:grid;grid-template-columns:330px minmax(0,1fr);gap:56px;padding:0 56px;min-height:0}
+.phone .vo .body{display:flex;flex-direction:column;padding:0 16px;gap:0}
+.rail{border-right:1px solid var(--rule);padding:22px 24px 22px 0;overflow:auto}
+.rail .sec{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);margin:14px 0 4px}
+.rail .sec:first-child{margin-top:0}
+.rail .sec.on{color:var(--ink)}
+.rl{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:start;min-height:34px;font:400 15px/1.35 var(--f);color:var(--dim);width:100%;padding:5px 0;position:relative}
+.rl::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:1px;background:var(--rule)}
+.rl .tick{left:8px;top:14px;width:12px}
+.rl.past{color:var(--dim)}
+.rl.past .tick{background:var(--dim)}
+.rl.now{color:var(--ink);font-weight:500}
+.rl.now .slot{position:absolute;left:5px;top:11px}
+.rl>span:last-child{grid-column:2}
+.lstrip{display:flex;gap:3px;align-items:center;padding:14px 0 4px}
+.lstrip i{flex:1;height:6px;border-radius:3px;background:var(--win)}
+.app.day .lstrip i{background:transparent;box-shadow:inset 0 0 0 1px var(--dim)}
+.lstrip i.past{background:var(--dim)!important;box-shadow:none!important}
+.lstrip i.cur{background:var(--lit)!important;box-shadow:0 0 0 1.5px var(--win)!important}
+.app.day .lstrip i.cur{box-shadow:0 0 0 3px var(--win)!important}
+.lstrip i.gap{flex:0 0 8px;background:transparent!important;box-shadow:none!important}
+.lsl{display:flex;justify-content:space-between;font:500 13px var(--mono);letter-spacing:var(--trk);color:var(--dim)}
+.lsl .on{color:var(--ink)}
+.vo .mid{display:flex;flex-direction:column;justify-content:center;max-width:900px;min-height:0}
+.phone .vo .mid{flex:1}
+.vo .where{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);margin-bottom:14px}
+.vo .prev{font:400 20px/1.4 var(--f);color:var(--dim);margin-bottom:22px}
+.phone .vo .prev{font-size:16px;margin-bottom:16px}
+.vo .cur{font:400 38px/1.3 var(--f)}
+.phone .vo .cur{font-size:26px}
+.vo .fill{height:4px;background:var(--hair);margin-top:26px;border-radius:2px;overflow:hidden;max-width:520px}
+.vo .fill i{display:block;height:100%;background:var(--ink);transform-origin:0 50%;animation:fillv 5s linear both}
+.vo.paused .fill i{animation-play-state:paused}
+@keyframes fillv{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.vo .bot{padding:16px 56px 24px;border-top:1px solid var(--rule);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.phone .vo .bot{padding:14px 16px 22px;justify-content:center}
+.vo .bot .k{min-height:60px;min-width:110px;font-size:17px}
+.phone .vo .bot .k{min-width:96px}
+.vo .say{font:500 13px var(--mono);color:var(--dim);margin-left:auto}
+.phone .vo .say{margin:0;width:100%;text-align:center}
+.heard{font:500 15px var(--f);margin-top:18px;display:flex;gap:10px;align-items:center}
+/* overlays: centred on desktop, bottom sheet on phone (CT12) */
+.veil{position:absolute;inset:0;background:var(--veil);z-index:5}
+.pop{position:absolute;z-index:6;background:var(--sheet);border-top:6px solid var(--walnut);box-shadow:0 24px 60px #0006;border-radius:4px}
+.desk .pop{left:50%;top:84px;width:640px;margin-left:-320px}
+.phone .pop{left:0;right:0;bottom:0;border-radius:14px 14px 0 0;max-height:86%;overflow:auto}
+.pop .ph{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--rule)}
+.pop .ph b{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase}
+.pop .ph .k{margin-left:auto}
+.pop .pb{padding:14px 18px 20px}
+.pop .pb p{margin:0 0 10px;font:400 17px/1.45 var(--f)}
+.fin{width:100%;font:400 20px var(--f);background:transparent;border:0;border-bottom:2px solid var(--ink);color:var(--ink);padding:6px 0;outline:none}
+.fg{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);margin:14px 0 4px}
+.fo{display:flex;justify-content:space-between;gap:10px;width:100%;padding:10px 8px;border-radius:3px;font:400 16px var(--f);min-height:44px;align-items:center}
+.fo.top{background:var(--shade);box-shadow:inset 3px 0 0 var(--ink)}
+.fo .mono{font-size:13px;color:var(--dim)}
+.opt{display:flex;gap:14px;align-items:flex-start;width:100%;padding:11px 8px;border-bottom:1px solid var(--hair);min-height:44px;border-radius:3px}
+.opt .sq{margin-top:6px}
+.opt small{display:block;font:400 14px var(--f);color:var(--dim)}
+.opt.on{background:var(--shade);box-shadow:inset 0 2px 0 var(--rule)}
+.opt.on>span:last-child{font-weight:500}
+.opt[disabled]{opacity:.55;cursor:not-allowed}
+.kl{display:grid;grid-template-columns:72px 1fr;gap:6px 10px;font:400 15px var(--f)}
+.kl .mono{font-size:13px}
+/* mockup stand-in notes (not product UI: the product changes things in place) */
+.mock{position:absolute;z-index:7;left:50%;transform:translateX(-50%);bottom:26px;background:var(--sheet);color:var(--ink);border:1.5px dashed var(--dim);display:flex;align-items:center;gap:8px;padding:4px 4px 4px 14px;border-radius:5px;width:max-content;max-width:calc(100% - 24px);font:400 15px/1.35 var(--f)}
+.phone .mock{bottom:78px;width:calc(100% - 24px)}
+.mock b{font:500 12px var(--mono);letter-spacing:var(--trk);color:var(--dim)}
+.mock span{flex:1;min-width:0;padding:6px 0}
+.mock .k{min-height:44px;border-color:transparent}
+/* Ask: a transcript with sidenotes */
+.ask{display:grid;grid-template-columns:minmax(0,680px) 260px;gap:0 48px}
+.phone .ask{display:block}
+.qa{display:contents}
+.qa .q,.qa .a,.qa .steps,.qa .acts{grid-column:1}
+.qtag{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);margin-top:22px;grid-column:1;display:flex;gap:10px;align-items:center}
+.qtext{font:500 21px/1.35 var(--f);grid-column:1;margin:4px 0 8px}
+.phone .qtext{font-size:19px}
+.atext{font:400 19px/1.5 var(--f);grid-column:1;margin:0;max-width:34em}
+.phone .atext{font-size:17px}
+.side{grid-column:2;align-self:start;border-left:1px solid var(--rule);padding-left:14px;font:400 13px/1.45 var(--mono);color:var(--dim);display:grid;gap:6px;margin-top:6px}
+.phone .side{border-left:0;padding:0;margin-top:10px}
+.steps{grid-column:1;font:400 14px var(--f);color:var(--dim);margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.reading{display:flex;gap:10px;align-items:center;font:500 15px var(--f);grid-column:1;margin-top:10px}
+.remember{grid-column:1;margin-top:16px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);padding:10px 0 12px}
+.remember .lab{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim)}
+.remember p{margin:4px 0 8px;font:400 17px/1.4 var(--f)}
+.compose{display:flex;gap:10px;align-items:center;border-top:2px solid var(--ink);padding:10px 0 0;margin-top:24px;grid-column:1}
+.compose input{flex:1;min-width:0;font:400 19px var(--f);border-bottom:1px solid var(--rule);padding:8px 0;outline:none;cursor:text}
+.compose input:focus{border-bottom-color:var(--ink)}
+.compose input::placeholder{color:var(--dim)}
+.earlier{grid-column:1;font:400 15px var(--f);color:var(--dim);padding:8px 0;border-bottom:1px solid var(--hair);display:flex;gap:10px;align-items:center;min-height:44px;width:100%}
+.sugg{display:grid;gap:2px;grid-column:1}
+.sugg button{text-align:left;padding:10px 0;border-bottom:1px solid var(--hair);font:400 17px var(--f);min-height:44px}
+/* People: the pair with a match gutter */
+.pair{border-top:2px solid var(--ink);padding-top:10px;margin:10px 0 22px}
+.pair .lab{display:flex;gap:10px;align-items:center;font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase}
+.pgrid{display:grid;grid-template-columns:96px minmax(0,1fr) 40px minmax(0,1fr);margin:12px 0 8px;font:400 16px/1.35 var(--f)}
+.phone .pgrid{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);font-size:15px}
+.pgrid>div{padding:7px 0;border-bottom:1px solid var(--hair);min-width:0;overflow-wrap:anywhere}
+.pgrid .pl{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);padding-top:9px}
+.phone .pgrid .pl{grid-column:1 / -1;border-bottom:0;padding:8px 0 0}
+.pgrid .gt{text-align:center;font:500 16px var(--mono);color:var(--dim)}
+.pgrid .gt.m{color:var(--ink);font-weight:600}
+.pgrid .nm2{font:600 18px var(--f)}
+.pgrid .hd{font:500 13px var(--mono);letter-spacing:var(--trk);color:var(--dim);border-bottom:1px solid var(--rule)}
+.pwhy{font:400 17px/1.4 var(--f);margin:6px 0 12px}
+.plist .prow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;padding:10px 0;border-bottom:1px solid var(--rule);width:100%;min-height:44px}
+.prow.sel{box-shadow:inset 3px 0 0 var(--ink);padding-left:12px}
+.prow b{font:600 17px var(--f)}
+.prow .w{font:400 15px var(--f);color:var(--dim)}
+.prow .ac{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;display:flex;gap:8px;align-items:center;justify-self:end;align-self:center;color:var(--dim)}
+.prow .ac.on{color:var(--ink)}
+.dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:0 16px}
+.phone .dl{grid-template-columns:1fr}
+.dl>div{padding:9px 0;border-bottom:1px solid var(--hair);font:400 16px/1.4 var(--f);min-width:0;overflow-wrap:anywhere}
+.dl .l{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);padding-top:11px}
+.phone .dl .l{border-bottom:0;padding:10px 0 0}
+/* Know me */
+.steps3 .srow{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start}
+.phone .steps3 .srow{grid-template-columns:34px minmax(0,1fr);}
+.phone .steps3 .srow .keys{grid-column:2}
+.srow b{font:600 17px var(--f);display:block}
+.srow .m{font:400 15px var(--f);color:var(--dim)}
+.idb.dn{border-color:var(--dim);color:var(--dim)}
+.facts{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:0 40px}
+.phone .facts{display:block}
+.fact{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--rule);grid-column:1;align-items:start}
+.fact .t{font:400 17px/1.4 var(--f)}
+.fact .s{grid-column:2;font:400 13px var(--mono);color:var(--dim)}
+.fact .nn{font:500 13px var(--mono);color:var(--dim);padding-top:3px}
+.fact .chk{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--ink);display:inline-flex;gap:6px;align-items:center;margin-left:8px}
+.bigfact{font:400 30px/1.3 var(--f);margin:8px 0 10px;max-width:24em}
+.phone .bigfact{font-size:24px}
+/* Projects */
+.prj{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--rule);width:100%;min-height:44px}
+.prj b{font:500 17px var(--f);display:block}
+.prj .st{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);display:flex;gap:8px;align-items:center;text-align:right}
+.prj .st.w{color:var(--warn-ink)}
+.prj.sugg{border-bottom-style:dashed}
+.prj.sugg b{font-weight:400}
+.track{position:relative;margin:18px 0 6px;padding-top:58px}
+.track .ln{position:relative;height:30px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.track .wk{position:absolute;top:0;bottom:0;border-left:1px solid var(--hair)}
+.track .wl{position:absolute;top:100%;margin-top:4px;font:400 12px var(--mono);color:var(--dim);transform:translateX(-50%);white-space:nowrap}
+.track .ms{position:absolute;top:6px;bottom:6px;width:3px;margin-left:-1.5px;background:var(--ink)}
+.track .ms.dn{background:var(--dim)}
+.track .ms.was{background:transparent;border-left:2px dashed var(--warn-line);width:0;margin-left:-1px}
+.track .mv{position:absolute;top:50%;height:0;border-top:2px solid var(--warn-line)}
+.track .mv::after{content:"";position:absolute;right:-1px;top:-6px;border:5px solid transparent;border-left:7px solid var(--warn-line);border-right:0}
+.track .lb{position:absolute;bottom:100%;margin-bottom:4px;font:400 14px/1.25 var(--f);white-space:nowrap}
+.track .lb.lo{bottom:auto;top:100%;margin:22px 0 0}
+.track .lb.w{color:var(--warn-ink);font-weight:500}
+.track .lb.dim{color:var(--dim)}
+.track .nd{position:absolute;top:-7px;bottom:-7px;width:2px;margin-left:-1px;background:var(--ink)}
+.track .nd .slot{position:absolute;top:-6px;left:-8px}
+.track.ph{padding-top:58px}
+.task{display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--hair);width:100%;min-height:44px;font:400 16px/1.4 var(--f)}
+.task .sq{margin-top:6px}
+.task.dn{color:var(--dim)}
+.task.dn .tx{text-decoration:line-through;text-decoration-thickness:1.5px}
+.task small{display:block;font:400 14px var(--f);color:var(--dim)}
+/* Setup: the form at the back of the sheet */
+.setg{display:grid;grid-template-columns:300px minmax(0,1fr);gap:56px}
+.sidx{border-top:2px solid var(--ink)}
+.sidx button{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:2px 12px;align-items:start;width:100%;padding:12px 0;border-bottom:1px solid var(--rule);min-height:44px;position:relative}
+.sidx .lt{font:600 15px var(--mono);padding-top:2px}
+.sidx b{font:500 17px var(--f);display:block}
+.sidx .s{font:400 14px var(--f);color:var(--dim)}
+.sidx .slot{margin-top:8px}
+.sidx .chev{font:400 18px var(--f);color:var(--dim);padding-top:2px}
+.form{border-top:2px solid var(--ink);padding-top:4px}
+.fr{display:grid;grid-template-columns:210px minmax(0,1fr) auto;gap:4px 18px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:start}
+.phone .fr{grid-template-columns:minmax(0,1fr) auto}
+.fr .fl{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);padding-top:3px}
+.phone .fr .fl{grid-column:1 / -1}
+.fr .fv{font:400 17px/1.4 var(--f);min-width:0;overflow-wrap:anywhere}
+.fr .fv small{display:block;font:400 14px/1.4 var(--f);color:var(--dim)}
+.fr .fx{align-self:center}
+.chs{display:flex;gap:4px 6px;flex-wrap:wrap}
+.chs .opt{width:auto;border:0;padding:8px 12px 8px 8px;align-items:center;gap:10px}
+.chs .opt .sq{margin-top:0}
+.ctl{position:relative}
+.ctl .orow{min-height:44px}
+.ctedit{padding:6px 0 14px}
+.ctin{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.ctin input{width:110px;font:500 22px var(--mono);border-bottom:2px solid var(--ink);padding:4px 0;outline:none;cursor:text}
+.ctmsg{font:400 14px var(--f);color:var(--dim)}
+.ctmsg.bad{color:var(--warn-ink)}
+.drw{border-bottom:1px solid var(--rule)}
+.drw>button{display:flex;justify-content:space-between;width:100%;padding:12px 0;min-height:44px;font:400 17px var(--f);align-items:center}
+.drw>button .mono{font-size:18px;color:var(--dim);width:24px;text-align:center}
+.drw .db{padding:0 0 14px;font:400 16px/1.45 var(--f);color:var(--ink2);max-width:36em}
+.findset{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--rule);padding:8px 0;margin:6px 0 14px;color:var(--dim);font:400 17px var(--f);min-height:44px}
+/* first run: the blank sheet */
+.blank .bs{border-top:2px solid var(--ink);margin-top:16px;padding-top:10px}
+.blank .bl{display:grid;grid-template-columns:40px minmax(0,1fr);gap:4px 14px;padding:10px 0;border-bottom:1px solid var(--rule);align-items:center}
+.blank .rec{height:14px;border-radius:2px;box-shadow:inset 0 0 0 1px var(--rule);background:var(--shade)}
+.blank .rec.s{width:60%}
+@media (prefers-reduced-motion:reduce){.wrule,.vo .fill i,.strk .w::after{animation:none}.app .k:active{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Jam design · pass 5 · Callsheet</div>
+  <h1 class="pt">Callsheet, pass 5: the whole app on one sheet</h1>
+  <p class="muted">Pass 4 printed Today as a call sheet: a running order down a time column, a numbered list of who needs you, footnoted sources and a sign-off. Pass 5 keeps that and prints the rest of the app the same way: Setup becomes a form, Ask a transcript with sidenotes, People a matched pair, Projects a slip track, Know me a list of facts with their sources, and voice a reading rail. It also fixes the pass 4 audit. All names, mail, numbers and events are made-up sample data.</p>
+</header>
+
+<section style="display:grid;gap:10px">
+  <h2 class="ps">What changed since pass 4</h2>
+  <ul class="lst">
+    <li><b>Day windows read without the rim.</b> On the light sheet an unlit window is a 1 px groove (an outline), and a lit window is flat cream in a 3 px dark bezel (a dark mass with light in it). The word beside it turns from dim to ink, and chosen options also press in. This is conflict 3's option B for light grounds, assumed pending Isaac.</li>
+    <li><b>The gap cue makes no time claim.</b> "About 6 min" is gone (H17). A free stretch prints only the calendar's own fact ("Free until 11:00 · 55 min") and offers Work through them.</li>
+    <li><b>Said once, live wins.</b> The summary is a snapshot. While a cue or a note on the same screen says the same thing, that sentence leaves the printed summary and its footnote number moves to the cue. Voice and the push still read the whole summary.</li>
+    <li><b>All five roster rows fit at 1440 × 900.</b> The headline and summary share one line on desktop, and desktop roster rows take two lines instead of three.</li>
+    <li><b>No "Sent 0".</b> The sign-off counts answered and for tomorrow, then says "Nothing was sent" in words. Its label no longer says "Wrap" (Isaac: "lets get rid of the cheeky production nods").</li>
+    <li><b>Undo happens where the change is.</b> Done, later and moved rows stay as one struck-through line with Undo. Pass 4's toasts are gone (LY16). The dashed "Mockup" notes stand in for things that happen outside the app, like opening Gmail.</li>
+    <li><b>Redrawn:</b> Setup (with a first run), Know me, People, Projects detail, Ask and voice. Phone overlays are now bottom sheets (CT12).</li>
+  </ul>
+</section>
+
+<section style="display:grid;gap:14px" id="flows">
+  <h2 class="ps">1 · The flows, playable</h2>
+  <p class="muted">Pick a flow and step through it. Each step sets both frames, and both stay live: click rows and keys, and type in Ask and in Setup's call times. Desktop keys (click the desktop frame first): <b>C</b> copy, <b>D</b> done, <b>L</b> later, <b>O</b> open, <b>X</b> not for me, <b>U</b> undo, <b>W</b> work through them, <b>R</b> read it to me, <b>/</b> find or ask, <b>1–5</b> places, <b>J/K</b> move, <b>?</b> keys, <b>Esc</b> back.</p>
+  <div class="ctrls">
+    <div><span class="eyebrow">Lighting</span><div class="seg" id="c-light"><button data-v="day" aria-pressed="true">Day</button><button data-v="night">Night</button></div></div>
+    <div><span class="eyebrow">Day</span><div class="seg" id="c-day"><button data-v="normal" aria-pressed="true">Normal</button><button data-v="quiet">Quiet</button></div></div>
+    <div><span class="eyebrow">Desktop</span><div class="seg" id="c-w"><button data-v="1440" aria-pressed="true">1440</button><button data-v="1280">1280</button></div></div>
+  </div>
+  <div class="flows" id="flowbtns"></div>
+  <div class="stepbar"><div class="num" id="stepnums"></div><div class="sd" id="stepdesc"></div><button class="pbtn" id="sprev">← Back</button><button class="pbtn" id="snext">Next step →</button></div>
+  <div class="stage">
+    <figure><div class="frame" id="fd"></div><figcaption id="capd">Desktop 1440 × 900</figcaption></figure>
+    <figure><div class="frame ph" id="fp"></div><figcaption>Phone 390 × 844</figcaption></figure>
+  </div>
+</section>
+
+<section style="display:grid;gap:14px">
+  <h2 class="ps">2 · Day and night</h2>
+  <p class="muted">The same sheet across every place, at both lightings. Desktop frames are 1280 × 800, phones 390 × 844. Every frame is live.</p>
+  <div class="gald" id="gald"></div>
+  <div class="gal" id="galp"></div>
+</section>
+
+<section style="display:grid;gap:14px">
+  <h2 class="ps">3 · New and redrawn elements</h2>
+  <div class="elist">
+    <div><b>Day bezel</b>Day windows on the light sheet: unlit is a groove in the paper, and lit is cream in a dark bezel. Seen at a glance or blurred, lit is a dark spot and unlit is nothing, so the state no longer depends on rim weight alone.</div>
+    <div><b>Struck line</b>Done, later or moved: the row stays where it was as one line, crossed through once (250 ms), with Undo beside it. Like crossing a name off a printed list. It goes when you do the next thing.</div>
+    <div><b>The form (Setup)</b>Setup is printed as the form at the back of the sheet: lettered sections A–D, labelled fields, tick-box windows that apply at once, and no orange. Rare settings sit in closed drawers.</div>
+    <div><b>Call times</b>The brief times are drawn as a short running order: time column, rail and a tick per sheet, with who writes it. Editing a time checks it as you type and says what it costs: "Careful: about 3–5 min, from the last 7 sheets".</div>
+    <div><b>Transcript with sidenotes (Ask)</b>Chat is printed as a transcript, with no bubbles. Each question has a mono time tag, and each answer has numbered sources in the margin on desktop and under the answer on the phone. "How I found it" folds to one line.</div>
+    <div><b>Match gutter (People)</b>Same person? sets two records side by side, field by field, with a gutter between them: = for a match, ≠ for a difference, · where one side has nothing. You can see why Callsheet asked. All three answers are neutral keys, so nothing pushes you to merge.</div>
+    <div><b>Fact list (Know me)</b>What Callsheet believes about you, numbered, each with its source and Forget. Facts it wants checked are marked "To check". Checking them uses the same one-at-a-time pattern as replies.</div>
+    <div><b>Slip track (Projects)</b>A project's weeks drawn as a strip with milestones. A slipped date keeps a dashed tick where it was, with an amber arrow to where it is now. Every date has a footnote to the mail it came from.</div>
+    <div><b>Reading rail (voice)</b>Read it to me shows the sheet's own sections 01–04 down a rail, with a tick per spoken line and the lit slot on the line being read. On the phone the rail folds to a line strip, the way the running order folds to the day strip.</div>
+    <div><b>The blank sheet (first run)</b>After setup, the sheet is shown empty: the four numbered sections as grooves, and "Your first sheet prints tomorrow at 06:30." One quiet key writes one now.</div>
+  </div>
+</section>
+
+<section style="display:grid;gap:14px">
+  <h2 class="ps">4 · Rules this pass assumed or broke</h2>
+  <p class="muted">Full reasons, the 15-item language check and the audit are in <code>notes/pass5-callsheet.md</code>.</p>
+  <div class="tblw"><table class="tbl">
+    <thead><tr><th>Rule</th><th>Here</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Conflict 3 · windows in Day</td><td>Form B on the light sheet (groove / cream in a 3 px bezel), plus the word and a press</td><td>Assumed, pending Isaac</td></tr>
+      <tr><td>H6 · reading surfaces have no orange</td><td>Today is a reading surface and a front door: one orange on the cue, none in the reading parts</td><td>Amend H6</td></tr>
+      <tr><td>H7 · NOW is a cream rule</td><td>Ink rule + lit slot in Day (a cream rule is 1.1:1 on the sheet); cream rule at night</td><td>Amend H7 (by ground)</td></tr>
+      <tr><td>CW4 · a snapshot sentence dims</td><td>It leaves the printed summary; its footnote moves to the cue</td><td>Language-wide (replace "dims")</td></tr>
+      <tr><td>CL5 · no orange on settings</td><td>Setup has none, except Try again on a broken connection (CW7)</td><td>Language-wide (refine)</td></tr>
+      <tr><td>CT1 / D83 · quiet paddles in Setup</td><td>Tick-box windows on the form</td><td>App-local</td></tr>
+      <tr><td>LY16 · no toasts for changes you can see</td><td>Kept, newly: Undo moved into place</td><td>Language-wide</td></tr>
+    </tbody>
+  </table></div>
+</section>
+</div>
+
+<script>
+/* ---------- data (sample only) ---------- */
+const REPLIES=[
+ {id:1,who:'Priya N.',area:'Co. A',ask:'Needs the Q4 budget sign-off today.',why:['Always counts','Due today'],vip:true,age:'07:40',
+  said:'“Could you sign off the Q4 budget by end of day? Finance closes the sheet tomorrow.”',
+  draft:'Hi Priya, signed off with one change: the contractor line moves to Q1. Thanks for chasing. Sam'},
+ {id:2,who:'School office',area:'Personal',ask:'Trip form for Friday, due tonight.',why:['Due today'],age:'Yesterday',
+  said:'“Please return the signed trip form by Thursday so we can confirm numbers.”',
+  draft:'Hello, Mia can go on Friday’s trip. The signed form comes in with her tomorrow morning. Thanks, Sam'},
+ {id:3,who:'Marco D.',area:'Co. B',ask:'Asks when the supplier contract ends.',why:['Asked you'],age:'2 days',
+  said:'“When does the current supplier contract end, and is there a notice period?”',
+  draft:'Hi Marco, it ends on 31 March with 60 days’ notice, so we’d need to decide by 30 January. Sam'},
+ {id:4,who:'A. Reyes',area:'Personal · landlord',ask:'Which morning suits the boiler visit?',why:['Asked you'],age:'3 days',
+  said:'“The engineer can come Tuesday or Wednesday morning. Which suits?”',
+  draft:'Hi, Wednesday morning works. Someone is in from 8. Thanks, Sam'},
+ {id:5,who:'Tom B.',area:'Personal',ask:'Dinner on Saturday?',why:['Asked you'],age:'Yesterday',
+  said:'“Are you two free for dinner Saturday? Thinking 7.”',draft:'Saturday at 7 sounds great. What can we bring? Sam'},
+ {id:6,who:'Lena K.',area:'Co. A',ask:'Wants an intro to Ben at Northwind.',why:['Waiting'],age:'5 days',
+  said:'“Would you mind introducing me to Ben? Happy to send a blurb.”',draft:'Hi Lena, happy to. Send me the blurb and I’ll write to Ben today. Sam'},
+ {id:7,who:'Northwind Store',area:'Personal',ask:'Asks you to review your last order.',why:['Waiting'],age:'6 days',
+  said:'“How did we do? Leave a review of your recent order.”',draft:null}
+];
+const EVENTS=[
+ {id:'su',t:570,d:15,title:'Stand-up',meta:'Co. A · video'},
+ {id:'rr',t:660,d:60,title:'Roadmap review',meta:'Co. A · Room 3',clash:'sc'},
+ {id:'sc',t:660,d:30,title:'Supplier call',meta:'Co. B · phone',clash:'rr'},
+ {id:'lj',t:780,d:45,title:'Lunch with Jo',meta:'Personal · Café Rosa'},
+ {id:'dc',t:900,d:60,title:'Design crit',meta:'Co. B · moved from 14:00'},
+ {id:'sw',t:1110,d:30,title:'Pick up Mia from swimming',meta:'Personal'}
+];
+const NOTES=[
+ {id:'si',txt:'New sign-in to your Co. A Google account from a Mac in Leeds, 06:12.',alert:true},
+ {id:'mv',txt:'Design crit moved from 14:00 to 15:00.'},
+ {id:'ex',txt:'Co. A’s expenses tool is down until noon.'}
+];
+const ADV=[{d:'Fri 6',t:'Dentist · 08:40'},{d:'Mon 9',t:'Co. B board pack due'},{d:'Thu 12',t:'Flu jab · 10:00'},{d:'Sat 21',t:'Jo’s birthday'}];
+const INV=[{t:'Q1 planning offsite',m:'Co. A · Tue 18 Nov · from Priya N.'},{t:'Supplier call (new time)',m:'Co. B · Fri 6 Nov 14:00 · from Marco D.'},{t:'Parents’ evening',m:'Personal · Wed 19 Nov 18:00'}];
+const SRC={1:'Calendars · Co. A and Co. B',2:'Gmail · Co. A and Personal',3:'All 8 calendars',4:'Google security mail · Co. A'};
+/* the summary: each sentence names the fact it carries, so the screen can leave it out when a cue says it */
+function summary(s){
+  if(s.day==='quiet') return [{t:'Nothing booked until 15:00, a clear run',fn:3},{t:'One reply is due today',fn:2}];
+  if(s.time>=1020) return [{t:'The 17:00 check-in found nothing new',fn:2},{t:'The evening is clear apart from one pick-up',fn:1}];
+  const L=[{t:'Six things on the calendar, and two of them land at 11:00',fn:1,fact:'clash'},{t:'Two replies are due today; the rest can wait',fn:2},{t:'Clear after 16:00',fn:3}];
+  if(s.sit==='alert') L.unshift({t:'A new sign-in to your Co. A account at 06:12 needs a look',fn:4,fact:'signin'});
+  return L;
+}
+const VOICE=[
+ {s:0,g:'Six things; two at 11:00',t:'Good morning, Sam. Six things today, and two of them land at eleven, so you’ll need to pick one.'},
+ {s:0,g:'Clear after 16:00',t:'After four o’clock the day is clear, apart from swimming at half six.'},
+ {s:1,g:'Priya: budget sign-off',t:'First, Priya. She needs the Q4 budget sign-off today, and there’s a draft ready.'},
+ {s:1,g:'School office: trip form',t:'Then the school office: the trip form for Friday is due tonight.'},
+ {s:2,g:'Design crit moved',t:'Worth knowing: the design crit moved to three o’clock.'},
+ {s:3,g:'Dentist, board pack',t:'Coming up: the dentist tomorrow at 8:40, and Co. B’s board pack is due Monday.'},
+ {s:3,g:'The end',t:'That’s the sheet. Nothing was sent.'}
+];
+const SECS=['Your day','Who needs you','Worth knowing','Coming up'];
+const TABS=[['sheet','Today'],['replies','Replies'],['agenda','Agenda'],['ask','Ask'],['projects','Projects']];
+const PAIRS=[
+ {a:{name:'Priya N.',mail:'priya@co-a.example',phone:'07700 900123',chat:'Slack · @priya'},b:{name:'Priya Nair',mail:'p.nair@mail.example',phone:'07700 900123',chat:'—'},
+  m:{name:'≈',mail:'≠',phone:'=',chat:'·'},why:'Same phone number, and the names agree.'},
+ {a:{name:'Marco D.',mail:'marco@co-b.example',phone:'—',chat:'Signal'},b:{name:'Marco Diaz',mail:'marco.d@mail.example',phone:'—',chat:'Signal'},
+  m:{name:'≈',mail:'≠',phone:'·',chat:'='},why:'The same Signal contact signs both mails.'},
+ {a:{name:'Tom B.',mail:'tom@home.example',phone:'07700 900456',chat:'—'},b:{name:'Tom Baker',mail:'tbaker@work.example',phone:'07700 900789',chat:'—'},
+  m:{name:'≈',mail:'≠',phone:'≠',chat:'·'},why:'Only the names are close. Probably two people.'}
+];
+const PEOPLE=[
+ {id:'pn',name:'Priya N.',w:'Co. A · mail, Slack',last:'Today 07:40',ac:true,wait:1,where:['priya@co-a.example','Slack · Co. A · @priya'],note:'Manager at Co. A.'},
+ {id:'so',name:'School office',w:'Personal · mail',last:'Yesterday',ac:true,wait:2,where:['office@school.example'],note:''},
+ {id:'md',name:'Marco D.',w:'Co. B · mail, Signal',last:'2 days ago',ac:false,wait:3,where:['marco@co-b.example','Signal'],note:''},
+ {id:'jo',name:'Jo',w:'Personal · Signal',last:'Today 07:02',ac:true,wait:0,where:['Signal'],note:''},
+ {id:'lk',name:'Lena K.',w:'Co. A · mail',last:'5 days ago',ac:false,wait:6,where:['lena@co-a.example'],note:''}
+];
+const FACTS=[
+ {t:'You sign emails “Sam”.',s:'Gmail · sent mail, 1,240 messages'},
+ {t:'Priya N. is your manager at Co. A.',s:'Gmail · Co. A, 312 threads',chk:1},
+ {t:'You prefer meetings after 09:30.',s:'Calendars · 8, the last 90 days',chk:1},
+ {t:'Mia swims on Thursdays; pick-up is 18:40.',s:'Calendar · Personal; Gmail, leisure centre'},
+ {t:'Your replies are short: most are under 40 words.',s:'Gmail · sent mail, 1,240 messages'},
+ {t:'Co. B is a board role that meets monthly.',s:'Calendar · Co. B; Gmail · Co. B'}
+];
+const PROJ=[
+ {id:'qb',name:'Q4 budget',m:'Co. A · sign-off due today',st:'On track',w:0},
+ {id:'kr',name:'Kitchen refit',m:'Personal · fitting moved a week',st:'Slipped',w:1},
+ {id:'ss',name:'Supplier switch',m:'Co. B · waiting on Marco D.',st:'Waiting',w:0}
+];
+const CALLT=[{t:'06:30',n:'Morning sheet',w:'Careful',d:'Every day'},{t:'12:30',n:'Midday check-in',w:'Careful',d:'Weekdays'},{t:'17:00',n:'Evening check-in',w:'Careful',d:'Weekdays'}];
+const SETS=[['conn','A','Connections','4 Google accounts · Slack · notes'],['day','B','Your day','Call times 06:30 · 12:30 · 17:00'],['ai','C','AI','Claude writes · sorting on'],['adv','D','Advanced','10 rare settings, each in a drawer']];
+
+/* ---------- helpers ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const dur=m=>m<60?m+' min':(Math.floor(m/60)+' h'+(m%60?' '+(m%60):''));
+const kh=k=>`<span class="kh">${k}</span>`;
+const sup=['','¹','²','³','⁴','⁵','⁶'];
+function evs(s){return s.day==='quiet'?EVENTS.filter(e=>e.id==='dc'):EVENTS}
+function reps(s){return s.day==='quiet'?REPLIES.filter(r=>r.id===2):REPLIES}
+function openR(s){return reps(s).filter(r=>!s.done.has(r.id)&&!s.later.has(r.id)&&!s.nf.has(r.id))}
+function rep(id){return REPLIES.find(r=>r.id===id)}
+function nowS(s){return fmt(s.time)}
+function cue(s){
+  if(s.sit==='alert'&&!s.alertSeen) return 'alert';
+  const c=evs(s).find(e=>e.clash);
+  if(c&&s.time>=c.t-60&&s.time<c.t&&!s.clashAck) return 'clash';
+  return openR(s).length?'reply':'wrap';
+}
+/* which facts are printed live on this screen (cue or note) */
+function liveFacts(s){const f=new Set(),c=cue(s);if(c==='clash')f.add('clash');if(s.sit==='alert')f.add('signin');return f}
+function base(dev){return{dev,theme:'day',time:394,sit:'normal',day:'normal',view:'sheet',done:new Set(),copied:new Set(),later:new Set(),nf:new Set(),
+  alertSeen:false,clashAck:false,sel:1,voice:0,playing:true,find:false,keys:false,nfOpen:null,nfScope:'one',mock:null,more:false,retry:0,last:null,fnOpen:0,checked:null,
+  q:'',asked:0,remembered:false,pair:0,merged:[],person:null,km:'home',kmi:0,kmq:false,kmDone:new Set(),forgot:new Set(),proj:null,tasks:new Set(['t1','t2']),
+  sp:dev==='desk'?'day':'home',ce:null,ctv:'',tg:{phone:true,tablet:false,look:'sheet',light:'auto',writer:'claude',sort:'rank',chat:true},gOff:false,drw:null,confirm:false,fr:0,frConn:false,heard:null,qa:null}}
+
+/* ---------- small pieces ---------- */
+const sqo=(on,label,act,small,dis)=>`<button class="opt${on?' on':''}" data-act="${act}" role="checkbox" aria-checked="${on}" ${dis?'disabled':''}><span class="sq${on?' on':''}"></span><span>${label}${small?`<small>${small}</small>`:''}</span></button>`;
+function undoK(){return `<button class="k q" data-act="undo">Undo ${kh('U')}</button>`}
+function keyCopy(s,r,orange){
+  if(!r.draft) return '';
+  if(s.copied.has(r.id)) return `<span class="copied"><span class="led"></span>Copied ${esc(s.copiedAt||nowS(s))}</span>${s.last&&s.last.k==='copy'&&s.last.id===r.id?undoK():''}`;
+  return `<button class="k ${orange?'go':''}" data-act="copy:${r.id}">Copy draft ${kh('C')}</button>`;
+}
+function struck(s){
+  const L=s.last; if(!L||!['done','later','nf'].includes(L.k)) return '';
+  const r=rep(L.id), w={done:`done ${L.at}`,later:'later: back at 12:30',nf:'moved out of Replies'}[L.k];
+  return `<div class="strk"><span class="w">${esc(r.who)} · ${w}</span>${undoK()}</div>`;
+}
+function rosterRow(s,r,i,mode){
+  const num=String(i+1).padStart(2,'0'), desk=s.dev==='desk';
+  const why=r.why.map(w=>w==='Always counts'?`<span class="vip">${w}</span>`:w).join(' · ');
+  const sel=s.view==='replies'&&desk&&s.sel===r.id?' sel':'';
+  let x='';
+  const c=cue(s), canOrange=s.sit!=='offline'&&c==='reply';
+  if(mode==='open'){
+    const copied=s.copied.has(r.id);
+    const doneK=`<button class="k ${copied&&canOrange?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button>`;
+    const openK=desk?`<button class="k q" data-act="open:${r.id}">Open in Gmail ${kh('O')}</button>`:'';
+    let more='';
+    if(s.more) more=`<div class="keys" style="margin-top:6px">${!desk?`<button class="k q" data-act="open:${r.id}">Open in Gmail</button>`:''}<button class="k q" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="note:${r.id}">Note ${kh('N')}</button><button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button></div>`;
+    x=`<div class="rx" data-act="noop">${r.draft?`<div class="draft">${esc(r.draft)}</div>`:'<div class="draft dim">No draft: this looks like a shop mailing. Not for me?</div>'}<div class="keys">${keyCopy(s,r,canOrange)}${doneK}${openK}<button class="k q" data-act="more" aria-expanded="${s.more}">${s.more?'Less':'More'}</button></div>${more}</div>`;
+  } else if(mode==='then'){
+    x=`<div class="rx" data-act="noop" style="margin-top:2px">${keyCopy(s,r,false).replace('class="k ','class="k q q0 ')}</div>`;
+  }
+  const head=desk?`<div class="rh"><span class="rn">${esc(r.who)} <span class="dim">· ${esc(r.area)}</span></span><span class="rw">${why}</span></div><div class="ra">${esc(r.ask)}</div>`
+    :`<div class="rn">${esc(r.who)} <span class="dim">· ${esc(r.area)}</span></div><div class="ra">${esc(r.ask)}</div><div class="rw">${why}</div>`;
+  return `<div class="rrow${sel}" role="button" tabindex="0" data-act="slip:${r.id}"><span class="idb">${num}</span><div>${mode==='then'?'<span class="then">THEN</span>':''}${head}</div><span class="rage">${esc(r.age)}</span>${x}</div>`;
+}
+function roster(s,max){
+  const o=openR(s), c=cue(s);
+  const rows=o.slice(0,max).map((r,i)=>rosterRow(s,r,i,i===0?(c==='reply'?'open':'then'):'row')).join('');
+  const more=o.length>max?`<button class="morel" data-act="tab:replies">${o.length-max} more in Replies ›</button>`:'';
+  return `<div class="sh"><span class="n">02</span>Who needs you<span class="r"><button class="k q" data-act="oat">Work through them ${kh('W')}</button></span></div><div class="ros">${struck(s)}${rows}</div>${more}`;
+}
+function cueBlock(s){
+  const c=cue(s), L=summary(s);
+  const fnOf=f=>{const x=L.find(y=>y.fact===f);return x?`<span class="fn">${sup[x.fn]}</span>`:''};
+  if(c==='alert') return `<div class="cue al"><div class="lab"><span class="led al"></span>Alert · 06:12${fnOf('signin')}</div><p class="say">A new sign-in to your Co. A Google account, from a Mac in Leeds. Was it you?</p><div class="keys"><button class="k red" data-act="alertcheck">Check the sign-in ${kh('↵')}</button><button class="k q" data-act="alertseen">It was me</button></div></div>`;
+  if(c==='clash'){const e=evs(s).find(x=>x.clash);const mins=e.t-s.time;
+    return `<div class="cue wn"><div class="lab"><span class="led wn"></span>▲ Clash · ${fmt(e.t)} · in ${mins} min${fnOf('clash')}</div><p class="say">The roadmap review and the supplier call both start at ${fmt(e.t)}. Pick one.</p><div class="keys"><button class="k ${s.sit==='offline'?'':'go'}" data-act="tab:agenda">See the clash ${kh('↵')}</button><button class="k q" data-act="gotit">Got it</button></div></div>`;}
+  return '';
+}
+function wrapBlock(s){
+  const o=reps(s), ans=o.filter(r=>s.done.has(r.id)||s.nf.has(r.id)).length, lat=o.filter(r=>s.later.has(r.id)).length;
+  return `<div class="wrapo"><div class="lab">All answered · ${nowS(s)}</div>
+   <div class="tally"><div><b>${ans}</b><span>Answered</span></div><div><b>${lat}</b><span>For tomorrow</span></div></div>
+   <div class="wrule"></div><div class="tmr">Tomorrow’s first thing: Dentist, 08:40.<br>Nothing was sent. The drafts you copied are yours.</div>
+   <div class="keys" style="margin-top:10px"><button class="k q k q0" data-act="voice">Read it to me ${kh('R')}</button><button class="k q" data-act="tab:agenda">See tomorrow</button></div></div>`;
+}
+function orderRows(s,full){
+  const now=s.time, ev=[...evs(s)].sort((a,b)=>a.t-b.t), rows=[];
+  const past=ev.filter(e=>e.t+e.d<=now);
+  if(!full&&past.length) rows.push({k:-1,h:`<div class="orow fold"><div class="ot dim">${fmt(past[0].t)}</div><div class="orail"></div><div class="ob">Done: ${past.length>2?past.length+' things':past.map(e=>esc(e.title)).join(', ')}</div></div>`});
+  const show=full?ev:ev.filter(e=>e.t+e.d>now), seen=new Set();
+  const tag='div', att=full?'':' role="button" tabindex="0" data-act="tab:agenda"';
+  const evh=(e,inner)=>{const isPast=e.t+e.d<=now, on=e.t<=now&&now<e.t+e.d;
+    const b=`<div class="tt">${esc(e.title)}${on?'<span class="onnow"><span class="slot on"></span>ON NOW</span>':''}</div><div class="mm">${esc(e.meta)} · <span class="mono">${dur(e.d)}</span>${isPast?' · done':''}</div>`;
+    return inner?`<div class="ce${isPast?' dim':''}">${b}</div>`:`<${tag} class="orow${isPast?' past':''}"${att}><div class="ot">${fmt(e.t)}</div><div class="orail"><span class="tick"></span></div><div class="ob">${b}</div></${tag}>`;};
+  for(const e of show){ if(seen.has(e.id))continue; seen.add(e.id);
+    const o=e.clash&&show.find(x=>x.id===e.clash);
+    if(o){seen.add(o.id);
+      const ack=s.clashAck&&s.last&&s.last.k==='gotit'?` · Got it ${s.last.at}</span><button class="k q" data-act="undo" style="min-height:28px">Undo</button><span>`:'';
+      rows.push({k:e.t,h:`<${tag} class="orow clash"${att}><div class="ot">${fmt(e.t)}</div><div class="orail"></div><div class="ob"><div class="ch"><span class="led wn"></span><span>▲ Clash · pick one${ack}</span></div>${evh(e,1)}${evh(o,1)}</div></${tag}>`});
+    } else rows.push({k:e.t,h:evh(e)}); }
+  let prev=Math.min(now,420), first=true; const c=cue(s), op=openR(s);
+  for(const e of ev){ if(e.t-prev>=30){const gs=Math.max(prev,now), ge=e.t;
+      if(ge-gs>=20&&ge>now){ let f='';
+        /* gap cue: only the calendar's own fact; no time-per-reply estimate (H17) */
+        if(first&&!full&&op.length&&c==='reply'){f=`<div class="gf">A free stretch for replies.</div><button class="k q q0" data-act="oat">Work through them</button>`; first=false;}
+        rows.push({k:gs+.5,h:`<div class="orow gap"><div class="ot dim">${gs===now?'':fmt(gs)}</div><div class="orail"></div><div class="ob"><div class="gl">Free until ${fmt(ge)}${c==='clash'&&gs===now&&evs(s).some(x=>x.clash&&x.t===ge)?'':' · '+dur(ge-gs)}</div>${f}</div></div>`}); } }
+    prev=Math.max(prev,e.t+e.d); }
+  rows.push({k:1e4,h:`<div class="orow end"><div class="ot dim">${fmt(prev)}</div><div class="orail"><span class="tick"></span></div><div class="ob"><div class="gl">End of day · clear from ${fmt(prev)}</div></div></div>`});
+  if(now<prev) rows.push({k:now,h:`<div class="orow now"><div class="ot">${nowS(s)}</div><div class="orail"><span class="slot on"></span></div><div class="ob"><span class="lbl">NOW</span><span class="ln"></span></div></div>`});
+  rows.sort((a,b)=>a.k-b.k);
+  return `<div class="ro">${rows.map(r=>r.h).join('')}</div>`;
+}
+function dayStrip(s){
+  const S=420,E=1200,W=E-S,p=m=>Math.max(0,Math.min(100,(m-S)/W*100));
+  const ev=evs(s), now=s.time;
+  let bl='', cb='';
+  for(const e of ev){const cls=(e.t+e.d<=now?' past':'')+(e.clash?(e.id<e.clash?' c1':' c2'):'');
+    bl+=`<span class="bl${cls}" style="left:${p(e.t)}%;width:${Math.max(1.2,e.d/W*100)}%"></span>`;}
+  const ce=ev.find(e=>e.clash&&e.t>now); if(ce) cb=`<span class="cb" style="left:${p(ce.t)}%;width:${60/W*100}%"></span>`;
+  const nx=ev.filter(e=>e.t>now&&!e.clash).sort((a,b)=>a.t-b.t)[0];
+  let labs='';
+  const place=(m,txt,cls)=>{const x=p(m);return `<span class="${cls||''}" style="left:${x}%;transform:translateX(-${x}%)">${txt}</span>`};
+  /* capacity: two labels. The clash label steps aside while the cue says it. */
+  const clashLab=ce&&cue(s)!=='clash';
+  if(clashLab) labs+=place(ce.t,`▲ ${fmt(ce.t)} clash`,'w');
+  if(nx&&(!clashLab||Math.abs(p(nx.t)-p(ce.t))>34)) labs+=place(nx.t,`${esc(nx.title)} ${fmt(nx.t)}`);
+  const hrs=[480,660,840,1020,1200].map(m=>`<span style="left:${p(m)}%">${fmt(m).slice(0,2)}</span>`).join('');
+  return `<div class="sh"><span class="n">01</span>Your day<span class="r"><button class="k q" data-act="tab:agenda">Agenda ›</button></span></div>
+   <button class="strip" data-act="tab:agenda" aria-label="Your day: open Agenda"><div class="labs">${labs}</div><div class="trk">${bl}${cb}<span class="nd" style="left:${p(now)}%"><span class="slot on"></span></span></div><div class="hrs">${hrs}</div></button>${s.last&&s.last.k==='gotit'?`<div class="strk" style="border-bottom:0"><span style="padding-left:0">▲ 11:00 clash · got it ${s.last.at}</span>${undoK()}</div>`:''}`;
+}
+function notes(s){
+  return `<div class="sh"><span class="n">03</span>Worth knowing</div>`+NOTES.map(n=>{
+    if(n.alert){const unseen=s.sit==='alert'&&!s.alertSeen; if(unseen) return '';
+      const u=s.last&&s.last.k==='seen'?undoK():'';
+      return `<div class="nl"><span class="w"><span class="led"></span></span><div>${esc(n.txt)}<span class="seen">Seen ${esc(s.seenAt||'06:20')}${u}</span></div></div>`;}
+    return `<div class="nl"><span class="w"><span class="led" style="visibility:hidden"></span></span><div>${esc(n.txt)}</div></div>`;}).join('');
+}
+function advance(s){return `<div class="sh"><span class="n">04</span>Coming up</div>`+ADV.filter((a,i)=>!(i===0&&cue(s)==='wrap')).map(a=>`<div class="adv"><span class="d">${a.d.toUpperCase()}</span><span>${esc(a.t)}</span></div>`).join('')}
+function foot(s){
+  const used=[...new Set(summary(s).map(x=>x.fn))].sort();
+  const wrap=cue(s)==='wrap';
+  return `<div class="foot"><div class="srcs">${used.map(n=>`<span>${sup[n]} ${SRC[n]}</span>`).join('')}</div>
+   ${wrap?'':'<div class="prom">Nothing was sent. Drafts wait for you.</div>'}<div class="dim" style="font-size:14px">Written ${s.time>=1020?'17:00':'06:30'} by Careful${s.checked?` · checked ${s.checked}, nothing new`:''} · next ${s.time>=1020?'tomorrow 06:30':'12:30'} · <button class="k q" style="min-height:${s.dev==='phone'?44:24}px;padding:0" data-act="refresh">Refresh</button></div></div>`;
+}
+function lede(s){
+  const live=liveFacts(s), L=summary(s).filter(x=>!x.fact||!live.has(x.fact)), ph=s.dev==='phone';
+  const fnb=n=>ph?`<button class="fn" data-act="fn:${n}" aria-label="Source ${n}">${sup[n]}</button>`:`<span class="fn">${sup[n]}</span>`;
+  const txt=L.map(x=>`${esc(x.t)}${fnb(x.fn)}.`).join(' ');
+  const fx=ph&&s.fnOpen?`<div class="fnx"><span>${sup[s.fnOpen]} ${SRC[s.fnOpen]}</span><button class="k q" data-act="fn:0">Close</button></div>`:'';
+  return `<p class="lede">${txt}</p>${fx}`;
+}
+function headline(s){return cue(s)==='wrap'&&s.time>=1020?'That’s the day, Sam.':'Good morning, Sam.'}
+function dateline(s,extra){return `<div class="dline"><span>Thursday 5 November · sheet ${s.time>=1020?'17:00':'06:30'}</span>${s.dev==='desk'?`<button class="k q" data-act="voice">Read it to me ${kh('R')}</button>`:''}</div>`}
+function offbar(s){
+  if(s.sit!=='offline') return '';
+  const t=s.retry?`Tried ${nowS(s)}, still no answer. Check the phone is on home Wi-Fi or the VPN.`:'Showing the 06:30 sheet. Copy still works; the rest waits until it’s back.';
+  return `<div class="offbar"><span class="t"><b>Can’t reach Callsheet</b>${t}</span><button class="k go" data-act="retry">Try again</button></div>`;
+}
+function subnav(s,items){return `<nav class="subnav">${items.map(([v,n,cur])=>`<button data-act="${v}" aria-current="${cur}">${n}</button>`).join('')}</nav>`}
+function askNav(s){return subnav(s,[['tab:ask','Ask',s.view==='ask'],['tab:people','People',s.view==='people'],['tab:knowme','Know me',s.view==='knowme']])}
+
+/* ---------- views ---------- */
+function sheetDesk(s){
+  const c=cue(s);
+  const right=c==='wrap'?wrapBlock(s):cueBlock(s)+roster(s,5);
+  return `${dateline(s)}<div class="top"><h1 class="hl">${headline(s)}</h1>${lede(s)}</div>
+  <div class="cols"><section><div class="sh"><span class="n">01</span>Your day<span class="r"><button class="k q" data-act="tab:agenda">Agenda ${kh('3')}</button></span></div>${orderRows(s,false)}</section>
+  <section>${right}<div class="two"><div>${notes(s)}</div><div>${advance(s)}</div></div>${foot(s)}</section></div>`;
+}
+function sheetPhone(s){
+  const c=cue(s);
+  return `${dateline(s)}<h1 class="hl">${headline(s)}</h1>${lede(s)}
+  <div class="blk">${cueBlock(s)}${c==='wrap'?wrapBlock(s):''}</div>
+  <div class="blk" style="margin-top:${c==='reply'?18:4}px">${dayStrip(s)}</div>
+  ${c==='wrap'?'':`<div class="blk">${roster(s,4)}</div>`}
+  <div class="blk">${notes(s)}</div><div class="blk">${advance(s)}</div>${foot(s)}`;
+}
+function slip(s,r){
+  if(!r) return `<p class="dim" style="margin-top:40px">Nobody is waiting on you.</p>`;
+  return `<div class="slip">${s.dev==='phone'?`<button class="back" data-act="back">‹ Back</button>`:''}
+   <div class="dline"><span>${esc(r.area)} · ${esc(r.age)}</span></div>
+   <div class="nm">${esc(r.who)}</div><div class="rw">${r.why.join(' · ')}</div>
+   <h4>What they want</h4><p class="ask">${esc(r.ask)}</p>
+   <h4>Their words</h4><p class="said">${esc(r.said)}</p>
+   <h4>Your draft</h4>${r.draft?`<textarea class="ta" aria-label="Draft reply">${esc(r.draft)}</textarea>`:'<p class="said">No draft: this looks like a shop mailing, so Not for me is probably right.</p>'}
+   <div class="keys">${keyCopy(s,r,s.sit!=='offline'&&!s.copied.has(r.id))}<button class="k ${s.copied.has(r.id)&&s.sit!=='offline'?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button><button class="k q" data-act="open:${r.id}">Open in Gmail ${kh('O')}</button></div>
+   <div class="keys" style="margin-top:6px"><button class="k q k q0" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="note:${r.id}">Note ${kh('N')}</button><button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button></div>
+   ${r.vip?'<p class="dim" style="font-size:14px;margin:14px 0 0">Priya N. always counts, so her mail is never hidden.</p>':''}</div>`;
+}
+function repliesView(s){
+  const o=openR(s), done=reps(s).filter(r=>s.done.has(r.id)||s.nf.has(r.id));
+  const list=struck(s)+(o.map((r,i)=>rosterRow(s,r,i,'row')).join('')||'<p class="dim">Nobody is waiting on you.</p>');
+  const dn=done.length?`<div class="sh" style="margin-top:22px"><span class="n">··</span>Done today</div>`+done.map(r=>`<div class="nl"><span class="w"><span class="led"></span></span><div class="dim">${esc(r.who)} · ${s.nf.has(r.id)?'not for me':'done'}</div></div>`).join(''):'';
+  const head=`<div class="dline"><span>Thursday 5 November</span></div><h1 class="subh">Who needs you</h1>`;
+  if(s.dev==='phone') return `${head}<div class="keys" style="margin:10px 0 14px"><button class="k ${s.sit!=='offline'&&o.length?'go':''}" data-act="oat">Work through them</button></div><div class="ros">${list}</div>${dn}`;
+  const sel=o.find(r=>r.id===s.sel)||o[0];
+  return `<div class="rep"><div>${head}<div class="keys" style="margin:10px 0 14px"><button class="k" data-act="oat">Work through them ${kh('W')}</button></div><div class="ros">${list}</div>${dn}</div><div>${slip(s,sel)}</div></div>`;
+}
+function agendaView(s){
+  const inv=`<div class="sh"><span class="n">··</span>Invites to answer</div>`+INV.map(i=>`<div class="inv" style="padding:10px 0;border-bottom:1px solid var(--rule)"><b style="font:500 17px var(--f);display:block">${esc(i.t)}</b><div class="dim" style="font-size:15px">${esc(i.m)}</div><button class="k q q0" data-act="gcal">Answer in Google Calendar</button></div>`).join('');
+  const clashNote=cue(s)==='clash'?`<div class="keys" style="margin:8px 0 0"><button class="k q q0" data-act="gotit">Got it, back to Today</button></div>`:'';
+  const head=`<div class="dline"><span>Thursday 5 November</span><button class="k q" data-act="tab:sheet">Today ›</button></div><h1 class="subh">Your day</h1>${clashNote}`;
+  if(s.dev==='phone') return `${head}<div class="blk" style="margin-top:14px">${orderRows(s,true)}</div><div class="blk">${inv}</div>`;
+  return `${head}<div class="cols" style="grid-template-columns:minmax(0,7fr) minmax(0,5fr)"><section>${orderRows(s,true)}</section><section>${inv}</section></div>`;
+}
+/* Ask: the transcript */
+const QA=[{at:'07:02',q:'What time is swimming?',a:'Mia’s swimming ends at 18:30 on Thursdays<span class="fn">¹</span>, and the pool asks for pick-up by 18:40<span class="fn">²</span>.',src:['¹ Calendar · Personal · repeats Thursdays','² Gmail · Personal · leisure centre, 2 Sep'],steps:'Read 1 calendar and 1 thread',rem:'Mia’s swimming pick-up is 18:40 on Thursdays.'}];
+const ANS={q:'When is the boiler visit?',a:'Nothing is booked yet. The engineer offered Tuesday or Wednesday morning<span class="fn">¹</span>, and your draft to A. Reyes says Wednesday<span class="fn">²</span>, but it hasn’t been sent.',src:['¹ Gmail · Personal · A. Reyes, 2 Nov','² Callsheet · draft for row 04, not sent'],steps:'Read 2 threads and 8 calendars'};
+function qaBlock(s,x,isNew){
+  const side=`<div class="side">${x.src.map(t=>`<span>${t}</span>`).join('')}</div>`;
+  return `<div class="qtag"><span>Q · ${x.at}</span></div><div class="qtext">${esc(x.q)}</div><p class="atext">${x.a}</p>${side}
+   <div class="steps"><span>${x.steps}</span>·<button class="k q" style="min-height:${s.dev==='phone'?44:28}px" data-act="mockask">How I found it</button><button class="k q" style="min-height:${s.dev==='phone'?44:28}px" data-act="mockcopy">Copy</button></div>`;
+}
+function askView(s){
+  const ph=s.dev==='phone', thinking=s.asked===1, answered=s.asked===2;
+  let body=`<button class="earlier" data-act="noop"><span class="mono" style="font-size:13px;letter-spacing:.16em">EARLIER</span>Yesterday · 2 questions ›</button>`;
+  body+=qaBlock(s,QA[0]);
+  if(!answered&&!thinking&&!s.remembered) body+=`<div class="remember"><div class="lab">Remember this?</div><p>${esc(QA[0].rem)}</p><div class="keys"><button class="k" data-act="remember">Save to Know me</button><button class="k q" data-act="noop">Not now</button></div></div>`;
+  if(s.remembered&&!answered&&!thinking) body+=`<div class="steps" style="margin-top:14px"><span class="led on"></span>Saved to Know me ${s.last&&s.last.k==='rem'?undoK():''}</div>`;
+  if(thinking) body+=`<div class="qtag"><span>Q · ${nowS(s)}</span></div><div class="qtext">${esc(ANS.q)}</div><div class="reading"><span class="slot on"></span>Reading Gmail · Personal<button class="k" data-act="stop" style="margin-left:6px">Stop</button></div>`;
+  if(answered) body+=qaBlock(s,Object.assign({at:nowS(s)},ANS));
+  const typed=(s.q||'').trim().length>0;
+  const compose=`<div class="compose"><input class="askin" placeholder="Ask about your mail, chat, calendar and notes" value="${esc(s.q||'')}" aria-label="Question" ${thinking?'disabled':''}><button class="k askgo ${typed&&s.sit!=='offline'?'go':''}" data-act="ask">Ask ${kh('↵')}</button></div>`;
+  const sugg=!answered&&!thinking?`<div class="sugg" style="margin-top:6px"><button data-act="suggest">When is the boiler visit?</button><button data-act="suggest">Who have I not answered this week?</button></div>`:'';
+  return `${askNav(s)}<div class="dline"><span>Reads only · nothing leaves this box</span></div><h1 class="subh">Ask</h1><div class="ask">${body}${compose}${sugg}</div>`;
+}
+/* People */
+function pairBlock(s){
+  const i=s.pair; const last=s.last&&s.last.k==='pair'?s.last:null;
+  const done=last?`<div class="strk" style="border-top:1px solid var(--rule)"><span class="w" style="padding-left:0">${esc(last.m)}</span>${undoK()}</div>`:'';
+  if(i>=PAIRS.length) return `<div class="pair"><div class="lab"><span class="led"></span>Same person? · all checked</div><p class="pwhy dim">No more pairs to check. Callsheet asks again only when a new one turns up.</p>${done}</div>`;
+  const P=PAIRS[i], ph=s.dev==='phone';
+  const F=[['name','Name'],['mail','Mail'],['phone','Phone'],['chat','Chat']];
+  const rows=F.map(([k,l])=>{const m=P.m[k], cls=m==='='?'gt m':'gt';
+    return ph?`<div class="pl">${l}</div><div${k==='name'?' class="nm2"':''}>${esc(P.a[k])}</div><div class="${cls}">${m}</div><div${k==='name'?' class="nm2"':''}>${esc(P.b[k])}</div>`
+      :`<div class="pl">${l}</div><div${k==='name'?' class="nm2"':''}>${esc(P.a[k])}</div><div class="${cls}">${m}</div><div${k==='name'?' class="nm2"':''}>${esc(P.b[k])}</div>`}).join('');
+  const hd=ph?`<div class="hd">FROM CO. A MAIL</div><div class="hd"></div><div class="hd">FROM PERSONAL</div>`:`<div class="hd"></div><div class="hd">ONE RECORD</div><div class="hd"></div><div class="hd">THE OTHER</div>`;
+  return `<div class="pair"><div class="lab"><span class="led"></span>Same person? · ${i+1} of ${PAIRS.length}</div>
+   <div class="pgrid">${hd}${rows}</div><div class="srcs" style="margin:-2px 0 8px">= same · ≈ close · ≠ different · · one side has none</div><p class="pwhy">${esc(P.why)}</p>
+   <div class="keys"><button class="k" data-act="same">Same person</button><button class="k" data-act="notsame">Not the same</button><button class="k q" data-act="unsure">Not sure</button></div>${done}</div>`;
+}
+function personPage(s,p){
+  if(!p) return '';
+  const r=p.wait?rep(p.wait):null;
+  return `<div>${s.dev==='phone'?`<button class="back" data-act="pback">‹ People</button>`:''}<div class="dline"><span>${esc(p.w)}</span></div><div class="subh" style="font-size:30px">${esc(p.name)}</div>
+   <div class="dl" style="margin-top:12px;border-top:1px solid var(--rule)">
+    <div class="l">Always counts</div><div><button class="task" style="border:0;padding:0;min-height:${s.dev==='phone'?44:28}px;align-items:center" data-act="ac:${p.id}" role="checkbox" aria-checked="${p.ac}"><span class="sq ${p.ac?'on':''}" style="margin:0"></span><span${p.ac?' style="font-weight:500"':''}>${p.ac?'On: never hidden, never sorted away':'Off'}</span></button></div>
+    <div class="l">Where</div><div>${p.where.map(esc).join('<br>')}</div>
+    <div class="l">Last heard</div><div>${esc(p.last)}</div>
+    <div class="l">Waiting on you</div><div>${r&&!s.done.has(r.id)?`<button class="k q q0" data-act="slip:${r.id}">${esc(r.ask)} ›</button>`:'<span class="dim">Nothing</span>'}</div>
+    <div class="l">Note for Callsheet</div><div>${p.note?esc(p.note)+' ':''}<button class="k q ${p.note?'':'q0'}" data-act="mocknote">${p.note?'Change':'Add a note'}</button></div>
+   </div></div>`;
+}
+function peopleView(s){
+  const ph=s.dev==='phone';
+  const pid=s.person||(ph?null:'pn'), p=PEOPLE.find(x=>x.id===pid);
+  if(ph&&p) return `${askNav(s)}${personPage(s,p)}`;
+  const list=`<div class="sh" style="margin-top:4px"><span class="n">··</span>You hear from most</div><div class="plist" style="border-top:1px solid var(--rule)">${PEOPLE.map(x=>`<button class="prow${!ph&&x.id===pid?' sel':''}" data-act="person:${x.id}"><span><b>${esc(x.name)}</b><br><span class="w">${esc(x.w)} · ${esc(x.last)}</span></span><span class="ac${x.ac?' on':''}">${x.ac?'<span class="sq on"></span>Always counts':''}</span></button>`).join('')}</div>`;
+  const left=`${askNav(s)}<div class="dline"><span>From mail, Slack and Signal</span></div><h1 class="subh">People</h1>${pairBlock(s)}${list}`;
+  if(ph) return left;
+  return `<div class="cols" style="margin-top:0;border-top:0;padding-top:0;grid-template-columns:minmax(0,7fr) minmax(0,5fr)"><section>${left}</section><section style="padding-top:88px">${personPage(s,p)}</section></div>`;
+}
+/* Know me */
+function knowView(s){
+  const ph=s.dev==='phone', toChk=FACTS.map((f,i)=>i).filter(i=>FACTS[i].chk&&!s.kmDone.has(i));
+  if(s.km==='check'){
+    const all=FACTS.map((f,i)=>i).filter(i=>FACTS[i].chk);
+    if(!toChk.length) return `${askNav(s)}<div class="oat"><div class="dline"><span>Check what it wrote</span><button class="k q" data-act="km:home">Close ${kh('Esc')}</button></div><div class="oatp">${all.map((i,j)=>`<span class="idb dn">${String(j+1).padStart(2,'0')}</span>`).join('')}</div><div class="bigfact">Both checked.</div><p class="intro">Next, four short questions. They help Callsheet decide what can wait.</p><div class="keys" style="margin-top:14px"><button class="k go" data-act="km:q">Answer 4 questions</button><button class="k q" data-act="km:home">Later</button></div></div>`;
+    const i=toChk[0], f=FACTS[i];
+    const boxes=all.map((x,j)=>`<span class="idb ${s.kmDone.has(x)?'dn':''} ${x===i?'cur':''}">${String(j+1).padStart(2,'0')}</span>`).join('');
+    const fix=s.kmq?`<textarea class="ta" aria-label="What is right" placeholder="What’s right?">Priya N. leads finance at Co. A. My manager is Ben.</textarea><div class="keys"><button class="k go" data-act="kmok:${i}">Save and next</button><button class="k q" data-act="kmq:0">Cancel</button></div>`
+      :`<div class="keys" style="margin-top:16px"><button class="k" data-act="kmok:${i}">Right</button><button class="k" data-act="kmq:1">Not quite</button><button class="k q" data-act="forget:${i}">Forget this</button></div>`;
+    return `${askNav(s)}<div class="oat"><div class="dline"><span>Check what it wrote</span><button class="k q" data-act="km:home">Close ${kh('Esc')}</button></div><div class="oatp" aria-label="Progress">${boxes}</div>
+      <div class="h4" style="margin-top:0">Callsheet thinks</div><div class="bigfact">${esc(f.t)}</div><div class="srcs"><span>From ${esc(f.s)}</span></div>${fix}</div>`;
+  }
+  if(s.km==='q'){
+    const o=['Evenings after 19:00','Weekends','Never: show everything'];
+    return `${askNav(s)}<div class="oat"><div class="dline"><span>A few questions · 1 of 4</span><button class="k q" data-act="km:home">Close ${kh('Esc')}</button></div><div class="oatp"><span class="idb cur">01</span><span class="idb">02</span><span class="idb">03</span><span class="idb">04</span></div>
+     <div class="bigfact">When can work replies wait until morning?</div><div style="border-top:1px solid var(--rule)">${o.map((t,j)=>sqo(j===(s.qa==null?0:s.qa),t,'qa:'+j)).join('')}</div>
+     <div class="keys" style="margin-top:16px"><button class="k go" data-act="km:home">Save and next</button><button class="k q" data-act="km:home">Skip</button></div></div>`;
+  }
+  const st=[
+    {n:1,dn:true,b:'Read your history',m:'Done 4 Nov · 2,412 threads, 8 calendars, 1 Slack',k:`<button class="k q ${ph?'q0':''}" data-act="mockscan">Read again</button>`},
+    {n:2,dn:!toChk.length,b:'Check what it wrote',m:toChk.length?`${toChk.length} to check`:'Checked',k:toChk.length?`<button class="k go" data-act="km:check">Check ${toChk.length===1?'1 thing':toChk.length+' things'}</button>`:''},
+    {n:3,dn:false,b:'A few questions',m:toChk.length?'4 questions · after step 2':'4 questions',k:toChk.length?'':`<button class="k go" data-act="km:q">Answer 4 questions</button>`}];
+  const steps=`<div class="steps3" style="border-top:2px solid var(--ink);margin-top:14px">${st.map(x=>`<div class="srow"><span class="idb ${x.dn?'dn':''}">${x.dn?'✓':x.n}</span><div><b>${x.b}</b><span class="m">${x.m}</span></div><div class="keys">${x.k}</div></div>`).join('')}</div>`;
+  const fl=FACTS.map((f,i)=>{
+    if(s.forgot.has(i)) return `<div class="strk" style="grid-column:1"><span class="w" style="padding-left:46px">${esc(f.t)}</span>${s.last&&s.last.k==='forget'&&s.last.id===i?undoK():''}</div>`;
+    const chk=f.chk&&!s.kmDone.has(i)?`<span class="chk"><span class="led wn"></span>▲ To check</span>`:'';
+    return `<div class="fact"><span class="nn">${String(i+1).padStart(2,'0')}</span><div class="t">${esc(f.t)}${chk}</div><button class="k q" data-act="forget:${i}">Forget</button>${ph?`<div class="s">${esc(f.s)}</div>`:''}</div>${ph?'':`<div class="side" style="grid-column:2;margin:0;padding:10px 0 10px 14px;border-bottom:1px solid var(--hair)">${esc(f.s)}</div>`}`}).join('');
+  return `${askNav(s)}<div class="dline"><span>Stays on this box</span></div><h1 class="subh">Know me</h1><p class="intro">Callsheet uses this to sort replies and write drafts that sound like you. Forgetting a fact doesn’t touch your mail.</p>
+   ${steps}<div class="sh" style="margin-top:26px"><span class="n">··</span>What it knows</div><div class="facts" style="border-top:1px solid var(--rule)">${fl}</div>`;
+}
+/* Projects */
+function slipTrack(s){
+  /* weeks from Mon 3 Nov to Mon 1 Dec; dates from mail (footnotes) */
+  const D0=3,D1=1+30, p=d=>((d-D0)/(D1-D0)*100);
+  const wk=[3,10,17,24,31].map(d=>`<span class="wk" style="left:${p(d)}%"></span><span class="wl" style="left:${p(d)}%;${d>30?'transform:translateX(-100%)':d<4?'transform:none':''}">${d>30?'1 Dec':d+' Nov'}</span>`).join('');
+  const now=5;
+  return `<div class="track"><div class="ln">${wk}
+    <span class="ms dn" style="left:${p(4)}%"></span><span class="lb lo dim" style="left:${p(4)}%;margin-top:40px">Measure ✓</span>
+    <span class="ms" style="left:${p(10)}%"></span><span class="lb" style="left:${p(10)}%;transform:translateX(-30%)">Worktop</span>
+    <span class="ms was" style="left:${p(14)}%"></span><span class="lb lo dim" style="left:${p(14)}%;transform:translateX(-50%)">was 14</span>
+    <span class="mv" style="left:${p(14)}%;width:${p(21)-p(14)}%"></span>
+    <span class="ms" style="left:${p(21)}%"></span><span class="lb w" style="left:${p(21)}%;transform:translateX(-50%)">▲ Fitting 21<span class="fn">¹</span></span>
+    <span class="ms" style="left:${p(28)}%"></span><span class="lb" style="left:${p(28)}%;transform:translateX(-70%)">Sign-off</span>
+    <span class="nd" style="left:${p(now)}%"><span class="slot on"></span></span></div></div>`;
+}
+function projectsView(s){
+  const ph=s.dev==='phone';
+  const nav=subnav(s,[['noop','List',true],['mockpv','Timeline',false],['mockpv','Slipped',false],['mockpv','Weekly review',false]]);
+  const list=`${nav}<div class="dline"><span>3 projects · 1 suggested</span></div><h1 class="subh">Projects</h1><div class="ros" style="margin-top:10px">${PROJ.map(p=>`<button class="prj" data-act="proj:${p.id}"><span class="led ${p.w?'wn':''}"></span><span><b>${p.name}</b><span class="dim" style="font-size:15px">${p.m}</span></span><span class="st ${p.w?'w':''}">${p.w?'▲ ':''}${p.st} ›</span></button>`).join('')}
+   <div class="prj sugg"><span class="led off"></span><span><b>School trip forms?</b><span class="dim" style="font-size:15px">Suggested from 3 mails · Personal</span></span><button class="k q" data-act="mockadd">Add project</button></div></div>`;
+  if(s.proj!=='kr') return ph?list:`<div style="max-width:820px">${list}</div>`;
+  const T=[['t1','Choose the worktop','Done 30 Oct'],['t2','Pay the deposit','Done 1 Nov'],['t3','Clear the kitchen','By Thu 20 Nov'],['t4','Book the sign-off visit','After the fitting']];
+  const tasks=T.map(([id,t,m])=>{const on=s.tasks.has(id);return `<button class="task ${on?'dn':''}" data-act="task:${id}" role="checkbox" aria-checked="${on}"><span class="sq ${on?'on':''}"></span><span><span class="tx">${t}</span><small>${m}</small></span></button>`}).join('');
+  const detail=`<div>${ph?`<button class="back" data-act="proj:">‹ Projects</button>`:''}<div class="dline"><span>Personal · project</span>${ph?'':`<button class="k q" data-act="proj:">All projects</button>`}</div><h1 class="subh">Kitchen refit</h1>
+   <div class="cue wn" style="margin:10px 0 0"><div class="lab"><span class="led wn"></span>▲ Slipped a week</div><p class="say" style="font-size:19px">The fitter moved the fitting from 14 to 21 November<span class="fn">¹</span>. Sign-off moves with it.</p></div>
+   ${slipTrack(s)}
+   <div class="sh" style="margin-top:58px"><span class="n">··</span>Tasks</div><div style="border-top:1px solid var(--rule)">${tasks}</div>
+   <div class="foot"><div class="srcs"><span>¹ Gmail · Personal · from the fitter, 3 Nov: “we’ll need to move to the 21st”</span><span>Other dates: Calendar · Personal</span></div>
+   <div class="keys"><button class="k q q0" data-act="open:4">Open the fitter’s mail</button></div></div></div>`;
+  if(ph) return detail;
+  return `<div class="cols" style="margin-top:0;border-top:0;padding-top:0;grid-template-columns:minmax(0,5fr) minmax(0,7fr)"><section>${list}</section><section>${detail}</section></div>`;
+}
+/* Setup: the form */
+function setIndex(s){
+  return `<div class="sidx">${SETS.map(([id,l,n,sub])=>{const cur=s.dev==='desk'&&s.sp===id;
+    return `<button data-act="sp:${id}" ${cur?'aria-current="true"':''}><span class="lt">${l}</span><span><b>${n}</b><span class="s">${id==='conn'&&s.gOff?'Personal Google offline · last read 06:30':sub}</span></span>${s.dev==='desk'?(cur?'<span class="slot on"></span>':'<span class="slot"></span>'):'<span class="chev">›</span>'}</button>`}).join('')}</div>`;
+}
+const fr=(l,v,x)=>`<div class="fr"><div class="fl">${l}</div><div class="fv">${v}</div><div class="fx">${x||''}</div></div>`;
+function callTimes(s){
+  return `<div class="ro ctl">${CALLT.map((c,i)=>{
+    if(s.ce===i){const v=s.ctv||c.t;
+      return `<div class="orow"><div class="ot">${c.t}</div><div class="orail"><span class="tick"></span></div><div class="ob ctedit">
+        <div class="tt">${c.n}</div><div class="ctin"><input class="ctinput" value="${esc(v)}" aria-label="Time" inputmode="numeric"><span class="ctmsg" id="ctmsg">${ctCheck(v).m}</span></div>
+        <div class="chs" style="margin:8px 0">${sqo(true,'Careful','noop')}${sqo(false,'Fast','noop')}</div>
+        <div class="ctmsg" style="margin-bottom:10px">Careful: about 3–5 min, from the last 7 sheets.</div>
+        <div class="keys"><button class="k" data-act="ctsave">Save</button><button class="k q" data-act="ce:">Cancel</button></div></div></div>`;}
+    return `<button class="orow" data-act="ce:${i}"><div class="ot">${c.t}</div><div class="orail"><span class="tick"></span></div><div class="ob"><div class="tt">${c.n}</div><div class="mm">${c.w} · ${c.d} · <span style="text-decoration:underline">Change</span></div></div></button>`}).join('')}
+    <div class="orow end"><div class="ot dim"></div><div class="orail"></div><div class="ob"><button class="k q q0" data-act="mockct">Add a time</button></div></div></div>`;
+}
+function ctCheck(v){const m=String(v).trim().match(/^([01]?\d|2[0-3])[:.]?([0-5]\d)$/);
+  return m?{ok:true,m:`Next sheet at ${m[1].padStart(2,'0')}:${m[2]} tomorrow.`}:{ok:false,m:'Write it as 06:30.'}}
+function setForm(s){
+  const T=s.tg, ph=s.dev==='phone';
+  const t=(k,lab,sm)=>sqo(T[k],lab,'tg:'+k,sm);
+  const pick=(k,v,lab,sm)=>sqo(T[k]===v,lab,'pk:'+k+':'+v,sm);
+  const head=(l,n,sub)=>`${ph?`<button class="back" data-act="sp:home">‹ Setup</button>`:''}<div class="dline"><span>${l} · ${n}</span></div>${sub?`<p class="intro">${sub}</p>`:''}`;
+  if(s.sp==='conn'){
+    const acc=[['sam@co-a.example','Mail · 3 calendars'],['sam@co-b.example','Mail · 2 calendars'],['sam@home.example','Mail · 2 calendars',1],['family@home.example','Calendar only']];
+    return `${head('A','Connections','Callsheet reads these. It never sends, accepts or deletes anything.')}<div class="form">
+     ${acc.map(([a,m,o])=>{const off=o&&s.gOff;return fr('Google',`${a}<small>${m}${off?' · last read 06:30':''}</small>`,off?`<span class="copied"><span class="led off"></span>Offline</span>`:`<span class="copied"><span class="led on"></span>On</span>`)}).join('')}
+     ${s.gOff?`<div class="fr" style="border-bottom:1.5px dashed var(--dim)"><div class="fl">Offline</div><div class="fv">Google isn’t answering for sam@home.example. ${s.retry?`Tried ${nowS(s)}: still no answer. Check the account’s sign-in on Google’s side.`:'Today’s sheet used the other three accounts.'}</div><div class="fx"><button class="k go" data-act="gretry">Try again</button></div></div>`:''}
+     ${fr('Slack','Co. A workspace<small>Channels you’re in</small>','<span class="copied"><span class="led on"></span>On</span>')}
+     ${fr('Signal','Not linked<small>Optional</small>','<button class="k" data-act="mocksig">Link Signal</button>')}
+     ${fr('Notes','1 folder<small>Read for context only</small>','<span class="copied"><span class="led on"></span>On</span>')}
+     ${fr('GitHub','Off','<button class="k q" data-act="mocksig">Connect</button>')}
+     <div class="keys" style="margin-top:14px"><button class="k" data-act="mockg">Connect Google account</button></div></div>`;
+  }
+  if(s.sp==='ai'){
+    return `${head('C','AI','Who writes the sheet and the drafts, and how sorting works.')}<div class="form">
+     ${fr('Who writes',`<div class="chs" style="flex-direction:column">${pick('writer','off','Off','No sheet text; lists only')}${pick('writer','box','On this box','Slower, nothing leaves the house')}${pick('writer','claude','Claude','Careful at 06:30 and the check-ins')}</div>`)}
+     ${fr('AI sorting',`<div class="chs">${pick('sort','off','Off')}${pick('sort','group','Group')}${pick('sort','rank','Group and rank')}</div><small>Never hides security alerts, invites or people who always count.</small>`)}
+     ${fr('Chat on this device',`<div class="chs">${t('chat',T.chat?'On':'Off')}</div>`)}
+     ${fr('What it learned','6 facts, 2 to check',`<button class="k q" data-act="tab:knowme">Know me ›</button>`)}
+     ${fr('Last sheet','06:30 · Careful · took 4 min 12 s')}</div>`;
+  }
+  if(s.sp==='adv'){
+    const D=[['key','Google sign-in key'],['model','Model server'],['presets','Presets'],['chat','Chat engine'],['alerts','Alerts'],['wi','Writing instructions'],['mem','Memory file'],['eval','Writer evaluation'],['sig','Signal import'],['start','Start over']];
+    const body={key:'A key is saved (added 12 Oct). It’s never shown again. <div class="keys" style="margin-top:8px"><button class="k" data-act="mockkey">Replace the key</button></div>',
+      start:'Deletes Callsheet’s local index, your profile, call times and rules on this box. Your mail, calendars and chats aren’t touched. <div class="keys" style="margin-top:8px"><button class="k" data-act="confirm">Start over…</button></div>'};
+    return `${head('D','Advanced','Rare settings. Each one stays closed until you open it.')}<div class="form">${D.map(([id,n])=>`<div class="drw"><button data-act="drw:${id}" aria-expanded="${s.drw===id}"><span>${n}</span><span class="mono">${s.drw===id?'−':'+'}</span></button>${s.drw===id?`<div class="db">${body[id]||'Unchanged from 0.9.0.'}</div>`:''}</div>`).join('')}</div>`;
+  }
+  /* Your day */
+  return `${head('B','Your day','')}<div class="form">
+   ${fr('Name','Sam','<button class="k q" data-act="mockname">Change</button>')}
+   ${fr('Time zone','Europe/London<small>From Home Assistant</small>')}
+   <div class="fr" style="grid-template-columns:${ph?'1fr':'210px minmax(0,1fr)'}"><div class="fl">Call times</div><div class="fv">${callTimes(s)}</div></div>
+   ${fr('Notify',`<div class="chs">${t('phone','Sam’s phone')}${t('tablet','Kitchen tablet')}</div>`)}
+   ${fr('Quiet hours','22:00 to 06:30<small>Voice starts muted</small>','<button class="k q" data-act="mockname">Change</button>')}
+   ${fr('Always counts','3 people',`<button class="k q" data-act="tab:people">People ›</button>`)}
+   ${fr('Never needs a reply','Northwind Store<small>Added 2 Nov · caught 3 mails</small>','<button class="k q" data-act="mockrm">Remove</button>')}
+   ${fr('Look',`<div class="chs">${pick('look','sheet','Sheet')}${pick('look','bold','Bold')}${pick('look','clean','Clean')}${pick('look','easy','Easy read')}</div><small>Nine Jam looks under More looks</small>`)}
+   ${fr('Lighting',`<div class="chs">${pick('light','auto','Follow the device')}${pick('light','day','Day')}${pick('light','night','Night')}</div>`)}</div>`;
+}
+function setupView(s){
+  const top=`<div class="dline"><span>Last refreshed 06:30</span><button class="k ${s.dev==='phone'?'q':''}" data-act="refresh">Refresh now</button></div>`;
+  if(s.dev==='phone'){
+    if(s.sp==='home') return `${top}<h1 class="subh">Setup</h1><div class="findset"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Find a setting</div>${setIndex(s)}<div class="keys" style="margin-top:14px"><button class="k q q0" data-act="first">See the first run</button></div>`;
+    return setForm(s);
+  }
+  return `${top}<div class="setg"><div><h1 class="subh">Setup</h1><div class="findset"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Find a setting</div>${setIndex(s)}<div class="keys" style="margin-top:14px"><button class="k q q0" data-act="first">See the first run</button></div></div><div style="padding-top:8px">${setForm(s)}</div></div>`;
+}
+/* First run */
+function firstView(s){
+  const i=s.fr, names=['Connect','Call times','Know me'];
+  const boxes=names.map((n,j)=>`<span class="idb ${j<i?'dn':''} ${j===i?'cur':''}">${j<i?'✓':j+1}</span><span class="mono" style="font-size:13px;color:var(--${j===i?'ink':'dim'});margin-right:10px">${n}</span>`).join('');
+  const head=`<div class="dline"><span>Setting up Callsheet</span></div>${i<3?`<div class="oatp" style="margin-top:6px">${boxes}</div>`:''}`;
+  if(i===0) return `<div class="oat">${head}<h1 class="subh">Connect your mail and calendars</h1><p class="intro">Callsheet reads them to print a sheet each morning: your day, who needs you, and what’s coming. It never sends, accepts or deletes anything.</p>
+     <div class="form" style="margin-top:16px">${s.frConn?fr('Google','sam@co-a.example<small>Mail · 3 calendars</small>','<span class="copied"><span class="led on"></span>On</span>'):''}${fr('Slack','Optional','<button class="k q" data-act="mocksig">Connect</button>')}${fr('Signal','Optional','<button class="k q" data-act="mocksig">Link</button>')}</div>
+     <div class="keys" style="margin-top:16px">${s.frConn?`<button class="k" data-act="frconn">Add another Google account</button><button class="k go" data-act="fr:1">Next</button>`:`<button class="k go" data-act="frconn">Connect Google account</button>`}</div></div>`;
+  if(i===1) return `<div class="oat">${head}<h1 class="subh">When should the sheet print?</h1><p class="intro">Three times suit most people. You can change them later in Setup › Your day.</p>
+     <div style="margin-top:14px;border-top:2px solid var(--ink);padding-top:6px">${callTimes(Object.assign({},s,{ce:null}))}</div>
+     <div class="keys" style="margin-top:12px"><button class="k go" data-act="fr:2">Use these times</button><button class="k q" data-act="fr:0">Back</button></div></div>`;
+  if(i===2) return `<div class="oat">${head}<h1 class="subh">Get to know you? <span class="dim" style="font-size:.6em">Optional</span></h1><p class="intro">Callsheet can read your history once, so it sorts replies better and writes drafts that sound like you. It stays on this box, and you can check or forget anything it learns.</p>
+     <div class="keys" style="margin-top:16px"><button class="k go" data-act="fr:3">Read my history</button><button class="k" data-act="fr:3">Not now</button></div></div>`;
+  const B=[['01','Your day'],['02','Who needs you'],['03','Worth knowing'],['04','Coming up']];
+  return `<div class="oat blank">${head}<h1 class="subh">You’re set up.</h1><p class="intro">Your first sheet prints tomorrow at 06:30.</p>
+    <div class="bs">${B.map(([n,t])=>`<div class="bl"><span class="mono dim" style="font-size:13px">${n}</span><div><div class="gl" style="color:var(--ink)">${t}</div><div class="rec s" style="margin-top:8px"></div></div></div>`).join('')}</div>
+    <div class="keys" style="margin-top:16px"><button class="k" data-act="mockwrite">Write today’s sheet now</button><button class="k q" data-act="sp:day">Back to Setup</button></div></div>`;
+}
+function oatView(s){
+  const all=reps(s), o=openR(s);
+  if(!o.length) return `<div class="oat">${wrapBlock(s)}<div class="keys"><button class="k" data-act="tab:sheet">Back to Today</button></div></div>`;
+  const r=o[0];
+  const boxes=all.map((x,i)=>`<span class="idb ${s.done.has(x.id)||s.nf.has(x.id)?'dn':''} ${s.later.has(x.id)?'x':''} ${x.id===r.id?'cur':''}">${String(i+1).padStart(2,'0')}</span>`).join('');
+  return `<div class="oat"><div class="dline"><span>One at a time</span><button class="k q" data-act="tab:sheet">Close ${kh('Esc')}</button></div>
+   <div class="oatp" aria-label="Roster progress">${boxes}</div>
+   <div class="nm">${esc(r.who)}</div><div class="rw">${esc(r.area)} · ${r.why.join(' · ')} · ${esc(r.age)}</div>
+   <p class="ask">${esc(r.ask)}</p><p class="said">${esc(r.said)}</p>
+   ${r.draft?`<textarea class="ta" aria-label="Draft reply">${esc(r.draft)}</textarea>`:'<p class="said" style="margin:14px 0">No draft: this looks like a shop mailing.</p>'}
+   <div class="keys">${keyCopy(s,r,s.sit!=='offline'&&!s.copied.has(r.id))}<button class="k ${s.copied.has(r.id)?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button><button class="k q" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="open:${r.id}">Open in Gmail ${kh('O')}</button><button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button></div>
+   ${s.dev==='phone'?'<div class="swh">Swipe right: done · swipe left: later</div>':''}</div>`;
+}
+function voiceView(s){
+  const i=Math.min(s.voice,VOICE.length-1), L=VOICE[i], end=i===VOICE.length-1, ph=s.dev==='phone';
+  let rail='';
+  if(!ph){ SECS.forEach((n,j)=>{rail+=`<div class="sec ${j===L.s?'on':''}">${String(j+1).padStart(2,'0')} ${n}</div>`;
+      VOICE.forEach((v,k)=>{if(v.s!==j)return;const c=k===i?'now':k<i?'past':'';
+        rail+=`<button class="rl ${c}" data-act="vgo:${k}">${c==='now'?'<span class="slot on"></span>':'<span class="tick"></span>'}<span></span><span>${esc(v.g)}</span></button>`.replace('<span></span>','');});});
+    rail=`<div class="rail">${rail}</div>`;
+  } else {
+    let segs='';VOICE.forEach((v,k)=>{if(k&&VOICE[k-1].s!==v.s)segs+='<i class="gap"></i>';segs+=`<i class="${k===i?'cur':k<i?'past':''}"></i>`});
+    rail=`<div><div class="lstrip">${segs}</div><div class="lsl">${SECS.map((n,j)=>`<span class="${j===L.s?'on':''}">${String(j+1).padStart(2,'0')}</span>`).join('')}</div></div>`;
+  }
+  const heard=s.heard?`<div class="heard"><span class="led on"></span>${esc(s.heard)}</div>`:'';
+  return `<div class="vo ${s.playing?'':'paused'}"><div class="top"><span class="mono" style="font-size:13px;letter-spacing:.16em">${ph?'READ IT TO ME':'READ IT TO ME · WHEATLEY'}</span><span style="margin-left:auto"></span><button class="k q" data-act="vclose">Close</button></div>
+   <div class="body">${rail}<div class="mid"><div class="where">${String(L.s+1).padStart(2,'0')} ${SECS[L.s]} · line ${i+1} of ${VOICE.length}</div>${i?`<div class="prev">${esc(VOICE[i-1].t)}</div>`:''}<div class="cur">${esc(L.t)}</div>${end?'':`<div class="fill"><i data-act="vauto" data-i="${i}"></i></div>`}${heard}</div></div>
+   <div class="bot">${end?`<button class="k" data-act="vback">Back</button><button class="k" data-act="vagain">Play again</button><button class="k" data-act="vclose">Close</button>`:
+   `<button class="k" data-act="vback">‹ Back</button><button class="k go" data-act="vpause">${s.playing?'Pause':'Play'}</button><button class="k" data-act="vnext">Next ›</button>`}<span class="say">Say: next · back · later · repeat · stop</span></div></div>`;
+}
+function lockView(s){
+  return `<div class="lock"><div class="tm">${nowS(s)}</div><div class="dt">Thursday 5 November</div>
+   <div class="nt" data-act="tab:sheet"><div class="h"><span>CALLSHEET</span><span>NOW</span></div><b>Your sheet is ready</b><p>Two things land at 11:00. Priya needs the budget sign-off today.</p></div>
+   <div class="na"><button data-act="tab:sheet">Open</button><button data-act="voice">Read it to me</button></div><div class="hint">Tap the notification, or Read it to me in the car</div></div>`;
+}
+function overlays(s){
+  let h='';
+  if(s.find){const q='pri';
+    const ppl=REPLIES.filter(r=>r.who.toLowerCase().includes(q)).slice(0,3);
+    h+=`<div class="veil" data-act="close"></div><div class="pop" role="dialog" aria-label="Find or ask"><div class="ph"><b>Find or ask</b><button class="k q" data-act="close">Close ${kh('Esc')}</button></div><div class="pb">
+     <div class="fin" aria-label="Search">${q}<span style="opacity:.5">|</span></div>
+     <div class="fg">People and threads</div>${ppl.map((r,i)=>`<button class="fo ${i===0?'top':''}" data-act="slip:${r.id}"><span>${esc(r.who)} · ${esc(r.ask)}</span><span class="mono">${i===0?'↵':''}</span></button>`).join('')}
+     <div class="fg">People</div><button class="fo" data-act="person:pn"><span>Priya N. · Co. A</span><span class="mono">People</span></button>
+     <div class="fg">Ask</div><button class="fo" data-act="tab:ask"><span>Ask: “${q}”</span><span class="mono">reads only</span></button></div></div>`;}
+  if(s.keys) h+=`<div class="veil" data-act="close"></div><div class="pop" role="dialog" aria-label="Keys"><div class="ph"><b>Keys</b><button class="k q" data-act="close">Close ${kh('Esc')}</button></div><div class="pb"><div class="kl">
+     ${[['C','Copy the draft'],['D','Done'],['L','Later'],['O','Open in Gmail'],['N','Note for Callsheet'],['X','Not for me'],['U','Undo the last change'],['J / K','Move through the list'],['W','Work through them'],['R','Read it to me'],['/ or ⌘K','Find or ask'],['1–5','Today, Replies, Agenda, Ask, Projects'],['Esc','Back']].map(k=>`<span class="mono">${k[0]}</span><span>${k[1]}</span>`).join('')}</div></div></div>`;
+  if(s.nfOpen){const r=rep(s.nfOpen), lock=!!r.vip;
+    h+=`<div class="veil" data-act="close"></div><div class="pop" role="dialog" aria-label="Not for me"><div class="ph"><b>Not for me · ${esc(r.who)}</b><button class="k q" data-act="close">Cancel</button></div><div class="pb">
+     ${sqo(s.nfScope==='one','Just this one','nfscope:one','This message leaves Replies. Their next one still comes in.')}
+     ${sqo(s.nfScope==='all','Everything from '+esc(r.who),'nfscope:all',lock?esc(r.who)+' always counts, so only this message can move.':'Saved in Setup › Your day › Never needs a reply, with Remove.',lock)}
+     <div class="keys" style="margin-top:14px"><button class="k go" data-act="nfsave">Move it ${kh('↵')}</button></div></div></div>`;}
+  if(s.confirm) h+=`<div class="veil" data-act="close"></div><div class="pop" role="dialog" aria-label="Start over"><div class="ph"><b>Start over?</b><button class="k q" data-act="close">Cancel</button></div><div class="pb">
+     <p>This deletes, on this box: the local index (2,412 threads), your profile and its 6 facts, the three call times and 1 rule. Your mail, calendars and chats aren’t touched.</p><p class="dim" style="font-size:15px">You’ll go through the first run again. This can’t be undone.</p>
+     <div class="keys" style="margin-top:6px"><button class="k" data-act="close">Keep everything</button><button class="k dark" data-act="mockdel">Delete and start over</button></div></div></div>`;
+  if(s.mock) h+=`<div class="mock" role="status"><b>MOCKUP</b><span>${esc(s.mock)}</span><button class="k" data-act="mockx" aria-label="Close">✕</button></div>`;
+  return h;
+}
+
+/* ---------- render ---------- */
+function render(F){
+  const s=F.st, el=F.app, desk=s.dev==='desk';
+  const veiled=s.find||s.keys||s.nfOpen||s.confirm;
+  el.className=`app ${desk?'desk':'phone'} ${s.theme}${veiled?' veiled':''}`;
+  if(!desk&&s.view==='lock'){el.innerHTML=lockView(s);return}
+  const curTab=s.view==='slip'?'replies':['people','knowme'].includes(s.view)?'ask':s.view;
+  let body;
+  switch(s.view){
+    case 'replies': body=repliesView(s);break;
+    case 'slip': body=desk?repliesView(s):slip(s,rep(s.sel));break;
+    case 'agenda': body=agendaView(s);break;
+    case 'ask': body=askView(s);break;
+    case 'people': body=peopleView(s);break;
+    case 'knowme': body=knowView(s);break;
+    case 'projects': body=projectsView(s);break;
+    case 'oat': body=oatView(s);break;
+    case 'voice': body='';break;
+    case 'setup': body=setupView(s);break;
+    case 'first': body=firstView(s);break;
+    default: body=desk?sheetDesk(s):sheetPhone(s);
+  }
+  const nav=TABS.map(([v,n])=>`<button data-act="tab:${v}" ${curTab===v?'aria-current="page"':''}>${n}</button>`).join('');
+  const off=s.sit==='offline', inSet=s.view==='setup'||s.view==='first';
+  const tools=desk?`<button class="k q" data-act="find" ${off?'disabled':''}>Find ${kh('/')}</button><button class="k q" data-act="refresh" ${off?'disabled':''}>Refresh</button><button class="tl" data-act="setup" ${inSet?'aria-current="page"':''}>Setup</button>`
+   :`<button class="k q" data-act="find" aria-label="Find or ask" ${off?'disabled':''}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button><button class="k q" data-act="setup" style="${inSet?'text-decoration-color:var(--ink);text-decoration-thickness:2px':''}">Setup</button>`;
+  el.innerHTML= desk?
+    `<div class="trim"></div><header class="mast"><span class="wm">Callsheet</span><nav class="nav">${nav}</nav><span class="tools">${tools}</span></header>${offbar(s)}<main class="pg">${body}</main>${s.view==='voice'?voiceView(s):''}${overlays(s)}`
+   :`<div class="trim"></div><header class="phead"><span class="wm">Callsheet</span><span class="tools">${tools}</span></header>${offbar(s)}<main class="pg">${body}</main><nav class="tabs">${inSet?nav.replace(/ aria-current="page"/g,''):nav}</nav>${s.view==='voice'?voiceView(s):''}${overlays(s)}`;
+  const pg=el.querySelector('.pg'); if(pg&&F.keepScroll==null) pg.scrollTop=0;
+  if(pg&&F.keepScroll!=null){pg.scrollTop=F.keepScroll;F.keepScroll=null}
+}
+
+/* ---------- actions ---------- */
+function snap(s){return{done:new Set(s.done),copied:new Set(s.copied),later:new Set(s.later),nf:new Set(s.nf),alertSeen:s.alertSeen,clashAck:s.clashAck,view:s.view,
+  pair:s.pair,merged:[...s.merged],forgot:new Set(s.forgot),remembered:s.remembered,kmDone:new Set(s.kmDone)}}
+function act(F,a){
+  const s=F.st, parts=a.split(':'), n=parts[0], arg=parts[1], id=+arg;
+  const keep=()=>{const pg=F.app.querySelector('.pg');F.keepScroll=pg?pg.scrollTop:null};
+  const mark=(k,x)=>{F.undo=snap(s);s.last=Object.assign({k,at:nowS(s)},x||{})};
+  if(n==='noop') return;
+  if(n!=='mockx') s.mock=null;
+  /* the struck line and inline Undo stay until the next change (mark) or until you leave the place ('tab') */
+  switch(n){
+    case 'tab': s.view=arg;s.find=false;s.more=false;s.km='home';s.proj=null;s.person=null;s.last=null;break;
+    case 'slip': s.sel=id;s.view='slip';s.find=false;s.more=false;break;
+    case 'back': s.view=s.prev||'sheet';break;
+    case 'copy': keep();mark('copy',{id});s.copied.add(id);s.copiedAt=nowS(s);break;
+    case 'done': keep();mark('done',{id});s.done.add(id);s.more=false;if(s.view==='slip'&&s.dev==='phone')s.view=s.prev||'sheet';{const o=openR(s);if(o[0])s.sel=o[0].id};break;
+    case 'later': keep();mark('later',{id});s.later.add(id);s.more=false;if(s.view==='slip'&&s.dev==='phone')s.view=s.prev||'sheet';{const o=openR(s);if(o[0])s.sel=o[0].id};break;
+    case 'open': keep();s.mock='Opens the thread in Gmail, in a new tab.';break;
+    case 'note': keep();s.mock=`Note for Callsheet about ${rep(id).who}: a one-line box opens under the row.`;break;
+    case 'notfor': keep();s.nfOpen=id;s.nfScope='one';break;
+    case 'nfscope': keep();s.nfScope=arg;break;
+    case 'nfsave': keep();{const r=rep(s.nfOpen);mark('nf',{id:r.id});s.nf.add(r.id);}s.nfOpen=null;if(s.view==='slip'&&s.dev==='phone')s.view='replies';{const o=openR(s);if(o[0])s.sel=o[0].id};break;
+    case 'more': keep();s.more=!s.more;break;
+    case 'fn': keep();s.fnOpen=id;break;
+    case 'alertcheck': keep();s.mock='Opens Google’s security page for Co. A, in a new tab.';break;
+    case 'alertseen': keep();mark('seen');s.alertSeen=true;s.seenAt=nowS(s);break;
+    case 'gotit': mark('gotit');s.clashAck=true;s.view='sheet';break;
+    case 'oat': s.view='oat';s.more=false;break;
+    case 'voice': s.prev=s.view==='lock'?'sheet':s.view;s.view='voice';s.voice=0;s.playing=true;s.heard=null;break;
+    case 'vnext': s.voice=Math.min(VOICE.length-1,s.voice+1);s.playing=true;s.heard=null;break;
+    case 'vback': s.voice=Math.max(0,s.voice-1);s.playing=true;s.heard=null;break;
+    case 'vgo': s.voice=id;s.playing=true;s.heard=null;break;
+    case 'vpause': s.playing=!s.playing;break;
+    case 'vagain': s.voice=0;s.playing=true;break;
+    case 'vclose': s.view=s.prev&&s.prev!=='voice'?s.prev:'sheet';break;
+    case 'find': s.find=true;break;
+    case 'keys': s.keys=true;break;
+    case 'close': s.find=false;s.keys=false;s.nfOpen=null;s.confirm=false;break;
+    case 'retry': keep();s.retry++;if(s.retry>=2){s.sit='normal';s.retry=0;s.checked=nowS(s);}break;
+    case 'refresh': keep();s.checked=nowS(s);break;
+    case 'setup': s.view='setup';s.sp=s.dev==='desk'?'day':'home';s.ce=null;s.drw=null;break;
+    case 'sp': keep();s.view='setup';s.sp=arg;s.ce=null;s.drw=null;break;
+    case 'ce': keep();s.ce=arg===''?null:id;s.ctv='';break;
+    case 'ctsave': keep();{const v=F.app.querySelector('.ctinput');const c=ctCheck(v?v.value:'');if(!c.ok){s.ctv=v.value;break;}s.ce=null;s.mock='Saved. '+c.m;}break;
+    case 'tg': keep();s.tg[arg]=!s.tg[arg];break;
+    case 'pk': keep();s.tg[arg]=parts[2];break;
+    case 'drw': keep();s.drw=s.drw===arg?null:arg;break;
+    case 'confirm': keep();s.confirm=true;break;
+    case 'gretry': keep();s.retry++;if(s.retry>=2){s.gOff=false;s.retry=0;}break;
+    case 'first': s.view='first';s.fr=0;s.frConn=false;break;
+    case 'fr': s.fr=id;break;
+    case 'frconn': keep();s.frConn=true;if(s.frConn&&a==='frconn'&&F.app.querySelector('[data-act="fr:1"]'))s.mock='Google’s sign-in opens for a second account.';break;
+    case 'ask': case 'suggest': {if(n==='suggest')s.q=ANS.q;const v=F.app.querySelector('.askin');if(n==='ask'&&v)s.q=v.value;if(!(s.q||'').trim()){s.mock='Type a question first.';break;}s.asked=1;s.q='';}break;
+    case 'stop': s.asked=0;break;
+    case 'remember': keep();mark('rem');s.remembered=true;break;
+    case 'same': case 'notsame': case 'unsure': keep();{const P=PAIRS[s.pair];const m=n==='same'?`${P.a.name} and ${P.b.name} are one person now.`:n==='notsame'?`Won’t ask about ${P.a.name} and ${P.b.name} again.`:`Skipped. Callsheet asks again next week.`;mark('pair',{m});s.pair++;}break;
+    case 'person': s.view='people';s.person=arg;s.find=false;break;
+    case 'pback': s.person=null;break;
+    case 'ac': keep();{const p=PEOPLE.find(x=>x.id===arg);p.ac=!p.ac;}break;
+    case 'km': s.km=arg;s.kmq=false;s.view='knowme';break;
+    case 'kmq': keep();s.kmq=arg==='1';break;
+    case 'kmok': keep();s.kmDone.add(id);s.kmq=false;break;
+    case 'qa': keep();s.qa=id;break;
+    case 'forget': keep();mark('forget',{id});s.forgot.add(id);s.kmDone.add(id);if(s.km==='check'){}break;
+    case 'proj': s.proj=arg||null;break;
+    case 'task': keep();s.tasks.has(arg)?s.tasks.delete(arg):s.tasks.add(arg);break;
+    case 'undo': if(F.undo){Object.assign(s,F.undo);F.undo=null}keep();s.last=null;break;
+    case 'mockx': keep();s.mock=null;break;
+    default: if(n.startsWith('mock')){keep();s.mock={mockask:'Unfolds the steps: which threads and calendars it read, in order.',mockcopy:'Copies the answer with its sources.',mocknote:'A one-line note box opens in place.',mockscan:'Reads the history again; progress shows on this row.',mockpv:'Timeline, Slipped and Weekly review keep pass 3’s structure.',mockadd:'Adds the project and moves it into the list, with Undo.',mockct:'A blank call time opens in the list, ready to type.',mocksig:'Opens that service’s own sign-in page.',mockg:'Google’s sign-in opens in a new tab.',mockname:'The field opens in place, checked as you type.',mockrm:'The rule leaves the list, with Undo in place.',mockkey:'A field opens; the new key is typed, never shown back.',mockdel:'Deletes, then opens the first run.',mockwrite:'Writes a sheet now (about 3–5 min) and opens Today.'}[n]||'Stand-in.';}
+  }
+  if(!['back','voice','vnext','vback','vpause','vagain','vclose','vgo'].includes(n)&&s.view!=='slip'&&s.view!=='voice') s.prev=s.view;
+  render(F);
+  if(n==='ask'||n==='suggest'){if(s.asked===1){clearTimeout(F.at);F.at=setTimeout(()=>{if(F.st.asked===1){F.st.asked=2;render(F)}},1400)}}
+}
+
+/* ---------- frames ---------- */
+const FR=[];
+function makeFrame(host,dev,st,w,h){
+  const W=w||(dev==='desk'?1440:390), H=h||(dev==='desk'?900:844);
+  host.innerHTML='';const scr=document.createElement('div');scr.className='screen';scr.tabIndex=0;
+  scr.setAttribute('aria-label',dev==='desk'?'Desktop frame':'Phone frame');
+  const sc=document.createElement('div');sc.className='scaler';sc.dataset.w=W;sc.style.width=W+'px';sc.style.height=H+'px';
+  const app=document.createElement('div');app.style.width=W+'px';app.style.height=H+'px';sc.appendChild(app);scr.appendChild(sc);host.appendChild(scr);
+  const F={host,scr,sc,app,W,H,st:Object.assign(base(dev),st||{})};
+  app.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t||t.disabled)return;e.stopPropagation();act(F,t.dataset.act)});
+  app.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('rrow')){e.preventDefault();act(F,e.target.dataset.act)}
+    if(e.key==='Enter'&&e.target.classList.contains('askin')){e.preventDefault();e.stopPropagation();act(F,'ask')}});
+  app.addEventListener('input',e=>{const t=e.target;
+    if(t.classList.contains('askin')){F.st.q=t.value;const b=F.app.querySelector('.askgo');if(b)b.classList.toggle('go',!!t.value.trim()&&F.st.sit!=='offline')}
+    if(t.classList.contains('ctinput')){F.st.ctv=t.value;const c=ctCheck(t.value),m=F.app.querySelector('#ctmsg');if(m){m.textContent=c.m;m.classList.toggle('bad',!c.ok)}}});
+  app.addEventListener('animationend',e=>{if(e.target.dataset&&e.target.dataset.act==='vauto'&&F.st.playing&&F.st.view==='voice'){F.st.voice=Math.min(VOICE.length-1,F.st.voice+1);render(F)}});
+  if(dev==='desk') scr.addEventListener('keydown',e=>deskKey(F,e));
+  FR.push(F);render(F);fitOne(F);return F;
+}
+function fitOne(F){const w=F.scr.clientWidth||F.host.clientWidth;const k=w/F.W;F.sc.style.transform=`scale(${k})`;F.scr.style.height=(F.H*k)+'px'}
+function fit(){FR.forEach(fitOne)}
+addEventListener('resize',fit);
+function deskKey(F,e){
+  const s=F.st,k=e.key;
+  if((e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')&&k!=='Escape')return;
+  if(e.metaKey||e.ctrlKey){if(k.toLowerCase()==='k'){e.preventDefault();act(F,'find')}return}
+  const o=openR(s);const cur=(s.view==='replies'||s.view==='slip')?(o.find(r=>r.id===s.sel)||o[0]):o[0];
+  const c=cue(s);
+  const map={'/':'find','?':'keys','r':'voice','w':'oat','u':'undo','1':'tab:sheet','2':'tab:replies','3':'tab:agenda','4':'tab:ask','5':'tab:projects'};
+  if(k==='Escape'){e.preventDefault();if(s.find||s.keys||s.nfOpen||s.confirm)act(F,'close');else if(s.view==='voice')act(F,'vclose');else if(s.view==='knowme'&&s.km!=='home')act(F,'km:home');else act(F,'tab:sheet');return}
+  if(s.find&&k==='Enter'){e.preventDefault();act(F,'slip:1');return}
+  if(s.confirm)return; /* Enter never fires a destructive key */
+  if(s.view==='voice'){if(k===' '){e.preventDefault();act(F,'vpause')}if(k==='ArrowRight')act(F,'vnext');if(k==='ArrowLeft')act(F,'vback');return}
+  if(map[k]){e.preventDefault();act(F,map[k]);return}
+  if(k==='Enter'&&s.view==='sheet'){e.preventDefault();if(c==='alert')act(F,'alertcheck');else if(c==='clash')act(F,'tab:agenda');else if(s.sit==='offline')act(F,'retry');else if(cur)act(F,(s.copied.has(cur.id)?'done:':'copy:')+cur.id);return}
+  if(s.nfOpen&&k==='Enter'){e.preventDefault();act(F,'nfsave');return}
+  if(!cur||!['sheet','replies','slip','oat'].includes(s.view))return;
+  const L={c:'copy:',d:'done:',l:'later:',o:'open:',n:'note:',x:'notfor:'}[k.toLowerCase()];
+  if(L){e.preventDefault();act(F,L+cur.id);return}
+  if(k==='j'||k==='k'){e.preventDefault();const i=o.indexOf(cur);const nx=o[Math.max(0,Math.min(o.length-1,i+(k==='j'?1:-1)))];if(nx){s.sel=nx.id;if(s.view==='sheet')s.view='replies';render(F)}}
+}
+
+/* ---------- flows ---------- */
+const D=(...ids)=>new Set(ids);
+const both=(o,p)=>({p:Object.assign({},o,p||{}),k:Object.assign({},o)});
+const FLOWS=[
+ {n:'A · Morning, from the push',steps:[
+  {d:'<b>06:34, phone.</b> The push says two things in one line. Open, or Read it to me in the car.',p:{view:'lock'},k:{}},
+  {d:'<b>The sheet.</b> Desktop: headline and summary share one line, so all five roster rows sit above the fold at 1440 × 900. Phone: tap a footnote number to see its source in place. The first free gap says only what the calendar knows.',...both({},{fnOpen:1})},
+  {d:'<b>Copy draft.</b> The key becomes “Copied 06:41” (a quiet past form: unlit window + word) with Undo beside it, and Done becomes the orange. No toast: the change is visible where it happened.',...both({copied:D(1),copiedAt:'06:41',last:{k:'copy',id:1,at:'06:41'}})},
+  {d:'<b>Done.</b> Priya’s row stays as one struck-through line with Undo. Everyone moves up a number and School office opens out.',...both({copied:D(1),done:D(1),last:{k:'done',id:1,at:'06:42'},time:402})}]},
+ {n:'B · One at a time',steps:[
+  {d:'<b>Work through them.</b> One person per screen. The roster numbers across the top are the progress: current is heavy, done is struck, later is dashed.',...both({view:'oat'})},
+  {d:'<b>Copied, then Done.</b> Swipes on the phone do the same (right = done, left = later).',...both({view:'oat',copied:D(1)})},
+  {d:'<b>Roster clear.</b> The sign-off: two figures (answered, for tomorrow), the walnut double rule draws in once, and “Nothing was sent” in words. No “Sent 0”, no orange.',...both({view:'oat',done:D(1,2,3,5,6,7),later:D(4)})}]},
+ {n:'C · Busy morning: an alert first',steps:[
+  {d:'<b>Alert takes the cue.</b> The 06:30 summary did mention the sign-in, but the cue says it now, so that sentence is left out of the printed summary and its footnote ⁴ moves onto the cue. Red key, no orange. Priya waits as THEN.',...both({sit:'alert'})},
+  {d:'<b>It was me.</b> The cue hands back to Priya and the orange returns. The sign-in sits in Worth knowing as “Seen 06:41” with Undo, and the summary still leaves it out: Worth knowing says it.',...both({sit:'alert',alertSeen:true,seenAt:'06:41',last:{k:'seen',at:'06:41'}})}]},
+ {n:'D · The clash, within the hour',steps:[
+  {d:'<b>06:34, before.</b> The summary says “two of them land at 11:00¹”. The running order draws the clash too, but a timeline isn’t a repeat (H7).',...both({})},
+  {d:'<b>10:05.</b> The clash is within 60 minutes and takes the cue. The summary sentence about it drops out and ¹ moves to the cue label. On the phone the day strip keeps its amber mark but drops its clash label.',...both({time:605})},
+  {d:'<b>See the clash.</b> Agenda: the full running order with the bracket, and invites to answer. No orange: answering happens in Google Calendar.',...both({time:605,view:'agenda'})},
+  {d:'<b>Got it.</b> The cue returns to the roster; the bracket says “Got it 10:06” with Undo, in place. The summary sentence returns, because nothing live says it now.',...both({time:606,clashAck:true,last:{k:'gotit',at:'10:06'}})}]},
+ {n:'E · A reply up close, and Not for me',steps:[
+  {d:'<b>The reply page.</b> What they want, their words, your draft to edit, then Copy / Done / Open and the quiet keys.',p:{view:'slip',sel:1,prev:'sheet'},k:{view:'replies',sel:1}},
+  {d:'<b>Not for me on a shop mailing.</b> A bottom sheet on the phone, centred on desktop. “Just this one” is chosen: a lit square in its bezel, and the row presses in.',p:{view:'slip',sel:7,prev:'replies',nfOpen:7},k:{view:'replies',sel:7,nfOpen:7}},
+  {d:'<b>Locked for people who always count.</b>',p:{view:'slip',sel:1,nfOpen:1},k:{view:'replies',sel:1,nfOpen:1}},
+  {d:'<b>Moved.</b> The line stays, struck through, with Undo.',...both({view:'replies',nf:D(7),last:{k:'nf',id:7,at:'06:44'}})}]},
+ {n:'F · Agenda',steps:[
+  {d:'<b>Agenda at 12:40.</b> Past things dimmed with “done”, lunch ON NOW with a lit slot, free stretches printed, invites to answer beside it.',...both({time:760,view:'agenda',clashAck:true})}]},
+ {n:'G · Find or ask',steps:[
+  {d:'<b>/ or ⌘K.</b> The page behind loses its orange. On the phone this is a bottom sheet.',...both({find:true})},
+  {d:'<b>Enter.</b> Priya’s reply page.',p:{view:'slip',sel:1},k:{view:'replies',sel:1}}]},
+ {n:'H · Read it to me',nw:1,steps:[
+  {d:'<b>The reading rail.</b> Desktop: the sheet’s sections 01–04 down a rail, a tick per spoken line, the lit slot on the line being read. Phone: the rail folds into a line strip. Pause is the one orange.',...both({view:'voice',voice:0})},
+  {d:'<b>Who needs you.</b> Click any line on the rail to jump there.',...both({view:'voice',voice:2})},
+  {d:'<b>“Later”, said aloud.</b> Confirmed in words, under the line.',...both({view:'voice',voice:2,playing:false,heard:'Heard “later”. Priya N. waits for your desk at 12:30.'})},
+  {d:'<b>The end.</b> No orange: Back, Play again, Close.',...both({view:'voice',voice:6})}]},
+ {n:'I · End of the day, 17:40',steps:[
+  {d:'<b>17:40.</b> The roster is clear. The headline becomes “That’s the day, Sam.” (one display line, not two). Answered and For tomorrow as figures, then the walnut rule, then “Nothing was sent” in words; the footer drops its own copy of the promise.',...both({time:1060,done:D(1,2,3,5,7),later:D(4,6),clashAck:true})}]},
+ {n:'J · Can’t reach Callsheet',steps:[
+  {d:'<b>Away from home.</b> A dashed bar over the 06:30 sheet. Try again is the orange; Copy still works as a plain key.',...both({sit:'offline'})},
+  {d:'<b>First try fails</b> and says what to check.',...both({sit:'offline',retry:1})},
+  {d:'<b>Second try works.</b> The footer says it in place: “checked 06:34, nothing new”.',...both({checked:'06:34'})}]},
+ {n:'K · Ask',nw:1,steps:[
+  {d:'<b>A transcript, not bubbles.</b> Each question has a mono time tag. The answer’s sources sit in the margin on desktop and under the answer on the phone. “Remember this?” offers to save a fact to Know me; you press Save.',...both({view:'ask'})},
+  {d:'<b>Typed.</b> Ask turns orange only once there’s a question to send. Try typing in either frame.',...both({view:'ask',q:'When is the boiler visit?'})},
+  {d:'<b>Reading.</b> The lit slot shows it’s running and says which source; Stop is a plain key.',...both({view:'ask',asked:1})},
+  {d:'<b>The answer.</b> Plain about what isn’t true yet: nothing is booked, and the draft hasn’t been sent.',...both({view:'ask',asked:2})}]},
+ {n:'L · People',nw:1,steps:[
+  {d:'<b>Same person?</b> Two records field by field, with a match gutter: = matches, ≠ differs, · missing, ≈ close. The reason is one line. All three answers are neutral keys.',...both({view:'people'})},
+  {d:'<b>Same person.</b> Merged, said in place with Undo; pair 2 of 3 is next.',...both({view:'people',pair:1,last:{k:'pair',at:'07:10',m:'Priya N. and Priya Nair are one person now.'}})},
+  {d:'<b>A person.</b> Always counts (a tick-box window), where Callsheet sees them, last heard, what’s waiting, and a note. Phone opens it full screen.',p:{view:'people',person:'pn'},k:{view:'people',person:'pn'}}]},
+ {n:'M · Know me',nw:1,steps:[
+  {d:'<b>Know me.</b> Three steps as rows with ID boxes. “Check 2 things” is the one orange. Below that, what it knows: numbered facts, each with its source (in the margin on desktop) and Forget. Two are marked ▲ To check.',...both({view:'knowme'})},
+  {d:'<b>Check, one at a time.</b> The fact large, its source, then Right / Not quite / Forget this, all neutral: orange would lean on your answer.',...both({view:'knowme',km:'check'})},
+  {d:'<b>Not quite.</b> A box to say what’s right; Save and next is now the orange.',...both({view:'knowme',km:'check',kmq:true})},
+  {d:'<b>A question.</b> Square-window choices; the chosen row presses in.',...both({view:'knowme',km:'q',kmDone:D(1,2)})}]},
+ {n:'N · Projects',nw:1,steps:[
+  {d:'<b>Projects.</b> A round window per project: unlit when fine, amber + ▲ + word when slipped. A suggestion has a dashed (unconfirmed) window and Add project.',...both({view:'projects'})},
+  {d:'<b>Kitchen refit.</b> The slip track: weeks as a strip, the dashed tick where the fitting was, an amber arrow to where it is, and today’s needle. The date has a footnote to the fitter’s mail (H17). Tasks are tick boxes.',...both({view:'projects',proj:'kr'})}]},
+ {n:'O · Setup',nw:1,steps:[
+  {d:'<b>Setup is a form.</b> Lettered sections A–D; on desktop the index sits beside the open section with a lit slot. Your day: call times drawn as a short running order. Tick boxes apply at once. No orange anywhere.',p:{view:'setup',sp:'home'},k:{view:'setup',sp:'day'}},
+  {d:'<b>Change a call time.</b> It checks as you type (try “6:45” or “25:00”) and says what it costs: about 3–5 min, from the last 7 sheets.',p:{view:'setup',sp:'day',ce:0},k:{view:'setup',sp:'day',ce:0}},
+  {d:'<b>A connection fails.</b> The only orange Setup ever shows: Try again, on the broken row (CW7).',...both({view:'setup',sp:'conn',gOff:true})},
+  {d:'<b>Start over.</b> In its closed drawer, then a confirm sheet that names what goes. The destructive key is dark, never orange or red, and Enter never fires it, and Keep everything comes first.',...both({view:'setup',sp:'adv',drw:'start',confirm:true})}]},
+ {n:'P · First run',nw:1,steps:[
+  {d:'<b>1 · Connect.</b> The ID boxes are the progress. One orange per step.',...both({view:'first',fr:0})},
+  {d:'<b>Connected.</b> The account shows as On, and the orange moves to Next.',...both({view:'first',fr:0,frConn:true})},
+  {d:'<b>2 · Call times.</b> The defaults, drawn as the same short running order.',...both({view:'first',fr:1})},
+  {d:'<b>3 · Know me, optional.</b>',...both({view:'first',fr:2})},
+  {d:'<b>The blank sheet.</b> The four sections as grooves, and when the first sheet prints. No orange: you’re done.',...both({view:'first',fr:3})}]}
+];
+let G={light:'day',day:'normal',w:1440,flow:0,step:0};
+let FD,FP;
+function applyStep(){
+  const st=FLOWS[G.flow].steps[G.step];
+  FR.length=0;
+  FD=makeFrame(document.getElementById('fd'),'desk',Object.assign({theme:G.light,day:G.day},st.k),G.w,900);
+  FP=makeFrame(document.getElementById('fp'),'phone',Object.assign({theme:G.light,day:G.day},st.p));
+  FR.push(...GAL);
+  document.getElementById('capd').textContent=`Desktop ${G.w} × 900`;
+  document.getElementById('stepdesc').innerHTML=`<span class="eyebrow">${FLOWS[G.flow].n.split(' · ')[0]} · step ${G.step+1} of ${FLOWS[G.flow].steps.length}</span><br>${st.d}`;
+  document.getElementById('stepnums').innerHTML=FLOWS[G.flow].steps.map((_,i)=>`<button aria-pressed="${i===G.step}" data-i="${i}">${i+1}</button>`).join('');
+  document.querySelectorAll('#flowbtns button').forEach((b,i)=>b.setAttribute('aria-pressed',i===G.flow));
+  fit();
+}
+document.getElementById('flowbtns').innerHTML=FLOWS.map((f,i)=>`<button data-i="${i}" class="${f.nw?'nw':''}">${f.n}</button>`).join('');
+document.getElementById('flowbtns').onclick=e=>{const b=e.target.closest('button');if(!b)return;G.flow=+b.dataset.i;G.step=0;applyStep()};
+document.getElementById('stepnums').onclick=e=>{const b=e.target.closest('button');if(!b)return;G.step=+b.dataset.i;applyStep()};
+document.getElementById('sprev').onclick=()=>{if(G.step>0)G.step--;else if(G.flow>0){G.flow--;G.step=FLOWS[G.flow].steps.length-1}applyStep()};
+document.getElementById('snext').onclick=()=>{if(G.step<FLOWS[G.flow].steps.length-1)G.step++;else{G.flow=(G.flow+1)%FLOWS.length;G.step=0}applyStep()};
+function seg(id,key,cb){const el=document.getElementById(id);el.onclick=e=>{const b=e.target.closest('button');if(!b)return;el.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));G[key]=key==='w'?+b.dataset.v:b.dataset.v;cb&&cb()}}
+seg('c-light','light',applyStep);seg('c-day','day',applyStep);seg('c-w','w',applyStep);
+
+/* ---------- gallery ---------- */
+const GAL=[];
+function gal(hostId,dev,cap,st,w){const fig=document.createElement('figure');const fr=document.createElement('div');fr.className='frame'+(dev==='phone'?' ph':'');fig.appendChild(fr);const fc=document.createElement('figcaption');fc.textContent=cap;fig.appendChild(fc);document.getElementById(hostId).appendChild(fig);GAL.push(makeFrame(fr,dev,st,w||(dev==='desk'?1280:390),dev==='desk'?800:844))}
+gal('gald','desk','Today · Day · 06:34',{theme:'day'});
+gal('gald','desk','Today · Night · 10:05, the clash takes the cue',{theme:'night',time:605});
+gal('gald','desk','Setup · Day · Your day with call times',{theme:'day',view:'setup',sp:'day'});
+gal('gald','desk','Ask · Night · an answer with sidenotes',{theme:'night',view:'ask',asked:2});
+gal('gald','desk','People · Day · Same person?',{theme:'day',view:'people'});
+gal('gald','desk','Know me · Night',{theme:'night',view:'knowme'});
+gal('gald','desk','Projects · Day · Kitchen refit',{theme:'day',view:'projects',proj:'kr'});
+gal('gald','desk','Read it to me · Night',{theme:'night',view:'voice',voice:2,playing:false});
+gal('galp','phone','Today · Day',{theme:'day'});
+gal('galp','phone','Today · Night',{theme:'night'});
+gal('galp','phone','Alert · Day',{theme:'day',sit:'alert'});
+gal('galp','phone','End of day · Night',{theme:'night',time:1060,done:D(1,2,3,5,7),later:D(4,6),clashAck:true});
+gal('galp','phone','Setup · Day',{theme:'day',view:'setup',sp:'home'});
+gal('galp','phone','Your day · Night',{theme:'night',view:'setup',sp:'day'});
+gal('galp','phone','Ask · Day',{theme:'day',view:'ask'});
+gal('galp','phone','Ask · Night',{theme:'night',view:'ask',asked:2});
+gal('galp','phone','People · Night',{theme:'night',view:'people'});
+gal('galp','phone','Know me check · Day',{theme:'day',view:'knowme',km:'check'});
+gal('galp','phone','Kitchen refit · Day',{theme:'day',view:'projects',proj:'kr'});
+gal('galp','phone','Kitchen refit · Night',{theme:'night',view:'projects',proj:'kr'});
+gal('galp','phone','Read it to me · Day',{theme:'day',view:'voice',voice:2,playing:false});
+gal('galp','phone','Read it to me · Night',{theme:'night',view:'voice',voice:4,playing:false});
+gal('galp','phone','First run, the blank sheet · Night',{theme:'night',view:'first',fr:3});
+gal('galp','phone','Not for me · Day',{theme:'day',view:'slip',sel:7,nfOpen:7});
+applyStep();
+addEventListener('load',fit);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+</script>
+</body>
+</html>
