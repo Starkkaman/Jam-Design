@@ -158,7 +158,7 @@ A look may have a full-screen film layer (scanlines, grain, colour fringe) if th
 | State | Never colour alone: shape + word | | |
 | Fonts | OFL, bundled, no CDNs | | |
 | Words | Plain, complete button wording ("Resume from 1:12:04"); no jokes in the interface | | One title + one line on **home screens, launchers and focused cards**. Detail pages and buttons keep complete wording. |
-| Carousels | — | — | Allowed for cover and screenshot rows. The next item peeks. Never for groups, controls or settings. |
+| Carousels | — | — | Allowed for cover and screenshot rows, and for groups in any look (Hi-Fi included) when the neighbours are named or visible at the edges and the position is shown ("3 of 8"). The next item always peeks. Never for controls or settings. |
 
 ## 10. Still open
 
@@ -167,4 +167,3 @@ A look may have a full-screen film layer (scanlines, grain, colour fringe) if th
 - The look shelf: which alternates survive and get rebuilt on these roles.
 - Token pipeline: one token file converted to CSS variables, HA `--jam-*` YAML, Compose `Palette.kt` and Godot `theme.json` (NervOS's dotted `tokens` block; role map in `projects/nervos/PROPOSALS.md` P6). The band and walnut trim need per-app layout code, not just tokens.
 - Kiosk glance size and "attention surfaces" (HA questions 3 and 7): not adopted for now.
-- Group carousels in alternate looks (NervOS P4).
