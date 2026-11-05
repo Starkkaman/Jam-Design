@@ -34,3 +34,6 @@ Isaac asked (2026-11-05, before bed): mockups for every interface, three passes 
 - Don't edit BIBLE.md, decisions.md, CHANGES.md, tokens/, projects/ or other apps' files.
 - Don't message other sessions or change any real app or server.
 - Don't use logos or recreate a real product's look; references inform, they aren't copied.
+
+## Update: Jam Braun reference is in
+The HA agent pushed `projects/jam-home/screens/braun/` (52 shots, phone + both kiosks, light and dark) and a "Jam Braun look" section in `projects/jam-home/README.md` (tokens, fonts, radii, motion). **Jam Braun is the look Isaac actually uses and likes**: use these as the primary reference for the "calm" baseline in every app, and especially for the Home Assistant rounds. The live dashboards don't pin a view theme; each user's own look applies.
