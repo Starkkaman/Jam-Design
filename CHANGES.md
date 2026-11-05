@@ -44,3 +44,8 @@ Mockup 13 applies this to Jam Home. If he keeps it, the bible needs these edits:
 Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 
 
+### Pass 1 · TV launcher
+- D1. A focusable card can't show two same-coloured bars at one edge (progress + selector). Define where progress lives on focusable cards.
+- D2. Accent clear zones exclude navigation and chrome, not just titles and buttons.
+- D3. One focus grammar per device: tiles and list rows use the same window logic.
+- D4. The TV minimum (22 px at 1080p) applies to hints and sub-labels too; hints 24 px.
