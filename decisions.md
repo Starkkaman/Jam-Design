@@ -217,3 +217,7 @@ Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopt
 ## Project check 5: Jam-Dash
 56 Depth screenshots + profile. Its questions 1, 3, 4, 6 (which originals/II looks stay, Global views per look, picker previews, look bugs) are app-internal and wait for Jam-Dash's rollout turn / the shelf decision. Q2 (Runner direction) and Q5 (phone monitoring rule) go to Isaac.
 - Isaac: Runner -> keep as a shelf candidate. Phone monitoring-row rule -> NOT adopted.
+
+## Jam Home v2 mockup (2026-11-05)
+- Isaac: look shelf waits until the lookbook is done; no interface sounds yet; token pipeline undecided. Keep defining.
+- Mockup 11: Jam Home from HA's real inventory (phone Living view, living-room iPad 1024x768, kitchen Echo Show 961x601) with everything locked: Rich texture (Echo in kiosk-safe tier, no grain overlays), paper clock/room titles, state words on every light (On · 70 / Off / Offline), light colour as a lit swatch window (never a full-card fill; room accent colours retired per colour discipline), readouts in windows, scenes with square windows, P1 progress on the TV band, ladder + volume fader, lock as a round window (green LED locked / red diamond + "Unlocked" + orange Lock button), base-window dock with state lines, HA tabs with base windows. One accent per screen: Session blocks (phone room title), Stripes (iPad), Colour bars (Echo).
