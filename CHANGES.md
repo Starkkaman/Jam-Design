@@ -107,3 +107,50 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D50. Decorative motifs may hold one indicator (the speaker grille's dot lights while playing).
 - D51. Type in HA: Jost + IBM Plex Mono replace Archivo at rollout, self-hosted; kiosk sizes clock 168/124, title 22, body 18, label 13.
 - D52. Offline lights still open a sheet ("Can't be reached since…", Retry).
+
+### Pass 2 · TV launcher
+- D53. TV cards are art + plinth everywhere; on a banner the plinth may shrink to a strip that only holds the focus window.
+- D54. On a launcher, Guide always opens one bottom TV menu over whatever is playing; apps never take that button (confirms D35).
+- D55. A full-screen preview applies only after focus rests ≥500 ms; Back reverts in one change (new flash/glare floor; NervOS uses 450 ms for large previews).
+- D56. D33 settled: while a list is open, its button shows ▲ instead of the value.
+- D57. D16 extended: lists pop below a top band, above a bottom band, beside a vertical list, in one shared dark sheet.
+- D58. D31 concrete: hold 600 ms for options, 1 s to unlock/delete; non-hold path = ≡ or "press OK again within 3 s".
+- D59. D32 for launcher rows: stop at the ends, walnut end mark, a nudge on an extra press, "n of N" on the focused row only.
+- D60. One launch rule: hold = max(load, 600 ms), then 300 ms to open; system apps may skip the shutter.
+- D61. New shared component: the source window (a recessed display naming the current input).
+- D62. The accent's clear zone holds one thing at a time; the accent hides while a toast or menu needs the space.
+- D63. Input words: Signal / No signal / Nothing plugged in; every no-signal screen ends with Try again + Home.
+
+### Pass 2 · Callsheet
+- D64. The moving primary gets a time scope: time-bound warns take the orange only within ~60 minutes.
+- D65. The Next card becomes a shared "one next action" component (same grammar as Jam-Dash's trouble card).
+- D66. Step mode becomes a shared pattern (slot-window progress, ≤1 orange per step, an end card), separate from carousels.
+- D67. Callsheet's accent is Stripes only, shown when calm.
+- D68. Bar group caps at 10 plus the number, and nearby text must not repeat that number (refines D6).
+- D69. A seen alert is an unlit light plus "Seen hh:mm": still listed, no red, no button (refines D11).
+- D70. A form sheet may hold one orange; a destructive sheet holds none, and Enter never fires a destructive button.
+- D71. Selected rows in desktop lists light a leading-edge slot window.
+- D72. Content rule for AI text: ≤25 words on a front door, never restating a value a meter on the same screen shows.
+- D73. Callsheet navigation: Today, Replies, Agenda, Ask, Projects + a labelled Setup ("Chat" becomes "Ask"). Desktop Replies returns to list + detail (needs Isaac's OK).
+- D74. Decide whether rocker paddles in long settings lists stay orange or go graphite (see D76).
+
+### Pass 2 · NervOS
+- D75. Group carousels wrap behind a non-focusable "Start" marker; a held key stops there, a fresh press goes round (answers D32 for group carousels; launcher rows stop instead, D59).
+- D76. Two keys acting on one value share a tray that names it once (D33).
+- D77. Guide band: paused content shows an unlit slot + "Paused"; running content a lit slot + "Running" and a lighter veil.
+- D78. An app may keep its approved section names (Archive · Hangar · Uplink · Theater) on shared screens if set in house type with a one-line description on focus (D37, Isaac decides).
+- D79. A TV home shows at least 2.5 rows at 1080p (cards ~15% of width, labels 26/22 px).
+- D80. The resume point appears once, on the main button.
+- D81. Save states: four picture slots; empty = dark recess, current = lit square.
+
+### Pass 2 · Home Assistant
+- D82. Orange is budgeted **per screen**: one primary, chosen playing > on > idle, then page order; a popup or sheet counts as its own screen (answers D39).
+- D83. Rocker paddles are never orange: on = paddle up + a lit window on the paddle in the device's colour. (Big change to A4; Isaac decides. Mockup shows pass 1 / adaptive / quiet side by side.)
+- D84. The control that fixes an alert is a solid red key with dark text at every size, and nothing else on that screen is orange while it shows (merges D42 + TV's alert-ring version; pick one form).
+- D85. A lit light card may tint the strip behind its fader ("Band"); whole-card tint stays retired. Options Band / Edge / Wash shown for Isaac.
+- D86. Kiosk light faders are vertical columns printing their own number on the cap.
+- D87. Day kiosk dock = card blocks with indicator windows; the black ribbed dock is night only (amends D47).
+- D88. HA's `primary-color` reaches only confirm buttons; switch/state keys map to dark and cream (keys unverified).
+- D89. Keys may carry a printed colour code for identification (never lit, never a state, never orange).
+- D90. A count only counts what it names ("Lights · 3 on" leaves out the Tree).
+- D91. Tab bars draw only the lit window (extends D12/D46).
