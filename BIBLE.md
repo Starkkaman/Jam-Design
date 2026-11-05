@@ -1,4 +1,4 @@
-# Jam Design Bible — working draft 0.3
+# Jam Design Bible — working draft 0.4
 
 > **Status: draft. Nothing here is approved for shipping, and nothing existing is being replaced or deleted.** Rollout comes later, one app or service at a time; existing looks and themes stay until that app's turn. The base look is still being designed with Isaac. Source of every decision: [`decisions.md`](decisions.md). Visual reference: [`mockups/`](mockups/), latest first.
 
@@ -9,6 +9,12 @@
 Inspiration: 70s NASA, Dieter Rams, TNG/Voyager interiors, Ralph McQuarrie and Syd Mead, Cowboy Bebop, Evangelion, Miyazaki and Satoshi Kon, mid-century modern furniture, the Atari 2600, Fallout. *"A retro design lover, but also a lover of clean, effective design."*
 
 Three people live in the house. The default look has to feel friendly to all of them, not like a cockpit.
+
+### Looks and who sees them
+- **Hi-Fi is the default house look.** When each app's rollout turn comes, Hi-Fi becomes its default. Existing looks stay until the look-shelf decision, and none are deleted without Isaac's OK.
+- **Shared screens (kiosks, TVs) show the house look**, so everyone sees the same thing.
+- **Personal devices (phones, desktops) follow each person's own look.**
+- **Exception: JamFin** saves each Jellyfin profile's preferred look and applies it when that profile is picked, even on the TV.
 
 ## 2. The base look: Hi-Fi
 
@@ -35,7 +41,7 @@ The house as a piece of 1970s hi-fi equipment: brushed aluminium, a black ribbed
 
 ### Type
 - **Jost** for everything you read as words. Uppercase labels at 12 px with 0.16em tracking.
-- **IBM Plex Mono** for numbers in lists and labels; **seven-segment** for big live readouts.
+- **IBM Plex Mono** for numbers in lists and labels; **seven-segment** for big live readouts, using the **DSEG** font (OFL 1.1) so every platform draws the same digits.
 - No serifs.
 
 ## 3. Light
@@ -48,6 +54,21 @@ Light is the signature of this look. The rules:
 4. **A window never changes size and never extends past the edge of its object.** Selecting something lights its window; nothing grows.
 5. **Nothing is more realistic than its neighbours.** Lights match the depth of the surface around them.
 6. **Light colours:** ok `#7be04f`, active `#ff7a2e`, warn `#ffc23d`, alert `#ff4b3a`, info `#fff1dc`. Indicators aren't only green and aren't only round.
+
+### Colour discipline (every look)
+- Colour is only for things that are **on or selected**. Idle things stay neutral, room accents on headings included.
+- **Red is reserved for alerts** in every look. No look may reuse red (or its room hue) as a signal colour.
+
+### State words (every app)
+Every app uses Jam Cards' state grammar, with the same words, meanings and hooks:
+
+| State | Meaning | Hook |
+|---|---|---|
+| **on** | Active, running, lit. The strongest form. | `data-state="on"` |
+| **off** | Present but idle. Quiet. A lock is never "on". | `data-state="off"` |
+| **offline** | Can't be reached. A broken form, not just grey. | `data-state="offline"` |
+| **action** | Something is happening right now (waking, starting). | `data-state="action"` |
+| **alert** | Needs attention. Red, plus shape and word. | `data-alert` |
 
 ### Indicator shapes
 
@@ -97,7 +118,20 @@ The lit scale and ladder use one LED per notch, with a little bleed. The top not
 
 Brightness: window about 85%, spill about 65% of full. The selector never animates like the progress bar.
 
-## 8. Motion curves
+## 8. Motion
+
+### Calm (SAFE) mode
+One meaning on every screen in the house:
+- no continuous motion: tickers, attract pulses and idle loops stop; textures are static;
+- no shake and no flash;
+- every transition becomes a short fade (≤ 180 ms);
+- the light reveal shows its light at once or with a ≤ 180 ms fade, with no travelling shutter;
+- long intros (boot sequences) are shortened.
+
+### Kiosk-safe tier
+Every look ships a kiosk-safe motion tier for weak devices like the Echo Show: one-shot moves only, nothing continuous, no effects layers.
+
+### Curves
 
 One table, and the names mean the same thing in every project.
 
@@ -107,6 +141,10 @@ One table, and the names mean the same thing in every project.
 | `decelerate` | `cubic-bezier(.16,1,.3,1)` | Shutters, reveals, things arriving |
 | `settle` | `cubic-bezier(.3,1.3,.5,1)` | Rocker paddle, things landing with a small bounce. **Overshoot is capped at 1.3** (spring damping ≥ 0.7). |
 | `leave` | `cubic-bezier(.4,0,1,1)` | Things exiting |
+| `stepped` | `steps(n)` at 12 fps | **Decoration only**, in looks that want a hand-drawn feel. Never for focus. |
+
+### Post layers
+A look may have a full-screen film layer (scanlines, grain, colour fringe) if the user turns it on. It is never drawn over real art or video, it's static in Calm mode, and it's **off in Hi-Fi**.
 
 ## 9. Floors (every look, every app)
 
@@ -116,7 +154,7 @@ One table, and the names mean the same thing in every project.
 | Contrast | WCAG AA, including secondary text | same | same; focused labels never fade below AA |
 | Targets | 44 px touch | 44 px, no scrolling | Focus visible from the sofa |
 | Motion | Desk gets more motion than phone | One-shot only, nothing continuous | Transform + opacity only; no blur; glows are sprites; focus ≤ 150 ms (≤ 80 ms or snap under key repeat); scenes 350–600 ms |
-| Flashing | At most 2 big luminance changes per second; a Calm/SAFE setting everywhere | | |
+| Flashing | At most 2 big luminance changes per second; Calm mode everywhere (see §8) | | |
 | State | Never colour alone: shape + word | | |
 | Fonts | OFL, bundled, no CDNs | | |
 | Words | Plain, complete button wording ("Resume from 1:12:04"); no jokes in the interface | | One title + one line on **home screens, launchers and focused cards**. Detail pages and buttons keep complete wording. |
@@ -127,4 +165,6 @@ One table, and the names mean the same thing in every project.
 - The project-by-project check: every project documents its current UI in `projects/` first.
 - TV title card in Hi-Fi (mockup 09: Shutter, Tape counter or Tuning dial), interface sounds, Callsheet's and HA's current Saul Bass defaults, LCARS II.
 - The look shelf: which alternates survive and get rebuilt on these roles.
-- Token pipeline: one token file converted to CSS variables, HA `--jam-*` YAML, Compose `Palette.kt` and Godot `theme.json`.
+- Token pipeline: one token file converted to CSS variables, HA `--jam-*` YAML, Compose `Palette.kt` and Godot `theme.json` (NervOS's dotted `tokens` block; role map in `projects/nervos/PROPOSALS.md` P6). The band and walnut trim need per-app layout code, not just tokens.
+- Kiosk glance size and "attention surfaces" (HA questions 3 and 7): not adopted for now.
+- Group carousels in alternate looks (NervOS P4).

@@ -185,3 +185,13 @@ HA pushed profile + 44 screenshots. Correction: kitchen Echo Show 8 is ~961x601 
 - We are only building the design doc. Nothing is replaced or deleted yet.
 - Rollout happens later, one app/service at a time. Nothing existing (looks, themes, dashboards) gets deleted until that app's turn, with Isaac's OK.
 - Answers to project questions describe the eventual design, not immediate changes.
+
+## Project answers: Jam Home questions (Isaac, 2026-11-05) — design doc only
+- Hi-Fi becomes HA's default at HA's rollout turn; existing looks stay until the shelf decision.
+- Per-user looks on personal devices; one house look on shared screens (kiosks, TVs). EXCEPTION: JamFin saves each profile's preferred look.
+- ADOPTED for every app: HA's state words (on/off/offline/action + alert); colour discipline (colour only for on/selected, idle neutral incl. room accents; red reserved for alerts; kiosk-safe motion tier).
+- NOT adopted for now: kiosk glance size (~65 px), attention surfaces rule.
+
+## Project check 3: NervOS
+Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopted without a visible change: P1 shared Calm/SAFE definition; P2 (already in 0.3); P3 "stepped" curve for decoration only; P5 per-look post layer, user-chosen, never over art/video, static in Calm, off in Hi-Fi; P6 Godot token shape + DSEG (OFL) for seven-segment. Open for Isaac: P4 group carousels in alternate looks (VHS consoles, CHOOSE YOUR HERO), which he approved on 2026-11-03.
+-> BIBLE.md draft 0.4.
