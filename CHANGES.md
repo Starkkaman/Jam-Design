@@ -59,3 +59,13 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D10. The Colour bars accent's lighter oranges conflict with "decorative oranges stay darker than control orange" — darken or drop those bars.
 - D11. A quieter form for an alert the user has already seen ("Seen 08:20").
 - D12. The base-window selector extends to phone tab bars.
+
+### Pass 1 · JamFin
+- D13. Progress vs. selector settled proposal: progress on the art's bottom edge; selector window on the label strip's bottom edge (half width). Never the same edge.
+- D14. On Play, the title card holds only as long as the load, floor ~600 ms; the 1.6 s hold stays for app launch and milestones.
+- D15. Make "never twice" precise: a bar plus "N min left" counts twice; "Ends at" is a different value.
+- D16. "Pop above or below" (Unigrid player menus) becomes a house TV rule; choosers from a vertical list pop beside it (needs Isaac's OK).
+- D17. Lit windows keep a dark rim in TV Day.
+- D18. The orange primary button needs its own focus cue on TV.
+- D19. Decide whether accents step back on art-heavy screens, and whether Session blocks' red square is allowed on TV homes.
+- D20. Per-profile looks save: look, Day/Night/Auto, Covers (Full colour/Toned), Calm.
