@@ -216,3 +216,4 @@ Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopt
 
 ## Project check 5: Jam-Dash
 56 Depth screenshots + profile. Its questions 1, 3, 4, 6 (which originals/II looks stay, Global views per look, picker previews, look bugs) are app-internal and wait for Jam-Dash's rollout turn / the shelf decision. Q2 (Runner direction) and Q5 (phone monitoring rule) go to Isaac.
+- Isaac: Runner -> keep as a shelf candidate. Phone monitoring-row rule -> NOT adopted.

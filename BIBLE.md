@@ -197,5 +197,6 @@ A look may have a full-screen film layer (scanlines, grain, colour fringe) if th
 - The project-by-project check: every project documents its current UI in `projects/` first.
 - Interface sounds, Callsheet's and HA's current Saul Bass defaults, LCARS II.
 - The look shelf: which alternates survive and get rebuilt on these roles.
+  - Candidates noted so far: Runner (Jam-Dash mockup v11: white modernist planes on concrete, one sun, red only on the path to the next action); the Slatted progress bar; the Horizon and Mission palettes.
 - Token pipeline: one token file converted to CSS variables, HA `--jam-*` YAML, Compose `Palette.kt` and Godot `theme.json` (NervOS's dotted `tokens` block; role map in `projects/nervos/PROPOSALS.md` P6). The band and walnut trim need per-app layout code, not just tokens.
 - Kiosk glance size and "attention surfaces" (HA questions 3 and 7): not adopted for now.
