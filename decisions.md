@@ -229,3 +229,12 @@ Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopt
 - RULE: a control may carry a lit glyph that shows its device's power state (power symbol). Otherwise controls still don't glow.
 - Next: popups for lights and every media card; a catalogue of the other Jam card types.
 - Mockup 12 (Jam Home cards): pop-ups and the other card types, all from the same parts. Pop-ups: Light (big brightness slider, Cozy/Clean white keys, hue slider, "Your colours" swatch windows, group members each with slider + rocker, off-timer keys, lit power symbol); TV Source (inputs/apps as rack switches with punch-label names, no logos; the live one lights its slot + "On now"); Speaker Library (base-window tabs, record shelf, mini tape deck, grouped speakers slot); NerveOS PC (cartridge deck, Sleep/Quit/Mute, volume, small soft-plastic remote). Other cards: switched devices (symbol + name + word + rocker), house strip, weather (flat glyph, paper temp, forecast readouts), history graph as a chart recorder (paper, red grid, solid inside / dashed outside), gauge (quiet face + state word), dehumidifier (appliance sibling), doors & windows list (open = amber, red only for alerts), choice keys, control-room panel (bad value -> red word + readout), automations (slot lights, unreachable count).
+
+## Course correction (Isaac, 2026-11-05) — "too much skeuomorphism again"
+- Loves the direction and is excited to continue, BUT: ditch the brushed-metal texture and the glowing; ditch a lot of the seven-segment displays; too much orange. Likes the minimalist simplicity of the CURRENT Jam Home, which runs the **Jam Braun** look (not Poster/JamBoard). Next redesign starts from Jam Braun's simplicity.
+- Keep: air purifier card ("came out great").
+- Light pop-up: the CCT presets (Cozy 2200K / Clean 4000K) must SHOW their colours. Changing a light's colour should change the colour of its slot/window.
+- TV Source: not a list of buttons.
+- Speaker pop-up: needs a button to see other speakers, to group or separate them.
+- NerveOS card: messy, rework it.
+- Requested Jam Braun screenshots + tokens from the HA agent (projects/jam-home/screens/braun/).
