@@ -168,3 +168,18 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D101. A rolled-back update is warn, not alert; Try again can fail and must say what to check (refines D27).
 - D102. A phone overview with several servers starts with a strip of one row per server.
 - D103. Apps without art get a neutral category icon in a dark frame, never initials or a brand mark (extends D34).
+
+### Pass 2 · JamFin
+- D104. Title card on Play: full shutter once per session (600 ms floor), ≤300 ms after; 1.6 s hold only for app launch and milestones (refines D14/D60).
+- D105. An open layer carries the value: while a chooser or shelf is open, the key/band text naming it hides (answers D33; same as D56/D76).
+- D106. Menus pop above, below, or drop below their key, **never beside** (closes D16; conflicts with D57's "beside a vertical list", pick one).
+- D107. Selector numbers: 12 px full-cream window on the plinth; progress 70% cream on the art's edge (settles D13).
+- D108. Focused orange key: rises 6 px, deeper under-edge, black label, window lit on a brown recess (closes D18; same as NervOS).
+- D109. TV homes put the sign in the menu band, and the accent sits in the band's clear zone, never touching art (D2/D19).
+- D110. Library rows end with an "All …" card (with D59 row ends).
+- D111. Two-press confirm with a draining slot for tap-only remotes, only for hard-to-undo actions (JamFin 4 s vs TV 3 s: pick one).
+- D112. Player prompts sit bottom right as the player's only orange; still-watching and errors are a centred panel on a dimmed picture.
+- D113. Profile saves look, lighting, covers, motion, Animate Back, sounds. Isaac decides whether a profile's Day may override the house look on the shared TV.
+- D114. When focus changes other content (season → episodes), it waits for a 280 ms dwell.
+- D115. TV safe area includes band text; slim bands 108 px with bottom-aligned text; a peeking next row isn't readable content.
+- D116. JamFin phone tabs: Home, Movies, Shows, Search, Downloads; Discover and Settings behind the profile chip.
