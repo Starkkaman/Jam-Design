@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NervOS Pass 5</title>
+<meta name="description" content="NervOS pass 5: the games console and the shelves, carried into every screen. A bespoke games launcher in the shared Jam language.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* NervOS pass 5: the games console and the shelves, now on every screen. One 16:9 TV authored in 1080p px:
+   u(N) = N px at 1080p (--u = 100cqw/1920). Shared language kept: Jost + Plex Mono, indicator windows, state words,
+   one orange per screen, focus = a light at the thing + a lift, walnut, ribs only on dark surfaces, transform/opacity motion. */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--decel:cubic-bezier(.16,1,.3,1);--leave:cubic-bezier(.4,0,1,1);--settle:cubic-bezier(.3,1.3,.5,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px;min-width:0}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}h2{font:600 18px var(--f);margin:0}
+p{margin:0;max-width:80ch}.muted{color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end}
+.ctl>div{display:grid;gap:6px;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 13px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}}
+.seg button:focus-visible,.kb:focus-visible,.tourb:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.alt{border:1px dashed var(--line);border-radius:14px;padding:8px 10px 10px}
+.alt .tag{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kb{font:500 13px var(--mono);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer;touch-action:manipulation}
+.tourb{font:600 14px var(--f);border:0;border-radius:10px;padding:9px 16px;background:#ec7c22;color:#1d1c1a;cursor:pointer}
+.tourb[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+.cap{font-size:14px;color:var(--muted);min-height:1.5em}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font:500 12px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.legend b{color:var(--fg);font-weight:500}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px;align-content:start}
+
+/* ================= TV ================= */
+.tv{--u:calc(100cqw / 1920);
+  --wall:#1d1a17;--ink:#efe9de;--dim:#b3ab9e;--track:#0e0d0c;--block:#3b3733;--blk-ink:#f3eee5;
+  --key:#2c2926;--key-ink:#ece8df;--key-dim:#b3ab9e;
+  --deck:#141312;--deck-ink:#ece8df;--deck-dim:#a8a397;--dkey:#2a2826;
+  --cream:#f3e6c8;--orange:#f08a2c;--deep:#a9530f;--win:#0b0b0a;--unlit:#00000066;--walnut:#6b4428;--plank:#6b4428;--plank-f:#4f3019;
+  --ok:#7bd651;--warn:#f2c14e;--warn-ink:#f2c14e;--alert:#ff5a48;
+  --shadow:calc(6*var(--u)) calc(8*var(--u)) 0 #0000002e;
+  --ribs:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 2px,transparent 2px calc(9*var(--u)));
+  position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;background:var(--wall);color:var(--ink);font-family:var(--f);
+  overflow:hidden;border-radius:12px;box-shadow:0 0 0 10px #0d0d0c,0 20px 50px #0000004d;outline:none}
+.tv:focus-visible{box-shadow:0 0 0 10px #0d0d0c,0 0 0 13px #f08a2c}
+.tv.day{--wall:#cfcac0;--ink:#1d1c1a;--dim:#4a463f;--track:#b6b0a5;--block:#f2efe9;--blk-ink:#1d1c1a;--key:#ebe7df;--key-ink:#1d1c1a;--key-dim:#4a463f;--orange:#ec7c22;--deep:#b55a12;--unlit:#0000002a;--plank-f:#563520;--warn-ink:#8a5a00;--shadow:calc(6*var(--u)) calc(8*var(--u)) 0 #0000001f}
+.scr{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity 220ms var(--decel),visibility 0s 220ms}
+.scr.on{opacity:1;visibility:visible;transition:opacity 220ms var(--decel),visibility 0s}
+.scr.under{opacity:.28}
+.calm .scr,.calm .scr.on{transition-duration:140ms}
+.calm *{transition-timing-function:linear}
+kbd{display:inline-grid;place-items:center;min-width:calc(38*var(--u));height:calc(38*var(--u));padding:0 calc(8*var(--u));border-radius:calc(99*var(--u));border:calc(2*var(--u)) solid currentColor;font:500 calc(22*var(--u)) var(--mono);margin-right:calc(10*var(--u));vertical-align:middle}
+.hints{display:flex;flex-wrap:wrap;gap:calc(12*var(--u)) calc(30*var(--u));font:500 calc(24*var(--u)) var(--f);color:var(--dim);align-items:center;white-space:nowrap}
+.hints span{display:inline-flex;align-items:center}
+.eb{font:500 calc(22*var(--u)) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+/* indicator windows: always a visible recess; lit = flat colour */
+.ind{position:relative;display:inline-block;flex:none;background:var(--win);box-shadow:inset 0 1px 2px #000,0 0 0 1px #ffffff17}
+.ind::after{content:"";position:absolute;inset:calc(3*var(--u));border-radius:inherit;background:var(--c,var(--cream));opacity:0}
+.ind.on::after{opacity:1}
+.ind.led{width:calc(18*var(--u));height:calc(18*var(--u));border-radius:50%}.ind.led.big{width:calc(30*var(--u));height:calc(30*var(--u))}.ind.led.big::after{inset:calc(5*var(--u))}
+.ind.sq{width:calc(18*var(--u));height:calc(18*var(--u));border-radius:calc(3*var(--u))}
+.ind.slot{width:calc(40*var(--u));height:calc(13*var(--u));border-radius:calc(3*var(--u))}.ind.slot.sm{width:calc(30*var(--u));height:calc(12*var(--u))}
+.ind.ok{--c:var(--ok)}.ind.wn{--c:var(--warn)}
+.ind.offl{background:transparent;box-shadow:inset 0 0 0 calc(2*var(--u)) var(--dim)}
+.ind.offl::before{content:"";position:absolute;left:50%;top:calc(-2*var(--u));bottom:calc(-2*var(--u));width:calc(2*var(--u));background:var(--dim);transform:rotate(45deg)}
+.wink{color:var(--warn-ink)}
+/* the selector window (base / leading edge). Unlit: quiet recess. Lit: flat cream in a dark rim. */
+.w{position:absolute;background:var(--unlit);pointer-events:none}
+.w::after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--cream);box-shadow:inset 0 0 0 calc(2*var(--u)) #0b0b0a;opacity:0}
+.f>.w::after{opacity:1}
+.wb{left:28%;right:28%;bottom:0;height:calc(10*var(--u));border-radius:calc(5*var(--u)) calc(5*var(--u)) 0 0}
+.wl{left:0;top:calc(14*var(--u));bottom:calc(14*var(--u));width:calc(10*var(--u));border-radius:0 calc(5*var(--u)) calc(5*var(--u)) 0}
+/* conflict 3 (assumed B): on a light ground an unlit window is a hairline groove; lit = flat cream in a dark rim */
+.day .k:not(.dk):not(.pri)>.w,.day .slk>.w,.day .vk>.w{background:transparent;box-shadow:inset 0 0 0 calc(1.5*var(--u)) #00000059}
+
+/* ---------- top bar with the section slide ---------- */
+.top{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(46*var(--u));height:calc(70*var(--u));display:flex;justify-content:space-between;align-items:flex-start;z-index:5}
+.slide{position:relative;display:flex;padding:calc(6*var(--u));border-radius:calc(16*var(--u));background:var(--track);box-shadow:inset 0 calc(2*var(--u)) calc(4*var(--u)) #00000059}
+.slk{position:absolute;top:calc(6*var(--u));bottom:calc(6*var(--u));left:0;border-radius:calc(11*var(--u));background:var(--block);box-shadow:0 calc(2*var(--u)) 0 #00000040;transition:transform 150ms var(--glide),width 150ms var(--glide)}
+.slk .w{left:30%;right:30%}
+.sl{position:relative;z-index:1;padding:calc(9*var(--u)) calc(26*var(--u)) calc(11*var(--u));font:500 calc(28*var(--u))/calc(36*var(--u)) var(--f);color:var(--dim);white-space:nowrap}
+.sl.cur{color:var(--blk-ink)}
+.ssub{position:absolute;top:calc(84*var(--u));font:400 calc(22*var(--u))/calc(26*var(--u)) var(--f);color:var(--dim);white-space:nowrap;transition:transform 150ms var(--glide)}
+.stat{display:flex;gap:calc(28*var(--u));align-items:center;font:500 calc(24*var(--u)) var(--f);color:var(--dim);padding-top:calc(12*var(--u))}
+.stat .clock{font:500 calc(30*var(--u)) var(--f);font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat span{display:inline-flex;gap:calc(10*var(--u));align-items:center}
+.botr{position:absolute;right:calc(96*var(--u));bottom:calc(54*var(--u));z-index:5}
+.botl{position:absolute;left:calc(96*var(--u));bottom:calc(54*var(--u));z-index:5}
+
+/* ---------- keys ---------- */
+.k{position:relative;display:inline-flex;align-items:center;gap:calc(12*var(--u));height:calc(76*var(--u));padding:0 calc(30*var(--u));border-radius:calc(14*var(--u));background:var(--key);color:var(--key-ink);font:500 calc(28*var(--u)) var(--f);white-space:nowrap;box-shadow:0 calc(3*var(--u)) 0 #00000055;transition:transform 140ms var(--glide)}
+.k small{font:400 calc(24*var(--u)) var(--f);color:var(--key-dim)}
+.k.pri{background:var(--orange);color:#1d1c1a;font-weight:600;box-shadow:0 calc(3*var(--u)) 0 var(--deep)}
+.k.pri small{color:#1d1c1a}
+.k.f{transform:translateY(calc(-3*var(--u)))}
+.k.dk{background:var(--dkey);color:var(--deck-ink)}.k.dk small{color:var(--deck-dim)}
+.k.dk.pri{background:var(--orange);color:#1d1c1a}.k.dk.pri small{color:#1d1c1a}
+.k.armed{background:#3a1f12;color:var(--cream)}
+.fill{position:absolute;left:0;top:0;height:calc(6*var(--u));width:0;background:var(--cream);border-radius:calc(14*var(--u)) 0 0 0}
+.holding .fill{width:100%;transition:width 1000ms linear}
+.col{display:grid;gap:calc(14*var(--u));justify-items:start}
+.col .k{min-width:calc(560*var(--u))}
+
+/* ---------- spines, covers, dividers, bookends, planks, the shelf rail ---------- */
+.rv{position:absolute;left:0;right:0;overflow:hidden;z-index:2}
+.row{position:absolute;left:0;top:0;bottom:calc(14*var(--u));width:100%;transition:transform 220ms var(--decel)}
+.row.nudgeR{animation:nudgeR 220ms var(--glide)}.row.nudgeL{animation:nudgeL 220ms var(--glide)}
+@keyframes nudgeR{50%{translate:calc(-14*var(--u)) 0}}@keyframes nudgeL{50%{translate:calc(14*var(--u)) 0}}
+.calm .row.nudgeR,.calm .row.nudgeL{animation:none}
+.sp{position:absolute;bottom:0;border-radius:calc(7*var(--u)) calc(7*var(--u)) calc(3*var(--u)) calc(3*var(--u));transition:transform 140ms var(--glide);box-shadow:inset calc(-3*var(--u)) 0 0 #00000038}
+.sp.f{transform:translateY(calc(-34*var(--u)))}
+.sp.mem{transform:translateY(calc(-12*var(--u)))}
+.sp.cv{box-shadow:none;border-radius:0}
+.sp.cv.f{transform:translateY(calc(-24*var(--u)))}
+.calm .sp{transition:none}
+.sp .lab{position:absolute;display:flex;justify-content:center;align-items:flex-start;overflow:hidden;border-radius:calc(4*var(--u))}
+.sp .tt{writing-mode:vertical-rl;font:500 calc(24*var(--u))/1.06 var(--f);padding:calc(10*var(--u)) 0;max-height:100%;text-align:start}
+.sp .cap{position:absolute;left:0;right:0;top:0}
+.sp .rid{position:absolute;left:calc(10*var(--u));right:calc(10*var(--u));bottom:calc(16*var(--u));height:calc(18*var(--u));background:repeating-linear-gradient(0deg,#00000040 0 calc(2*var(--u)),transparent calc(2*var(--u)) calc(6*var(--u)))}
+.newd{position:absolute;left:50%;bottom:calc(26*var(--u));width:calc(58*var(--u));height:calc(32*var(--u));margin-left:calc(-29*var(--u));border-radius:calc(16*var(--u));background:var(--cream);color:#1d1c1a;font:600 calc(22*var(--u))/calc(32*var(--u)) var(--f);text-align:center;box-shadow:0 0 0 calc(2*var(--u)) #1d1c1a;z-index:2}
+.dv{position:absolute;bottom:0;width:calc(10*var(--u));background:#d9cfbd;border-radius:calc(2*var(--u))}
+.dv .tab{position:absolute;bottom:100%;left:0;height:calc(40*var(--u));padding:0 calc(12*var(--u));background:#d9cfbd;border-radius:calc(8*var(--u)) calc(8*var(--u)) 0 0;font:500 calc(22*var(--u))/calc(40*var(--u)) var(--mono);color:#2b2722;white-space:nowrap}
+.bk{position:absolute;bottom:0;width:calc(30*var(--u));height:calc(230*var(--u));background:var(--walnut);border-radius:calc(14*var(--u)) calc(14*var(--u)) 0 0;box-shadow:var(--shadow)}
+.plank{position:absolute;left:0;right:0;height:calc(46*var(--u));background:linear-gradient(var(--plank) 0 calc(14*var(--u)),var(--plank-f) calc(14*var(--u)))}
+/* the shelf rail: one groove along the shelf top; the segment where the focused thing stood lights cream */
+.groove{position:absolute;left:0;right:0;top:calc(2*var(--u));height:calc(10*var(--u));background:#2a170b;box-shadow:inset 0 calc(1*var(--u)) calc(2*var(--u)) #000}
+.rl{position:absolute;bottom:calc(-11*var(--u));height:calc(8*var(--u));border-radius:calc(2*var(--u));background:var(--cream);box-shadow:0 0 0 calc(1*var(--u)) #0b0b0a;z-index:3}
+.edge{position:absolute;left:0;right:0;height:calc(32*var(--u));display:flex;gap:calc(28*var(--u));align-items:center;justify-content:space-between;font:500 calc(24*var(--u)) var(--f);color:#f3e6c8;white-space:nowrap}
+/* name rail: a shelf edge tall enough to carry the focused item's name horizontally (H1, TV12) */
+.nr{position:absolute;left:calc(24*var(--u));right:calc(24*var(--u));display:flex;align-items:center;justify-content:space-between;gap:calc(30*var(--u));color:#f3e6c8;white-space:nowrap}
+.nr .nm{display:flex;align-items:baseline;gap:calc(22*var(--u));min-width:0}
+.nr .nm b{font:600 calc(46*var(--u))/1.05 var(--f)}
+.nr .nm span,.nr .cnt{font:500 calc(24*var(--u)) var(--f);color:#e6d4b4}
+.nr .nm2{display:grid;gap:calc(4*var(--u))}.nr .nm2 b{font:600 calc(46*var(--u))/1.05 var(--f)}.nr .nm2 span{font:500 calc(24*var(--u)) var(--f);color:#e6d4b4}
+.nr .hints{color:#e6d4b4}
+.nr kbd{height:calc(34*var(--u));min-width:calc(34*var(--u));font-size:calc(22*var(--u))}
+
+.host{position:absolute;bottom:0;border-radius:calc(14*var(--u));background:#2a2826;box-shadow:inset 0 0 0 calc(2*var(--u)) #3a3733,var(--shadow);color:#ece8df;transition:transform 140ms var(--glide)}
+.host.f{transform:translateY(calc(-20*var(--u)))}
+.host .vent{position:absolute;left:calc(18*var(--u));right:calc(18*var(--u));top:calc(18*var(--u));height:calc(90*var(--u));border-radius:calc(8*var(--u));background:#121110;background-image:var(--ribs)}
+.host .hs{position:absolute;left:calc(18*var(--u));right:calc(18*var(--u));bottom:calc(22*var(--u));display:flex;gap:calc(10*var(--u));align-items:center;font:400 calc(22*var(--u)) var(--f);color:#b3ab9e}
+.host.room{background:#e9e0cc;color:#1d1c1a;box-shadow:var(--shadow)}
+.host.room .code{position:absolute;left:calc(22*var(--u));right:calc(22*var(--u));top:calc(22*var(--u));font:500 calc(40*var(--u)) var(--mono);letter-spacing:.08em;white-space:nowrap}
+.host.room .code.ph{letter-spacing:.02em}
+.host.room .rart{position:absolute;left:calc(22*var(--u));right:calc(22*var(--u));top:calc(90*var(--u));bottom:calc(90*var(--u));border-radius:calc(8*var(--u));overflow:hidden}
+.host.room .seats{position:absolute;left:calc(22*var(--u));bottom:calc(26*var(--u));display:flex;gap:calc(14*var(--u))}
+.host.room .seats .sock{width:calc(46*var(--u));height:calc(34*var(--u))}
+
+/* ---------- faces (face-out covers drawn as their media) ---------- */
+.face{position:relative;border-radius:calc(10*var(--u));overflow:hidden;box-shadow:var(--shadow)}
+.face svg{position:absolute;display:block}
+.face .ftl{position:absolute;left:0;right:0;top:0}
+.face .ptl{position:absolute;left:0;right:0;top:0;padding:calc(6*var(--u)) calc(12*var(--u)) calc(8*var(--u));font:600 calc(24*var(--u))/1.1 var(--f);white-space:normal;z-index:1}
+
+/* ---------- Home: the games console ---------- */
+.con{position:absolute;left:calc(96*var(--u));top:calc(150*var(--u));width:calc(840*var(--u));height:calc(466*var(--u))}
+.cart{position:absolute;top:0;width:calc(300*var(--u));height:calc(220*var(--u));transition:transform 450ms var(--decel)}
+.deck{position:absolute;left:0;right:0;top:calc(170*var(--u));height:calc(240*var(--u));border-radius:calc(20*var(--u)) calc(20*var(--u)) 0 0;background:var(--deck);background-image:var(--ribs);z-index:2;color:var(--deck-ink)}
+.slotr{position:absolute;top:0;height:calc(14*var(--u));background:#050505;border-radius:0 0 calc(6*var(--u)) calc(6*var(--u))}
+.deck .dt{position:absolute;left:calc(34*var(--u));top:calc(18*var(--u));display:grid;gap:0}
+.deck .dt .t{font:600 calc(48*var(--u))/1.08 var(--f);white-space:nowrap}
+.deck .dt .s{font:400 calc(24*var(--u)) var(--f);color:var(--deck-dim);white-space:nowrap}
+.deck .dk-row{position:absolute;left:calc(34*var(--u));bottom:calc(20*var(--u));display:flex;gap:calc(14*var(--u))}
+.deck .k{height:calc(68*var(--u))}
+.front{position:absolute;left:0;right:0;top:calc(410*var(--u));height:calc(56*var(--u));background:var(--walnut);border-radius:0 0 calc(14*var(--u)) calc(14*var(--u));z-index:2;display:flex;align-items:center;padding:0 calc(34*var(--u));gap:calc(26*var(--u));color:#f3e6c8;font:500 calc(22*var(--u)) var(--mono)}
+.port{display:inline-flex;gap:calc(8*var(--u));align-items:center}
+.sock{display:inline-block;width:calc(34*var(--u));height:calc(26*var(--u));border-radius:calc(6*var(--u)) calc(6*var(--u)) calc(12*var(--u)) calc(12*var(--u));background:#1a0f08;position:relative;flex:none}
+.sock.in::after{content:"";position:absolute;inset:calc(5*var(--u));border-radius:calc(3*var(--u)) calc(3*var(--u)) calc(8*var(--u)) calc(8*var(--u));background:#e9e0cc}
+.bars{margin-left:auto;display:flex;gap:calc(6*var(--u));align-items:flex-end;height:calc(40*var(--u))}
+.bars i{display:block;width:calc(16*var(--u));border-radius:calc(3*var(--u)) calc(3*var(--u)) 0 0}
+.lately{position:absolute;left:calc(1000*var(--u));right:calc(96*var(--u));top:calc(152*var(--u));height:calc(400*var(--u))}
+.lately .items{position:absolute;left:0;right:0;top:0;height:calc(270*var(--u))}
+.lt{position:absolute;bottom:0;transition:transform 140ms var(--glide)}
+.lt.f{transform:translateY(calc(-20*var(--u)))}
+.calm .lt,.calm .k,.calm .lev{transition:none}
+
+/* ---------- Shelf screens ---------- */
+.disp{position:absolute;left:calc(96*var(--u));top:calc(176*var(--u));width:calc(520*var(--u));bottom:calc(150*var(--u))}
+.disp .stage{position:absolute;left:0;right:0;top:calc(46*var(--u));height:calc(400*var(--u));display:flex;align-items:flex-end;justify-content:center}
+.disp .stand{position:absolute;left:0;right:0;top:calc(446*var(--u));height:calc(16*var(--u));background:var(--plank);border-radius:calc(3*var(--u))}
+.disp .txt{position:absolute;left:0;right:0;top:calc(486*var(--u));display:grid;gap:calc(10*var(--u));align-content:start}
+.disp .dtt{font:600 calc(50*var(--u))/1.08 var(--f)}
+.disp .dln{font:400 calc(26*var(--u))/1.3 var(--f);color:var(--dim)}
+.disp .dln b{color:var(--ink);font-weight:500}
+.disp .dln span{display:inline-flex;gap:calc(10*var(--u));align-items:center}
+.disp.cvv .txt{top:calc(60*var(--u))}
+.disp.cvv .dtt{font-size:calc(60*var(--u))}
+.case{position:absolute;left:calc(680*var(--u));right:0;top:calc(166*var(--u));bottom:0;overflow:hidden}
+.scrn{position:relative;width:calc(500*var(--u));height:calc(281*var(--u));border-radius:calc(12*var(--u));overflow:hidden;background:#000;box-shadow:var(--shadow)}
+.scrn svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.scrn::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 calc(8*var(--u)) #141312}
+.stack{position:absolute;left:0;right:0;top:0;transition:transform 300ms var(--decel)}
+.calm .stack,.calm .row{transition:none}
+.shelf{position:absolute;left:0;right:0;height:calc(436*var(--u))}
+.shelf.dimmed .rv,.shelf.dimmed .edge{opacity:.5}
+.picture{transition:opacity 200ms var(--glide)}
+/* showcase: a section with five things or fewer stands them face-out on one wide shelf */
+.show{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(250*var(--u));height:calc(640*var(--u))}
+.show .grp{position:absolute;top:0}
+.show .itm{position:absolute;bottom:calc(540*var(--u))}
+
+/* ---------- options chooser (pops above its key, five rows, then n of N) ---------- */
+.chs{position:absolute;z-index:7;min-width:calc(440*var(--u));padding:calc(10*var(--u));border-radius:calc(16*var(--u));background:#24211e;color:#ece8df;box-shadow:var(--shadow);display:grid;gap:calc(4*var(--u))}
+.chs .ch{font:500 calc(22*var(--u)) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#a8a397;padding:calc(8*var(--u)) calc(22*var(--u)) calc(4*var(--u))}
+.chs .ci{position:relative;height:calc(62*var(--u));display:flex;align-items:center;gap:calc(14*var(--u));padding:0 calc(22*var(--u)) 0 calc(26*var(--u));border-radius:calc(10*var(--u));font:500 calc(28*var(--u)) var(--f);white-space:nowrap}
+.chs .ci small{font:400 calc(24*var(--u)) var(--f);color:#a8a397;margin-left:auto;padding-left:calc(24*var(--u))}
+.chs .ci.f{background:#34302b}
+.chs .ci.pick{box-shadow:inset 0 calc(2*var(--u)) calc(4*var(--u)) #0000008c;background:#191715}
+.chs .ci.f.pick{background:#2c2925}
+
+/* ---------- Game page (the box opened) ---------- */
+.gp-cover{position:absolute;left:calc(96*var(--u));top:calc(150*var(--u));width:calc(640*var(--u));height:calc(560*var(--u));display:flex;align-items:flex-end;justify-content:center}
+.gp-stand{position:absolute;left:calc(96*var(--u));top:calc(710*var(--u));width:calc(640*var(--u));height:calc(16*var(--u));background:var(--plank);border-radius:calc(3*var(--u))}
+.gp-r{position:absolute;left:calc(820*var(--u));right:calc(96*var(--u));top:calc(150*var(--u))}
+.gp-r .gt{font:600 calc(76*var(--u))/1.04 var(--f);margin:calc(10*var(--u)) 0 calc(10*var(--u))}
+.gp-r .gl{font:400 calc(28*var(--u))/1.3 var(--f);color:var(--dim);max-width:calc(960*var(--u))}
+.gp-keys{position:absolute;left:calc(820*var(--u));top:calc(470*var(--u))}
+.gp-keys .k{min-width:calc(520*var(--u))}
+.strip{position:absolute;background:#070706;border-radius:calc(6*var(--u))}
+.strip .spk{position:absolute;left:calc(10*var(--u));right:calc(10*var(--u));height:calc(8*var(--u));background:repeating-linear-gradient(90deg,#2b2925 0 calc(12*var(--u)),transparent calc(12*var(--u)) calc(30*var(--u)))}
+.fr{position:absolute;top:calc(15*var(--u));display:flex;gap:calc(14*var(--u));align-items:center;color:#ece8df;transition:transform 140ms var(--glide)}
+.fr .pic{position:relative;border-radius:calc(4*var(--u));overflow:hidden;background:#141312;box-shadow:inset 0 0 0 calc(2*var(--u)) #2b2925;flex:none}
+.fr .pic.empty{background:#0d0c0b}
+.fr .pic svg{width:100%;height:100%;display:block}
+.fr .pic .w.wb{z-index:2}
+.fr.f .pic>.w::after{opacity:1}
+.fr .fl{display:grid;gap:calc(2*var(--u))}
+.fr .fl b{font:500 calc(24*var(--u)) var(--f);white-space:nowrap}
+.fr .fl span{font:400 calc(22*var(--u)) var(--f);color:#b3ab9e;white-space:nowrap}
+.fr.f{transform:translateY(calc(-3*var(--u)))}
+
+/* ---------- Players (pick up a controller) ---------- */
+.pl-h{position:absolute;left:calc(96*var(--u));top:calc(150*var(--u));right:calc(96*var(--u))}
+.pl-h .t{font:600 calc(76*var(--u))/1.05 var(--f);margin:calc(8*var(--u)) 0}
+.pl-h .l{font:400 calc(28*var(--u)) var(--f);color:var(--dim)}
+.ports{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(430*var(--u));height:calc(330*var(--u));background:var(--walnut);border-radius:calc(24*var(--u));display:grid;grid-template-columns:repeat(4,1fr);padding:calc(30*var(--u));gap:calc(30*var(--u))}
+.pp{position:relative;border-radius:calc(16*var(--u));background:#00000026;display:grid;grid-template-rows:auto 1fr auto;padding:calc(22*var(--u)) calc(26*var(--u));color:#f3e6c8}
+.pp .num{font:500 calc(84*var(--u))/1 var(--mono)}
+.pp .sk{justify-self:center;align-self:center;width:calc(120*var(--u));height:calc(84*var(--u));border-radius:calc(14*var(--u)) calc(14*var(--u)) calc(34*var(--u)) calc(34*var(--u));background:#1a0f08;position:relative;transition:transform 300ms var(--settle)}
+.pp .sk.in::after{content:"";position:absolute;inset:calc(14*var(--u));border-radius:calc(6*var(--u)) calc(6*var(--u)) calc(22*var(--u)) calc(22*var(--u));background:#e9e0cc}
+.pp .pw{display:grid;gap:calc(2*var(--u));font:500 calc(26*var(--u)) var(--f);white-space:nowrap}
+.pp .pw small{font:400 calc(22*var(--u)) var(--f);color:#ecdcbf}
+.pp .pw small.lo{color:#f7d27a}
+.pp .led2{position:absolute;right:calc(26*var(--u));top:calc(30*var(--u))}
+.pl-k{position:absolute;left:calc(96*var(--u));top:calc(800*var(--u));display:flex;gap:calc(16*var(--u))}
+
+/* ---------- Launch / return / signal lost: the media goes in (a dark cover in Day too, conflict 5 B) ---------- */
+.lc{background:#0f0e0d;color:#efe9de;--dim:#b3ab9e;--ink:#efe9de}
+.lc .ld{position:absolute;left:0;right:0;top:calc(400*var(--u));height:calc(250*var(--u));background:#141312;background-image:var(--ribs);border-top:calc(6*var(--u)) solid var(--walnut);z-index:2}
+.lc .ld .slotr{left:50%;width:calc(420*var(--u));margin-left:calc(-210*var(--u));height:calc(16*var(--u))}
+.lc .med{position:absolute;left:50%;top:calc(130*var(--u));z-index:1;transition:transform 480ms var(--decel)}
+.lc .stp{position:absolute;right:calc(-40*var(--u));top:calc(40*var(--u));display:grid;gap:calc(10*var(--u))}
+.lc .stp i{display:block;height:calc(16*var(--u));border-radius:calc(8*var(--u)) 0 0 calc(8*var(--u))}
+.lc .lt1{position:absolute;left:0;right:0;top:calc(690*var(--u));text-align:center}
+.lc .lt1 .t{font:600 calc(66*var(--u))/1.1 var(--f);letter-spacing:.06em;text-transform:uppercase}
+.lc .lt1 .s{font:400 calc(26*var(--u)) var(--f);color:var(--dim);margin-top:calc(6*var(--u))}
+.slats{position:absolute;left:50%;top:calc(880*var(--u));width:calc(640*var(--u));margin-left:calc(-320*var(--u));display:grid;grid-template-columns:repeat(16,1fr);gap:calc(8*var(--u))}
+.slats i{display:block;height:calc(20*var(--u));border-radius:calc(4*var(--u));background:var(--win);box-shadow:inset 0 1px 2px #000,0 0 0 1px #ffffff17;position:relative}
+.slats i.on::after{content:"";position:absolute;inset:calc(3*var(--u));border-radius:calc(2*var(--u));background:var(--cream)}
+.lost .ld{top:calc(330*var(--u));height:calc(150*var(--u))}
+.lost .med{top:calc(70*var(--u))}
+.lost .lb{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(540*var(--u));display:grid;gap:calc(12*var(--u));justify-items:center;text-align:center}
+.lost .lb .st{display:inline-flex;gap:calc(12*var(--u));align-items:center;font:500 calc(24*var(--u)) var(--f);color:var(--dim)}
+.lost .lb .t{font:600 calc(56*var(--u))/1.1 var(--f)}
+.lost .lb .l{font:400 calc(28*var(--u))/1.35 var(--f);color:var(--dim);max-width:calc(1200*var(--u))}
+.lost .lb .d{font:500 calc(28*var(--u))/1.35 var(--f)}
+.lost .lk{position:absolute;left:0;right:0;top:calc(820*var(--u));display:flex;justify-content:center;gap:calc(16*var(--u))}
+.lost .code{position:absolute;right:calc(96*var(--u));bottom:calc(54*var(--u));font:500 calc(22*var(--u)) var(--mono);color:var(--dim);letter-spacing:.06em}
+
+/* ---------- Playing + the Guide band, drawn as the console's deck ---------- */
+.gpic{position:absolute;inset:0}
+.gpic svg{width:100%;height:100%;display:block}
+.gband{position:absolute;left:0;right:0;bottom:0;height:calc(230*var(--u));background:#121211;background-image:var(--ribs);border-top:calc(4*var(--u)) solid var(--walnut);color:#ece8df;transform:translateY(calc(100% + calc(130*var(--u))));transition:transform 260ms var(--decel)}
+.gband.open{transform:none}
+.calm .gband{transition:none}
+.gband .gh{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(20*var(--u));height:calc(44*var(--u));display:flex;align-items:center;gap:calc(18*var(--u));font:400 calc(26*var(--u)) var(--f);color:#a8a397;white-space:nowrap}
+.gband .gh b{font:500 calc(28*var(--u)) var(--f);color:#ece8df}
+.gband .gh .sp2{margin-left:auto}.gband .gh .bports+.sp2{margin-left:calc(14*var(--u))}
+.gband .hints{color:#a8a397;flex-wrap:nowrap}
+.gband .bports{display:inline-flex;gap:calc(10*var(--u));align-items:center;font:400 calc(24*var(--u)) var(--f);color:#a8a397;margin-left:auto;padding-right:calc(14*var(--u));border-right:calc(2*var(--u)) solid #3a3733}
+.gband .kr{position:absolute;left:calc(96*var(--u));top:calc(84*var(--u));display:flex;gap:calc(14*var(--u))}
+.gband .k{height:calc(84*var(--u));background:#2a2826;color:#ece8df}
+.gband .k.pri{background:var(--orange);color:#1d1c1a}
+.gband .k.armed{background:#3a1f12;color:var(--cream)}
+.gband .k .two{display:grid;line-height:1.15}
+.gband .k .two small{color:#a8a397}
+.bmed{position:absolute;bottom:100%;margin-bottom:calc(4*var(--u));overflow:hidden}
+.bmed .bmi{position:absolute;left:0;top:0}
+.bslot{position:absolute;top:0;height:calc(12*var(--u));background:#050505;border-radius:0 0 calc(5*var(--u)) calc(5*var(--u))}
+.tline{position:absolute;left:0;right:0;top:calc(-14*var(--u));height:calc(10*var(--u));background:#4f3019}
+.tline i{position:absolute;left:0;top:0;bottom:0;background:var(--cream)}
+.tline b{position:absolute;top:calc(-6*var(--u));width:calc(4*var(--u));height:calc(22*var(--u));margin-left:calc(-2*var(--u));background:var(--cream);box-shadow:0 0 0 calc(1*var(--u)) #0b0b0a}
+.sleep{position:absolute;inset:0;background:#000;display:grid;place-items:center;font:400 calc(26*var(--u)) var(--f);color:#8f897e;z-index:9;opacity:0;visibility:hidden;transition:opacity 400ms linear,visibility 0s 400ms}
+.sleep.on{opacity:1;visibility:visible;transition:opacity 400ms linear}
+
+/* ---------- Power: the console's switch panel ---------- */
+.pws{position:absolute;left:0;right:0;bottom:0;height:calc(540*var(--u));background:#141312;border-top:calc(6*var(--u)) solid var(--walnut);color:#ece8df;transform:translateY(100%);transition:transform 260ms var(--decel)}
+.pws.open{transform:none}
+.calm .pws{transition:none}
+.pws .ph{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(36*var(--u));display:flex;justify-content:space-between;align-items:flex-end}
+.pws .ph .t{font:600 calc(46*var(--u))/1.1 var(--f)}
+.pws .ph .hints{color:#a8a397}
+.swrow{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(150*var(--u));display:flex;gap:calc(24*var(--u))}
+.lev{position:relative;flex:1;height:calc(240*var(--u));border-radius:calc(18*var(--u));background:#2a2826;display:grid;justify-items:center;align-content:space-between;padding:calc(26*var(--u)) calc(10*var(--u)) calc(22*var(--u));transition:transform 140ms var(--glide);box-shadow:0 calc(3*var(--u)) 0 #00000080}
+.lev.f{transform:translateY(calc(-4*var(--u)))}
+.lev .track{position:relative;width:calc(46*var(--u));height:calc(124*var(--u));border-radius:calc(23*var(--u));background:#0b0b0a;box-shadow:inset 0 calc(2*var(--u)) calc(3*var(--u)) #000}
+.lev .thumb{position:absolute;left:calc(6*var(--u));right:calc(6*var(--u));bottom:calc(6*var(--u));height:calc(54*var(--u));border-radius:calc(17*var(--u));background:#d9cfbd;transition:transform 200ms var(--decel)}
+.lev.half .thumb{transform:translateY(calc(-30*var(--u)))}
+.lev.up .thumb{transform:translateY(calc(-58*var(--u)))}
+.lev .nm{font:500 calc(28*var(--u))/1.15 var(--f);text-align:center;white-space:normal}
+.lev.plain{align-content:center}
+.lev.armed{background:#3a1f12;color:var(--cream)}
+.lev .w.wb{left:30%;right:30%}
+.pws .cons{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(420*var(--u));font:400 calc(28*var(--u)) var(--f);color:#c9c2b5}
+.pws .cons b{color:#ece8df;font-weight:500}
+
+/* ---------- Settings: the rear panel ---------- */
+.vrail{position:absolute;left:calc(96*var(--u));top:calc(150*var(--u));width:calc(390*var(--u));padding:calc(6*var(--u));border-radius:calc(16*var(--u));background:var(--track);box-shadow:inset 0 calc(2*var(--u)) calc(4*var(--u)) #00000059}
+.vk{position:absolute;left:calc(6*var(--u));right:calc(6*var(--u));top:calc(6*var(--u));height:calc(76*var(--u));border-radius:calc(11*var(--u));background:var(--block);box-shadow:0 calc(2*var(--u)) 0 #00000040;transition:transform 150ms var(--glide)}
+.vi{position:relative;z-index:1;height:calc(76*var(--u));display:flex;align-items:center;padding:0 calc(30*var(--u));font:500 calc(28*var(--u)) var(--f);color:var(--dim)}
+.vi.cur{color:var(--blk-ink)}
+.panel{position:absolute;left:calc(540*var(--u));right:calc(96*var(--u));top:calc(150*var(--u));bottom:calc(54*var(--u));border-radius:calc(22*var(--u));background:#141312;color:#ece8df}
+.panel .ph{position:absolute;left:calc(44*var(--u));right:calc(44*var(--u));top:calc(30*var(--u))}
+.panel .ph .t{font:600 calc(46*var(--u))/1.1 var(--f)}
+.panel .ph .l{font:400 calc(26*var(--u)) var(--f);color:#a8a397;margin-top:calc(4*var(--u))}
+.srow{position:absolute;left:0;right:0;height:calc(104*var(--u));display:flex;align-items:center;justify-content:space-between;gap:calc(30*var(--u));padding:0 calc(40*var(--u)) 0 calc(44*var(--u));border-top:1px solid #2a2826}
+.srow.f{background:#1f1d1b}
+.srow .lb{display:grid;gap:calc(2*var(--u));min-width:0}
+.srow .lb b{font:500 calc(30*var(--u)) var(--f)}
+.srow .lb span{font:400 calc(22*var(--u))/1.25 var(--f);color:#a8a397;white-space:normal;max-width:calc(700*var(--u))}
+.srow .val{font:500 calc(26*var(--u)) var(--f);color:#ece8df;white-space:nowrap}
+.sw{display:flex;padding:calc(5*var(--u));border-radius:calc(12*var(--u));background:#0b0b0a;box-shadow:inset 0 calc(1*var(--u)) calc(2*var(--u)) #000;flex:none}
+.sw span{padding:calc(8*var(--u)) calc(20*var(--u));font:500 calc(24*var(--u)) var(--f);color:#a39d91;border-radius:calc(9*var(--u));white-space:nowrap}
+.sw span.on{color:#f3eee5;background:#2f2b27;box-shadow:inset 0 calc(2*var(--u)) calc(4*var(--u)) #000000a6}
+.sw span.on::before{content:"";display:inline-block;width:calc(12*var(--u));height:calc(12*var(--u));border-radius:calc(2*var(--u));background:var(--cream);margin-right:calc(10*var(--u));vertical-align:middle;box-shadow:0 0 0 calc(2*var(--u)) #0b0b0a}
+.pv{position:absolute;left:calc(44*var(--u));right:calc(44*var(--u));display:flex;gap:calc(26*var(--u));align-items:flex-end}
+.pv .ex{display:flex;gap:calc(16*var(--u));align-items:flex-end}
+.pv .sws{display:grid;gap:calc(10*var(--u))}
+.pv .swt{display:flex;gap:calc(10*var(--u));align-items:center;font:500 calc(22*var(--u)) var(--mono);color:#a8a397}
+.pv .swt i{display:block;width:calc(44*var(--u));height:calc(44*var(--u));border-radius:calc(6*var(--u));box-shadow:inset 0 0 0 calc(2*var(--u)) #ffffff26}
+.pv .ar{font:400 calc(28*var(--u)) var(--f);color:#6f6a62;align-self:center}
+
+/* ---------- On-screen keyboard on the console deck ---------- */
+.osk-h{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(150*var(--u))}
+.osk-h .t{font:600 calc(60*var(--u))/1.1 var(--f);margin:calc(6*var(--u)) 0}
+.osk-h .l{font:400 calc(28*var(--u)) var(--f);color:var(--dim)}
+.field{position:absolute;left:calc(1130*var(--u));right:calc(96*var(--u));top:calc(176*var(--u));height:calc(150*var(--u));border-radius:calc(12*var(--u));background:#e9e0cc;color:#1d1c1a;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;padding:0 calc(34*var(--u))}
+.field .v{font:500 calc(64*var(--u)) var(--mono);letter-spacing:.14em;display:flex;align-items:center}
+.field .car{display:inline-block;width:calc(5*var(--u));height:calc(66*var(--u));background:#1d1c1a;margin-left:calc(4*var(--u))}
+.field .n{font:500 calc(22*var(--u)) var(--mono);color:#4a463f}
+.okd{position:absolute;left:calc(300*var(--u));right:calc(300*var(--u));top:calc(400*var(--u));height:calc(500*var(--u));border-radius:calc(20*var(--u)) calc(20*var(--u)) 0 0;background:#141312;background-image:var(--ribs);padding:calc(26*var(--u))}
+.okg{display:grid;grid-template-columns:repeat(12,1fr);gap:calc(10*var(--u))}
+.ok{position:relative;height:calc(76*var(--u));border-radius:calc(12*var(--u));background:#2a2826;color:#ece8df;display:grid;place-items:center;font:500 calc(30*var(--u)) var(--f);box-shadow:0 calc(3*var(--u)) 0 #000;transition:transform 140ms var(--glide)}
+.ok.sm{font-size:calc(24*var(--u))}
+.ok.f{transform:translateY(calc(-3*var(--u)))}
+.ok.pri{background:var(--orange);color:#1d1c1a;font-weight:600;box-shadow:0 calc(3*var(--u)) 0 var(--deep)}
+.ok.pin{box-shadow:inset 0 calc(2*var(--u)) calc(4*var(--u)) #000000b3;background:#1d1b19}
+.ok .w.wb{left:30%;right:30%}
+.okf{position:absolute;left:calc(300*var(--u));right:calc(300*var(--u));top:calc(900*var(--u));height:calc(70*var(--u));border-radius:0 0 calc(14*var(--u)) calc(14*var(--u));background:var(--walnut);display:flex;align-items:center;padding:0 calc(30*var(--u))}
+.okf .hints{color:#f3e6c8;gap:calc(30*var(--u))}
+.okf kbd{height:calc(34*var(--u));min-width:calc(34*var(--u))}
+
+/* ---------- Netplay room: the host's console with two ports ---------- */
+.rm-h{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(150*var(--u))}
+.rm-h .t{font:600 calc(76*var(--u))/1.05 var(--f);margin:calc(6*var(--u)) 0}
+.rm-h .l{font:400 calc(28*var(--u)) var(--f);color:var(--dim);display:flex;gap:calc(12*var(--u));align-items:center}
+.tag{display:inline-block;width:calc(14*var(--u));height:calc(30*var(--u));border-radius:calc(3*var(--u))}
+.rcon{position:absolute;left:calc(96*var(--u));top:calc(350*var(--u));width:calc(840*var(--u));height:calc(560*var(--u))}
+.rcon .deck{top:calc(170*var(--u));height:calc(250*var(--u))}
+.rcon .front{top:calc(420*var(--u));height:calc(140*var(--u));padding:0 calc(34*var(--u));gap:calc(40*var(--u));font:500 calc(26*var(--u)) var(--f)}
+.rport{display:grid;grid-template-columns:auto auto;gap:calc(4*var(--u)) calc(16*var(--u));align-items:center}
+.rport .sock{width:calc(66*var(--u));height:calc(50*var(--u));grid-row:span 2}
+.rport .sock.in::after{inset:calc(9*var(--u))}
+.rport b{font:500 calc(28*var(--u)) var(--f);display:flex;gap:calc(10*var(--u));align-items:center}
+.rport small{font:400 calc(22*var(--u)) var(--f);color:#e6d4b4}
+.rm-k{position:absolute;left:calc(1040*var(--u));top:calc(560*var(--u))}
+.rm-st{position:absolute;left:calc(1040*var(--u));top:calc(470*var(--u));display:flex;gap:calc(14*var(--u));align-items:center;font:500 calc(28*var(--u)) var(--f)}
+
+/* ---------- Attract board (idle) ---------- */
+.mq{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(96*var(--u));height:calc(540*var(--u));border-radius:calc(26*var(--u));overflow:hidden;background:#121211;transition:opacity 1200ms linear}
+.mq .pic{position:absolute;left:0;right:0;top:0;bottom:calc(150*var(--u));transition:opacity 600ms linear}
+.mq .art{position:absolute;right:0;top:0;bottom:0;width:calc(560*var(--u))}
+.mq .mt{position:absolute;left:calc(56*var(--u));right:calc(620*var(--u));top:calc(60*var(--u));font:600 calc(104*var(--u))/1 var(--f);letter-spacing:.01em}
+.mq .ms{position:absolute;left:calc(60*var(--u));bottom:calc(46*var(--u));font:500 calc(24*var(--u)) var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.mq .mplate{position:absolute;left:0;right:0;bottom:0;height:calc(150*var(--u));background:#121211;background-image:var(--ribs);display:flex;align-items:center;justify-content:space-between;padding:0 calc(50*var(--u));color:#ece8df}
+.mq .slots{display:flex;gap:calc(12*var(--u))}
+.att-dim .mq{opacity:.3}
+.att-b{position:absolute;left:calc(96*var(--u));right:calc(96*var(--u));top:calc(690*var(--u));display:flex;justify-content:space-between;align-items:flex-start;gap:calc(60*var(--u))}
+.att-b .t{font:600 calc(56*var(--u))/1.1 var(--f)}
+.att-b .l{font:400 calc(28*var(--u))/1.35 var(--f);color:var(--dim);max-width:calc(900*var(--u));margin-top:calc(8*var(--u))}
+.att-c{display:grid;gap:calc(8*var(--u));justify-items:end;text-align:right;font:400 calc(26*var(--u)) var(--f);color:var(--dim)}
+.att-c b{color:var(--ink);font-weight:500}
+.toast{position:absolute;right:calc(96*var(--u));top:calc(150*var(--u));max-width:calc(620*var(--u));padding:calc(18*var(--u)) calc(24*var(--u));border-radius:calc(14*var(--u));background:#2a2826;color:#ece8df;font:400 calc(24*var(--u))/1.3 var(--f);opacity:0;transition:opacity 200ms linear;z-index:8}
+.toast.on{opacity:1}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Jam Design · Pass 5 · NervOS</div>
+    <h1>NervOS pass 5: the console, all the way through</h1>
+    <p class="muted">The games launcher on the living-room TV. Pass 4 put the last game <b>in the console</b> and everything else <b>on shelves seen by spine</b>. Pass 5 keeps that and carries it into the screens pass 4 left alone: the <b>Guide band</b> is now the console's deck with the game standing in its slot, <b>Power</b> is the console's switch panel, <b>Settings</b> is its rear panel, the <b>keyboard</b> sits on the deck and writes on a label, a <b>netplay room</b> is the host's console with two ports, <b>Signal lost</b> is the computer popping back out of the slot, and <b>Theater</b> plays on the same deck. It also fixes pass 4's audit: names now show large and horizontally on every shelf (a name rail on the shelf edge), a <b>Covers</b> view for people who don't read spines, a lit shelf rail under the focused spine, ⏮ ⏭ on the remote to jump dividers, small sections stand face-out, and the attract board shows its place with slots. Click the TV and use the arrow keys, Enter (A), Esc (B), G (Guide), M (≡), Y (view), X, [ ] (L1/R1), , . (LT/RT or ⏮ ⏭) and 2 (a second controller presses A). Every game, film, computer, code and name is made up.</p>
+  </header>
+  <div class="ctl">
+    <div><span class="eyebrow">Lighting</span><div class="seg" data-ctl="lit"><button data-v="night" aria-pressed="true">Night</button><button data-v="day" aria-pressed="false">Day</button></div></div>
+    <div><span class="eyebrow">Motion</span><div class="seg" data-ctl="calm"><button data-v="full" aria-pressed="true">Full</button><button data-v="calm" aria-pressed="false">Calm</button></div></div>
+    <div><span class="eyebrow">Hints for</span><div class="seg" data-ctl="hint"><button data-v="pad" aria-pressed="true">Gamepad (A / B)</button><button data-v="remote" aria-pressed="false">HA remote (OK / Back)</button></div></div>
+    <div><span class="eyebrow">Controllers on</span><div class="seg" data-ctl="pads"><button data-v="1" aria-pressed="false">1</button><button data-v="2" aria-pressed="true">2</button></div></div>
+    <div><span class="eyebrow">Shelf view</span><div class="seg" data-ctl="view"><button data-v="spines" aria-pressed="true">Spines</button><button data-v="covers" aria-pressed="false">Covers</button></div></div>
+    <div class="alt"><span class="tag">Alternative for Isaac to judge · section names</span><div class="seg" data-ctl="names"><button data-v="app" aria-pressed="true">Archive · Hangar · Uplink · Theater</button><button data-v="plain" aria-pressed="false">Plain words</button></div></div>
+  </div>
+  <div class="keys"><button class="tourb" id="tourb" aria-pressed="false">▶ Tour</button><span class="cap" id="tcap">Steps through every state, about 3 seconds each. Any key on the TV stops it.</span></div>
+  <div class="keys"><span class="eyebrow">Jump to</span>
+    <button class="kb" data-jump="attract">Attract board</button><button class="kb" data-jump="home">Home · console</button><button class="kb" data-jump="archive">Archive</button><button class="kb" data-jump="covers">Covers view</button><button class="kb" data-jump="hangar">Hangar</button><button class="kb" data-jump="uplink">Uplink</button><button class="kb" data-jump="theater">Theater</button><button class="kb" data-jump="game">Game page</button><button class="kb" data-jump="players">Pick up a controller</button><button class="kb" data-jump="launch">Launch</button><button class="kb" data-jump="band">Guide band</button><button class="kb" data-jump="strip">Save strip</button><button class="kb" data-jump="ret">Return</button><button class="kb" data-jump="film">Theater player</button><button class="kb" data-jump="power">Power</button><button class="kb" data-jump="settings">Settings</button><button class="kb" data-jump="osk">Keyboard</button><button class="kb" data-jump="room">Netplay room</button><button class="kb" data-jump="lost">Signal lost</button></div>
+  <div class="keys"><span class="eyebrow">Pad</span><button class="kb" data-key="ArrowUp">↑</button><button class="kb" data-key="ArrowDown">↓</button><button class="kb" data-key="ArrowLeft">←</button><button class="kb" data-key="ArrowRight">→</button><button class="kb" data-key="Enter">A · OK</button><button class="kb" data-hold="1">Hold A 1 s</button><button class="kb" data-key="Escape">B · Back</button><button class="kb" data-key="g">Guide</button><button class="kb" data-key="m">≡ Menu</button><button class="kb" data-key="y">Y · view</button><button class="kb" data-key="x">X</button><button class="kb" data-key="[">L1</button><button class="kb" data-key="]">R1</button><button class="kb" data-key=",">LT · ⏮</button><button class="kb" data-key=".">RT · ⏭</button><button class="kb" data-key="2">Pad 2 presses A</button></div>
+
+  <div class="tv" id="tv" tabindex="0" aria-label="NervOS TV mockup. Click, then use the arrow keys, Enter, Escape, G, M and Y.">
+    <div class="scr" id="s-attract"></div>
+    <div class="scr" id="s-home"></div>
+    <div class="scr" id="s-shelf"></div>
+    <div class="scr" id="s-game"></div>
+    <div class="scr" id="s-players"></div>
+    <div class="scr lc" id="s-launch"></div>
+    <div class="scr" id="s-play"></div>
+    <div class="scr" id="s-set"></div>
+    <div class="scr" id="s-osk"></div>
+    <div class="scr" id="s-room"></div>
+    <div class="scr lc lost" id="s-lost"></div>
+    <div class="scr" id="s-power"></div>
+    <div class="sleep" id="sleep">Asleep · press any button to wake</div>
+    <div class="toast" id="toast"></div>
+  </div>
+  <div class="cap" id="cap">Home: the console holds the game you played last. Continue is the one orange key.</div>
+  <div class="legend"><span><b>← ↑ → ↓</b> move</span><span><b>Enter</b> A / OK (acts on release; hold 1 s on Quit)</span><span><b>Esc</b> B / Back</span><span><b>G</b> Guide</span><span><b>M</b> ≡ options</span><span><b>Y</b> spines / covers</span><span><b>X</b> delete (keyboard)</span><span><b>[ ]</b> L1 / R1 sections</span><span><b>, .</b> LT / RT, or ⏮ ⏭ on the HA remote: jump dividers</span><span><b>2</b> controller 2 presses A</span><span><b>any key</b> wakes attract</span></div>
+  <div class="notes">
+    <div class="note"><h2>Names you can read from the sofa</h2><p class="muted">Every shelf edge is a name rail: the focused thing's name in 46 px, horizontal, on the walnut. The spines keep their vertical titles for density. Y switches a shelf to Covers (face-out, about five per shelf) for anyone who finds spines slow. Sections with five things or fewer stand face-out on their own.</p></div>
+    <div class="note"><h2>The console in every screen</h2><p class="muted">Guide band = the deck, with the game in its slot and the players in its ports. Power = the switch panel. Settings = the rear panel with two-position slide switches. Keyboard = keys on the deck writing on a label. Netplay = the host's console, a free port is a free seat. Signal lost = the computer pops back out.</p></div>
+    <div class="note"><h2>Shared on purpose</h2><p class="muted">The Guide band and the player band keep the house key order, header and chooser rules (conflict 10, assumed B: the face is NervOS's). The launch keeps the house rule (opaque cover, slatted bar, max(load, 600 ms), B cancels, Calm fade) and draws its own cover (conflict 4, assumed B).</p></div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const U=n=>`calc(${n}*var(--u))`;
+const tv=$('tv');
+/* ---------- colour helpers ---------- */
+function rgb(h){const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]}
+function hex(r,g,b){return '#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('')}
+function lum(h){return rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0)}
+function contrast(a,b){const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+function inkFor(bg){return contrast(bg,'#1d1c1a')>=contrast(bg,'#f4efe4')?'#1d1c1a':'#f4efe4'}
+const inkOn=inkFor;
+function toHsl(h){const [r,g,b]=rgb(h).map(v=>v/255);const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let H=0,Sa=0;const L=(mx+mn)/2;
+ if(mx!==mn){const d=mx-mn;Sa=L>.5?d/(2-mx-mn):d/(mx+mn);H=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;H*=60}return [H,Sa,L]}
+function fromHsl(H,Sa,L){const c=(1-Math.abs(2*L-1))*Sa,x=c*(1-Math.abs((H/60)%2-1)),m=L-c/2;
+ const [r,g,b]=H<60?[c,x,0]:H<120?[x,c,0]:H<180?[0,c,x]:H<240?[0,x,c]:H<300?[x,0,c]:[c,0,x];return hex((r+m)*255,(g+m)*255,(b+m)*255)}
+/* H11: a spine colour taken from the cover is kept out of the orange and red signal ranges, held inside a lightness band,
+   and nudged away from the middle until its title ink reaches 4.5:1. */
+function clampSpine(h){let [H,Sa,L]=toHsl(h);if((H<50||H>=335)&&Sa>.3)Sa=.3;L=Math.min(.7,Math.max(.22,L));let out=fromHsl(H,Sa,L);let n=0;
+ while(Math.max(contrast(out,'#1d1c1a'),contrast(out,'#f4efe4'))<4.5&&n<12){L+=L>.45?.03:-.03;out=fromHsl(H,Sa,L);n++}return out}
+function shade(h,k){const [r,g,b]=rgb(h);return hex(r*(1+k),g*(1+k),b*(1+k))}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+/* ---------- art: flat, original compositions (no titles, no logos) ---------- */
+function artInner(g){const [a,b,c,d]=g.pal;let s='';
+ switch(g.m){
+ case'sun':s=`<rect width="100" height="100" fill="${a}"/><circle cx="50" cy="56" r="22" fill="${c}"/><rect y="58" width="100" height="42" fill="${b}"/>`+[64,70,78,90].map(y=>`<rect y="${y}" width="100" height="1.4" fill="${d}" opacity=".7"/>`).join('')+[-40,-10,20,50,80,110,140].map(x=>`<line x1="50" y1="58" x2="${x}" y2="100" stroke="${d}" stroke-width="1.2" opacity=".7"/>`).join('');break;
+ case'moon':s=`<rect width="100" height="100" fill="${a}"/><circle cx="68" cy="32" r="15" fill="${c}"/><path d="M0 74 Q30 58 55 70 T100 64 V100 H0Z" fill="${b}"/><rect x="30" y="56" width="5" height="16" fill="${d}"/><rect x="62" y="58" width="5" height="14" fill="${d}"/>`;break;
+ case'wave':s=`<rect width="100" height="100" fill="${a}"/><circle cx="30" cy="34" r="13" fill="${c}"/>`+[56,66,76,86].map((y,i)=>`<path d="M0 ${y} Q12 ${y-6} 25 ${y} T50 ${y} T75 ${y} T100 ${y} V100 H0Z" fill="${i%2?c:b}" opacity="${i%2?.55:1}"/>`).join('');break;
+ case'peak':s=`<rect width="100" height="100" fill="${a}"/><path d="M-5 90 L40 28 L62 58 L74 44 L110 90Z" fill="${b}"/><path d="M40 28 L49 41 L44 44 L36 38Z" fill="${c}"/><rect y="88" width="100" height="12" fill="${d}"/>`;break;
+ case'blocks':s=`<rect width="100" height="100" fill="${a}"/><circle cx="34" cy="40" r="24" fill="${b}"/><rect x="50" y="46" width="38" height="38" fill="${c}"/><path d="M14 92 L34 62 L54 92Z" fill="${d}"/>`;break;
+ case'road':s=`<rect width="100" height="100" fill="${a}"/><rect y="52" width="100" height="48" fill="${b}"/><path d="M42 52 L58 52 L92 100 L8 100Z" fill="${d}"/>`+[58,68,82].map((y,i)=>`<rect x="${49-i}" y="${y}" width="${2+i*2}" height="${4+i*2}" fill="${c}"/>`).join('')+`<circle cx="76" cy="30" r="9" fill="${c}"/>`;break;
+ case'city':s=`<rect width="100" height="100" fill="${a}"/><circle cx="62" cy="50" r="16" fill="${c}"/>`+[[4,50,12],[18,38,10],[30,58,14],[46,44,9],[58,62,12],[72,40,10],[84,54,14]].map(([x,y,w])=>`<rect x="${x}" y="${y}" width="${w}" height="${100-y}" fill="${b}"/>`).join('')+`<rect y="86" width="100" height="14" fill="${d}"/>`;break;
+ case'orbit':s=`<rect width="100" height="100" fill="${a}"/><circle cx="50" cy="52" r="20" fill="${b}"/><ellipse cx="50" cy="52" rx="38" ry="9" fill="none" stroke="${c}" stroke-width="3"/>`+[[14,16],[82,22],[24,84],[88,78],[60,12]].map(([x,y])=>`<rect x="${x}" y="${y}" width="2" height="2" fill="${d}"/>`).join('');break;
+ default:s=`<rect width="100" height="100" fill="${a}"/><rect x="0" y="60" width="100" height="40" fill="${b}"/><circle cx="50" cy="40" r="16" fill="${c}"/>`}
+ return s}
+function art(g){return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" style="inset:0;width:100%;height:100%">${artInner(g)}</svg>`}
+/* a made-up game picture for "playing" (pixel scene in the game's own palette) */
+function gamePic(g,shift=0){const [a,b,c,d]=g.pal;let s=`<rect width="192" height="108" fill="${a}"/><rect width="192" height="12" fill="${d}" opacity=".18"/>`;
+ [[30+shift,18],[96+shift,10],[150+shift,24]].forEach(([x,y])=>{s+=`<rect x="${x%192}" y="${y}" width="22" height="5" fill="#f4efe4" opacity=".85"/><rect x="${(x+4)%192}" y="${y-4}" width="12" height="4" fill="#f4efe4" opacity=".85"/>`});
+ s+=`<rect y="80" width="192" height="28" fill="${b}"/>`;for(let x=0;x<192;x+=16)s+=`<rect x="${x}" y="80" width="15" height="3" fill="${d}" opacity=".35"/>`;
+ [[40,58],[56,58],[110,52]].forEach(([x,y])=>{s+=`<rect x="${x}" y="${y}" width="12" height="12" fill="${c}" stroke="${d}" stroke-width="1.5"/>`});
+ s+=`<rect x="${120+shift%20}" y="66" width="8" height="14" fill="${d}"/><rect x="${121+shift%20}" y="60" width="6" height="6" fill="${c}"/>`;
+ return `<svg viewBox="0 0 192 108" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">${s}</svg>`}
+
+/* ---------- media: each system's own template. Sizes in 1080p px ---------- */
+const MEDIA={
+ cart:{w:72,h:222,body:'#8f8c95',lab:[12,12,10,52],rid:1,face:[300,230],fb:'#8f8c95',fpad:[22,22,22,62],kind:'cartridge'},
+ case:{w:60,h:282,body:'#18181a',cap:58,face:[250,350],fb:'#18181a',fpad:[0,0,0,0],kind:'case'},
+ n64:{w:88,h:206,body:'#3c3c41',lab:[12,14,12,36],rid:1,face:[330,230],fb:'#3c3c41',fpad:[26,26,26,52],kind:'cartridge'},
+ mini:{w:64,h:176,body:'#5b5672',lab:[10,10,8,30],face:[260,170],fb:'#5b5672',fpad:[16,16,16,34],kind:'small cartridge'},
+ jewel:{w:54,h:262,body:'#101012',strip:12,face:[300,300],fb:'#101012',fpad:[18,8,8,8],kind:'disc case'},
+ marq:{w:80,h:272,body:'#19191a',cap:70,face:[440,190],fb:'#19191a',fpad:[12,12,12,12],kind:'arcade board'},
+ box:{w:108,h:300,body:null,face:[270,360],fb:null,fpad:[0,0,0,0],kind:'big box'},
+ tape:{w:60,h:272,body:'#151515',lab:[8,34,8,34],labc:'#e9e0cc',face:[250,360],fb:'#151515',fpad:[14,14,14,14],kind:'film case'},
+ host:{w:230,h:250,face:[230,250],kind:'computer'},
+ room:{w:230,h:250,face:[230,250],kind:'netplay room'}};
+const SYSCOL={'Super Nintendo':'#5b5470','Mega Drive':'#3c4f6b','Nintendo 64':'#4a5a3c','Game Boy Advance':'#4f4a72','PlayStation':'#3f4650','Arcade':'#6a4b3a','Steam':'#3b4a5a','Film':'#4a4540'};
+function spc(g){if(S.spc==='system')return SYSCOL[g.sys]||'#5a5660';return g._spc||(g._spc=clampSpine(g.pal[0]))}
+function spine(g,x,f,mem){const M=MEDIA[g.med];const c=spc(g);const ink=inkFor(c);let st=`left:${U(x)};width:${U(M.w)};height:${U(M.h)};`;let inner='';
+ if(g.med==='box'){st+=`background:${c};`;inner=`<div class="cap" style="height:${U(12)};background:${shade(c,-.3)}"></div><div class="lab" style="left:0;right:0;top:${U(22)};bottom:${U(20)}"><span class="tt" style="color:${ink};font-size:${U(26)};font-weight:600">${esc(g.t)}</span></div>`}
+ else{st+=`background:${M.body};`;
+  if(M.cap){inner=`<div class="cap" style="height:${U(M.cap)};background:${c}"><div style="position:absolute;left:0;right:0;bottom:${U(10)};height:${U(8)};background:${shade(c,-.35)}"></div></div><div class="lab" style="left:${U(6)};right:${U(6)};top:${U(M.cap+4)};bottom:${U(14)}"><span class="tt" style="color:#ece8df">${esc(g.t)}</span></div>`}
+  else if(M.strip){inner=`<div style="position:absolute;left:0;top:0;bottom:0;width:${U(M.strip)};background:${c};border-radius:${U(7)} 0 0 ${U(3)}"></div><div class="lab" style="left:${U(M.strip)};right:${U(4)};top:${U(12)};bottom:${U(12)}"><span class="tt" style="color:#ece8df">${esc(g.t)}</span></div>`}
+  else{const [l,t,r,b]=M.lab;const lc=M.labc||c;inner=`<div class="lab" style="left:${U(l)};right:${U(r)};top:${U(t)};bottom:${U(b)};background:${lc}">${M.labc?`<div style="position:absolute;left:0;right:0;top:0;height:${U(14)};background:${c}"></div>`:''}<span class="tt" style="color:${inkFor(lc)};${M.labc?`padding-top:${U(24)}`:''}">${esc(g.t)}</span></div>${M.rid?'<div class="rid"></div>':''}`}}
+ if(g.isNew&&S.newSticker)inner+=`<div class="newd">New</div>`;
+ return `<div class="sp${f?' f':''}${mem?' mem':''}" style="${st}">${inner}</div>`}
+function hostFace(g,W,H){
+ if(g.med==='room'){const join=g.code==='CODE';
+  const kb=`<svg viewBox="0 0 120 70" style="position:static;width:62%;height:auto"><rect x="2" y="2" width="116" height="66" rx="8" fill="none" stroke="#6f6553" stroke-width="3"/>${[16,31].map(y=>[0,1,2,3,4,5,6,7].map(i=>`<rect x="${12+i*12.5}" y="${y}" width="9" height="9" rx="2" fill="#6f6553"/>`).join('')).join('')}<rect x="30" y="47" width="60" height="9" rx="2" fill="#6f6553"/></svg>`;
+  return `<div class="host room" style="position:relative;width:${U(W)};height:${U(H)}"><div class="code${join?' ph':''}">${join?'_ _ _ _ _ _':esc(g.code)}</div>${join?`<div class="rart" style="background:#d8cdb6;display:grid;place-items:center">${kb}</div>`:`<div class="rart">${art(g)}</div>`}<div class="seats">${join?'':'<span class="sock in"></span><span class="sock"></span>'}</div></div>`}
+ const st=g.state;const led=st==='on'?'<i class="ind led big ok on"></i>':st==='offline'?'<i class="ind led big offl"></i>':'<i class="ind led big"></i>';
+ return `<div class="host" style="position:relative;width:${U(W)};height:${U(H)}"><div class="vent" style="height:${U(H*.36)}"></div><div class="hs" style="bottom:${U(H*.1)}">${led}</div></div>`}
+function fitH(g,maxW,maxH){const M=MEDIA[g.med];const [fw,fh]=M.face||[M.w,M.h];return Math.min(maxH,maxW*fh/fw)}
+/* face-out: the front of the media at a given height; o.printed adds the title band real box art carries */
+function face(g,H,o){o=o||{};const M=MEDIA[g.med];
+ if(g.med==='host'||g.med==='room')return hostFace(g,M.face[0]*H/M.face[1],H);
+ const [fw,fh]=M.face;const sc=H/fh;const W=fw*sc;const [l,t,r,b]=M.fpad.map(v=>v*sc);const bg=M.fb||g.pal[0];
+ let lab='';if(['cart','n64','mini'].includes(g.med))lab=`<div class="ftl" style="background:${g.pal[2]};height:${U(30*sc)}"></div><div style="position:absolute;left:0;right:0;top:${U(30*sc)};height:${U(5*sc)};background:${g.pal[3]};opacity:.5"></div>`;
+ if(o.printed)lab+=`<div class="ptl" style="background:${g.pal[1]};color:${inkFor(g.pal[1])}">${esc(g.t)}</div>`;
+ const rad=(g.med==='cart'||g.med==='n64')?16*sc:10;
+ return `<div class="face" style="width:${U(W)};height:${U(H)};background:${bg};border-radius:${U(rad)} ${U(rad)} ${U(8)} ${U(8)}"><div style="position:absolute;left:${U(l)};right:${U(r)};top:${U(t)};bottom:${U(b)};border-radius:${U(6)};overflow:hidden">${art(g)}${lab}</div>${g.med==='jewel'?`<div style="position:absolute;left:0;top:0;bottom:0;width:${U(18*sc)};background:#2b2b30"></div>`:''}</div>`}
+
+/* ---------- data (all made up) ---------- */
+const mk=(t,med,pal,m,o={})=>Object.assign({t,med,pal,m,pl:1},o);
+const PAL={dusk:['#2b2350','#1a1430','#f0a24a','#f6efe0'],red:['#c8372d','#2a1210','#f3e6c8','#1d1c1a'],sea:['#1f4f6b','#123245','#f2c14e','#e9f0f2'],mint:['#cfe3d2','#4f7a5c','#e05a3a','#1d1c1a'],sand:['#e8d3a8','#a8743c','#c0392b','#2b1d10'],night:['#141b33','#0b0f1f','#e9e0cc','#7aa0d8'],plum:['#5a2e5c','#2a1530','#f08aa0','#f6efe0'],lime:['#2f4a1e','#18240f','#c9e265','#f6efe0'],sky:['#79b6e0','#2f8f4e','#f2c14e','#3a2412'],rust:['#8a3a1c','#3d1a0c','#f2b134','#f6efe0'],teal:['#2a7f8a','#123b40','#f3e6c8','#0b1d20'],cream:['#efe6d2','#2b2b2b','#d8452b','#1d1c1a'],gold:['#d69a2e','#6b3416','#f6efe0','#2b1d10'],slate:['#3b4250','#20242c','#9fd3c7','#eef2f4'],rose:['#e7b7a8','#7a3b3b','#2f4858','#1d1c1a']};
+const SNES=[mk('Glass Dragon','cart',PAL.dusk,'sun',{res:'Tuesday 21:40',played:'42 min on Tuesday',saves:[['Slot 1','Tue 21:31'],['Slot 2','Sun 18:02'],null,null],line:'A dragon of glass and a kingdom of mirrors.'}),mk('Harvest Heroes','cart',PAL.mint,'peak',{pl:2}),mk('Kite Knights','cart',PAL.sky,'wave',{pl:2}),mk('Lantern Lake','cart',PAL.night,'moon'),mk('Mole Patrol','cart',PAL.sand,'blocks',{pl:2}),mk('Orbit Bakery','cart',PAL.plum,'orbit'),mk('Paper Tiger Turbo','cart',PAL.cream,'road',{pl:2}),mk('Quiet Comet','cart',PAL.slate,'orbit'),mk('Rally Hearts','cart',PAL.red,'road',{pl:4}),mk('Snow Signal','cart',PAL.sea,'peak'),mk('Thimble Quest','cart',PAL.gold,'blocks',{isNew:true}),mk('Velvet Fox','cart',PAL.rose,'moon'),mk('Wild Wicket','cart',PAL.lime,'sun',{pl:2})];
+const MD=[mk('Blast Harbor','case',PAL.sea,'wave'),mk('Copper Comet','case',PAL.rust,'orbit'),mk('Desert Relay','case',PAL.sand,'road',{pl:2}),mk('Hyper Gull','case',PAL.sky,'wave'),mk('Iron Lullaby','case',PAL.slate,'city'),mk('Neon Ferry','case',PAL.plum,'city'),mk('Turbo Tortoise','case',PAL.lime,'road',{pl:2}),mk('Velvet Viper','case',PAL.red,'blocks')];
+const N64=[mk('Cloud Kart','n64',PAL.sky,'road',{pl:4}),mk('Fort Fable','n64',PAL.gold,'peak'),mk('Moon Golf','n64',PAL.night,'moon',{pl:4}),mk('Starfold','n64',PAL.dusk,'orbit'),mk('Toy Harbour','n64',PAL.teal,'wave',{pl:2})];
+const GBA=[mk('Pocket Comet','mini',PAL.slate,'orbit'),mk('Tiny Tactics','mini',PAL.mint,'blocks'),mk('Vault Runner','mini',PAL.rust,'city'),mk('Wren','mini',PAL.rose,'moon')];
+const PS=[mk('Ash Garden','jewel',PAL.cream,'blocks'),mk('Bluebird Bay','jewel',PAL.sea,'wave'),mk('Chrome Choir','jewel',PAL.slate,'city'),mk('Echo Divers','jewel',PAL.teal,'wave'),mk('Hollow Lantern','jewel',PAL.night,'moon'),mk('Tidebreaker','jewel',PAL.plum,'wave',{played:'Saturday'}),mk('Umbra Rail','jewel',PAL.dusk,'road')];
+const ARC=[mk('Bolt Brothers','marq',PAL.gold,'blocks',{pl:2}),mk('Comet Catcher','marq',PAL.night,'orbit'),mk('Moonlit Duel','marq',PAL.red,'moon',{pl:2,played:'yesterday',res:'yesterday 22:10',saves:[['Slot 1','Wed 22:10'],null,null,null]}),mk('Pinwheel','marq',PAL.mint,'sun'),mk('Sky Ranger','marq',PAL.sky,'peak',{pl:2})];
+const STEAM=[mk('Brass Orchard','box',PAL.gold,'sun'),mk('Cinder Valley','box',PAL.rust,'peak'),mk('Deep Lantern','box',PAL.night,'moon'),mk('Fieldwork','box',PAL.mint,'blocks'),mk('Harbour Lights','box',PAL.sea,'city'),mk('Kettle Quest','box',PAL.cream,'blocks'),mk('Overgrown','box',PAL.lime,'peak'),mk('Rocket Picnic','box',PAL.sky,'orbit',{pl:4}),mk('Skyline Rally','box',PAL.dusk,'road',{pl:4,played:'Sunday'}),mk('Tin Choir','box',PAL.slate,'city')];
+STEAM.forEach(g=>g.steam=1);
+const COOP=[STEAM[7],STEAM[8],mk('Pillow Fort','box',PAL.rose,'blocks',{pl:4,steam:1}),mk('Snack Heist','box',PAL.red,'city',{pl:4,steam:1})];
+const FILMS=[mk('A Quiet Ferry','tape',PAL.sea,'wave'),mk('Harbour Hour','tape',PAL.teal,'wave'),mk('Paper Moons','tape',PAL.night,'moon'),mk('Signal Street','tape',PAL.dusk,'road'),mk('Small Hours','tape',PAL.plum,'city'),mk('The Copper City','tape',PAL.rust,'city',{res:'1:12:04',played:'Sunday'}),mk('The Velvet Machine','tape',PAL.red,'blocks'),mk('Winter Orchard','tape',PAL.cream,'peak')];
+const SHORTS=[mk('Kite Day','tape',PAL.sky,'wave'),mk('Lamp','tape',PAL.gold,'sun'),mk('Night Bus','tape',PAL.slate,'city')];
+FILMS.concat(SHORTS).forEach(g=>g.film=1);
+const HOSTS=[mk('Study PC','host',PAL.slate,'city',{state:'on',stream:1,grp:'Computers'}),mk('Laptop','host',PAL.slate,'city',{state:'offline',stream:1,grp:'Computers'})];
+const ROOMS=[mk('Moonlit Duel','room',PAL.red,'moon',{code:'MOON42',host:'Sam',grp:'Netplay rooms'}),mk('Join with a code','room',PAL.cream,'blocks',{code:'CODE',grp:'Netplay rooms'})];
+const SYS=[['Super Nintendo',SNES],['Mega Drive',MD],['Nintendo 64',N64],['Game Boy Advance',GBA],['PlayStation',PS],['Arcade',ARC]];
+SYS.forEach(([n,l])=>l.forEach(g=>g.sys=n));STEAM.concat(COOP).forEach(g=>g.sys='Steam');FILMS.concat(SHORTS).forEach(g=>g.sys='Film');HOSTS.forEach(g=>g.sys='Computer');ROOMS.forEach(g=>g.sys='Netplay');
+const SECS=[{n:'Home',p:'Home',sub:'The console'},{n:'Archive',p:'Retro',sub:'Retro games'},{n:'Hangar',p:'Steam',sub:'Steam games'},{n:'Uplink',p:'Streaming',sub:'Streams and netplay'},{n:'Theater',p:'Films',sub:'Films'}];
+const CASES={1:SYS.map(([n,l])=>({n,items:l})),2:[{n:'Installed',items:STEAM},{n:'Couch co-op',items:COOP}],3:[{n:'Computers and rooms',items:HOSTS.concat(ROOMS)}],4:[{n:'Films',items:FILMS},{n:'Short films',items:SHORTS}]};
+const FAVS=[SNES[0],ARC[2],STEAM[8],PS[5],N64[0],MD[2],SNES[6],GBA[2],STEAM[7],FILMS[5],SNES[8],ARC[0],N64[2],MD[6]];
+const LATELY=[ARC[2],STEAM[8],FILMS[5],HOSTS[0]];
+const BARS=['#3f2210','#5a2f15','#74391a','#8c4520','#a05527','#b0652f'];/* Colour bars, kept darker than control orange (CL7) */
+const PICS=['Sharp pixels','Smooth','Scan lines','Original size','Fill the screen'];
+const SUBS=['Off','English','English (SDH)','French','Spanish'];
+const CHAPS=['Opening','The harbour','Night shift','Copper rain','The archive','The ferry','Lanterns','The bridge','The vote','Low tide','Morning','End credits'].map((n,i)=>[`${i+1} · ${n}`,['0:00','0:09:40','0:21:15','0:33:02','0:47:30','1:02:10','1:12:00','1:21:44','1:30:05','1:39:20','1:48:12','1:54:00'][i]]);
+
+/* ---------- state ---------- */
+const S={scr:'home',lit:'night',calm:false,hint:'pad',names:'app',pads:2,view:'spines',spc:'cover',newSticker:true,sv:{},
+ con:SNES[0],home:{z:'con',i:0},sec:1,
+ sh:{z:'shelf',s:0,pos:{},shown:null},ch:null,
+ game:{g:SNES[0],z:'keys',i:0,si:0,from:'shelf'},
+ pl:{g:null,joined:[1],i:0,next:null},
+ play:{g:SNES[0],band:false,k:0,mode:null,si:0,armed:null,pic:0,ch:null,chi:0,picv:'Sharp pixels',subs:'English'},
+ att:{i:0,dim:false},pw:{i:0,armed:null,done:null},set:{z:'rows',pg:1,i:0},
+ osk:{t:'',r:2,c:5,shift:true},room:{st:'seat',i:0},lost:{n:0,i:0,trying:false}};
+const BTN={pad:{A:'A',B:'B',M:'≡',G:'⌂',X:'X',Y:'Y'},remote:{A:'OK',B:'Back',M:'≡',G:'Guide',X:'X',Y:'Y'}};
+const hint=(b,l)=>`<span><kbd>${BTN[S.hint][b]}</kbd>${l}</span>`;
+const secName=i=>S.names==='plain'?SECS[i].p:SECS[i].n;
+let restT=null,armT=null,roomT=null;
+
+
+/* ---------- top bar ---------- */
+function topbar(cur,focused){const items=SECS.map((s,i)=>`<div class="sl${i===cur?' cur':''}" data-i="${i}">${secName(i)}</div>`).join('');
+ const sub=S.names==='plain'||cur===0?'':`<div class="ssub" id="ssub">${SECS[cur].sub}</div>`;
+ const pads=S.pads===2?'2 controllers':'Controller 72%';
+ return `<div class="top"><div class="slide" id="slide"><div class="slk${focused?' f':''}" id="slk"><div class="w wb"></div></div>${items}${sub}</div><div class="stat">${cur===0?'':`<span><i class="ind led ok on"></i>${pads}</span>`}<span class="clock">21:12</span></div></div>`}
+function placeSlide(scope){const sl=scope.querySelector('#slide');if(!sl)return;const cur=sl.querySelector('.sl.cur'),k=sl.querySelector('#slk'),sub=sl.querySelector('#ssub');
+ k.style.transform=`translateX(${cur.offsetLeft}px)`;k.style.width=cur.offsetWidth+'px';if(sub)sub.style.transform=`translateX(${cur.offsetLeft+parseFloat(getComputedStyle(cur).paddingLeft)}px)`}
+
+/* ---------- shelf row: spines or covers, dividers, bookend, the lit rail segment ---------- */
+const RANGES=[['A','F'],['G','L'],['M','R'],['S','Z']];
+const firstL=t=>t.replace(/^(The|A) /,'')[0].toUpperCase();
+const rangeOf=g=>RANGES.findIndex(([a,b])=>{const L=firstL(g.t);return L>=a&&L<=b});
+function layoutRow(items,withDiv,faceOut){const out=[];let x=24;let lastR=-1;
+ items.forEach((g,i)=>{const r=rangeOf(g);
+  if(withDiv&&r!==lastR){out.push({div:RANGES[r].join('–'),x});x+=26;lastR=r}
+  const M=MEDIA[g.med];
+  if(faceOut){const H=fitH(g,250,300);const W=M.face[0]*H/M.face[1];out.push({g,i,x,w:W,h:H});x+=W+26}
+  else{out.push({g,i,x,w:M.w});x+=M.w+(M.w>150?28:10)}});
+ out.push({end:1,x:x+10});return {els:out,total:x+70}}
+function rowHTML(items,focusI,viewW,o){const L=layoutRow(items,o.div,o.covers);const fe=L.els.find(e=>e.g&&e.i===focusI);
+ let shift=0;if(fe)shift=Math.max(0,Math.min(fe.x+fe.w/2-viewW*.42,L.total-viewW));
+ const html=L.els.map(e=>{if(e.div)return `<div class="dv" style="left:${U(e.x+6)};height:${U(330)}"><div class="tab">${e.div}</div></div>`;
+  if(e.end)return `<div class="bk" style="left:${U(e.x)}"></div>`;
+  const f=o.show&&e.i===focusI,mem=o.mem&&e.i===focusI;
+  const body=o.covers?`<div class="sp cv${f?' f':''}${mem?' mem':''}" style="left:${U(e.x)};width:${U(e.w)};height:${U(e.h)}">${face(e.g,e.h,{printed:1})}</div>`:spine(e.g,e.x,f,mem);
+  return body+(f?`<i class="rl" style="left:${U(e.x-8)};width:${U(e.w+16)}"></i>`:'')}).join('');
+ return {html,shift}}
+
+/* ---------- HOME: the games console ---------- */
+function conKeys(g){return g.steam?['cont','page']:['cont','saves','page']}
+function rHome(){const h=S.home,g=S.con;const el=$('s-home');const fK=i=>h.z==='con'&&h.i===i;
+ const ks=conKeys(g).map((a,i)=>a==='cont'?`<div class="k dk pri${fK(i)?' f':''}">Continue <small>· ${esc(g.res||'from the start')}</small><div class="w wb"></div></div>`:a==='saves'?`<div class="k dk${fK(i)?' f':''}">Saves <small>${(g.saves||[]).filter(Boolean).length}</small><div class="w wb"></div></div>`:`<div class="k dk${fK(i)?' f':''}">Game page<div class="w wb"></div></div>`);
+ const CH=fitH(g,330,220),CW=CH*(MEDIA[g.med].face[0]/MEDIA[g.med].face[1]);const cx=620-CW/2;
+ const ports=[1,2,3,4].map(n=>`<span class="port"><span class="sock${n===1||(n===2&&S.pads===2)?' in':''}"></span>${n}</span>`).join('');
+ const bars=BARS.map((c,i)=>`<i style="background:${c};height:${U(14+i*5)}"></i>`).join('');
+ const conHTML=`<div class="con"><div class="cart" style="left:${U(cx)};top:${U(220-CH)};width:${U(CW)};height:${U(CH)}">${face(g,CH)}</div>
+  <div class="deck"><div class="slotr" style="left:${U(450)};width:${U(340)}"></div><div class="dt"><span class="eb" style="color:var(--deck-dim)">In the console</span><span class="t">${esc(g.t)}</span><span class="s">${esc(g.sys)} · ${esc(g.played||'')}</span></div><div class="dk-row">${ks.join('')}</div></div>
+  <div class="front"><span style="color:#e6d4b4">Players</span>${ports}<span class="bars">${bars}</span></div></div>`;
+ let li='';LATELY.forEach((x,i)=>{const H=fitH(x,186,250);const M=MEDIA[x.med];const W=M.face[0]*H/M.face[1];const left=i*206+(186-W)/2;const f=h.z==='lately'&&h.i===i;
+  li+=`<div class="lt${f?' f':''}" style="left:${U(left)};width:${U(W)};height:${U(H)}">${face(x,H)}</div>`+(f?`<i class="rl" style="left:${U(left-8)};width:${U(W+16)}"></i>`:'')});
+ const lf=h.z==='lately'?LATELY[h.i]:null;
+ const lsub=lf?(lf.stream?`<span style="display:inline-flex;gap:${U(10)};align-items:center"><i class="ind led ok on"></i>On · stream it from Uplink</span>`:lf.film?`Film · stopped at ${lf.res}`:`${esc(lf.sys)} · ${esc(lf.played)}`):'';
+ const lately=`<div class="lately"><div class="items">${li}</div><div class="plank" style="top:${U(270)};height:${U(130)}"><div class="groove"></div></div><div class="nr" style="left:${U(20)};right:${U(20)};top:${U(284)};height:${U(116)}">${lf?`<div class="nm2"><b>${esc(lf.t)}</b><span>${lsub}</span></div>`:`<span class="cnt">Played lately · ${LATELY.length}</span>`}</div></div>`;
+ const fv=rowHTML(FAVS,h.z==='fav'?h.i:-1,1728,{show:h.z==='fav'});const ff=h.z==='fav'?FAVS[h.i]:null;
+ const favs=`<div class="rv" style="left:${U(72)};right:0;top:${U(596)};height:${U(348)}"><div class="row" style="transform:translateX(${U(-fv.shift)})">${fv.html}</div></div>
+  <div class="plank" style="top:${U(930)};height:${U(96)}"><div class="groove"></div></div>
+  <div class="nr" style="left:${U(96)};right:${U(96)};top:${U(944)};height:${U(82)}">${ff?`<div class="nm"><b>${esc(ff.t)}</b><span>${esc(ff.sys)} · ${h.i+1} of ${FAVS.length}</span></div>`:`<span class="cnt">Favourites · ${FAVS.length}</span>`}<span class="hints">${homeHints()}</span></div>`;
+ el.innerHTML=topbar(0,h.z==='top')+conHTML+lately+favs;placeSlide(el)}
+function homeHints(){const h=S.home;const z=h.z;
+ if(z==='con'){const a=conKeys(S.con)[h.i];return hint('A',a==='cont'?'Continue':a==='saves'?'Choose a save':'Open')+hint('B','Power')}
+ if(z==='lately')return hint('A',LATELY[h.i].stream?'Stream':'Continue')+hint('M','Game page');
+ if(z==='fav')return hint('A','Take it off the shelf')+hint('M','Game page');
+ return hint('A','Open')+hint('B','Power')}
+
+/* ---------- SHELF screens (Archive, Hangar, Uplink, Theater) ---------- */
+function curCase(){return CASES[S.sec]}
+function curItem(){const c=curCase()[S.sh.s];return c.items[S.sh.pos[S.sec+':'+S.sh.s]||0]}
+function isShowcase(){const c=CASES[S.sec];return c&&c.length===1&&c[0].items.length<=5}
+function factsOf(g){const players=g.pl>1?`1–${g.pl} players`:g.film?'':'1 player';
+ return [g.film&&g.res?'Stopped at '+g.res:players,g.played?'Played '+g.played:g.isNew?'New on the shelf':g.film?'Not watched yet':'Not played yet'].filter(Boolean).join(' · ')}
+function standPic(g,covers){if(!covers)return face(g,fitH(g,500,390));const shot=g.film?`<svg viewBox="18 14 64 36" preserveAspectRatio="xMidYMid slice">${artInner(g)}</svg>`:gamePic(g,7);return `<div class="scrn">${shot}</div>`}
+function rShelf(){if(isShowcase())return rShow();
+ const el=$('s-shelf');const cs=curCase();const s=S.sh.s;const PITCH=440,OFF=200,viewW=1240;
+ let st='';cs.forEach((c,i)=>{const k=S.sec+':'+i;const fi=S.sh.pos[k]||0;const covers=S.view==='covers'||c.items.length<=5;const many=c.items.length>8;
+  const r=rowHTML(c.items,fi,viewW,{div:many,covers,show:i===s&&S.sh.z==='shelf',mem:i!==s&&(k in S.sh.pos)});
+  st+=`<div class="shelf${i===s?'':' dimmed'}" style="top:${U(i*PITCH)}"><div class="rv" style="top:0;height:${U(404)}"><div class="row" id="row${i}" style="transform:translateX(${U(-r.shift)})">${r.html}</div></div><div class="plank" style="top:${U(390)}"><div class="groove"></div></div><div class="edge" style="top:${U(404)};left:${U(24)};right:${U(96)}"><span>${esc(c.n)} · ${i===s?(fi+1)+' of '+c.items.length:c.items.length}</span><span>${i===s?'Shelf '+(s+1)+' of '+cs.length:''}</span></div></div>`});
+ const g=curItem();const c=cs[s];const covers=S.view==='covers'||c.items.length<=5;const pg=S.sh.shown||g;
+ const disp=`<div class="disp"><span class="eb">${esc(c.n)} · ${covers?(g.film?'a still from the film':'a picture from the game'):esc(MEDIA[g.med].kind)}</span><div class="stage"><div class="picture" id="pic">${standPic(pg,covers)}</div></div><div class="stand"></div><div class="txt"><div class="dtt">${esc(g.t)}</div><div class="dln">${factsOf(g)}</div></div></div>`;
+ el.innerHTML=topbar(S.sec,S.sh.z==='top')+disp+`<div class="case"><div class="stack" style="transform:translateY(${U(OFF-s*PITCH)})">${st}</div></div><div class="botl hints" style="width:${U(560)}">${shelfHints(g)}</div>`+chooserHTML();
+ placeSlide(el)}
+function divKeys(){return S.hint==='pad'?'<span><kbd>LT</kbd><kbd>RT</kbd>Dividers</span>':'<span><kbd>⏮</kbd><kbd>⏭</kbd>Dividers</span>'}
+function shelfHints(g){if(S.sh.z==='top')return hint('A','Open')+hint('B','Home');if(S.ch)return hint('A','Choose')+hint('B','Close');
+ const many=curCase()[S.sh.s].items.length>8;
+ return hint('A',g.film?'Play':'Take it off')+hint('B','Home')+(many?divKeys():'')+(S.hint==='pad'?hint('Y',S.view==='covers'?'Spines':'Covers'):hint('M','Options'))}
+/* options chooser (≡ = options for the focused thing). It pops above the hints, five rows at most. */
+function shelfOpts(){const g=curItem();const fav=FAVS.includes(g);const many=curCase()[S.sh.s].items.length>8;
+ return [g.film?null:{l:'Game page',a:'page'},{l:S.view==='covers'?'Show spines':'Show covers',a:'view'},many?{l:'Jump to a letter',a:'jump'}:null,{l:'Favourite',a:'fav',v:fav?'On':'Off',sq:fav}].filter(Boolean)}
+function jumpOpts(){const items=curCase()[S.sh.s].items;return RANGES.map(([a,b],r)=>{const idx=items.map((g,i)=>rangeOf(g)===r?i:-1).filter(i=>i>=0);return idx.length?{l:a+'–'+b,v:idx.length+(idx.length>1?' games':' game'),a:'to',to:idx[0]}:null}).filter(Boolean)}
+function chooserHTML(){if(!S.ch)return '';const opts=S.ch.k==='jump'?jumpOpts():shelfOpts();
+ return `<div class="chs" style="left:${U(96)};bottom:${U(460)}"><div class="ch">${S.ch.k==='jump'?'Jump to a letter':'Options'}</div>${opts.map((o,i)=>`<div class="ci${i===S.ch.i?' f':''}">${o.sq!=null?`<i class="ind sq${o.sq?' on':''}"></i>`:''}${esc(o.l)}${o.v?`<small>${esc(o.v)}</small>`:''}<div class="w wl"></div></div>`).join('')}</div>`}
+/* showcase: five things or fewer stand face-out on one wide shelf, names on the shelf edge */
+function rShow(){const el=$('s-shelf');const items=CASES[S.sec][0].items;const key=S.sec+':0';const fi=S.sh.pos[key]||0;const foc=S.sh.z==='shelf';
+ const W=340,H=370,gap=40,PL=470;const xs=[];let x=0;items.forEach((g,i)=>{if(i>0)x+=g.grp!==items[i-1].grp?148:gap;xs.push(x);x+=W});
+ const off=(1728-(x+60))/2;const X=i=>xs[i]+off;
+ let h='';items.forEach((g,i)=>{if(i===0||g.grp!==items[i-1].grp)h+=`<span class="eb" style="position:absolute;left:${U(X(i))};top:${U(PL-H-62)}">${esc(g.grp)}</span>`;
+  const f=foc&&i===fi;h+=`<div class="lt${f?' f':''}" style="left:${U(X(i))};bottom:auto;top:${U(PL-H)};width:${U(W)};height:${U(H)}">${hostFace(g,W,H)}</div>`;
+  if(f)h+=`<i class="rl" style="left:${U(X(i)-8)};width:${U(W+16)};bottom:auto;top:${U(PL+3)}"></i>`;
+  const sub=g.stream?(g.state==='on'?'<i class="ind led ok on"></i>On · ready to stream':'<i class="ind led offl" style="--dim:#e6d4b4"></i>Offline · wake it from Jam Home'):g.code==='CODE'?'A friend gives you the code':`<span class="tag" style="background:#3f8f9a"></span>Hosted by ${esc(g.host)} · 1 seat free`;
+  h+=`<div style="position:absolute;left:${U(X(i))};width:${U(W+30)};top:${U(PL+28)};display:grid;gap:${U(8)};color:#f3e6c8"><b style="font:600 ${U(46)}/1.05 var(--f)">${esc(g.t)}</b><span style="font:500 ${U(24)} var(--f);color:#e6d4b4;display:inline-flex;gap:${U(10)};align-items:center;white-space:nowrap">${sub}</span></div>`});
+ h+=`<div class="bk" style="left:${U(off+x+30)};top:${U(PL-230)};bottom:auto"></div>`;
+ el.innerHTML=topbar(S.sec,S.sh.z==='top')+`<div class="show"><div class="plank" style="left:${U(-96)};right:${U(-96)};top:${U(PL)};height:${U(176)}"><div class="groove"></div></div>${h}</div>`+
+  `<div class="botl hints">${S.sh.z==='top'?hint('A','Open')+hint('B','Home'):hint('A',items[fi].stream?(items[fi].state==='on'?'Stream':'Why?'):'Open')+hint('B','Home')}</div>`;
+ placeSlide(el)}
+
+/* ---------- GAME PAGE: the box opened ---------- */
+function gameKeys(g){const ks=[];if(g.res)ks.push({l:'Continue',s:'from '+g.res,pri:1,a:'cont'});ks.push({l:g.res?'Start from the beginning':'Play',pri:!g.res,a:'start'});ks.push({l:'Favourite',fav:1,a:'fav'});return ks}
+function rGame(){const G=S.game,g=G.g;const el=$('s-game');const ks=gameKeys(g);
+ const keys=ks.map((k,i)=>`<div class="k${k.pri?' pri':''}${G.z==='keys'&&G.i===i?' f':''}">${k.fav?`<i class="ind sq${FAVS.includes(g)?' on':''}"></i>`:''}${k.l}${k.s?` <small>${k.s}</small>`:''}${k.fav?` <small>${FAVS.includes(g)?'On':'Off'}</small>`:''}<div class="w wl"></div></div>`).join('');
+ const sv=g.saves||[null,null,null,null];const H=fitH(g,640,540);
+ const players=g.pl>1?`1–${g.pl} players`:'1 player';
+ const guide=g.steam?'In Steam games, Guide opens Steam. Hold ⧉ + ≡ for 1 s for the house menu.':'Guide pauses the game and opens the menu to save, load or quit.';
+ el.innerHTML=`<div class="gp-cover">${face(g,H)}</div><div class="gp-stand"></div>
+  <div class="gp-r"><span class="eb">${esc(g.sys)} · ${MEDIA[g.med].kind} · ${players}</span><div class="gt">${esc(g.t)}</div><div class="gl">${esc(g.line||'A made-up game for this mockup.')}</div><div class="gl" style="font-size:${U(26)};margin-top:${U(8)}">${guide}</div></div>
+  <div class="gp-keys col">${keys}</div>`+
+  (g.steam?'':`<div class="eb" style="position:absolute;left:${U(820)};top:${U(762)}">Saves · ${sv.filter(Boolean).length} of 4</div>`+stripHTML(sv.map((s,i)=>s?[s[0],s[1],i*37+11]:null),820,800,1004,G.z==='strip'?G.si:-1,g,112,63))+
+  `<div class="botr hints">${G.z==='strip'?hint('A',sv[G.si]?'Start from this save':'Nothing saved here')+hint('B','Back'):hint('A','Choose')+hint('B','Shelf')}</div>`}
+/* the save strip: frames on a film strip; entries are [title, sub, picture seed] or null for an empty frame */
+function stripHTML(ent,x,y,w,fi,g,fw,fh,emptyLab){const n=ent.length;const iw=(w-40)/n;
+ const fr=ent.map((s,i)=>`<div class="fr${fi===i?' f':''}" style="left:${U(20+i*iw)}"><div class="pic${s?'':' empty'}" style="width:${U(fw)};height:${U(fh)}">${s?(g.film?`<svg viewBox="${s[2]%40} ${s[2]%50} 60 34" preserveAspectRatio="xMidYMid slice">${artInner(g)}</svg>`:gamePic(g,s[2])):''}<div class="w wb"></div></div><div class="fl"><b>${s?esc(s[0]):'Slot '+(i+1)}</b><span>${s?esc(s[1]):(emptyLab||'Empty')}</span></div></div>`).join('');
+ return `<div class="strip" style="left:${U(x)};top:${U(y)};width:${U(w)};height:${U(fh+32)}"><div class="spk" style="top:${U(3)}"></div><div class="spk" style="bottom:${U(3)}"></div>${fr}</div>`}
+
+/* ---------- PICK UP A CONTROLLER ---------- */
+function rPlayers(){const P=S.pl,g=P.g;const el=$('s-players');const n=P.joined.length;
+ const ports=[1,2,3,4].map(i=>{const j=P.joined.includes(i);const pad=j?(i===1?'<small>Controller · 72%</small>':'<small class="lo">▲ Low battery · 12%</small>'):(i===2&&S.pads===2)?'<small>Connected · press A on it</small>':'<small>Free</small>';
+  return `<div class="pp"><span class="num">${i}</span><i class="ind led ok led2${j?' on':''}"></i><span class="sk${j?' in':''}"></span><span class="pw">${j?'Player '+i:'Not playing'}${pad}</span></div>`}).join('');
+ const ks=[`Start with ${n} player${n>1?'s':''}`,...(n>1?['Swap 1 and 2']:[]),'Back'];
+ el.innerHTML=`<div class="pl-h"><span class="eb">${esc(g.t)} · 1–${g.pl} players</span><div class="t">Pick up a controller</div><div class="l">Press A on the controller you'll play with. The first one is Player 1. Up to ${g.pl}.</div></div>
+  <div class="ports">${ports}</div><div class="pl-k">${ks.map((k,i)=>`<div class="k${i===0?' pri':''}${P.i===i?' f':''}">${k}<div class="w wb"></div></div>`).join('')}</div>
+  <div class="botr hints">${hint('A','Choose')+hint('B','Back')}</div>`}
+
+/* ---------- LAUNCH / RETURN: the media goes in ---------- */
+let lt=[];function clearT(){lt.forEach(clearTimeout);lt=[];clearTimeout(roomT)}
+function rLaunch(g,mode,sub,phase){const el=$('s-launch');const H=fitH(g,420,330);
+ const stripes=['#3f2210','#6b3416','#93461c'].map((c,i)=>`<i style="background:${c};width:${U(300-i*40)};justify-self:end"></i>`).join('');
+ el.innerHTML=`<div class="med" id="lmed" style="transform:translate(-50%,${phase==='ret'||S.calm?U(0):U(-700)})">${face(g,H)}</div><div class="ld"><div class="slotr"></div><div class="stp">${stripes}</div></div>
+  <div class="lt1"><div class="eb">${esc(mode)}</div><div class="t">${esc(g.t)}</div><div class="s" id="lsub">${esc(sub)}</div></div>
+  <div class="slats" id="slats">${'<i></i>'.repeat(16)}</div>`;
+ const m=$('lmed');m.style.top=U(400-H*0.6);const fin=`translate(-50%,${U(H*0.4)})`;
+ if(S.calm){m.style.transform=phase==='ret'?`translate(-50%,${U(-40)})`:fin;return}
+ if(phase==='ret'){m.style.transform=fin;requestAnimationFrame(()=>requestAnimationFrame(()=>{m.style.transform=`translate(-50%,${U(-40)})`}))}
+ else requestAnimationFrame(()=>requestAnimationFrame(()=>{m.style.transform=fin}))}
+function fillSlats(ms){const sl=[...$('slats').children];sl.forEach((s,i)=>lt.push(setTimeout(()=>s.classList.add('on'),ms*(i+1)/16)))}
+function launch(g,how){clearT();
+ if(!how.skipPlayers&&g.pl>1&&S.pads>1&&!g.film&&!g.stream){S.pl={g,joined:[1],i:0,next:how};show('players');rPlayers();return}
+ S.launchG=g;show('launch');
+ const mode=how.mode==='net'?'Netplay · with Sam · you are Player 2':g.stream?'Uplink · streaming':g.film?'Theater · '+(how.mode==='cont'?'Play from '+g.res:'from the start'):g.sys+' · '+(how.mode==='cont'?'Continue from '+g.res:how.mode==='slot'?'Start from '+how.slot:'From the start');
+ const sub=g.stream?'Connecting to '+g.t+' · B cancels':g.steam?'Starting Steam · hold ⧉ + ≡ for the house menu':g.film?'Opening the film · B cancels':'Starting the emulator · B cancels';
+ rLaunch(g,mode+(how.players>1?' · '+how.players+' players':''),sub,'in');
+ if(how.freeze)return fillSlats(400);
+ fillSlats(900);lt.push(setTimeout(()=>startPlay(g),1300))}
+function cancelLaunch(){clearT();const m=$('lmed');if(m)m.style.transform=`translate(-50%,${U(-700)})`;$('lsub').textContent='Cancelled';lt.push(setTimeout(()=>{back();toast(`Didn't start ${S.launchG.t}`)},500))}
+function startPlay(g){S.play=Object.assign(S.play,{g,band:false,k:0,mode:null,si:0,armed:null,ch:null,pic:0});show('play');rPlay()}
+function quitGame(){const g=S.play.g;clearT();show('launch');rLaunch(g,'Back from',g.film?'Stopped at 1:14:10 · it resumes from here':g.stream?'Disconnected from '+g.t:'Played 42 min · resume point saved','ret');
+ if(!g.film&&!g.stream){S.con=g;g.res='today 21:54';g.played='42 min today'}
+ lt.push(setTimeout(()=>{S.home={z:'con',i:0};S.sec=0;show('home');rHome()},1500))}
+function back(){if(S.ret==='game'){show('game');rGame()}else if(S.ret==='shelf'){show('shelf');rShelf()}else if(S.ret==='room'){show('room');rRoom()}else{show('home');rHome()}}
+
+/* ---------- PLAYING + the Guide band, drawn as the console's deck ---------- */
+function bandKeys(g){const P=S.play;
+ if(g.film)return [{l:'Play',pri:1,a:'resume'},{l:'Back 10 s'},{l:'Forward 30 s'},{l:'Subtitles',v:P.subs,a:'subs'},{l:'Audio',v:'English 5.1'},{l:'Chapters',a:'chap'},{l:'Stop film',hold:1,a:'quit'}];
+ if(g.stream)return [{l:'Resume',pri:1,a:'resume'},{l:'Stream menu'},{l:'Disconnect',hold:1,a:'quit'}];
+ if(g.steam)return [{l:'Resume',pri:1,a:'resume'},{l:'Steam menu'},{l:'Quit game',hold:1,a:'quit'}];
+ return [{l:'Resume',pri:1,a:'resume'},{l:'Save',a:'save'},{l:'Load',a:'load'},{l:'Picture',v:P.picv,a:'pic'},{l:'Reset',hold:1,a:'reset'},{l:'Quit game',hold:1,a:'quit'}]}
+function rPlay(){const P=S.play,g=P.g;const el=$('s-play');const ks=bandKeys(g);
+ const pic=g.film||g.stream?art(g):gamePic(g,P.pic||0);
+ let row='';
+ if(P.mode==='chap'){const st=Math.max(0,Math.min(P.si-2,CHAPS.length-5));const ent=CHAPS.slice(st,st+5).map((c,i)=>[c[0],c[1],(st+i)*29+7]);row=stripHTML(ent,96,70,1728,P.si-st,g,132,74)}
+ else if(P.mode){const sv=g.saves||[null,null,null,null];row=stripHTML(sv.map((s,i)=>s?[s[0],s[1],i*37+11]:null),96,70,1728,P.si,g,132,74)}
+ else row=`<div class="kr">${ks.map((k,i)=>{const f=P.band&&P.k===i;const armed=P.armed===i;const open=P.ch&&k.a===P.ch;
+   return `<div class="k${k.pri?' pri':''}${f?' f':''}${armed?' armed':''}" data-i="${i}">${k.hold?'<span class="fill"></span>':''}${k.v?`<span class="two"><small>${k.l}</small>${open?'▲':esc(k.v)}</span>`:armed?`Press ${BTN[S.hint].A} again to ${k.a==='reset'?'reset':g.film?'stop':g.stream?'disconnect':'quit'}`:k.l}<div class="w wb"></div></div>`}).join('')}</div>`;
+ const hdr=P.mode==='chap'?`<b>Chapters</b><span>Chapter ${P.si+1} of ${CHAPS.length} · A jumps there</span>`
+  :P.mode?`<b>${P.mode==='save'?'Save to a slot':'Load a save'}</b><span>${P.mode==='save'?'The paused picture above is what gets saved':'The game jumps back to that moment'}</span>`
+  :`${P.band?'<i class="ind slot"></i><span style="color:#ece8df">Paused</span>':''}<b>${esc(g.t)}</b><span>${g.film?'1:12:04 of 1:58:30 · Ends at 21:58':esc(g.sys)+' · playing 42 min'}</span>`;
+ const ports=g.film||g.stream?'':`<span class="bports">Players <span class="sock in"></span>1${S.pads===2?' <span class="sock in"></span>2':''}</span>`;
+ const tl=g.film?`<div class="tline"><i style="width:61%"></i><b style="left:61%"></b></div>`:'';
+ let med='';if(!g.film&&!g.stream){const H=fitH(g,250,170);const W=MEDIA[g.med].face[0]*H/MEDIA[g.med].face[1];med=`<div class="bslot" style="right:${U(206)};width:${U(W+28)}"></div><div class="bmed" style="right:${U(220)};width:${U(W)};height:${U(104)}"><div class="bmi">${face(g,H)}</div></div>`}
+ const hb=P.ch?hint('A','Choose')+hint('B','Close'):hint('A','Choose')+hint('B',P.mode?'Back':'Resume');
+ const list=P.ch==='pic'?PICS:P.ch==='subs'?SUBS:null;const cur=P.ch==='pic'?P.picv:P.subs;
+ const chs=list?`<div class="chs" id="pch" style="bottom:${U(250)}"><div class="ch">${P.ch==='pic'?'Picture':'Subtitles'}</div>${list.map((o,i)=>`<div class="ci${i===P.chi?' f':''}${o===cur?' pick':''}"><i class="ind sq${o===cur?' on':''}"></i>${esc(o)}<div class="w wl"></div></div>`).join('')}</div>`:'';
+ el.innerHTML=`<div class="gpic">${pic}</div><div class="gband${P.band?' open':''}" id="gband">${tl}${med}<div class="gh">${hdr}${ports}<span class="sp2 hints">${hb}</span><b style="font-variant-numeric:tabular-nums">21:12</b></div>${row}</div>${chs}`;
+ if(P.mode&&P.mode!=='chap'&&P.confirm!=null){const fr=el.querySelectorAll('.fr')[P.si];if(fr)fr.querySelector('.fl').innerHTML=`<b>Replace slot ${P.si+1}?</b><span>Press ${BTN[S.hint].A} again</span>`}
+ if(list){const key=el.querySelector(`.gband .k[data-i="${P.k}"]`);const ch=$('pch');if(key&&ch)ch.style.left=(key.offsetLeft+key.parentElement.offsetLeft)+'px'}}
+
+
+/* ---------- POWER: the console's switch panel (no orange, focus on Cancel, Sleep is one press) ---------- */
+const PWR=[{l:'Cancel',plain:1,c:'Closes this panel. Nothing changes.'},{l:'Sleep',c:'The computer sleeps. Any button on a controller or the remote wakes it.'},{l:'Restart',hold:1,c:'Restarts the computer. NervOS is back in about a minute.'},{l:'Shut down',hold:1,c:'Turns the computer off. The TV stays on.'},{l:'Desktop mode',hold:1,c:'Leaves NervOS for the desktop. Games stay where they are.'},{l:'Settings',plain:1,c:'Opens Settings: display, library, Steam, streaming, films and netplay.'}];
+function rPower(anim){const P=S.pw;const el=$('s-power');
+ const levs=PWR.map((o,i)=>{const f=P.i===i;const armed=P.armed===i;const st=P.done===i?' up':armed?' half':'';
+  return `<div class="lev${o.plain?' plain':''}${f?' f':''}${armed?' armed':''}${st}" data-i="${i}">${o.hold?'<span class="fill"></span>':''}${o.plain?'':'<div class="track"><div class="thumb"></div></div>'}<div class="nm">${armed?`Press ${BTN[S.hint].A} again`:esc(o.l)}</div><div class="w wb"></div></div>`}).join('');
+ const o=PWR[P.i];
+ el.innerHTML=`<div class="pws${anim&&!S.calm?'':' open'}" id="pws"><div class="ph"><div><div class="eb" style="color:#a8a397">Power</div><div class="t">Sleep, restart or turn off</div></div><span class="hints">${hint('A','Choose')+hint('B','Close')}</span></div><div class="swrow">${levs}</div><div class="cons"><b>${esc(o.l)}.</b> ${esc(P.armed===P.i?'Press again, or hold for 1 s. It cancels itself after 3 s.':o.c)}</div></div>`;
+ if(anim&&!S.calm)requestAnimationFrame(()=>requestAnimationFrame(()=>{const p=$('pws');if(p)p.classList.add('open')}))}
+function openPower(){S.pw={i:0,armed:null,done:null};show('power');rPower(true)}
+function closePower(){S.pw={i:0,armed:null,done:null};S.home={z:'con',i:0};show('home');rHome()}
+function keyPower(k){const P=S.pw;if(P.done!=null)return;
+ if(k==='Left'&&P.i>0){P.i--;P.armed=null}else if(k==='Right'&&P.i<PWR.length-1){P.i++;P.armed=null}
+ else if(k==='B'||k==='M')return closePower();
+ else if(k==='A'){const o=PWR[P.i];if(o.l==='Cancel')return closePower();if(o.l==='Settings')return openSettings();
+  if(o.l==='Sleep'){P.done=P.i;rPower();lt.push(setTimeout(()=>$('sleep').classList.add('on'),450));return}
+  if(P.armed===P.i){P.done=P.i;P.armed=null;rPower();lt.push(setTimeout(()=>{toast(o.l+': in the mockup nothing really happens');closePower()},800));return}
+  P.armed=P.i;clearTimeout(armT);armT=setTimeout(()=>{if(S.pw.armed!=null){S.pw.armed=null;if(S.scr==='power')rPower()}},3000)}
+ rPower()}
+
+/* ---------- SETTINGS: the rear panel ---------- */
+const SETP=[
+ {n:'Display',lead:'How NervOS looks on this TV.',rows:[{l:'Look',h:'Braun Hi-Fi is the house look. The four approved looks keep their own layouts.',v:'Braun Hi-Fi'},{l:'Motion',h:'Calm turns every move into a short fade and stops the attract board.',sw:['Full','Calm'],k:'calm'},{l:'Lighting',h:'Day follows the room lights. Night keeps the wall dark.',sw:['Follow the room','Always night'],k:'lit'},{l:'Sounds',h:'Short clicks when you move and choose.',sw:['On','Off']}]},
+ {n:'Library',lead:'How games stand on your shelves.',rows:[{l:'Shelf view',h:'Covers stands every game face-out: about five a shelf, easier to spot from the sofa.',sw:['Spines','Covers'],k:'view'},{l:'Spine colour',h:'Taken from the cover art, kept out of orange and red, then made darker or lighter until the title reads.',sw:['From the cover','One per system'],k:'spc'},{l:'New sticker',h:'A New sticker sits on a spine until the first time you play it.',sw:['On','Off'],k:'new'},{l:'Game folders',h:'3 folders · checked today at 20:14',key:'Check now'}],preview:1},
+ {n:'Steam',lead:'Steam games in Hangar.',rows:[{l:'Guide button',h:'Steam keeps Guide in its games. Hold ⧉ + ≡ for 1 s for the house menu.',v:'Steam keeps it'},{l:'Show Steam games',h:'Installed games stand in Hangar.',sw:['On','Off']}]},
+ {n:'Streaming',lead:'Computers you stream games from.',rows:[{l:'Computers',h:'Study PC and Laptop. Pair another from the computer itself.',v:'2 paired'},{l:'Picture',h:'Smooth drops detail to keep up on a slow network.',sw:['Best','Smooth']}]},
+ {n:'Films',lead:'What Theater starts with.',rows:[{l:'Subtitles',h:'Used when a film starts. Change them any time in the player.',v:'English'},{l:'Audio',h:'The film’s own language when there is one.',v:'Original'}]},
+ {n:'Netplay',lead:'Playing with friends in other houses.',rows:[{l:'Name shown to friends',h:'Only this name is shared. Nothing else about the house is.',v:'Living room'},{l:'Room codes',h:'Friends can send you a code to join their room.',sw:['On','Off']}]}];
+function getSV(r){if(r.k==='view')return S.view==='covers'?'Covers':'Spines';if(r.k==='calm')return S.calm?'Calm':'Full';if(r.k==='lit')return S.lit==='night'?'Always night':'Follow the room';if(r.k==='spc')return S.spc==='system'?'One per system':'From the cover';if(r.k==='new')return S.newSticker?'On':'Off';return S.sv[r.l]||r.sw[0]}
+function setSV(r,v){if(r.k==='view')setView(v==='Covers'?'covers':'spines');else if(r.k==='calm')setCtl('calm',v==='Calm'?'calm':'full');else if(r.k==='lit')setCtl('lit',v==='Always night'?'night':'day');else if(r.k==='spc'){S.spc=v==='One per system'?'system':'cover'}else if(r.k==='new')S.newSticker=v==='On';else S.sv[r.l]=v}
+function previewHTML(top){const ex=[SNES[10],SNES[4],SNES[3]];
+ return `<div class="eb" style="position:absolute;left:${U(44)};top:${U(top)};color:#a8a397">How a spine is made from a scraped cover</div><div class="pv" style="top:${U(top+44)}">${ex.map(g=>`<div class="ex">${face(g,84)}<div class="sws"><span class="swt"><i style="background:${g.pal[0]}"></i>Taken</span><span class="swt"><i style="background:${spc(g)}"></i>Kept</span></div><div style="position:relative;width:${U(MEDIA[g.med].w)};height:${U(MEDIA[g.med].h)}">${spine(g,0,false,false)}</div></div>`).join(`<span style="width:${U(30)}"></span>`)}</div>`}
+function rSet(){const T=S.set;const el=$('s-set');const pg=SETP[T.pg];
+ const rail=`<div class="vrail"><div class="vk${T.z==='rail'?' f':''}" style="transform:translateY(${U(T.pg*76)})"><div class="w wl"></div></div>${SETP.map((p,i)=>`<div class="vi${i===T.pg?' cur':''}">${p.n}</div>`).join('')}</div>`;
+ const rows=pg.rows.map((r,i)=>{const f=T.z==='rows'&&T.i===i;let ctl='';
+  if(r.sw){const v=getSV(r);ctl=`<div class="sw">${r.sw.map(o=>`<span class="${o===v?'on':''}">${o}</span>`).join('')}</div>`}
+  else if(r.key)ctl=`<div class="k dk" style="height:${U(60)}">${r.key}</div>`;
+  else ctl=`<span class="val">${esc(r.v)} ›</span>`;
+  return `<div class="srow${f?' f':''}" style="top:${U(126+i*104)}"><div class="lb"><b>${esc(r.l)}</b>${r.h?`<span>${esc(r.h)}</span>`:''}</div>${ctl}<div class="w wl"></div></div>`}).join('');
+ const pv=pg.preview?previewHTML(126+pg.rows.length*104+26):'';
+ el.innerHTML=`<div class="top"><span class="eb" style="padding-top:${U(14)}">Settings</span><div class="stat"><span class="clock">21:12</span></div></div>`+rail+
+  `<div class="panel"><div class="ph"><div class="t">${pg.lead}</div></div>${rows}${pv}</div><div class="botl hints" style="width:${U(400)}">${T.z==='rail'?hint('A','Open')+hint('B','Home'):hint('A','Change')+hint('B','Pages')}</div>`}
+function openSettings(){S.set={z:'rows',pg:1,i:0};show('set');rSet()}
+function keySet(k){const T=S.set;const pg=SETP[T.pg];
+ if(T.z==='rail'){if(k==='Up'&&T.pg>0)T.pg--;else if(k==='Down'&&T.pg<SETP.length-1)T.pg++;else if(k==='Right'||k==='A'){T.z='rows';T.i=0}else if(k==='B'){S.home={z:'con',i:0};show('home');return rHome()}}
+ else{if(k==='Up'){if(T.i>0)T.i--}else if(k==='Down'){if(T.i<pg.rows.length-1)T.i++}else if(k==='Left'||k==='B')T.z='rail';
+  else if(k==='A'){const r=pg.rows[T.i];if(r.sw){const v=getSV(r);setSV(r,r.sw[(r.sw.indexOf(v)+1)%r.sw.length])}else if(r.key)toast('Checking 3 folders (mockup)');else toast('A chooser pops beside this row (conflict 11: from a row in a vertical list)')}}
+ rSet()}
+
+/* ---------- ON-SCREEN KEYBOARD: keys on the deck, writing on a label ---------- */
+const OSKR=[[...'1234567890'].map(k=>({k})).concat([{k:'Delete',u:2,a:'del'}]),[...'QWERTYUIOP@.'].map(k=>({k})),[...'ASDFGHJKL:/_'].map(k=>({k})),[{k:'Shift',u:2,a:'shift'}].concat([...'ZXCVBNM,?#'].map(k=>({k}))),[{k:'Clear',u:2,a:'clear'},{k:'Space',u:6,a:'space'},{k:'Cancel',u:2,a:'cancel'},{k:'Done',u:2,a:'done'}]];
+OSKR.forEach(r=>{let c=0;r.forEach(o=>{o.u=o.u||1;o.c0=c;c+=o.u})});
+function rOsk(){const O=S.osk;const el=$('s-osk');
+ const grid=OSKR.map((r,ri)=>r.map((o,ci)=>{const f=O.r===ri&&O.c===ci;const lab=o.a?o.k:(O.shift?o.k:o.k.toLowerCase());const pin=o.a==='shift'&&O.shift;
+  return `<div class="ok${o.a?' sm':''}${o.a==='done'?' pri':''}${pin?' pin':''}${f?' f':''}" style="grid-column:span ${o.u}">${esc(lab)}<div class="w wb"></div></div>`}).join('')).join('');
+ el.innerHTML=`<div class="osk-h"><span class="eb">Uplink · join a room</span><div class="t">Room code</div><div class="l">Type the 6-character code from the person hosting.<br>A keyboard on the computer types straight in.</div></div>
+  <div class="field"><span class="v">${esc(O.t)}<span class="car"></span></span><span class="n">${O.t.length} of 6</span></div>
+  <div class="okd"><div class="okg">${grid}</div></div><div class="okf"><span class="hints">${hint('A','Type')+hint('X','Delete')+hint('Y','Space')+hint('M','Done')+hint('B','Cancel')}</span></div>`}
+function openOsk(){S.osk={t:'',r:2,c:5,shift:true};show('osk');rOsk()}
+function oskType(ch){const O=S.osk;if(O.t.length>=6)return;O.t+=ch;if(O.t.length===6){O.r=4;O.c=3}rOsk()}
+function oskDel(){S.osk.t=S.osk.t.slice(0,-1);rOsk()}
+function oskDone(){const t=S.osk.t;if(t==='MOON42')return openRoom();toast(t.length<6?'A room code has 6 characters':`No room called ${t}. Check the code with the host.`)}
+function keyOsk(k){const O=S.osk;const row=OSKR[O.r];const o=row[O.c];const mid=o.c0+o.u/2-.01;
+ const findIn=ri=>{const r=OSKR[ri];let j=r.findIndex(x=>mid>=x.c0&&mid<x.c0+x.u);return j<0?r.length-1:j};
+ if(k==='Left'&&O.c>0)O.c--;else if(k==='Right'&&O.c<row.length-1)O.c++;
+ else if(k==='Up'&&O.r>0){O.r--;O.c=findIn(O.r)}else if(k==='Down'&&O.r<OSKR.length-1){O.r++;O.c=findIn(O.r)}
+ else if(k==='X')return oskDel();else if(k==='Y')return;else if(k==='M')return oskDone();
+ else if(k==='B'){S.sh.z='shelf';show('shelf');return rShelf()}
+ else if(k==='A'){if(!o.a)return oskType(O.shift?o.k:o.k.toLowerCase());if(o.a==='del')return oskDel();if(o.a==='shift')O.shift=!O.shift;if(o.a==='clear')O.t='';if(o.a==='cancel'){show('shelf');return rShelf()}if(o.a==='done')return oskDone()}
+ rOsk()}
+
+/* ---------- NETPLAY ROOM: the host's console; a free port is a free seat ---------- */
+function rRoom(){const R=S.room;const el=$('s-room');const g=ARC[2];const CH=fitH(g,420,200),CW=CH*MEDIA[g.med].face[0]/MEDIA[g.med].face[1];
+ const seated=R.st!=='seat';
+ const keys=R.st==='seat'?[['Take seat 2',1],['Watch only'],['Leave room']]:R.st==='ready'?[["I'm ready",1],['Leave room']]:[['Not ready yet'],['Leave room']];
+ const state=R.st==='wait'?`<i class="ind slot on"></i>Waiting for Sam to start`:R.st==='ready'?`<i class="ind led ok on"></i>Seat 2 is yours`:'';
+ el.innerHTML=`<div class="rm-h"><span class="eb">Uplink · netplay room</span><div class="t">${esc(g.t)}</div><div class="l">Arcade · 2 players · room MOON42</div></div>
+  <div class="con rcon"><div class="cart" style="left:${U(420-CW/2)};top:${U(200-CH)};width:${U(CW)};height:${U(CH)}">${face(g,CH)}</div>
+   <div class="deck"><div class="slotr" style="left:${U(200)};width:${U(440)}"></div><div class="dt" style="top:${U(40)}"><span class="eb" style="color:var(--deck-dim)">On Sam's NervOS</span><span class="s" style="display:inline-flex;gap:${U(12)};align-items:center;font-size:${U(28)};color:#ece8df;margin-top:${U(10)}"><i class="ind led ok on"></i>Linked · 18 ms, smooth</span></div></div>
+   <div class="front"><span class="rport"><span class="sock in"></span><b><span class="tag" style="background:#3f8f9a"></span>Sam</b><small>Host · Player 1</small></span><span class="rport"><span class="sock${seated?' in':''}"></span><b>${seated?'<span class="tag" style="background:#b98a3a"></span>Living room':'Free seat'}</b><small>${seated?'You · Player 2':'Player 2'}</small></span></div></div>
+  ${state?`<div class="rm-st">${state}</div>`:''}<div class="rm-k col">${keys.map(([l,p],i)=>`<div class="k${p?' pri':''}${R.i===i?' f':''}">${l}<div class="w wl"></div></div>`).join('')}</div>
+  <div class="botr hints">${hint('A','Choose')+hint('B','Leave')}</div>`}
+function openRoom(){S.room={st:'seat',i:0};show('room');rRoom()}
+function backToUplink(){clearTimeout(roomT);S.sec=3;S.sh.z='shelf';show('shelf');rShelf()}
+function keyRoom(k){const R=S.room;const n=R.st==='seat'?3:2;
+ if(k==='Up'&&R.i>0)R.i--;else if(k==='Down'&&R.i<n-1)R.i++;else if(k==='B')return backToUplink();
+ else if(k==='A'){if(R.st==='seat'){if(R.i===0){R.st='ready';R.i=0}else if(R.i===1)toast('Watching only: you see the game, your controller does nothing');else return backToUplink()}
+  else if(R.st==='ready'){if(R.i===0){R.st='wait';R.i=0;clearTimeout(roomT);roomT=setTimeout(()=>{if(S.scr==='room'&&S.room.st==='wait'){S.ret='room';launch(ARC[2],{mode:'net',skipPlayers:1})}},2600)}else return backToUplink()}
+  else{if(R.i===0){clearTimeout(roomT);R.st='ready';R.i=0}else return backToUplink()}}
+ rRoom()}
+
+/* ---------- SIGNAL LOST: the computer pops back out of the slot ---------- */
+function rLost(){const L=S.lost;const el=$('s-lost');const g=Object.assign({},HOSTS[0],{state:'offline'});const H=220,W=230*H/250;
+ el.innerHTML=`<div class="med" style="transform:translate(-50%,0);top:${U(330-H+12)}">${hostFace(g,W,H)}</div><div class="ld"><div class="slotr"></div></div>
+  <div class="lb"><span class="st"><i class="ind led offl"></i>Offline · Uplink</span><div class="t">${L.n?'Still no answer from Study PC':'Lost the picture from Study PC'}</div><div class="l">${L.n?'It didn’t answer three tries in a row.':'It stopped answering 8 seconds ago. It may have gone to sleep or dropped off the network.'}</div><div class="d">${L.n?'Check that it’s switched on and on the home network, then try again.':'Wake it from Jam Home, then try again.'}</div></div>
+  <div class="lk">${L.trying?`<div class="k" style="background:#2a2826;color:#ece8df"><span class="ind slot sm on"></span>Trying Study PC</div>`:`<div class="k pri${L.i===0?' f':''}">Try again<div class="w wb"></div></div><div class="k${L.i===1?' f':''}" style="background:#2a2826;color:#ece8df">Home<div class="w wb"></div></div>`}</div>
+  <div class="code">NV-204 · stream timed out</div>`}
+function openLost(n){S.lost={n:n||0,i:0,trying:false};show('lost');rLost()}
+function keyLost(k){const L=S.lost;if(L.trying)return;if(k==='Left')L.i=0;else if(k==='Right')L.i=1;else if(k==='B'){S.home={z:'con',i:0};S.sec=0;show('home');return rHome()}
+ else if(k==='A'){if(L.i===1){S.home={z:'con',i:0};S.sec=0;show('home');return rHome()}L.trying=true;rLost();lt.push(setTimeout(()=>{L.trying=false;L.n=1;L.i=0;if(S.scr==='lost')rLost()},1500));return}
+ rLost()}
+
+/* ---------- ATTRACT BOARD (idle) ---------- */
+const ATT=[SNES[0],ARC[2],PS[5],STEAM[8],SNES[6]];let attT=null;
+function rAttract(){const el=$('s-attract');const i=S.att.i;el.classList.toggle('att-dim',S.att.dim);
+ el.innerHTML=`<div class="mq">${ATT.map((g,k)=>`<div class="pic" style="opacity:${k===i?1:0};background:${g.pal[1]};color:${inkFor(g.pal[1])}"><div class="art">${art(g)}</div><div class="mt">${esc(g.t)}</div><div class="ms" style="opacity:.85">${esc(g.sys)} · ${g.pl>1?'1–'+g.pl+' players':'1 player'}</div></div>`).join('')}<div class="mplate"><span class="eb" style="color:#a8a397">On your shelves</span><span class="slots" id="aslots">${ATT.map((g,k)=>`<i class="ind slot${k===i?' on':''}"></i>`).join('')}</span></div></div>
+  <div class="att-b"><div><div class="t">Press any button</div><div class="l">NervOS is resting. It shows games from your shelves, one every 10 seconds. Nothing starts by itself.</div></div>
+  <div class="att-c"><span>In the console</span><b style="font-size:${U(34)}">${esc(S.con.t)}</b><span>One press, then Continue</span></div></div>`}
+function attStep(){if(S.scr!=='attract'||S.calm||S.att.dim)return;S.att.i=(S.att.i+1)%ATT.length;const el=$('s-attract');el.querySelectorAll('.mq .pic').forEach((p,k)=>p.style.opacity=k===S.att.i?1:0);
+ [...$('aslots').children].forEach((d,k)=>d.classList.toggle('on',k===S.att.i))}
+function startAttract(){clearInterval(attT);attT=setInterval(attStep,tourOn?2600:10000)}
+
+/* ---------- screens ---------- */
+const IDS={home:'s-home',shelf:'s-shelf',game:'s-game',players:'s-players',launch:'s-launch',play:'s-play',attract:'s-attract',set:'s-set',osk:'s-osk',room:'s-room',lost:'s-lost',power:'s-power'};
+function show(n){S.scr=n;if(n!=='shelf')S.ch=null;
+ document.querySelectorAll('.tv .scr').forEach(s=>{const under=n==='power'&&s.id==='s-home';s.classList.toggle('on',s.id===IDS[n]||under);s.classList.toggle('under',under)});
+ if(n==='attract')startAttract();else clearInterval(attT)}
+function render(){({home:rHome,shelf:rShelf,game:rGame,players:rPlayers,play:rPlay,attract:rAttract,set:rSet,osk:rOsk,room:rRoom,lost:rLost,power:()=>{rHome();rPower()}}[S.scr]||(()=>{}))()}
+let toastT;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),3500)}
+function openSec(i,top){if(i<0||i>4)return;S.sec=i;S.ch=null;if(i===0){S.home={z:top?'top':'con',i:0};show('home');rHome();return}S.sh.s=0;S.sh.z=top?'top':'shelf';S.sh.shown=null;show('shelf');rShelf()}
+function openGame(g,from){S.game={g,z:'keys',i:0,si:0,from};S.ret=from;show('game');rGame()}
+function setCtl(c,v){const seg=document.querySelector(`[data-ctl="${c}"]`);if(seg)seg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v?'true':'false'));
+ if(c==='lit'){S.lit=v;tv.classList.toggle('day',v==='day')}if(c==='calm'){S.calm=v==='calm';tv.classList.toggle('calm',S.calm)}if(c==='hint')S.hint=v;if(c==='names')S.names=v;if(c==='pads')S.pads=+v;if(c==='view')S.view=v}
+function setView(v){setCtl('view',v);S.sh.shown=null}
+
+
+/* ---------- input ---------- */
+function act(k){
+ if($('sleep').classList.contains('on')){$('sleep').classList.remove('on');S.pw={i:0,armed:null,done:null};S.home={z:'con',i:0};S.sec=0;show('home');rHome();return}
+ if(S.scr==='attract'){S.att.dim=false;S.home={z:'con',i:0};S.sec=0;show('home');rHome();return}/* the waking press is not passed on */
+ const f={home:keyHome,shelf:keyShelf,game:keyGame,players:keyPlayers,play:keyPlay,power:keyPower,set:keySet,osk:keyOsk,room:keyRoom,lost:keyLost}[S.scr];
+ if(S.scr==='launch'){if(k==='B'&&lt.length)cancelLaunch();return}
+ if(f)f(k)}
+function lr(k){const t=S.sh.z==='top';if(k==='L1')openSec(S.sec-1,t);if(k==='R1'&&S.sec<4)openSec(S.sec+1,t)}
+function keyHome(k){const h=S.home;const nK=conKeys(S.con).length;if(k==='R1')return openSec(1,h.z==='top');
+ if(h.z==='top'){if(k==='Right')return openSec(1,true);if(k==='Down'||k==='A'){h.z='con';h.i=0}if(k==='B'||k==='M')return openPower()}
+ else if(h.z==='con'){if(k==='Left'&&h.i>0)h.i--;else if(k==='Right'){if(h.i<nK-1)h.i++;else{h.z='lately';h.i=0}}else if(k==='Up')h.z='top';else if(k==='Down'){h.z='fav';h.i=0}
+  else if(k==='A'){S.ret='home';const a=conKeys(S.con)[h.i];if(a==='cont')return launch(S.con,{mode:S.con.res?'cont':'start'});if(a==='saves'){openGame(S.con,'home');S.game.z='strip';S.game.si=0;return rGame()}return openGame(S.con,'home')}
+  else if(k==='M')return openGame(S.con,'home');else if(k==='B')return openPower()}
+ else if(h.z==='lately'){if(k==='Left'){if(h.i>0)h.i--;else{h.z='con';h.i=nK-1}}else if(k==='Right'&&h.i<3)h.i++;else if(k==='Up')h.z='top';else if(k==='Down'){h.z='fav';h.i=0}
+  else if(k==='A'){S.ret='home';return launch(LATELY[h.i],{mode:'cont'})}else if(k==='M'&&!LATELY[h.i].stream&&!LATELY[h.i].film)return openGame(LATELY[h.i],'home');else if(k==='B'){h.z='con';h.i=0}}
+ else if(h.z==='fav'){if(k==='Left'){if(h.i>0)h.i--;else nudge('L')}else if(k==='Right'){if(h.i<FAVS.length-1)h.i++;else nudge('R')}else if(k==='Up'){h.z='con';h.i=0}else if(k==='A'||k==='M'){const g=FAVS[h.i];if(g.film){S.ret='home';return launch(g,{mode:g.res?'cont':'start'})}return openGame(g,'home')}else if(k==='B'){h.z='con';h.i=0}}
+ rHome()}
+function nudge(d){if(S.calm)return;const r=document.querySelector(S.scr==='home'?'#s-home .row':`#row${S.sh.s}`);if(!r)return;r.classList.remove('nudgeL','nudgeR');void r.offsetWidth;r.classList.add('nudge'+d)}
+function keyChooser(k){const opts=S.ch.k==='jump'?jumpOpts():shelfOpts();
+ if(k==='Up'&&S.ch.i>0)S.ch.i--;else if(k==='Down'&&S.ch.i<opts.length-1)S.ch.i++;
+ else if(k==='B'||k==='M'){S.ch=S.ch.k==='jump'?{k:'opt',i:shelfOpts().findIndex(o=>o.a==='jump')}:null}
+ else if(k==='A'){const o=opts[S.ch.i];
+  if(o.a==='page'){S.ch=null;return openGame(curItem(),'shelf')}
+  if(o.a==='view'){S.ch=null;setView(S.view==='covers'?'spines':'covers')}
+  else if(o.a==='jump')S.ch={k:'jump',i:0};
+  else if(o.a==='fav'){const g=curItem();const j=FAVS.indexOf(g);j>=0?FAVS.splice(j,1):FAVS.push(g)}
+  else if(o.a==='to'){S.sh.pos[S.sec+':'+S.sh.s]=o.to;S.ch=null;S.sh.shown=null}}
+ rShelf();schedulePic()}
+function keyShow(k){const items=CASES[S.sec][0].items;const key=S.sec+':0';const fi=S.sh.pos[key]||0;const sh=S.sh;
+ if(k==='L1'||k==='R1')return lr(k);
+ if(sh.z==='top'){if(k==='Left')return openSec(S.sec-1,true);if(k==='Right'){if(S.sec<4)return openSec(S.sec+1,true);return}if(k==='Down'||k==='A')sh.z='shelf';if(k==='B')return openSec(0);return rShelf()}
+ if(k==='Left'){if(fi>0)sh.pos[key]=fi-1}else if(k==='Right'){if(fi<items.length-1)sh.pos[key]=fi+1}else if(k==='Up')sh.z='top';else if(k==='B')return openSec(0);
+ else if(k==='A'){const g=items[fi];S.ret='shelf';if(g.stream){if(g.state==='on')return launch(g,{mode:'cont'});return toast("Can't reach Laptop. Wake it from Jam Home, then try again.")}if(g.code==='CODE')return openOsk();return openRoom()}
+ rShelf()}
+function keyShelf(k){if(isShowcase())return keyShow(k);const sh=S.sh;if(!sh.shown)sh.shown=curItem();if(S.ch)return keyChooser(k);
+ const cs=curCase();const key=S.sec+':'+sh.s;const fi=sh.pos[key]||0;const items=cs[sh.s].items;
+ if(k==='L1'||k==='R1')return lr(k);
+ if(sh.z==='top'){if(k==='Left')return openSec(S.sec-1,true);if(k==='Right'){if(S.sec<4)return openSec(S.sec+1,true);return}if(k==='Down'||k==='A')sh.z='shelf';if(k==='B')return openSec(0);return rShelf()}
+ if(k==='Left'){if(fi>0)sh.pos[key]=fi-1;else return nudge('L')}
+ else if(k==='Right'){if(fi<items.length-1)sh.pos[key]=fi+1;else return nudge('R')}
+ else if(k==='Up'){if(sh.s>0)sh.s--;else sh.z='top'}
+ else if(k==='Down'){if(sh.s<cs.length-1)sh.s++;else return}
+ else if(k==='LT'||k==='RT'){if(items.length<=8)return;const firsts=[];let last=-1;items.forEach((g,i)=>{const r=rangeOf(g);if(r!==last){firsts.push(i);last=r}});
+  const t=k==='RT'?firsts.find(x=>x>fi):[...firsts].reverse().find(x=>x<fi);if(t!=null)sh.pos[key]=t;else return nudge(k==='RT'?'R':'L')}
+ else if(k==='Y'){setView(S.view==='covers'?'spines':'covers')}
+ else if(k==='M'){S.ch={k:'opt',i:0}}
+ else if(k==='A'){const g=items[fi];S.ret='shelf';if(g.film)return launch(g,{mode:g.res?'cont':'start'});return openGame(g,'shelf')}
+ else if(k==='B')return openSec(0);
+ rShelf();schedulePic()}
+function schedulePic(){clearTimeout(restT);restT=setTimeout(()=>{if(S.scr!=='shelf'||isShowcase())return;const g=curItem();if(S.sh.shown===g)return;S.sh.shown=g;const q=$('pic');if(!q)return;const cs=curCase()[S.sh.s];q.innerHTML=standPic(g,S.view==='covers'||cs.items.length<=5)},500)}
+function keyGame(k){const G=S.game,g=G.g;const ks=gameKeys(g);
+ if(G.z==='keys'){if(k==='Up'&&G.i>0)G.i--;else if(k==='Down'){if(G.i<ks.length-1)G.i++;else if(!g.steam){G.z='strip';G.si=0}}
+  else if(k==='A'){const a=ks[G.i].a;if(a==='fav'){const j=FAVS.indexOf(g);j>=0?FAVS.splice(j,1):FAVS.push(g)}else{S.ret='game';return launch(g,{mode:a})}}
+  else if(k==='B')return back2()}
+ else{const sv=g.saves||[];if(k==='Left'&&G.si>0)G.si--;else if(k==='Right'&&G.si<3)G.si++;else if(k==='Up'||k==='B')G.z='keys';else if(k==='A'&&sv[G.si]){S.ret='game';return launch(g,{mode:'slot',slot:sv[G.si][0]+' ('+sv[G.si][1]+')'})}}
+ rGame()}
+function back2(){if(S.game.from==='home'){show('home');rHome()}else{show('shelf');rShelf()}}
+function keyPlayers(k){const P=S.pl;const n=P.joined.length;const nk=n>1?3:2;
+ if(k==='Left'&&P.i>0)P.i--;else if(k==='Right'&&P.i<nk-1)P.i++;
+ else if(k==='P2'){if(S.pads<2)return toast('Only one controller is on');if(!P.joined.includes(2)&&P.joined.length<P.g.pl)P.joined.push(2)}
+ else if(k==='A'){const lab=P.i===0?'start':(n>1&&P.i===1)?'swap':'back';if(lab==='start')return launch(P.g,Object.assign({},P.next,{skipPlayers:1,players:n}));if(lab==='swap')toast('Controller 2 is now Player 1');else return back()}
+ else if(k==='B')return back();
+ rPlayers()}
+function keyPlay(k){const P=S.play,g=P.g;const ks=bandKeys(g);
+ if(!P.band){if(k==='G'||(k==='A'&&g.film)){P.band=true;P.k=0;P.armed=null}return rPlay()}
+ if(P.ch){const list=P.ch==='pic'?PICS:SUBS;if(k==='Up'&&P.chi>0)P.chi--;else if(k==='Down'&&P.chi<list.length-1)P.chi++;else if(k==='B'||k==='M')P.ch=null;else if(k==='A'){if(P.ch==='pic')P.picv=list[P.chi];else P.subs=list[P.chi];P.ch=null}return rPlay()}
+ if(P.mode==='chap'){if(k==='Left'&&P.si>0)P.si--;else if(k==='Right'&&P.si<CHAPS.length-1)P.si++;else if(k==='B')P.mode=null;else if(k==='A'){toast('Playing from chapter '+(P.si+1));P.mode=null;P.band=false}return rPlay()}
+ if(P.mode){const sv=g.saves||(g.saves=[null,null,null,null]);
+  if(k==='Left'&&P.si>0){P.si--;P.confirm=null}else if(k==='Right'&&P.si<3){P.si++;P.confirm=null}
+  else if(k==='B'){P.mode=null;P.confirm=null}
+  else if(k==='A'){if(P.mode==='save'){if(sv[P.si]&&P.confirm!==P.si){P.confirm=P.si}else{sv[P.si]=['Slot '+(P.si+1),'Now · 21:12'];P.mode=null;P.confirm=null;toast('Saved to slot '+(P.si+1))}}
+   else if(sv[P.si]){P.mode=null;P.band=false;P.pic=P.si*37+11;toast('Loaded '+sv[P.si][0])}}
+  return rPlay()}
+ if(k==='Left'&&P.k>0){P.k--;P.armed=null}else if(k==='Right'&&P.k<ks.length-1){P.k++;P.armed=null}
+ else if(k==='B'||k==='G'){P.band=false;P.armed=null}
+ else if(k==='A'){const kk=ks[P.k];if(kk.a==='resume')P.band=false;else if(kk.a==='save'||kk.a==='load'){P.mode=kk.a;P.si=kk.a==='save'?2:0;P.confirm=null}
+  else if(kk.a==='pic'||kk.a==='subs'){P.ch=kk.a;const list=kk.a==='pic'?PICS:SUBS;P.chi=list.indexOf(kk.a==='pic'?P.picv:P.subs)}
+  else if(kk.a==='chap'){P.mode='chap';P.si=5}
+  else if(kk.hold){if(P.armed===P.k){P.armed=null;return kk.a==='quit'?quitGame():(toast('Reset'),rPlay())}P.armed=P.k;clearTimeout(armT);armT=setTimeout(()=>{if(S.play.armed!=null){S.play.armed=null;if(S.scr==='play')rPlay()}},3000)}}
+ rPlay()}
+/* holds: Quit, Reset, Stop, Disconnect, Restart, Shut down, Desktop mode. The fill runs along the top edge. */
+function holdTarget(){if(S.scr==='play'&&S.play.band&&!S.play.mode&&!S.play.ch){const kk=bandKeys(S.play.g)[S.play.k];if(kk.hold)return {el:document.querySelector(`#s-play .k[data-i="${S.play.k}"]`),run:()=>kk.a==='quit'?quitGame():(S.play.armed=null,toast('Reset'),rPlay())}}
+ if(S.scr==='power'&&S.pw.done==null){const o=PWR[S.pw.i];if(o.hold)return {el:document.querySelector(`#s-power .lev[data-i="${S.pw.i}"]`),run:()=>{S.pw.armed=S.pw.i;keyPower('A')}}}return null}
+function holdA(){const h=holdTarget();if(!h)return false;if(h.el)h.el.classList.add('holding');lt.push(setTimeout(h.run,1000));return true}
+
+const KEYMAP={ArrowUp:'Up',ArrowDown:'Down',ArrowLeft:'Left',ArrowRight:'Right',Enter:'A',Escape:'B',Backspace:'B',g:'G',G:'G',m:'M',M:'M',y:'Y',Y:'Y',x:'X',X:'X','[':'L1',']':'R1',',':'LT','.':'RT','2':'P2'};
+let holdTimer=null,held=false;
+tv.addEventListener('keydown',e=>{
+ if(S.scr==='osk'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){if(e.key.length===1&&/[a-z0-9]/i.test(e.key)){e.preventDefault();if(!tourStepping)stopTour();oskType(e.key.toUpperCase());return}if(e.key==='Backspace'){e.preventDefault();oskDel();return}}
+ const k=KEYMAP[e.key];if(!k)return;e.preventDefault();if(!tourStepping)stopTour();
+ if(k==='A'){if(e.repeat)return;held=false;const h=holdTarget();if(h){if(h.el)h.el.classList.add('holding');holdTimer=setTimeout(()=>{held=true;h.run()},1000)}return}
+ act(k)});
+tv.addEventListener('keyup',e=>{if(KEYMAP[e.key]!=='A')return;clearTimeout(holdTimer);if(held){held=false;return}act('A')});
+document.querySelectorAll('[data-key]').forEach(b=>b.addEventListener('click',()=>{stopTour();act(KEYMAP[b.dataset.key]);tv.focus({preventScroll:true})}));
+document.querySelector('[data-hold]').addEventListener('click',()=>{stopTour();if(!holdA())act('A')});
+tv.addEventListener('click',()=>tv.focus({preventScroll:true}));
+
+/* ---------- page controls ---------- */
+document.querySelectorAll('[data-ctl]').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setCtl(seg.dataset.ctl,b.dataset.v);if(seg.dataset.ctl==='view')S.sh.shown=null;render()}));
+
+/* ---------- jumps and tour ---------- */
+function jump(n){clearT();$('sleep').classList.remove('on');S.ch=null;S.att.dim=false;
+ if(n==='attract'){S.att.i=0;show('attract');rAttract()}
+ else if(n==='home'){S.home={z:'con',i:0};S.sec=0;show('home');rHome()}
+ else if(['archive','hangar','uplink','theater','covers'].includes(n)){S.sh.z='shelf';S.sh.s=0;S.sh.shown=null;if(n==='covers'){setView('covers');n='archive'}S.sec=['','archive','hangar','uplink','theater'].indexOf(n);show('shelf');rShelf()}
+ else if(n==='game'){S.ret='shelf';openGame(SNES[0],'shelf')}
+ else if(n==='players'){S.ret='shelf';setCtl('pads','2');S.pl={g:ARC[2],joined:[1],i:0,next:{mode:'cont'}};show('players');rPlayers()}
+ else if(n==='launch'){S.ret='game';launch(SNES[0],{mode:'cont',freeze:1})}
+ else if(n==='band'){startPlay(SNES[0]);S.play.band=true;rPlay()}
+ else if(n==='strip'){startPlay(SNES[0]);S.play.band=true;S.play.mode='save';S.play.si=2;rPlay()}
+ else if(n==='ret'){startPlay(SNES[0]);quitGame()}
+ else if(n==='film'){startPlay(FILMS[5]);S.play.band=true;rPlay()}
+ else if(n==='power'){S.home={z:'con',i:0};S.sec=0;show('home');rHome();openPower()}
+ else if(n==='settings')openSettings();
+ else if(n==='osk')openOsk();
+ else if(n==='room')openRoom();
+ else if(n==='lost')openLost(0)}
+document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>{stopTour();jump(b.dataset.jump)}));
+const sp=()=>setView('spines');
+const TOUR=[
+ ['Attract board (after 45 s idle): your own games, one every 10 s. The slots show which one (round windows stay for status). Any button wakes it; nothing starts by itself',()=>{sp();jump('attract')},4200],
+ ['After 10 minutes on the OLED the board dims to 30% and stops changing. The words stay readable',()=>{jump('attract');S.att.dim=true;rAttract()}],
+ ['Home: the console holds the game you played last. Continue is the one orange key on its deck',()=>{sp();jump('home')}],
+ ['Played lately: its shelf edge is a name rail. The focused thing\'s name is horizontal at 46 px; the rail lights where it stood',()=>{jump('home');S.home={z:'lately',i:1};rHome()}],
+ ['Favourites: spines keep vertical titles, and the name rail says the focused one large (H1). The lit rail segment marks focus on thin spines',()=>{jump('home');S.home={z:'fav',i:3};rHome()}],
+ ['The section slide: L1 / R1 move it from anywhere. B or ≡ here opens Power',()=>{jump('home');S.home={z:'top',i:0};rHome()}],
+ ['Archive: one shelf per system. The stand names the focused game at 50 px; the shelf rail lights under its spine',()=>{sp();jump('archive');S.sh.pos['1:0']=0;rShelf()}],
+ ['Thin dark spines (PlayStation): the 34 px lift plus the lit rail segment, wider than the case itself',()=>{sp();jump('archive');S.sh.s=4;S.sh.pos['1:4']=3;rShelf()}],
+ ['Dividers: LT / RT jump between them on a gamepad. The HA remote has no triggers, so ⏮ ⏭ do the same',()=>{sp();setCtl('hint','remote');jump('archive');S.sh.pos['1:0']=6;rShelf()}],
+ ['≡ opens options for the focused game: Game page, Show covers, Jump to a letter, Favourite',()=>{setCtl('hint','pad');jump('archive');S.sh.pos['1:0']=6;S.ch={k:'opt',i:2};rShelf()}],
+ ['Jump to a letter: works from any input, with a count for each range',()=>{jump('archive');S.sh.pos['1:0']=6;S.ch={k:'jump',i:2};rShelf()}],
+ ['Covers view (Y, or Settings › Library): every game face-out with the title its box prints. About five a shelf. The stand drops its picture so nothing shows twice',()=>{jump('covers');S.sh.pos['1:0']=2;rShelf()}],
+ ['Covers view on PlayStation discs',()=>{jump('covers');S.sh.s=4;S.sh.pos['1:4']=1;rShelf()}],
+ ['A walnut bookend ends every shelf; an extra press nudges. Shelves stop, they never wrap',()=>{sp();jump('archive');S.sh.pos['1:0']=12;rShelf();setTimeout(()=>nudge('R'),300)}],
+ ['Hangar: Steam big boxes. Spine colours come from the cover, clamped out of orange and red (H11)',()=>{sp();jump('hangar');S.sh.pos['2:0']=8;rShelf()}],
+ ['Uplink has four things, so it is a showcase: one wide shelf, face-out, every name on the shelf edge. No bare wall',()=>{sp();jump('uplink')}],
+ ['Theater: films by spine; Short films has three, so they stand face-out on their shelf',()=>{sp();jump('theater');S.sh.s=1;rShelf()}],
+ ['Game page: the box opened. Continue is the one orange; the save strip shows what each save looks like',()=>jump('game')],
+ ['Pick up a controller: ports, not profiles. Controller 2 has a low battery: amber words with ▲ (warn, conflict 1 B)',()=>{jump('players');S.pl.joined=[1,2];rPlayers()}],
+ ['Launch: the media drops into the slot; the slatted bar shows the real load. Dark in Day too (conflict 5 B)',()=>jump('launch'),3000],
+ ['Guide band in a game: the console\'s deck. The cartridge stands in the band\'s slot, the ports show who is playing. Resume is the only orange',()=>jump('band')],
+ ['Picture pops above its key. The key shows ▲ while the chooser carries the value',()=>{jump('band');S.play.k=3;S.play.ch='pic';S.play.chi=0;rPlay()}],
+ ['Save strip in the band: four frames replace the key row, so the band never grows',()=>jump('strip')],
+ ['Quit: press twice or hold 1 s. The fill runs along the top edge',()=>{jump('band');S.play.k=5;S.play.armed=5;rPlay()}],
+ ['Return: the cartridge pops back up, then Home has it in the console',()=>jump('ret'),3200],
+ ['Theater player: the same deck, the house player keys (shared with JamFin). The timeline is the band\'s top edge, NOW a cream rule',()=>jump('film')],
+ ['Subtitles pops above its key: five rows, the chosen one pressed in with its square lit',()=>{jump('film');S.play.k=3;S.play.ch='subs';S.play.chi=2;rPlay()}],
+ ['Chapters: the same film strip as the saves, five frames at a time, "6 of 12"',()=>{jump('film');S.play.mode='chap';S.play.si=5;rPlay()}],
+ ['Power: the console\'s switch panel. Focus on Cancel, no orange. Sleep is one press',()=>jump('power')],
+ ['Restart takes two presses or a 1 s hold; the lever goes half-way and the fill runs along the top',()=>{jump('power');S.pw.i=2;S.pw.armed=2;rPower()}],
+ ['Settings: the rear panel. Two-position slide switches; Library shows how a spine is made from a scraped cover',()=>jump('settings')],
+ ['Settings › Display. The page rail is the section slide stood on end',()=>{jump('settings');S.set={z:'rows',pg:0,i:1};rSet()}],
+ ['Keyboard: keys on the deck, the code written on a label like a room card. Done is the one orange; at 6 characters focus jumps there',()=>{jump('osk');S.osk.t='MOON4';rOsk()}],
+ ['Netplay room: Sam\'s console. Port 1 is Sam, port 2 is the free seat. Taking it plugs you in',()=>jump('room')],
+ ['Seated and ready: the room waits for the host (a lit slot: the one happening now)',()=>{jump('room');S.room={st:'wait',i:0};rRoom()}],
+ ['Signal lost: the computer pops back out of the slot with its light in the offline form. Try again + Home',()=>jump('lost')],
+ ['Try again failed: now it says what to check',()=>{jump('lost');S.lost.n=1;rLost()}],
+ ['Day: the wall turns light; the console, bands, panels and launch stay dark objects',()=>{tv.classList.add('day');jump('home')},3000]];
+let tourOn=false,tourI=0,tourT=null,tourStepping=false;
+function stepTour(){if(!tourOn)return;tv.classList.toggle('day',S.lit==='day');const [cap,fn,ms]=TOUR[tourI];tourStepping=true;try{fn()}finally{tourStepping=false}
+ $('cap').textContent=`Tour ${tourI+1} of ${TOUR.length} · ${cap}`;tourI=(tourI+1)%TOUR.length;tourT=setTimeout(stepTour,ms||3000)}
+function startTour(){tourOn=true;tourI=0;$('tourb').setAttribute('aria-pressed','true');$('tourb').textContent='■ Stop tour';stepTour()}
+function stopTour(){if(!tourOn)return;tourOn=false;clearTimeout(tourT);tv.classList.toggle('day',S.lit==='day');$('tourb').setAttribute('aria-pressed','false');$('tourb').textContent='▶ Tour'}
+$('tourb').addEventListener('click',()=>{tourOn?stopTour():startTour()});
+$('tcap').textContent=`Steps through ${TOUR.length} states, about 3 seconds each. Any key on the TV stops it.`;
+window.addEventListener('resize',()=>{const s=document.querySelector('.tv .scr.on:not(.under)');if(s)placeSlide(s);if(S.scr==='play'&&S.play.ch)rPlay()});
+document.fonts&&document.fonts.ready.then(()=>{document.querySelectorAll('.tv .scr.on').forEach(placeSlide);if(S.scr==='play'&&S.play.ch)rPlay()});
+show('home');rHome();
+</script>
+</body>
+</html>
