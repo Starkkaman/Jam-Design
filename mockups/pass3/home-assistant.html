@@ -1,0 +1,1165 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jam Theme Pass 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Pass 3: one recommended build is the default everywhere; pass 2's options live in the Compare panel. Layout: page chrome (follows the system theme), then sections. 1 Theme sheet: day + night token panels read live from CSS, plus a shared spec. 2 Jam Cards library at real phone card size; every popup opens over the page. 3 Dashboards: phone 390x844, iPad 1024x768, Echo Show 961x601, each in Day and Night, scaled to fit; popups and kiosk sheets open inside each device. */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--decel:cubic-bezier(.16,1,.3,1);--settle:cubic-bezier(.3,1.3,.5,1);--leave:cubic-bezier(.4,0,1,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1480px;margin:0 auto;padding-block:32px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:26px}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}
+h2{font:600 24px/1.2 var(--f);margin:0}
+h3{font:600 17px/1.3 var(--f);margin:0}
+p{margin:0;max-width:76ch}
+.muted{color:var(--muted)}
+.ctrls{display:flex;gap:12px 20px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line)}
+@media (max-width:640px){.ctrls{position:static}}
+.ctl{display:flex;gap:8px;align-items:center}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 14px;border-radius:9px;cursor:pointer;min-height:36px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}}
+.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.toc{display:flex;gap:14px;flex-wrap:wrap;font-size:14px}
+.toc a{color:var(--fg)}
+section.top{display:grid;gap:16px;scroll-margin-top:70px}
+.intro{display:grid;gap:6px}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px}
+.difflist{margin:0;padding-left:22px;display:grid;gap:6px;max-width:90ch;font-size:15px}
+/* device frames */
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
+@media (max-width:900px){.pair{grid-template-columns:1fr}}
+.pair.phones{grid-template-columns:repeat(2,minmax(0,340px));justify-content:center}
+@media (max-width:760px){.pair.phones{grid-template-columns:minmax(0,340px)}}
+figure{margin:0;display:grid;gap:8px;min-width:0;width:100%}
+figcaption{font-size:13px;color:var(--muted)}
+.frame{position:relative;width:100%;border-radius:20px;background:#0d0d0c;padding:12px;box-shadow:0 20px 50px #0000004d}
+.screen{position:relative;overflow:hidden;border-radius:8px}
+.phone{border-radius:44px;padding:12px}.phone .screen{aspect-ratio:390/844;border-radius:34px}
+.ipad .screen{aspect-ratio:1024/768}
+.echo{border-radius:16px;padding:12px 12px 24px}.echo .screen{aspect-ratio:961/601}
+.scaler{position:absolute;top:0;left:0;transform-origin:0 0}
+
+/* ================= JAM THEME: Braun Hi-Fi tokens ================= */
+.bh{--bg:#e3e1dc;--card:#f1efeb;--key:#e6e3de;--rule:#d4d1ca;--ink:#1d1c1a;--dim:#66635c;
+  --band:#1d1c1a;--band-ink:#ece8df;--band-dim:#a8a397;--band-key:#2b2a27;
+  --orange:#ec7c22;--deep:#b55a12;--walnut:#6b4428;
+  --win:#151413;--cream:#f3e6c8;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;--alert-ink:#b3261b;--warn-ink:#7a5300;
+  --sw-track:#cfcbc4;--sw-pad:#fbfaf7;--cap:#fbfaf7;--pressed:#ebe8e3;--offl:#8d8a83;
+  --groove:#d9d5cd;--groove-sh:inset 0 1px 2px #00000038,inset 0 0 0 1px #0000000d;--bandmix:var(--card);--bandpct:30%;
+  --e1:0 1px 2px #0000001a,0 4px 12px #0000000f;--ekey:0 2px 0 #0000001f;--epress:inset 0 1px 3px #00000033;--esheet:0 -10px 30px #00000040;
+  --r-card:16px;--r-key:12px;--r-sw:8px;--r-chip:999px;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;
+  --ribs:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 2px,transparent 2px 8px);
+  color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.35}
+.night .bh{--bg:#1c1c1b;--card:#2a2a28;--key:#353533;--rule:#3a3a37;--ink:#ece9e2;--dim:#a3a097;--band:#121211;--band-key:#262523;
+  --orange:#f08a2c;--deep:#a4560f;--alert-ink:#ff7466;--warn-ink:#f2c14e;
+  --sw-track:#121211;--sw-pad:#5e5b55;--cap:#8d8981;--pressed:#232321;--offl:#7a776f;
+  --groove:#151413;--groove-sh:inset 0 1px 2px #00000080;--bandmix:#3b3a37;--bandpct:30%;
+  --e1:0 1px 2px #00000059;--ekey:0 2px 0 #00000080;--epress:inset 0 1px 3px #000;--esheet:0 -10px 30px #00000080}
+/* Compare: pass 2's day track (window recess) */
+.bh[data-trk="dark"]{--groove:#151413;--groove-sh:inset 0 1px 2px #00000080}
+.dev .bh{position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg)}
+.bh button{font-family:var(--f)}
+.lab{font:500 12px/1.25 var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.meta{font:500 12px/1.25 var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.u{font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.t{font:500 19px/1.15 var(--f)}
+.sm{font-size:14px;color:var(--dim)}
+.big2{font:400 40px/1 var(--f);font-variant-numeric:tabular-nums}
+.big2 small{font-size:18px;color:var(--dim);margin-left:2px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row8{display:inline-flex;align-items:center;gap:8px}
+.ltx{display:grid;gap:3px;min-width:0}
+.ltx>*{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.card{background:var(--card);border-radius:var(--r-card);padding:16px;display:grid;gap:12px;box-shadow:var(--e1);min-width:0;position:relative;align-content:start}
+.band{background:var(--ribs) var(--band);color:var(--band-ink);border-radius:var(--r-card);padding:16px;display:grid;gap:10px}
+.band .lab,.band .meta,.band .sm{color:var(--band-dim)}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.g3k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.g4k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.wide{width:100%}
+[hidden]{display:none!important}
+/* indicator windows: always a dark recess; lit = flat solid colour, no halo */
+.ind{position:relative;display:inline-block;flex:none;background:var(--win);box-shadow:inset 0 1px 2px #000;vertical-align:middle}
+.ind::after{content:"";position:absolute;inset:1.5px;border-radius:inherit;background:var(--c,var(--cream));opacity:0;transition:opacity 300ms var(--decel)}
+.ind.on::after{opacity:1}
+.led{width:10px;height:10px;border-radius:50%}.sq{width:10px;height:10px;border-radius:2px}.slot{width:22px;height:7px;border-radius:2px}
+.slotc{width:10px;height:22px;border-radius:3px}
+.slotc.big{width:14px;height:30px;border-radius:4px}
+.bars{display:inline-flex;gap:3px;vertical-align:middle}.bars .ind{width:5px;height:13px;border-radius:1.5px}
+.swatch{width:100%;height:16px;border-radius:5px}
+.swatch::after{inset:2px;border-radius:3px}
+.cdot{width:30px;height:30px;border-radius:9px}
+.cdot::after{inset:2.5px;border-radius:7px}
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--key);font-size:15px;border:0;color:inherit;min-height:34px}
+.band .chip{background:#ffffff14;color:var(--band-ink)}
+.band .chip.alert{background:transparent;box-shadow:inset 0 0 0 1.5px var(--alert);color:#ff8a7d;cursor:pointer}
+/* rocker: up = on. Pass 2: the paddle treatment is a screen-level choice (data-pm on the host).
+   quiet  = the paddle stays plastic and a small window on it lights (the light's own colour, or cream)
+   orange = pass 1: the paddle itself turns orange */
+.sw{appearance:none;border:0;padding:0;cursor:pointer;position:relative;width:30px;height:44px;border-radius:var(--r-sw);background:var(--sw-track);box-shadow:inset 0 2px 4px #00000040;flex:none}
+.sw::before{content:"";position:absolute;inset:-1px -8px}
+.sw .pad{position:absolute;left:3px;right:3px;top:20px;height:21px;border-radius:6px;background:var(--sw-pad);box-shadow:0 2px 0 #00000026,0 3px 6px #00000026;transition:transform 260ms var(--settle),background 150ms}
+.sw .pad::before{content:"";position:absolute;left:50%;top:7px;width:18px;height:7px;margin-left:-9px;border-radius:2px;background:var(--win);box-shadow:inset 0 1px 1px #000}
+.sw .pad::after{content:"";position:absolute;left:50%;top:8.5px;width:15px;height:4px;margin-left:-7.5px;border-radius:1px;background:var(--pc,var(--cream));opacity:0;transition:opacity 300ms var(--decel)}
+.sw[aria-pressed="true"] .pad{transform:translateY(-17px)}
+.sw[aria-pressed="true"] .pad::after{opacity:1}
+[data-pm="orange"] .sw[aria-pressed="true"] .pad{background:var(--orange)}
+[data-pm="orange"] .sw .pad::before,[data-pm="orange"] .sw .pad::after{display:none}
+.bh[data-pw="p2"] .sw .pad::before{top:8px;width:10px;height:4px;margin-left:-5px}.bh[data-pw="p2"] .sw .pad::after{width:8px;height:3px;margin-left:-4px}
+.sw:disabled{opacity:.35;cursor:default}
+/* keys: chosen = pressed in, never orange */
+.key{appearance:none;border:0;cursor:pointer;font:500 15px var(--f);color:var(--ink);background:var(--key);border-radius:var(--r-key);padding:11px 13px;display:flex;gap:9px;align-items:center;justify-content:flex-start;box-shadow:var(--ekey);transition:transform 100ms;min-height:44px;text-align:left}
+.key:active{transform:translateY(1px)}
+.key[aria-pressed="true"]{background:var(--pressed);box-shadow:var(--epress)}
+.btn{appearance:none;border:0;cursor:pointer;font:500 15px var(--f);border-radius:var(--r-key);padding:11px 16px;display:inline-flex;gap:8px;align-items:center;justify-content:center;transition:transform 100ms;min-height:44px;color:var(--ink)}
+.btn.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 2px 0 var(--deep)}
+.btn.sec{background:var(--key);box-shadow:var(--ekey)}
+.btn.sec.rest svg{width:22px;height:22px}
+/* alert fix (D42): the one control that clears an alert is alert red with ink text, everywhere */
+.btn.fix,.chip.fix{background:var(--alert);color:#1d1c1a;box-shadow:0 2px 0 #9a2a1f;font-weight:500}
+.chip.fix{cursor:pointer;border:0;font:500 15px var(--f)}
+.chip.fix .ind{background:#5a120c}
+.btn.icon{padding:0;width:44px}
+.btn:active{transform:translateY(1px)}
+.btn svg,.key svg,.chip svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn svg.f,.key svg.f{fill:currentColor;stroke:none}
+.bh :focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.trans{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:8px}
+.trio{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:8px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* fader: reveals cream, or the light's own colour; the value rides the cap only while you drag */
+.fd{position:relative;height:36px;display:flex;align-items:center;touch-action:none;cursor:pointer;min-width:0;flex:1;user-select:none;-webkit-user-select:none}
+.fd .trk{position:relative;flex:1;height:8px;border-radius:4px;overflow:hidden;background:var(--lc,var(--fillc,var(--cream)));box-shadow:var(--groove-sh)}
+.fd .cov{position:absolute;top:0;bottom:0;right:0;left:var(--v);background:var(--groove);box-shadow:var(--groove-sh)}
+.fd .th{position:absolute;left:var(--v);top:50%;width:16px;height:26px;margin-left:-8px;transform:translateY(-50%);border-radius:5px;background:var(--cap);box-shadow:0 0 0 1px #0000001a,0 2px 0 #00000033,0 3px 6px #00000033}
+.fd .tv{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);font:500 12px var(--mono);background:var(--ink);color:var(--card);padding:2px 6px;border-radius:6px;opacity:0;transition:opacity 120ms;pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+.fd.drag .tv,.fd:focus-visible .tv{opacity:1}
+.bh{--fillc:#ead7a6}.night .bh,.night.bh{--fillc:var(--cream)}
+.fd.big{height:56px}.fd.big .trk{height:40px;border-radius:10px}
+.fd.big .th{width:52px;height:50px;margin-left:-26px;border-radius:10px;display:grid;place-items:center}
+.fd.big .tv{position:static;transform:none;opacity:1;background:none;color:#1d1c1a;font-size:15px;padding:0}
+.fd.big{margin:0 26px}
+.vrow{display:flex;gap:12px;align-items:center}
+.vrow .lab{width:64px;flex:none}
+
+/* ---- jam-light ---- */
+.light{gap:10px;padding:14px 14px 10px;overflow:hidden}
+/* Pass 2: three ways to give a lit light its colour back (data-lc on the host). Colour only while on. */
+.light .edge{display:none;position:absolute;left:6px;top:12px;bottom:12px;width:7px;border-radius:3px;background:var(--win);box-shadow:inset 0 1px 2px #000}
+.light .edge::after{content:"";position:absolute;inset:1.5px;border-radius:2px;background:var(--lc);opacity:0;transition:opacity 300ms var(--decel)}
+.light[data-state="on"] .edge::after{opacity:1}
+[data-lc="edge"] .light:not(.lk) .edge{display:block}
+[data-lc="edge"] .light:not(.lk){padding-left:22px}
+[data-lc="edge"] .light:not(.lk) .open>.slotc{display:none}
+.lband{display:grid;transition:background 300ms var(--decel)}
+[data-lc="band"] .light:not(.lk) .lband{margin:0 -14px -10px;padding:4px 14px 8px;border-radius:0 0 var(--r-card) var(--r-card)}
+[data-lc="band"] .light[data-state="on"]:not(.lk) .lband{background:color-mix(in srgb,var(--lc) 30%,var(--card))}
+.night [data-lc="band"] .light[data-state="on"]:not(.lk) .lband,.night[data-lc="band"] .light[data-state="on"]:not(.lk) .lband{background:color-mix(in srgb,var(--lc) 30%,#3b3a37)}
+[data-lc="wash"] .light[data-state="on"]:not(.lk){background:color-mix(in srgb,var(--lc) 18%,var(--card))}
+.night [data-lc="wash"] .light[data-state="on"]:not(.lk),.night[data-lc="wash"] .light[data-state="on"]:not(.lk){background:color-mix(in srgb,var(--lc) 22%,var(--card))}
+/* kiosk light column: a tall vertical fader fills from the bottom in the light's colour and prints its own number on the cap */
+.light.lk{grid-template-rows:auto minmax(0,1fr);padding:16px;gap:14px;align-content:stretch}
+.fd.v{height:auto;width:100%;align-items:stretch;min-height:0}
+.fd.v .trk{height:auto;width:100%;border-radius:14px}
+.fd.v .cov{left:0;right:0;top:0;bottom:var(--v);height:auto}
+.fd.v .th{left:6px;right:6px;width:auto;top:auto;bottom:clamp(6px,calc(var(--v) - 22px),calc(100% - 50px));margin:0;height:44px;transform:none;border-radius:10px;display:grid;place-items:center}
+.fd.v .tv{position:static;transform:none;opacity:1;background:none;color:#1d1c1a;font:500 24px var(--mono);padding:0}
+.fd.v[aria-valuenow="0"] .tv{color:#66635c;font:500 18px var(--f);letter-spacing:.06em;text-transform:uppercase}
+.offbody{display:grid;align-content:center;justify-items:start;gap:14px;border-radius:14px;border:1.5px dashed var(--offl);padding:16px}
+.lhead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}
+.open{appearance:none;border:0;background:none;padding:0;margin:0;color:inherit;text-align:left;cursor:pointer;display:flex;gap:10px;align-items:flex-start;min-width:0;font:inherit;min-height:44px}
+.open .slotc{margin-top:2px}
+.light[data-state="off"] .t,.swdev[data-state="off"] .t,.swr[data-state="off"] .t{color:var(--dim)}
+.swdev[data-state="off"] .glyph,.swr[data-state="off"] .glyph{opacity:.6}
+.swdev[data-state="on"] .glyph,.swr[data-state="on"] .glyph{color:var(--ink)}
+.light[data-state="offline"],.swdev[data-state="offline"]{background:transparent;box-shadow:none;border:1.5px dashed var(--offl)}
+.light[data-state="offline"] .t{color:var(--dim)}
+.offw{font-size:14px;color:var(--dim);min-height:36px;display:flex;align-items:center}
+/* ---- switched device ---- */
+.swdev{grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px}
+.glyph{width:38px;height:38px;border-radius:10px;background:var(--key);display:grid;place-items:center;color:var(--dim);flex:none}
+.glyph svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.swlist{padding:4px 16px;gap:0}
+.swlist .swr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--rule)}
+.swlist .swr:first-of-type{border-top:0}
+.swlist>.lab{padding:10px 0 2px}
+/* ---- room heading ---- */
+.rh{display:grid;gap:10px}
+.rule{height:4px;border-radius:2px;background:var(--walnut)}
+.rh .row{align-items:end}
+.rtitle{font:500 28px/1.05 var(--f)}
+.scn{display:flex;gap:8px;flex-wrap:wrap}
+/* ---- house band ---- */
+.house .hrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}
+.hbig{font:400 42px/1 var(--f);font-variant-numeric:tabular-nums}
+.hbig small{font-size:18px;color:var(--band-dim);margin-left:2px}
+.hmid{font:400 28px/1 var(--f)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+/* ---- appliance (the kept air purifier) ---- */
+.appl{position:relative;border-radius:20px 20px 14px 14px;background:linear-gradient(180deg,#f5f3ef,#e2dfd9);box-shadow:inset 0 2px 0 #fff,inset 0 -3px 0 #0000001f,0 6px 14px #00000026;padding:12px 14px 14px;display:grid;gap:10px;color:#1d1c1a}
+.night .appl{background:linear-gradient(180deg,#45433f,#33312e);box-shadow:inset 0 2px 0 #ffffff1f,inset 0 -3px 0 #00000059,0 6px 14px #00000066;color:#eeeae2}
+.appl .sm,.appl .u{color:#5d5a53}.night .appl .sm,.night .appl .u{color:#bdb8ae}
+.grille{height:24px;border-radius:10px;background:radial-gradient(circle,#00000059 2.1px,transparent 2.7px) 0 0/10px 9px,#d4d0c9;box-shadow:inset 0 1px 3px #00000033}
+.night .grille{background:radial-gradient(circle,#000000aa 2.1px,transparent 2.7px) 0 0/10px 9px,#2a2926}
+.appl .face{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center}
+.seg7{display:inline-block;background:#121110;border-radius:5px;padding:5px 7px;box-shadow:inset 0 1px 3px #000}
+.seg7 svg{display:block;height:22px;width:auto}
+.seg7 .sg{fill:#2b2420}.seg7 .sg.on{fill:var(--cream)}
+.pwr{appearance:none;border:0;cursor:pointer;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fbfaf7,#d6d2cb);box-shadow:inset 0 -2px 0 #00000026,0 2px 0 #00000026;display:grid;place-items:center}
+.night .pwr{background:radial-gradient(circle at 40% 35%,#6a6761,#4a4843)}
+.pwr svg{width:17px;height:17px;stroke:#6b6862;stroke-width:2.4;fill:none;stroke-linecap:round;transition:stroke 300ms}
+.night .pwr svg{stroke:#a39f97}
+.pwr[aria-pressed="true"] svg{stroke:var(--ok)}
+.akeys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.akey{appearance:none;border:0;cursor:pointer;border-radius:8px;padding:8px 6px 7px;min-height:44px;background:linear-gradient(180deg,#fbfaf7,#e6e3dd);box-shadow:inset 0 1px 0 #fff,0 2px 0 #00000026;display:grid;gap:5px;justify-items:center;font:600 12px var(--mono);color:#3a3936}
+.night .akey{background:linear-gradient(180deg,#5a5853,#46443f);box-shadow:inset 0 1px 0 #ffffff1f,0 2px 0 #00000059;color:#e4dfd5}
+.akey[aria-pressed="true"]{transform:translateY(1px);box-shadow:inset 0 1px 2px #00000040}
+.aname{font:600 16px var(--f)}
+/* ---- media: TV ---- */
+.scr{border-radius:12px;background:var(--ribs) #121211;padding:14px 16px;display:grid;gap:4px;min-height:132px;align-content:end;position:relative;color:#ece8df;box-shadow:inset 0 2px 6px #000}
+.scr .lab{color:#a8a397}
+.scr .tt{font:500 26px/1.1 var(--f)}
+.pk{appearance:none;border:0;cursor:pointer;position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;background:#2e2e2b;display:grid;place-items:center;box-shadow:0 2px 0 #000}
+.pk svg{width:17px;height:17px;fill:none;stroke:#8f8b82;stroke-width:2.2;stroke-linecap:round;transition:stroke 300ms}
+.pk[data-on="true"] svg{stroke:var(--ok)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{appearance:none;border:0;cursor:pointer;text-align:left;border-radius:12px;background:var(--key);color:var(--ink);padding:12px 12px 10px;display:grid;gap:12px;font:500 15px/1.2 var(--f);box-shadow:var(--ekey);min-height:88px;align-content:space-between}
+.tile .tp{display:flex;justify-content:space-between;align-items:center;color:var(--dim)}
+.tile .tp svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}
+.tile[aria-pressed="true"]{background:var(--pressed);box-shadow:var(--epress)}
+.tile .tn{display:grid;gap:2px}
+/* printed colour code (Braun's colour chart for function keys): ink on the key, not a light */
+.ptab{display:inline-block;width:20px;height:4px;border-radius:1px;background:var(--c);opacity:.9}
+.tile .tn .ptab{margin-bottom:4px}
+/* ---- media: speaker ---- */
+.grill{appearance:none;border:0;padding:0;cursor:pointer;display:block;width:100%;position:relative;height:132px;border-radius:12px;background:var(--key);overflow:hidden}
+.grill svg{position:absolute;inset:0;width:100%;height:100%}
+.grill .dt{fill:#00000026}.night .grill .dt{fill:#00000059}
+.spkinfo{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}
+.grp{display:grid;border-radius:12px;background:var(--key);padding:2px 12px}
+.grp .r{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--rule);min-height:52px}
+.grp .r:first-child{border-top:0}
+.sleeve{width:64px;height:64px;border-radius:6px;flex:none;box-shadow:0 2px 4px #00000040}
+.np{display:flex;gap:14px;align-items:center}
+.shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.shelf .rec{display:grid;gap:4px;font-size:14px;min-width:0}
+.shelf .rec .sleeve{width:100%;height:auto;aspect-ratio:1}
+.shelf .rec span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ---- NerveOS row ---- */
+.pc{grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:12px 14px}
+.pcmark{width:44px;height:44px;border-radius:12px;background:var(--ribs) var(--band);display:grid;place-items:center;color:var(--cream);font:600 13px var(--mono);letter-spacing:.06em}
+/* ---- climate ---- */
+.stepper{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.tgt{display:grid;justify-items:center;gap:2px}
+.tgt .num{font:500 26px/1 var(--mono);font-variant-numeric:tabular-nums}
+/* ---- sensor / history ---- */
+.spark{width:100%;height:72px;display:block}
+.spark .gl{stroke:var(--rule);stroke-width:1}
+.spark .ln{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.spark .ar{fill:var(--ink);opacity:.06}
+.axis{display:flex;justify-content:space-between;font:500 12px var(--f);color:var(--dim)}
+.open.col{flex-direction:column;align-items:stretch;gap:8px;width:100%}
+.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.readouts>div{background:var(--key);border-radius:10px;padding:8px 10px;display:grid;gap:2px}
+.readouts b{font:500 18px var(--mono);font-variant-numeric:tabular-nums}
+/* ---- lists: doors, people ---- */
+.rows{display:grid}
+.rows .r{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--rule);min-height:48px}
+.rows .r:first-child{border-top:0}
+.w-alert{color:var(--alert-ink);font-weight:500}.w-warn{color:var(--warn-ink);font-weight:500}
+.mono{width:36px;height:36px;border-radius:50%;background:var(--key);display:grid;place-items:center;font:600 14px var(--mono);color:var(--dim)}
+/* ---- camera ---- */
+.cam{appearance:none;border:0;padding:0;cursor:pointer;display:block;width:100%;position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#222}
+.cam svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cam .ov{position:absolute;left:10px;right:10px;bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cam .tag{display:inline-flex;gap:8px;align-items:center;background:#000000a6;color:#ece8df;border-radius:999px;padding:5px 10px;font:500 13px var(--f)}
+.evrow{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--rule)}
+.evrow .th2{width:72px;aspect-ratio:16/9;border-radius:6px;overflow:hidden;position:relative}
+.evrow .th2 svg{position:absolute;inset:0;width:100%;height:100%}
+/* ---- popups (one layer system for phone, kiosk and page) ---- */
+.layer{position:absolute;inset:0;z-index:30}
+.veil{position:absolute;inset:0;background:#000000a6;opacity:0;transition:opacity 220ms var(--glide)}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:90%;background:var(--bg);color:var(--ink);border-radius:20px 20px 0 0;display:flex;flex-direction:column;box-shadow:var(--esheet);transform:translateY(100%);transition:transform 280ms var(--decel)}
+.layer.in .veil{opacity:1}.layer.in .sheet{transform:none}
+.shd{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 16px 12px;border-bottom:1px solid var(--rule);flex:none}
+.shd .st{font:500 24px/1.1 var(--f)}
+.sbody{overflow:auto;padding:14px 14px 22px;display:grid;gap:12px;align-content:start;scrollbar-width:none;flex:1 1 auto;min-height:0}
+.sbody::-webkit-scrollbar{display:none}
+.fixedhost{position:fixed;inset:0;z-index:100}
+.fixedhost>.bh{position:absolute;inset:0}
+.fixedhost .sheet{width:min(440px,calc(100vw - 16px));margin:0 auto;max-height:88vh}
+.k .sheet{left:20px;right:20px;top:20px;bottom:20px;max-height:none;border-radius:20px;transform:translateY(12px);opacity:0;transition:transform 220ms var(--decel),opacity 180ms var(--glide)}
+.k .layer.in .sheet{opacity:1;transform:none}
+.k .sheet.cols .sbody{display:block;columns:2;column-gap:14px;overflow:hidden}
+.k .sheet.cols .sbody>*{break-inside:avoid;margin-bottom:12px}
+.k .sheet.solo .sbody{overflow:hidden}
+.k .sheet.ksheet{inset:0;border-radius:0}
+.k .sheet.ksheet .sbody{overflow:hidden;padding:18px 24px 24px}
+.k .sheet.ksheet .shd{padding:22px 24px 14px}
+/* remote: soft plastic, IR emitter at the very top, flashes red on each press, lit power symbols */
+.remote{position:relative;width:264px;margin:14px auto 6px;border-radius:46px 46px 66px 66px;padding:34px 18px 24px;display:grid;gap:14px;background:linear-gradient(180deg,#ece9e3,#d3cfc8);box-shadow:inset 0 3px 2px #ffffffb3,inset 0 -6px 10px #00000026,0 14px 26px #00000040;color:#2a2926}
+.night .remote{background:linear-gradient(180deg,#43413d,#2d2b28);box-shadow:inset 0 3px 2px #ffffff1f,inset 0 -6px 10px #00000080,0 14px 26px #000000a0;color:#e4dfd5}
+.irlens{position:absolute;top:-5px;left:50%;width:44px;height:12px;margin-left:-22px;border-radius:8px 8px 4px 4px;background:#3a0d0a;box-shadow:inset 0 2px 2px #000,0 1px 0 #ffffff40;overflow:hidden}
+.irlens::after{content:"";position:absolute;inset:2px 3px;border-radius:5px 5px 2px 2px;background:#ff3b2e;opacity:0;transition:opacity 220ms ease-out}
+.irlens.tx::after{opacity:1;transition:none}
+.engr{font:600 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:#00000094}
+.night .engr{color:#ffffff8a}
+.rg{display:flex;justify-content:space-between;align-items:center}
+.rkey{appearance:none;border:0;cursor:pointer;border-radius:12px;background:#33322f;color:#ece8df;box-shadow:inset 0 1px 0 #ffffff1f,0 2px 0 #000000a0;display:grid;place-items:center;gap:2px;min-height:48px;padding:6px 4px;font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;transition:transform 80ms}
+.night .rkey{background:#55534e}
+.rkey:active{transform:translateY(2px);box-shadow:inset 0 1px 3px #000000a0}
+.rkey svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rkey svg.f{fill:currentColor;stroke:none}
+.rkey.round{width:46px;height:46px;border-radius:50%;padding:0;min-height:0}
+.rkey.round svg{stroke:#8f8b82;transition:stroke 300ms}
+.rkey.round[data-on="true"] svg{stroke:var(--ok)}
+.rkey[aria-pressed="true"]{transform:translateY(2px);box-shadow:inset 0 1px 3px #000}
+.rk4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.rk3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rk3.inp .rkey{justify-items:start;padding:8px 9px 7px;grid-template-rows:auto auto;text-transform:none;letter-spacing:0;font:500 13px var(--f)}
+.dpad{position:relative;width:184px;height:184px;margin:0 auto;border-radius:50%;background:#33322f;box-shadow:inset 0 1px 0 #ffffff1f,0 3px 0 #000000a0}
+.night .dpad{background:#55534e}
+.dz{appearance:none;border:0;cursor:pointer;position:absolute;width:56px;height:56px;background:transparent;display:grid;place-items:center;color:#ece8df;border-radius:50%}
+.dz svg{width:16px;height:16px;fill:currentColor}
+.dz.u{top:0;left:64px}.dz.d{bottom:0;left:64px}.dz.l{left:0;top:64px}.dz.r{right:0;top:64px}
+.dz:active{background:#00000040}
+.okk{appearance:none;border:0;cursor:pointer;position:absolute;left:52px;top:52px;width:80px;height:80px;border-radius:50%;background:var(--orange);color:#1d1c1a;font:600 16px var(--f);letter-spacing:.12em;box-shadow:0 0 0 6px #00000040,0 3px 0 var(--deep);transition:transform 80ms}
+.okk:active{transform:translateY(2px);box-shadow:0 0 0 6px #00000040,0 1px 0 var(--deep)}
+.seam{height:0;border-top:1px solid #0000002e;border-bottom:1px solid #ffffff80;margin:2px -18px}
+.night .seam{border-top-color:#00000080;border-bottom-color:#ffffff1f}
+
+/* ---- phone dashboard ---- */
+.ph{display:grid;grid-template-rows:auto minmax(0,1fr);grid-template-columns:minmax(0,1fr)}
+.hbar{display:flex;align-items:stretch;height:56px;background:var(--card);box-shadow:0 1px 0 var(--rule);position:relative;z-index:2}
+.hic{width:52px;display:grid;place-items:center;color:var(--dim);flex:none}
+.hic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.htabs{display:flex;flex:1;min-width:0;overflow:hidden}
+.htab{appearance:none;border:0;background:none;cursor:pointer;font:500 16px var(--f);color:var(--dim);padding:0 9px;position:relative;display:grid;place-items:center;flex:none}
+.htab[aria-selected="true"]{color:var(--ink)}
+.htab .ind{position:absolute;bottom:6px;left:50%;margin-left:-11px}
+.htab .ind:not(.on){visibility:hidden}
+.pscroll{overflow-y:auto;scrollbar-width:none;min-height:0}
+.pscroll::-webkit-scrollbar{display:none}
+.pcol{padding:14px 14px 28px;display:grid;gap:14px}
+
+/* ---- kiosks ---- */
+.k{font-size:18px}
+.k .t{font-size:22px}.k .lab,.k .meta{font-size:13px}.k .sm,.k .offw{font-size:16px}
+.k .key,.k .btn{font-size:17px;min-height:52px}
+.k .btn.icon{width:52px}
+.k .sw{width:32px;height:48px}.k .sw .pad{top:23px;height:22px}.k .sw[aria-pressed="true"] .pad{transform:translateY(-19px)}
+.k .shd .st{font-size:30px}
+.kh{display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.ktop{display:grid;grid-template-columns:minmax(0,1fr) auto;padding:var(--kt) var(--kp) 0;gap:18px var(--kp)}
+.krule{grid-column:1/-1;height:3px;border-radius:2px;background:var(--walnut)}
+.lockc{grid-column:2;display:grid;justify-items:end;gap:12px}
+.lock{width:var(--ld);height:var(--ld);border-radius:50%;background:var(--card);box-shadow:var(--e1);display:grid;place-items:center;color:var(--ink);border:0;cursor:pointer}
+.lock svg{width:38%;height:38%;fill:currentColor}
+.lock.alert{background:var(--alert);color:#1d1c1a}
+.lockw{font:500 18px var(--f);letter-spacing:.1em;text-transform:uppercase;display:flex;gap:10px;align-items:center;white-space:nowrap}
+.lockw.alert{color:var(--alert-ink)}
+.kmid{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:24px;padding:0 var(--kp) var(--kg)}
+.kclock{font:300 var(--kc)/.86 var(--f);font-variant-numeric:tabular-nums;letter-spacing:-.02em;display:flex;align-items:flex-start}
+.kclock .co{color:var(--dim)}
+.kclock .ap{font:500 24px var(--f);letter-spacing:.06em;color:var(--dim);margin:.08em 0 0 14px}
+.kdate{font:500 26px/1.2 var(--f);margin-top:20px}
+.kfacts{font:500 20px/1.3 var(--f);color:var(--dim);margin-top:6px;letter-spacing:.01em}
+.kwx{display:grid;justify-items:end;text-align:right;gap:6px}
+.kwx .wt{font:400 44px/1 var(--f)}
+.kwx .ws{font:500 18px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.dock{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:12px;padding:16px;background:var(--ribs) var(--band)}
+.dk{appearance:none;border:0;cursor:pointer;text-align:left;border-radius:14px;background:var(--band-key);color:#ece8df;padding:18px 20px;display:grid;gap:8px;align-content:end;position:relative;box-shadow:inset 0 1px 0 #ffffff12,0 2px 0 #000;min-height:var(--dh);font-family:var(--f)}
+.dk .dn{font:500 26px/1 var(--f)}
+.dk .ds{font:500 18px/1.1 var(--f);letter-spacing:.06em;text-transform:uppercase;color:#a8a397;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk .ind{position:absolute;top:18px;right:18px}
+.dk .ind.led{width:14px;height:14px}.dk .ind.slot{width:28px;height:9px}
+.dk.action{background:transparent;box-shadow:inset 0 0 0 1.5px #55534e}
+.dk.confirm .ds{color:#ffb27a}
+/* Pass 2: Day dock = card blocks on the page (Jam Braun's soft blocks, minus the room tints); night keeps the black band */
+.dev:not(.night) [data-dock="card"] .dock{background:transparent;padding:0 var(--kp) 22px}
+.dev:not(.night) [data-dock="card"] .dk{background:var(--card);color:var(--ink);box-shadow:var(--e1),inset 0 0 0 1px var(--rule)}
+.dev:not(.night) [data-dock="card"] .dk .ds{color:var(--dim)}
+.dev:not(.night) [data-dock="card"] .dk.action{background:transparent;box-shadow:inset 0 0 0 1.5px var(--dim)}
+.dev:not(.night) [data-dock="card"] .dk.confirm .ds{color:var(--warn-ink)}
+.ks.l3{grid-template-columns:minmax(0,350px) repeat(3,minmax(0,1fr));align-items:stretch}
+.ks.e3{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,200px);align-items:stretch}
+.ks.l3>.light,.ks.e3>.light{height:100%}
+.kcol.fill{grid-template-rows:auto auto auto minmax(0,1fr) auto;align-content:stretch}
+.ks{display:grid;gap:16px;height:100%;min-height:0}
+.ks.l2{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:start}
+.ks.tv2{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:start}
+.kcol{display:grid;gap:14px;align-content:start}
+.spk.wide{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 20px;align-items:start}
+.spk.wide .grill{height:100%;min-height:300px}
+.alloff.confirm{box-shadow:inset 0 0 0 2px var(--orange)}
+.k .sheet.ksheet .sbody{display:grid;grid-template-rows:minmax(0,1fr)}
+.ks.l2{align-items:stretch}.ks.l2>.g2{grid-auto-rows:minmax(0,1fr)}
+.ks .light,.ks .swdev{align-content:space-between}
+.ks .swdev{grid-template-columns:auto minmax(0,1fr) auto;align-items:start}
+.k .ks .fd:not(.v){height:52px}.k .ks .fd:not(.v) .trk{height:12px;border-radius:6px}.k .ks .fd:not(.v) .th{width:24px;height:40px;margin-left:-12px;border-radius:7px}
+.ks .light.lk{align-content:stretch}
+.ks.tv2{align-items:stretch}
+.k .ks [data-comp="tv"]{grid-template-rows:minmax(0,1fr) auto auto auto}
+.k .ks [data-comp="tv"] .scr{min-height:0;align-content:end}
+.k .ks [data-comp="tv"] .scr .tt{font-size:40px}
+.ks>.spk.wide{height:100%;grid-template-rows:auto auto auto auto minmax(0,1fr)}
+.spk.wide .grill{grid-row:1/6}
+.k .shelf{grid-template-columns:repeat(4,minmax(0,1fr))}
+.k .remote{zoom:.86}
+/* Pass 3: the kiosk Lights sheet's left column at kiosk size (pass 2 audit 6). Keys 20 px / 60 tall, appliance keys 16 px. */
+.k .ks .kcol{gap:12px}
+.k .ks .kcol .card{padding:16px;gap:12px}
+.k .ks .kcol .lab{font-size:14px}
+.k .ks .kcol .scn{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.k .ks .kcol .key{font-size:20px;min-height:60px;padding:12px 14px}
+.k .ks .kcol .key .ind.sq{width:12px;height:12px}
+.k .ks .swdev .glyph{width:48px;height:48px}.k .ks .swdev .glyph svg{width:24px;height:24px}
+.k .ks .appl{padding:14px 16px 16px;gap:12px}
+.k .ks .appl .grille{height:22px}
+.k .ks .appl .seg7 svg{height:30px}
+.k .ks .appl .aname{font-size:22px}.k .ks .appl .sm{font-size:16px}.k .ks .appl .u{font-size:13px}
+.k .ks .appl .pwr{width:56px;height:56px}.k .ks .appl .pwr svg{width:22px;height:22px}
+.k .ks .appl .akey{font-size:16px;min-height:60px;gap:7px}
+.k .ks .appl .akey .ind.sq{width:12px;height:12px}
+.k .ks .alloff{font-size:20px;min-height:64px}
+.k .sw .pad::before{top:8px;width:20px;height:8px;margin-left:-10px}.k .sw .pad::after{top:9.5px;width:17px;height:5px;margin-left:-8.5px}
+/* Echo Lights sheet: an offline light collapses to a narrow column at the end (pass 2 audit 12) */
+.g3e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 230px;gap:16px;align-items:stretch;grid-auto-rows:minmax(0,1fr)}
+.g3e>.light[data-state="offline"] .offbody{padding:4px 0;gap:12px;border:0}
+
+
+/* ================= THEME SHEET (page) ================= */
+.tpair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.tpair{grid-template-columns:1fr}}
+.tpanel{background:var(--bg);border-radius:20px;padding:20px;display:grid;gap:16px;border:1px solid var(--rule)}
+.tphead{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.tphead .t{font-size:24px}
+.toks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:10px}
+.tok{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;background:var(--card);border-radius:12px;padding:8px 10px;box-shadow:var(--e1)}
+.tok .sw0{width:38px;height:38px;border-radius:9px;box-shadow:inset 0 0 0 1px #00000026}
+.tok .ind.big0{width:38px;height:38px;border-radius:9px}
+.tok .ind.big0::after{inset:4px;border-radius:6px}
+.tok b{font:500 14px var(--f);display:block}
+.tok code{font:500 12px var(--mono);color:var(--dim)}
+.tok .was{font:400 12px var(--f);color:var(--dim);display:flex;gap:5px;align-items:center}
+.tok .was i{display:inline-block;width:10px;height:10px;border-radius:3px;box-shadow:inset 0 0 0 1px #00000033}
+.ctab{width:100%;border-collapse:collapse;font-size:14px}
+.ctab td{padding:7px 6px;border-top:1px solid var(--rule)}
+.ctab td:last-child{text-align:right;font:500 13px var(--mono)}
+.ctab .pv{display:inline-block;padding:2px 8px;border-radius:6px;font:500 14px var(--f)}
+.pass{color:var(--ink)}.fail{color:var(--alert-ink)}
+.live{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.spec{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:16px;background:var(--bg);border-radius:20px;padding:20px;border:1px solid var(--rule)}
+.spec>.card>h3{margin-bottom:2px}
+.tyrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:8px 0;border-top:1px solid var(--rule)}
+.tyrow:first-of-type{border-top:0}
+.tyrow code{font:500 12px var(--mono);color:var(--dim);text-align:right}
+.radii{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.radii div{display:grid;gap:6px;justify-items:center;font:500 12px var(--mono);color:var(--dim)}
+.radii i{display:block;width:56px;height:44px;background:var(--key);box-shadow:inset 0 0 0 1.5px var(--dim)}
+.space{display:flex;gap:14px;align-items:end;flex-wrap:wrap}
+.space div{display:grid;gap:6px;justify-items:center;font:500 12px var(--mono);color:var(--dim)}
+.space i{display:block;background:var(--dim);height:24px;border-radius:2px}
+.elev{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:14px}
+.elev div{display:grid;gap:8px;font:500 13px var(--f);color:var(--dim)}
+.elev i{display:block;height:54px;border-radius:12px;background:var(--card)}
+.states{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:10px}
+.stx{display:grid;gap:6px;align-content:start}
+.stx .card{padding:12px;gap:8px}
+.inds{display:flex;gap:18px;flex-wrap:wrap}
+.inds>div{display:grid;gap:8px;justify-items:start;font-size:14px}.inds .il{display:flex;gap:8px;align-items:center;min-height:14px}
+.curves{display:grid;gap:10px}
+.cv{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:center;font-size:14px}
+.cv .tr{position:relative;height:22px;border-radius:11px;background:var(--key)}
+.cv .tr i{position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--ink);transition:transform var(--d) var(--ease)}
+.cv.go .tr i{transform:translateX(calc(var(--w) - 22px))}
+.hamap{width:100%;border-collapse:collapse;font-size:14px}
+.hamap th{font:500 12px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);text-align:left;padding:6px 6px}
+.hamap td{padding:7px 6px;border-top:1px solid var(--rule);vertical-align:top}
+.hamap code{font:500 12.5px var(--mono);word-break:break-word}
+/* library */
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:22px;align-items:start;background:var(--bg);border-radius:20px;padding:20px;border:1px solid var(--rule)}
+.spc{display:grid;gap:10px;align-content:start;min-width:0}
+.spc>header{display:grid;gap:2px}
+.spc>header b{font:600 16px var(--f)}
+.spc>header span{font-size:13px;color:var(--dim)}
+@media (max-width:480px){.lib,.spec,.tpanel{padding:12px}}
+/* pass 2: decisions panel, comparisons, HA built-ins */
+.picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.pick{border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:6px;align-content:start;font-size:14px}
+.pick b{font:600 15px var(--f)}
+.pick .rec{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cmp3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}
+@media (max-width:1000px){.cmp3{grid-template-columns:minmax(0,1fr)}}
+.cmp3 figure{gap:10px}
+.cmphead{display:grid;gap:4px;font-size:14px;align-content:start}
+.pair.phones.three .cmphead{min-height:118px}
+.cmp3 .cmphead{min-height:112px}
+@media (max-width:1000px){.pair.phones.three .cmphead,.cmp3 .cmphead{min-height:0}}
+.cmphead b{font:600 16px var(--f)}
+.count{display:inline-flex;gap:8px;align-items:center;font:500 13px var(--mono);border:1px solid var(--line);border-radius:999px;padding:3px 10px;justify-self:start}
+.count i{width:10px;height:10px;border-radius:50%;background:#ec7c22;display:inline-block}
+.lcgrid{border-radius:18px;padding:14px;display:grid;gap:12px;background:var(--bg)}
+.pair.phones.three{grid-template-columns:repeat(3,minmax(0,300px))}
+@media (max-width:1000px){.pair.phones.three{grid-template-columns:minmax(0,300px)}}
+.hadlg{background:var(--card);border-radius:24px;padding:16px 18px 20px;display:grid;gap:14px;box-shadow:var(--e1);max-width:340px;width:100%;justify-self:center}
+.hadlg .hd{display:flex;align-items:center;gap:12px;font:500 18px var(--f)}
+.hadlg .hd i{width:24px;height:24px;display:grid;place-items:center;color:var(--dim);font-style:normal;font-size:20px}
+.habig{justify-self:center;width:120px;height:260px;border-radius:30px;background:var(--key);position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px var(--rule)}
+.habig .fill{position:absolute;left:0;right:0;bottom:0;height:var(--h);background:var(--hc)}
+.habig .knob{position:absolute;left:44px;right:44px;height:4px;bottom:calc(var(--h) - 12px);border-radius:2px;background:#ffffffd9}
+.hatgl{display:flex;justify-content:center;gap:12px;align-items:center}
+.hapill{width:52px;height:30px;border-radius:15px;background:var(--tr);position:relative;flex:none}
+.hapill::after{content:"";position:absolute;right:4px;top:4px;width:22px;height:22px;border-radius:50%;background:var(--kn)}
+.hasw{justify-self:center;width:120px;height:200px;border-radius:30px;background:var(--tr);position:relative}
+.hasw::after{content:"";position:absolute;left:8px;right:8px;top:8px;height:88px;border-radius:22px;background:var(--kn)}
+.habtns{display:flex;gap:10px;justify-content:center}
+.habtns span{width:44px;height:44px;border-radius:12px;background:var(--key);display:grid;place-items:center;font-size:13px;color:var(--dim)}
+.haconf{display:flex;justify-content:flex-end;gap:8px}
+.bh{--hst:var(--ink)}.night .bh,.night.bh{--hst:var(--cream)}
+.hasmall{width:44px;height:24px;border-radius:12px;background:var(--band);position:relative;flex:none;box-shadow:inset 0 0 0 1px var(--band)}.hasmall::after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--cream)}
+.night .hasmall{box-shadow:inset 0 0 0 1px #55534e}
+.haconf span{padding:8px 14px;border-radius:999px;font:500 14px var(--f)}
+.build{display:inline-flex;gap:10px;align-items:center;font:500 14px var(--f);border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 14px;background:var(--chip);min-height:36px}
+.build i{width:10px;height:10px;border-radius:50%;background:#7bd651;box-shadow:inset 0 0 0 1px #0003}
+.build[data-custom="true"] i{background:#f2c14e}
+.build button{font:500 13px var(--f);border:0;border-radius:999px;padding:6px 12px;background:#1d1c1a;color:#f2efe9;cursor:pointer}
+:root[data-theme="dark"] .build button{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .build button{background:#e9e7e2;color:#1d1c1a}}
+.build button[hidden]{display:none}
+.cpanel{border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:14px}
+.cpanel .ctrls{position:static;border:0;padding:0}
+.cpanel .opt{display:grid;gap:6px;font-size:14px;align-content:start}
+.copts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:14px 22px}
+.recb{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.recb .pick .was{font-size:13px;color:var(--muted)}
+.rtab-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+.rtab{width:100%;border-collapse:collapse;font-size:14px;min-width:860px}
+.rtab th{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:bottom}
+.rtab td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+.rtab td:first-child{font-weight:600;white-space:nowrap}
+.rtab code{font:500 12.5px var(--mono)}
+.sz{display:inline-block;font:600 12px var(--mono);border:1px solid var(--line);border-radius:6px;padding:1px 7px}
+.whtab{width:100%;border-collapse:collapse;font-size:14px}
+.whtab th{font:500 12px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);text-align:left;padding:6px}
+.whtab td{padding:7px 6px;border-top:1px solid var(--rule);vertical-align:middle}
+.whtab code{font:500 12.5px var(--mono)}
+.whtab .sw2{display:inline-block;width:46px;height:22px;border-radius:5px;background:var(--win);position:relative;vertical-align:middle}
+.whtab .sw2::after{content:"";position:absolute;inset:2px;border-radius:3px;background:var(--c)}
+.trkdemo{display:grid;gap:14px}
+.trkdemo .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;height:220px}
+@media (prefers-reduced-motion:reduce){.bh *,.bh *::after{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Jam Design · Overnight pass 3 of 3 · Home Assistant</span>
+    <h1>Jam Theme and Jam Cards, pass 3</h1>
+    <p class="muted">The settled version. Everything on this page shows one <b>recommended build</b>: Jam Braun's calm cards with the Hi-Fi parts Isaac kept (rockers, indicator windows, ribs only on black bands, the walnut rule, the air purifier). Pass 2's options are still here, in the <a href="#compare">Compare</a> panel; changing one there changes every card on the page until you press "Back to recommended". Sample data only, in the jam-home harness style (clock fixed at Tue 2:30 pm). Tap a card's name to open its popup. Nothing here changes Home Assistant.</p>
+  </header>
+  <div class="ctrls" role="toolbar" aria-label="Mockup controls">
+    <div class="ctl"><span class="eyebrow">Cards</span><div class="seg" data-pg="mode"><button data-v="day" aria-pressed="true">Day</button><button data-v="night" aria-pressed="false">Night</button></div></div>
+    <div class="ctl"><span class="eyebrow">Door</span><div class="seg" data-pg="door"><button data-v="locked" aria-pressed="true">Locked</button><button data-v="unlocked" aria-pressed="false">Unlocked</button></div></div>
+    <span class="build" id="build" data-custom="false" aria-live="polite"><i aria-hidden="true"></i><span data-buildtxt>Recommended build</span><button data-reset hidden>Back to recommended</button></span>
+  </div>
+  <nav class="toc" aria-label="Sections"><a href="#build-sec">0 The build</a><a href="#theme">1 Theme</a><a href="#cards">2 Cards</a><a href="#builtins">HA dialogs</a><a href="#dash">3 Dashboards</a><a href="#compare">4 Compare</a><a href="#rollout">5 Rollout</a></nav>
+
+  <section class="top" id="build-sec">
+    <div class="intro"><span class="eyebrow">0 · For Isaac</span><h2>The recommended build, and what pass 3 settled</h2>
+      <p class="muted">Each line is now a default on every card. "Pass 2" says what it was, so you can find it again in Compare.</p></div>
+    <div class="recb">
+      <div class="pick"><span class="rec">New · fixes pass 2 High</span><b>Day tracks are a light groove</b><span>A fader's empty part is a groove pressed into the card (a shade darker, with an inner shadow), like Jam Braun's grey track. The caps are light plastic. Small indicator windows stay dark in both modes; at night tracks are the dark recess as before.</span><span class="was">Pass 2: every empty track was the black window recess.</span></div>
+      <div class="pick"><span class="rec">New · warm whites</span><b>Whites never read as the orange key</b><span>The five whites are drawn on an amber-to-cream line (Cozy is pale amber, not orange). Any light colour that comes too close to the control orange is drawn a little lighter. The page works the distance out live (Theme, "Light display colours").</span><span class="was">Pass 2: Cozy 2200 K was #ffb565, close to orange.</span></div>
+      <div class="pick"><span class="rec">Settled · orange</span><b>One orange per screen, quiet paddles</b><span>The one orange goes to what's happening (playing, then on, then idle, then page order). A popup or sheet is its own screen. The main key that loses keeps its place, its width and a bigger glyph, so you still find Play. Paddles are never orange.</span><span class="was">Options kept in Compare: Orange paddles, Adaptive, 1 per card.</span></div>
+      <div class="pick"><span class="rec">Bigger · arm's length</span><b>The paddle window doubled</b><span>The lit window on an "on" paddle is now 18 × 7 (15 × 4 lit), 20 × 8 on kiosks. Switched devices (Tree, fan) also dim their name and glyph when off, like lights.</span><span class="was">Pass 2: 10 × 4 (8 × 3 lit).</span></div>
+      <div class="pick"><span class="rec">Speaker · the right Play</span><b>Music gets its orange where you go for music</b><span>On the Living view, Pause on the playing TV keeps the orange. Play is orange on the new phone <b>Music</b> tab, in the speaker popup and on the kiosk Music sheet, and as soon as the TV stops.</span><span class="was">Pass 2: Play became a plain key, with nowhere obvious to start music.</span></div>
+      <div class="pick"><span class="rec">Settled · light colour</span><b>Band</b><span>A lit light tints the strip behind its fader. At night that's 30 % on a lifted base, so warm whites read lit, not brown.</span><span class="was">Pass 2: 24 % on the card at night. Edge and Wash are in Compare.</span></div>
+      <div class="pick"><span class="rec">Kiosk · from 3 m</span><b>Every Lights-sheet control at kiosk size</b><span>Scenes are 20 px keys, 60 px tall; the purifier's keys 16 px. An off column says "Off" on its cap. On the Echo, an offline light shrinks to a narrow column at the end.</span><span class="was">Pass 2: 12–17 px keys in the left column; offline took a third of the Echo sheet.</span></div>
+      <div class="pick"><span class="rec">Verified · HA 2026.10</span><b>HA's own dialogs, real keys</b><span>Checked in HA's frontend source (release 20260930.5 and dev). The old <code>switch-checked-*</code> keys are no longer read. Jam Theme sets <code>ha-switch-checked-*</code>, the <code>ha-color-primary-*</code> ramp and <code>state-*-active-color</code>.</span><span class="was">Pass 2: key names from memory, unverified.</span></div>
+    </div>
+  </section>
+
+  <section class="top" id="theme">
+    <div class="intro"><span class="eyebrow">1 · Jam Theme</span><h2>Tokens, day and night</h2>
+      <p class="muted">Each panel reads its own CSS variables and works out contrast and colour distance as it renders, so this is the spec, not a picture of it. "Jam Braun" under a swatch is the value the live theme uses today.</p></div>
+    <div class="tpair" id="tpair"></div>
+    <div id="specwrap"><div class="bh spec" id="spec"></div></div>
+  </section>
+
+  <section class="top" id="cards">
+    <div class="intro"><span class="eyebrow">2 · Jam Cards</span><h2>The card library</h2>
+      <p class="muted">Cards at real phone size. Rockers, faders, keys and popups all work, and a change shows up on every copy of that card on the page. In the library each card is drawn as if it were alone on its screen, so each shows its own main button in orange; on a dashboard only one wins.</p></div>
+    <div id="libwrap"><div class="bh lib" id="lib"></div></div>
+  </section>
+
+  <section class="top" id="builtins">
+    <div class="intro"><span class="eyebrow">HA's own dialogs · keys verified</span><h2>More-info, switch and confirm, themed by keys only</h2>
+      <p class="muted">HA's built-in dialogs can't use Jam's rockers. These are drawn from HA's components as they are in release 20260930.5 (HA 2026.10): the big toggle takes <code>state-&lt;domain&gt;-active-color</code>, the small switch takes <code>ha-switch-checked-*</code>, buttons take the <code>ha-color-primary-*</code> ramp, and the light slider uses the light's own colour (HA nudges it for contrast). Pass 2's cream for the big toggle disappears on a Day card, so Day uses ink.</p></div>
+    <div id="builtwrap"><div class="bh lib" id="builtins-host"></div></div>
+  </section>
+
+  <section class="top" id="dash">
+    <div class="intro"><span class="eyebrow">3 · Dashboards</span><h2>Phone, living-room iPad, kitchen Echo Show</h2>
+      <p class="muted">Each device at its real CSS size, Day and Night. The phone tabs switch between Living, Kitchen, Master and Music. On a kiosk, tap a dock block to open its sheet; nothing on a kiosk scrolls. Under each phone: the orange marks in the current view, counted from the rendered page.</p></div>
+    <div class="pair phones">
+      <figure><div class="frame phone dev"><div class="screen"><div class="scaler" data-w="390" data-h="844" data-dev="phone"></div></div></div><figcaption>Phone 390 · Living · Day · <span data-count></span></figcaption></figure>
+      <figure><div class="frame phone dev night"><div class="screen"><div class="scaler" data-w="390" data-h="844" data-dev="phone"></div></div></div><figcaption>Phone 390 · Living · Night · <span data-count></span></figcaption></figure>
+    </div>
+    <div class="pair phones">
+      <figure><div class="frame phone dev"><div class="screen"><div class="scaler" data-w="390" data-h="844" data-dev="phone" data-view="music"></div></div></div><figcaption>Phone · Music tab · Day: Play takes the orange here · <span data-count></span></figcaption></figure>
+      <figure><div class="frame phone dev night"><div class="screen"><div class="scaler" data-w="390" data-h="844" data-dev="phone" data-view="master"></div></div></div><figcaption>Phone · Master · Night: switches, dehumidifier, an offline light · <span data-count></span></figcaption></figure>
+    </div>
+    <div class="pair">
+      <figure><div class="frame ipad dev"><div class="screen"><div class="scaler" data-w="1024" data-h="768" data-dev="ipad"></div></div></div><figcaption>Living-room iPad · 1024 × 768 · Day</figcaption></figure>
+      <figure><div class="frame ipad dev night"><div class="screen"><div class="scaler" data-w="1024" data-h="768" data-dev="ipad"></div></div></div><figcaption>Living-room iPad · 1024 × 768 · Night</figcaption></figure>
+    </div>
+    <div class="pair">
+      <figure><div class="frame ipad dev"><div class="screen"><div class="scaler" data-w="1024" data-h="768" data-dev="ipad" data-open="lights:living"></div></div></div><figcaption>iPad · Lights sheet (opened) · Day: light grooves, kiosk-size left column</figcaption></figure>
+      <figure><div class="frame ipad dev night"><div class="screen"><div class="scaler" data-w="1024" data-h="768" data-dev="ipad" data-open="lights:living"></div></div></div><figcaption>iPad · Lights sheet (opened) · Night</figcaption></figure>
+    </div>
+    <div class="pair">
+      <figure><div class="frame ipad dev"><div class="screen"><div class="scaler" data-w="1024" data-h="768" data-dev="ipad" data-open="tv:living"></div></div></div><figcaption>iPad · TV sheet (opened) · Day</figcaption></figure>
+      <figure><div class="frame ipad dev night"><div class="screen"><div class="scaler" data-w="1024" data-h="768" data-dev="ipad" data-open="music:living"></div></div></div><figcaption>iPad · Music sheet (opened) · Night: its own screen, so Play is orange</figcaption></figure>
+    </div>
+    <div class="pair">
+      <figure><div class="frame echo dev"><div class="screen"><div class="scaler" data-w="961" data-h="601" data-dev="echo"></div></div></div><figcaption>Kitchen Echo Show 8 · 961 × 601 · Day</figcaption></figure>
+      <figure><div class="frame echo dev night"><div class="screen"><div class="scaler" data-w="961" data-h="601" data-dev="echo"></div></div></div><figcaption>Kitchen Echo Show 8 · 961 × 601 · Night</figcaption></figure>
+    </div>
+    <div class="pair">
+      <figure><div class="frame echo dev"><div class="screen"><div class="scaler" data-w="961" data-h="601" data-dev="echo" data-open="lights:kitchen"></div></div></div><figcaption>Echo · Lights sheet (opened) · Day: the offline Stove lights is a narrow column at the end</figcaption></figure>
+      <figure><div class="frame echo dev night"><div class="screen"><div class="scaler" data-w="961" data-h="601" data-dev="echo" data-open="lights:kitchen"></div></div></div><figcaption>Echo · Lights sheet (opened) · Night</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="top" id="compare">
+    <div class="intro"><span class="eyebrow">4 · Compare</span><h2>Pass 2's options, against the build</h2>
+      <p class="muted">These switches change every card and dashboard on the page (the side-by-side figures below keep their own setting). The first choice in each row is the recommended build.</p></div>
+    <div class="cpanel">
+      <div class="copts">
+        <div class="opt"><div class="ctl"><span class="eyebrow">Paddle</span><div class="seg" data-pg="paddle"><button data-v="quiet" aria-pressed="true">Quiet</button><button data-v="adaptive" aria-pressed="false">Adaptive</button><button data-v="orange" aria-pressed="false">Orange</button></div></div><span class="muted">Adaptive now decides once, when a view opens: turning a third light on doesn't restyle the first two.</span></div>
+        <div class="opt"><div class="ctl"><span class="eyebrow">Primary</span><div class="seg" data-pg="cap"><button data-v="screen" aria-pressed="true">1 per screen</button><button data-v="card" aria-pressed="false">1 per card</button></div></div><span class="muted">Pass 1 was 1 per card.</span></div>
+        <div class="opt"><div class="ctl"><span class="eyebrow">Light colour</span><div class="seg" data-pg="lc"><button data-v="band" aria-pressed="true">Band</button><button data-v="edge" aria-pressed="false">Edge</button><button data-v="wash" aria-pressed="false">Wash</button></div></div><span class="muted">Wash is closest to Jam Braun today.</span></div>
+        <div class="opt"><div class="ctl"><span class="eyebrow">Day track</span><div class="seg" data-pg="trk"><button data-v="groove" aria-pressed="true">Light groove</button><button data-v="dark" aria-pressed="false">Dark (pass 2)</button></div></div></div>
+        <div class="opt"><div class="ctl"><span class="eyebrow">Whites</span><div class="seg" data-pg="wh"><button data-v="p3" aria-pressed="true">Pass 3</button><button data-v="p2" aria-pressed="false">Pass 2</button></div></div><span class="muted">Pass 2 = the raw warm values, no orange guard.</span></div>
+        <div class="opt"><div class="ctl"><span class="eyebrow">Paddle window</span><div class="seg" data-pg="pw"><button data-v="p3" aria-pressed="true">18 × 7</button><button data-v="p2" aria-pressed="false">10 × 4 (pass 2)</button></div></div></div>
+        <div class="opt"><div class="ctl"><span class="eyebrow">Day dock</span><div class="seg" data-pg="dock"><button data-v="card" aria-pressed="true">Cards</button><button data-v="band" aria-pressed="false">Black band</button></div></div></div>
+      </div>
+    </div>
+    <div class="intro"><h3>A · Orange on the phone Living view</h3><p class="muted">Same view and state in each: three lights and the Tree on, the TV playing, the speaker idle. The count is every element painted the control orange, measured from the page.</p></div>
+    <div class="pair phones three" id="cmpOrange"></div>
+    <div class="intro"><h3>B · A lit light's colour</h3><p class="muted">Living room (Warm), Kitchen lamp (Cozy), TV light (blue WLED) and Car port (off), Day and Night.</p></div>
+    <div class="cmp3" id="cmpColour"></div>
+    <div class="intro"><h3>C · Day tracks and whites</h3><p class="muted">Left: pass 2 (black recess, raw warm whites). Right: the build (light groove, display whites). Same lights, same levels, Day.</p></div>
+    <div class="pair" id="cmpTrack"></div>
+  </section>
+
+  <section class="top" id="rollout">
+    <div class="intro"><span class="eyebrow">5 · Rollout (later, not now)</span><h2>What a rollout would change, card by card</h2>
+      <p class="muted">Nothing changes in Home Assistant now. At Jam Home's rollout turn, and only with Isaac's OK, this is the work. The Jam Braun theme and look pack stay installed until the shelf decision, so going back is one menu pick.</p></div>
+    <div class="rtab-wrap"><table class="rtab" id="rtab"></table></div>
+  </section>
+</div>
+
+<script>
+/* ============ state (shared by every copy of a card) ============ */
+let MODE='day',DOOR='locked';
+/* page-level choices (pass 2). Hosts carry them as data attributes; comparison hosts pin their own. */
+/* the recommended build (pass 3). Compare switches change OPT; "Back to recommended" restores REC. */
+const REC={paddle:'quiet',cap:'screen',lc:'band',dock:'card',trk:'groove',pw:'p3',wh:'p3'};
+const OPT={...REC};
+const OPTNAMES={paddle:'Paddle',cap:'Primary',lc:'Light colour',dock:'Day dock',trk:'Day track',pw:'Paddle window',wh:'Whites'};
+const LIGHTS={
+  lr:{name:'Living room',kind:'Group',on:true,v:75,col:'#f4d8a4',members:[['Ceiling',75,1],['Floor lamp',60,1]]},
+  kl:{name:'Kitchen lamp',on:true,v:50,col:'#f4ca8a'},
+  tvl:{name:'TV light',kind:'WLED',on:true,v:14,col:'#7fb6ff',wled:true},
+  st:{name:'Stove lights',kind:'Group',offline:true,on:false,v:0,col:'#f2e4c6'},
+  cp:{name:'Car port',on:false,v:0,col:'#efebe1'},
+  ds:{name:'Dresser',on:false,v:0,col:'#f4d8a4'},
+  bs:{name:'Bedside',on:true,v:30,col:'#f4ca8a'},
+  mc:{name:'Master ceiling',offline:true,on:false,v:0,col:'#f2e4c6'}};
+const SW={tree:{name:'Tree',icon:'tree',on:true},fan:{name:'Bedroom fan',icon:'fan',on:false},blanket:{name:'Blanket',icon:'blanket',on:true},plug:{name:'Desk plug',icon:'plug',on:true,sub:'42 W'}};
+const SRC=[['Nerv//OS','HDMI 1','#5ad6c8','tv'],['Switch','HDMI 2','#ff6a5a','tv'],['Jamfin','App','#f2a14e','app'],['YouTube','App','#ff6a5a','app'],['Dropout','App','#ff7ab0','app'],['Corridor Digital','App','#6a8cff','app'],['Home screen','','#cfcbc4','home']];
+const TV={on:true,src:0,playing:true};
+const SPK={playing:false,vol:40,grp:{kitchen:true,master:false,phoster:false}};
+const KSPK={playing:false,vol:36};
+const PC={on:true,game:'Hades II'};
+const PUR={on:true,speed:1};
+const DEH={on:true,target:1};
+const CLIM={mode:1,target:70};
+/* whites: [name, kelvin, pass-3 display colour (amber-to-cream line), pass-2 value]. HA stores the kelvin; this is only how we draw it. */
+const CCT=[['Cozy','2200 K','#f4ca8a','#ffb565'],['Warm','2700 K','#f4d8a4','#ffcf94'],['Neutral','3500 K','#f2e4c6','#ffe8c9'],['Clean','4000 K','#efebe1','#fff3e3'],['Daylight','5000 K','#dbe6f9','#eef3ff']];
+const WH2=Object.fromEntries(CCT.map(c=>[c[2],c[3]]));
+const COL=['#ffd27a','#ff9a5a','#ff6f8a','#ff7ab0','#c79bff','#6a8cff','#7fb6ff','#5ad6c8','#7bd651'];
+/* ---- light display colour: OKLab distance from the control orange (day and night) must be >= 0.15, else mix toward cream ---- */
+const ORANGES=['#ec7c22','#f08a2c'],GUARD=.15;
+function lin(h){return [1,3,5].map(i=>parseInt(h.substr(i,2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4))}
+function oklab(h){const [r,g,b]=lin(h);const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b),m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b),q=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
+  return [.2104542553*l+.793617785*m-.0040720468*q,1.9779984951*l-2.428592205*m+.4505937099*q,.0259040371*l+.7827717662*m-.808675766*q]}
+function okd(x,y){const A=oklab(x),B=oklab(y);return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2])}
+const toOrange=c=>Math.min(...ORANGES.map(o=>okd(c,o)));
+function mixHex(a,b,t){const A=[1,3,5].map(i=>parseInt(a.substr(i,2),16)),B=[1,3,5].map(i=>parseInt(b.substr(i,2),16));return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+const GC={};
+function guard(c){if(GC[c])return GC[c];let x=c;for(let t=0;t<=1.0001;t+=.05){x=mixHex(c,'#f3e6c8',t);if(toOrange(x)>=GUARD)break}return GC[c]=x}
+let WHF=null;
+function disp(c,w){w=w||WHF||OPT.wh;return w==='p2'?(WH2[c]||c):guard(c)}
+const dispAt=(el,c)=>disp(c,el&&el.closest('[data-whpin]')?.dataset.whpin);
+const SENS={t:{name:'Living room · Temperature',now:'71.3',unit:'°F',lo:'68.9',hi:'73.6',avg:'71.0',d:[70.2,69.8,69.5,69.2,69.0,68.9,69.1,69.6,70.4,71.2,71.9,72.6,73.1,73.6,73.4,73.0,72.5,72.0,71.7,71.5,71.4,71.3]},
+  h:{name:'Master · Humidity',now:'49',unit:'%',lo:'46',hi:'58',avg:'51',d:[52,53,55,57,58,57,55,53,51,50,48,47,46,46,47,48,49,50,50,49,49,49]}};
+const PEOPLE=[['Isaac',1,'Home'],['Amber',0,'Away · since 8:40 am'],['Marissa',1,'Home']];
+
+/* ============ icons ============ */
+const IC={pwr:'<svg viewBox="0 0 16 16"><path d="M8 2v6M4.5 4.5a5 5 0 1 0 7 0"/></svg>',
+ prev:'<svg class="f" viewBox="0 0 16 16"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg>',play:'<svg class="f" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>',pause:'<svg class="f" viewBox="0 0 16 16"><path d="M3 2h3.5v12H3zM9.5 2H13v12H9.5z"/></svg>',next:'<svg class="f" viewBox="0 0 16 16"><path d="M11 2h2v12h-2zM2 2v12l8-6z"/></svg>',
+ rew:'<svg class="f" viewBox="0 0 16 16"><path d="M8 3v10L1 8zM15 3v10L8 8z"/></svg>',ff:'<svg class="f" viewBox="0 0 16 16"><path d="M8 3v10l7-5zM1 3v10l7-5z"/></svg>',
+ tv:'<svg viewBox="0 0 16 16"><rect x="1.5" y="3" width="13" height="9" rx="1.5"/><path d="M6 14h4"/></svg>',app:'<svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M7 6l3 2-3 2z"/></svg>',home:'<svg viewBox="0 0 16 16"><path d="M2 8l6-5 6 5M4 7v6h8V7"/></svg>',
+ spk:'<svg viewBox="0 0 16 16"><rect x="3" y="1.5" width="10" height="13" rx="2"/><circle cx="8" cy="9.5" r="2.5"/><path d="M8 4.5h.01"/></svg>',
+ tree:'<svg viewBox="0 0 18 18"><path d="M9 2l5 6h-3l4 5H3l4-5H4z"/><path d="M9 13v3"/></svg>',fan:'<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="1.6"/><path d="M9 7.4c0-3 1-5 3-5s2 3-3 5zM10.6 9c3 0 5 1 5 3s-3 2-5-3zM9 10.6c0 3-1 5-3 5s-2-3 3-5zM7.4 9c-3 0-5-1-5-3s3-2 5 3z"/></svg>',
+ blanket:'<svg viewBox="0 0 18 18"><rect x="2.5" y="4" width="13" height="10" rx="2"/><path d="M5 7c2 1 6 1 8 0M5 10c2 1 6 1 8 0"/></svg>',plug:'<svg viewBox="0 0 18 18"><path d="M6 2v4M12 2v4M4 6h10v3a5 5 0 0 1-10 0zM9 14v3"/></svg>',
+ dots:'<svg class="f" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.6"/><circle cx="8" cy="8" r="1.6"/><circle cx="13" cy="8" r="1.6"/></svg>',
+ remote:'<svg viewBox="0 0 16 16"><rect x="5" y="1.5" width="6" height="13" rx="2"/><path d="M8 4.5h.01M8 8h.01"/></svg>',grid:'<svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>',
+ minus:'<svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg>',plus:'<svg viewBox="0 0 16 16"><path d="M3 8h10M8 3v10"/></svg>',mute:'<svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2zM11 6l4 4M15 6l-4 4"/></svg>',
+ back:'<svg viewBox="0 0 16 16"><path d="M6 4L2 8l4 4M2 8h9a3 3 0 0 1 0 6"/></svg>',menu:'<svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h10M3 12h10"/></svg>',set:'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></svg>',
+ search:'<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>',burger:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+ up:'<svg viewBox="0 0 16 16"><path d="M8 3l6 8H2z"/></svg>',down:'<svg viewBox="0 0 16 16"><path d="M8 13L2 5h12z"/></svg>',left:'<svg viewBox="0 0 16 16"><path d="M3 8l8-6v12z"/></svg>',right:'<svg viewBox="0 0 16 16"><path d="M13 8L5 2v12z"/></svg>',
+ lock:'<svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3h1.5a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2.5 0h5V7a2.5 2.5 0 0 0-5 0z"/></svg>',
+ unlock:'<svg viewBox="0 0 24 24"><path d="M9.5 10V7a2.5 2.5 0 0 1 4.9-.7l2.4-.7A5 5 0 0 0 7 7v3H5.5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1z"/></svg>'};
+
+/* ============ parts ============ */
+const ind=(shape,on,c,extra='')=>`<i class="ind ${shape}${on?' on':''}"${c?` style="--c:${c}"`:''} ${extra}></i>`;
+const sw=(on,label,attrs='',dis=false,pc='')=>`<button class="sw" aria-pressed="${!!on}" aria-label="${label} power" ${attrs}${dis?' disabled':''}${pc?` style="--pc:${pc}"`:''}><i class="pad"></i></button>`;
+/* a main button: orange only if it wins its screen (see capPrimaries). prio: 3 = playing now, 2 = on, 1 = idle */
+const pri=(prio,attrs='')=>`class="btn pri" data-pri="${prio}" ${attrs}`;
+const fd=(v,label,lc,attrs='',cls='')=>`<div class="fd ${cls}" role="slider" tabindex="0" aria-label="${label}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${v}" style="--v:${v}%;${lc?`--lc:${lc}`:''}" ${attrs}><div class="trk"><i class="cov"></i></div><i class="th"><b class="tv">${cls.includes('v')&&!v?'Off':v}</b></i></div>`;
+const bars=(n,on)=>`<span class="bars">${Array.from({length:n},(_,k)=>ind('',k<on)).join('')}</span>`;
+const SEGS={0:'abcdef',1:'bc',2:'abged',3:'abgcd',4:'fgbc',5:'afgcd',6:'afgedc',7:'abc',8:'abcdefg',9:'abcdfg','-':'g',' ':''};
+function hs(x,y,L,t){return`${x},${y} ${x+t/2},${y-t/2} ${x+L-t/2},${y-t/2} ${x+L},${y} ${x+L-t/2},${y+t/2} ${x+t/2},${y+t/2}`}
+function vs(x,y,L,t){return`${x},${y} ${x+t/2},${y+t/2} ${x+t/2},${y+L-t/2} ${x},${y+L} ${x-t/2},${y+L-t/2} ${x-t/2},${y+t/2}`}
+function seg7(str){const dw=12,dh=22,g=4,t=2.8,q=.7;let x=2,out='';[...str].forEach(ch=>{const P={a:hs(x+q,2+t/2,dw-2*q,t),g:hs(x+q,2+dh/2,dw-2*q,t),d:hs(x+q,2+dh-t/2,dw-2*q,t),f:vs(x+t/2,2+q,dh/2-2*q,t),b:vs(x+dw-t/2,2+q,dh/2-2*q,t),e:vs(x+t/2,2+dh/2+q,dh/2-2*q,t),c:vs(x+dw-t/2,2+dh/2+q,dh/2-2*q,t)};for(const k in P)out+=`<polygon class="sg${(SEGS[ch]||'').includes(k)?' on':''}" points="${P[k]}"/>`;x+=dw+g});return `<span class="seg7" role="img" aria-label="${str.trim()}"><svg viewBox="0 0 ${x} 26"><g transform="skewX(-6)">${out}</g></svg></span>`}
+const art=i=>{const A=[['#3a4f7a','#d9a63a'],['#7a2e2a','#e4dccc'],['#2f5f4a','#d6c27a'],['#5a3a6a','#ff9b70'],['#26323a','#7fd6c8'],['#6b4a2a','#e8d29a']][i%6];return `background:linear-gradient(135deg,${A[0]} 0 58%,${A[1]} 58% 64%,${A[0]} 64%)`};
+
+/* ============ cards ============ */
+const lword=L=>L.offline?'Offline':(L.on?'On':'Off')+(L.kind?' · '+L.kind:'');
+/* v = '' (phone card) or 'k' (kiosk column with a tall vertical fader that prints its number) */
+function lightCard(id,v=''){const L=LIGHTS[id],on=!L.offline&&L.on,k=v==='k',C=disp(L.col);
+  const head=`<div class="lhead"><button class="open" data-pop="light" data-arg="${id}" aria-label="${L.name}${L.offline?', offline: details':': open controls'}">${ind('slotc',on,C,'data-slot')}<span class="ltx"><span class="t">${L.name}</span><span class="meta" data-word>${lword(L)}</span></span></button>${sw(on,L.name,`data-l="${id}"`,L.offline,C)}</div>`;
+  const body=L.offline?(k?`<div class="offbody"><span class="offw">Can't be reached since 9:12 am</span><button class="btn sec" data-retry>Try again</button></div>`:`<span class="offw">Can't be reached since 9:12 am</span>`)
+    :k?fd(on?L.v:0,L.name+' brightness',C,`data-lf="${id}"`,'v'):`<div class="lband">${fd(on?L.v:0,L.name+' brightness',C,`data-lf="${id}"`)}</div>`;
+  return `<div class="card light${k?' lk':''}" data-lid="${id}" data-v="${v}" data-state="${L.offline?'offline':on?'on':'off'}" style="--lc:${C}"><i class="edge" aria-hidden="true"></i>${head}${body}</div>`}
+function swCard(id){const S=SW[id];return `<div class="card swdev" data-swid="${id}" data-state="${S.on?'on':'off'}"><span class="glyph">${IC[S.icon]}</span><span class="ltx"><span class="t">${S.name}</span><span class="meta" data-word>${swword(S)}</span></span>${sw(S.on,S.name,`data-s="${id}"`)}</div>`}
+const swword=S=>(S.on?'On':'Off')+(S.on&&S.sub?' · '+S.sub:'');
+function swList(ids,title){return `<div class="card swlist">${title?`<span class="lab">${title}</span>`:''}${ids.map(id=>{const S=SW[id];return `<div class="swr" data-swid="${id}" data-state="${S.on?'on':'off'}"><span class="glyph">${IC[S.icon]}</span><span class="ltx"><span class="t" style="font-size:17px">${S.name}</span><span class="meta" data-word>${swword(S)}</span></span>${sw(S.on,S.name,`data-s="${id}"`)}</div>`}).join('')}</div>`}
+function roomHead(name,chips){return `<div class="rh"><div class="rule"></div><div class="row"><span class="rtitle">${name}</span><span class="row8">${chips.map(c=>`<span class="chip">${c}</span>`).join('')}</span></div></div>`}
+function scenes(names,sel){return `<div class="scn" data-group role="group" aria-label="Scenes">${names.map((s,i)=>`<button class="key" aria-pressed="${i===sel}">${ind('sq',i===sel)}${s}</button>`).join('')}</div>`}
+function scenesCard(){return `<div class="card"><span class="lab">Scenes · Living room</span>${scenes(['Normal','Movie time','Vibes','Spooky vibes'],0)}</div>`}
+function house(){const locked=DOOR==='locked';return `<div class="band house" data-comp="house">
+  <div class="hrow"><div class="ltx" style="gap:6px"><span class="lab">The Bungalow · Inside</span><span class="hbig">67<small>°F</small></span></div>
+  <div class="ltx" style="gap:6px;justify-items:end;text-align:right"><span class="lab">Outside · Cloudy</span><span class="hmid">64°</span></div></div>
+  <div class="chips">${locked?`<span class="chip">${ind('led',1,'var(--ok)')}Door locked</span>`:`<span class="chip">${ind('led',1,'var(--alert)')}Door unlocked</span><button class="chip fix" data-lock data-alertfix>${IC.lock.replace('<svg','<svg class="f" style="fill:currentColor;stroke:none"')}Lock</button>`}${PEOPLE.map(([n,h])=>`<span class="chip">${ind('led',h,'var(--ok)')}${n}${h?'':' · away'}</span>`).join('')}</div></div>`}
+function purifier(){const P=PUR;return `<div class="appl" data-comp="pur"><div class="grille"></div>
+  <div class="face"><div style="display:grid;gap:3px;justify-items:start">${seg7(P.on?'004':'   ')}<span class="u">PM2.5</span></div><div class="ltx"><span class="aname">Air purifier</span><span class="sm">${P.on?'Running':'Off'}</span></div><button class="pwr" aria-pressed="${P.on}" aria-label="Air purifier power" data-apwr>${IC.pwr}</button></div>
+  <div class="akeys" role="group" aria-label="Fan speed">${['25 %','50 %','75 %','100 %'].map((k,i)=>`<button class="akey" aria-pressed="${P.on&&i===P.speed}" data-akey="${i}">${ind('sq',P.on&&i===P.speed)}${k}</button>`).join('')}</div></div>`}
+function dehum(){const D=DEH;return `<div class="appl" data-comp="deh"><div class="grille"></div>
+  <div class="face"><div style="display:grid;gap:3px;justify-items:start">${seg7(D.on?'58':'  ')}<span class="u">RH %</span></div><div class="ltx"><span class="aname">Dehumidifier</span><span class="sm">${D.on?'Drying':'Off'}</span></div><button class="pwr" aria-pressed="${D.on}" aria-label="Dehumidifier power" data-dpwr>${IC.pwr}</button></div>
+  <div class="akeys" style="grid-template-columns:repeat(3,minmax(0,1fr))" role="group" aria-label="Target humidity"><span class="u" style="grid-column:1/-1;color:inherit;opacity:.75">Dry to</span>${['45 %','50 %','55 %'].map((k,i)=>`<button class="akey" aria-pressed="${i===D.target}" data-dkey="${i}">${ind('sq',D.on&&i===D.target)}${k}</button>`).join('')}</div></div>`}
+function tvCard(v=''){const on=TV.on,s=SRC[TV.src];return `<div class="card media" data-comp="tv" data-v="${v}">
+  <div class="scr"><button class="pk" data-tvpw data-on="${on}" aria-label="TV power, ${on?'on':'off'}">${IC.pwr}</button><span class="lab">TV · Phoster${on&&s[1]?' · '+s[1]:''}</span><span class="tt">${on?s[0]:'Off'}</span></div>
+  ${on?`<div class="trans"><button class="btn sec" aria-label="Previous">${IC.prev}</button><button ${pri(TV.playing?3:2,'data-tvplay')} aria-label="${TV.playing?'Pause':'Play'}">${TV.playing?IC.pause:IC.play}</button><button class="btn sec" aria-label="Next">${IC.next}</button></div>
+  <div class="trio"><button class="btn sec" aria-label="Volume down">${IC.minus}</button><button class="btn sec">${IC.mute}Mute</button><button class="btn sec" aria-label="Volume up">${IC.plus}</button></div>`
+  :`<button ${pri(1,'data-tvon')} style="width:100%">${IC.pwr}Turn on</button>`}
+  <div class="duo"><button class="btn sec" data-pop="remote">${IC.remote}Remote</button><button class="btn sec" data-pop="source">${IC.grid}Source</button></div></div>`}
+const grpText=()=>{const g=[['kitchen','Kitchen'],['master','Master'],['phoster','Phoster']].filter(([k])=>SPK.grp[k]).map(x=>x[1]);return g.length?'Living room + '+g.join(' + '):'Living room only'};
+function grilleSvg(lit,rows=5){let o='';const cols=16;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if(r===2&&c===6)continue;const x=(c+.5+(r%2)*.5)/cols*100,y=(r+.6)/rows*100;o+=`<circle class="dt" cx="${x}%" cy="${y}%" r="8"/>`}
+  const x=(6.5)/cols*100,y=(2.6)/rows*100;/* special dot stays at row 2 */o+=lit?`<circle cx="${x}%" cy="${y}%" r="9" fill="var(--win)"/><circle cx="${x}%" cy="${y}%" r="7" fill="var(--cream)"/>`:`<circle class="dt" cx="${x}%" cy="${y}%" r="8"/>`;return `<svg aria-hidden="true">${o}</svg>`}
+function spkCard(v=''){const kit=v==='kitchen'||v==='kphone',wide=v==='wide'||v==='kitchen';const S=kit?KSPK:SPK,p=S.playing,room=kit?'Kitchen':'Living room';
+  return `<div class="card media spk ${wide?'wide':''}" data-comp="spk" data-v="${v}">
+  <button class="grill" data-pop="speaker" data-arg="${kit?'kitchen':''}" aria-label="Open ${room} speaker">${grilleSvg(p,wide?18:5)}</button>
+  <div class="spkinfo"><button class="open" data-pop="speaker" data-arg="${kit?'kitchen':''}"><span class="ltx"><span class="lab row8">${ind('slot',p)}${kit?'Kitchen':grpText()}</span><span class="t">${p?'Saturn':'Last played: Saturn'}</span><span class="sm">The Olympians</span></span></button>${kit?'':`<button class="btn sec icon" data-pop="speaker" data-arg="group" aria-label="Speakers: group or split">${IC.spk}</button>`}</div>
+  <div class="trans"><button class="btn sec" aria-label="Previous">${IC.prev}</button><button ${pri(p?3:1,`data-spkplay="${kit?'k':''}"`)} aria-label="${p?'Pause':'Play'}">${p?IC.pause:IC.play}</button><button class="btn sec" aria-label="Next">${IC.next}</button></div>
+  <div class="vrow"><span class="lab">Volume</span>${fd(S.vol,room+' volume','',`data-vol="${kit?'k':''}"`)}</div>${wide?`<div style="display:grid;gap:8px;align-content:end"><div class="row"><span class="lab">Pinned</span><button class="btn sec" data-pop="speaker" data-arg="${kit?'kitchen':''}">Browse</button></div><div class="shelf">${PINS.slice(0,4).map(([t,a],i)=>`<div class="rec"><span class="sleeve" style="${art(i)}"></span><span>${t}</span></div>`).join('')}</div></div>`:''}</div>`}
+const PINS=[['Kind of Blue','Miles Davis'],['Rumours','Fleetwood Mac'],['Moon Safari','Air'],['Aja','Steely Dan'],['Blue Train','John Coltrane'],['Discovery','Daft Punk']];
+function pcCard(){return `<div class="card pc" data-comp="pc"><span class="pcmark" aria-hidden="true">NV</span><button class="open" data-pop="pc" style="align-items:center"><span class="ltx"><span class="t">NerveOS</span><span class="meta">${PC.on?(PC.game?'Playing · '+PC.game:'On · idle'):'Asleep'}</span></span></button>${ind('slot',PC.on&&!!PC.game)}<button class="btn sec icon" data-pop="pc" aria-label="NerveOS controls">${IC.dots}</button></div>`}
+function pcPanel(){return `<div class="card" data-comp="pcp"><div class="row"><span class="row8"><span class="pcmark" aria-hidden="true">NV</span><span class="ltx"><span class="t">NerveOS</span><span class="meta">${PC.on?(PC.game?'Playing · '+PC.game:'On · idle'):'Asleep'}</span></span></span>${ind('slot',PC.on&&!!PC.game)}</div>
+  <div class="g3k"><button class="btn sec">Sleep</button><button class="btn sec">Quit game</button><button class="btn sec">${IC.mute}Mute</button></div>
+  <div class="vrow"><span class="lab">Volume</span>${fd(79,'PC volume')}</div><button class="btn sec wide" data-pop="pc">${IC.remote}PC remote</button></div>`}
+function climCard(){const C=CLIM,modes=['Off','Heat','Cool','Auto'],run=C.mode!==0&&C.target>68&&C.mode!==2;
+  return `<div class="card" data-comp="clim"><div class="row" style="align-items:start"><span class="ltx" style="gap:6px"><span class="lab">Thermostat · Hallway</span><span class="big2">68<small>°F</small></span></span><span class="row8">${ind('slot',run)}<span class="meta">${C.mode===0?'Off':run?'Heating':'Idle'}</span></span></div>
+  <div class="stepper"><button class="btn sec icon" data-ct="-1" aria-label="Lower target">${IC.minus}</button><div class="tgt"><span class="lab">Target</span><span class="num">${C.mode===0?'--':C.target+'°'}</span></div><button class="btn sec icon" data-ct="1" aria-label="Raise target">${IC.plus}</button></div>
+  <div class="g4k" role="group" aria-label="Mode">${modes.map((m,i)=>`<button class="key" style="padding:10px 8px;font-size:14px" data-cm="${i}" aria-pressed="${i===C.mode}">${ind('sq',i===C.mode)}${m}</button>`).join('')}</div></div>`}
+function sparkSvg(d,h=72,grid=3){const mn=Math.min(...d),mx=Math.max(...d),pad=(mx-mn)*.15||1;const y=v=>((mx+pad-v)/(mx-mn+2*pad)*h).toFixed(1);const pts=d.map((v,i)=>`${(i/(d.length-1)*300).toFixed(1)},${y(v)}`).join(' ');
+  let g='';for(let i=1;i<=grid;i++)g+=`<line class="gl" x1="0" x2="300" y1="${(i*h/(grid+1)).toFixed(1)}" y2="${(i*h/(grid+1)).toFixed(1)}" vector-effect="non-scaling-stroke"/>`;
+  return `<svg class="spark" viewBox="0 0 300 ${h}" preserveAspectRatio="none" style="height:${h}px" aria-hidden="true">${g}<polygon class="ar" points="0,${h} ${pts} 300,${h}"/><polyline class="ln" points="${pts}" vector-effect="non-scaling-stroke"/></svg>`}
+function sensCard(id){const S=SENS[id];return `<div class="card"><button class="open col" data-pop="hist" data-arg="${id}" aria-label="${S.name}: open history"><span class="lab">${S.name}</span><span class="big2">${S.now}<small>${S.unit}</small></span>${sparkSvg(S.d)}<span class="axis"><span>Midnight</span><span>24 h</span><span>Now</span></span></button></div>`}
+function peopleCard(){return `<div class="card"><span class="lab">Who's home</span><div class="rows">${PEOPLE.map(([n,h,w])=>`<div class="r"><span class="mono" aria-hidden="true">${n[0]}</span><span class="ltx"><span style="font-size:17px">${n}</span><span class="sm">${w}</span></span>${ind('led',h,'var(--ok)')}</div>`).join('')}</div></div>`}
+function doorsCard(){const locked=DOOR==='locked';return `<div class="card" data-comp="doors"><div class="row"><span class="lab">Doors & windows</span><span class="sm">${locked?'1 open':'1 open · 1 unlocked'}</span></div><div class="rows">
+  <div class="r">${ind('led',1,locked?'var(--ok)':'var(--alert)')}<span class="ltx"><span style="font-size:17px">Front door</span><span class="sm ${locked?'':'w-alert'}">${locked?'Locked':'Unlocked'}</span></span>${locked?'':`<button class="btn fix" data-lock data-alertfix>${IC.lock.replace('<svg','<svg class="f"')}Lock</button>`}</div>
+  <div class="r">${ind('led',1,'var(--ok)')}<span class="ltx"><span style="font-size:17px">Back door</span><span class="sm">Locked</span></span><span></span></div>
+  <div class="r">${ind('led',1,'var(--ok)')}<span class="ltx"><span style="font-size:17px">Garage</span><span class="sm">Closed</span></span><span></span></div>
+  <div class="r">${ind('slot',1,'var(--warn)')}<span class="ltx"><span style="font-size:17px">Kitchen window</span><span class="sm w-warn">Open · 25 min</span></span><span></span></div></div></div>`}
+function camSvg(t){return `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="320" height="180" fill="#2a323b"/><rect y="124" width="320" height="56" fill="#3b3a35"/><rect y="120" width="320" height="6" fill="#4b4943"/>
+  <rect x="38" y="28" width="66" height="96" fill="#4a3a2c"/><rect x="44" y="34" width="54" height="40" fill="#3f3226"/><circle cx="94" cy="82" r="3" fill="#c9b27a"/>
+  <rect x="134" y="38" width="118" height="58" fill="#1e252d" stroke="#58626d" stroke-width="3"/><path d="M193 38v58M134 67h118" stroke="#58626d" stroke-width="2"/>
+  <circle cx="118" cy="22" r="6" fill="#efe0b6"/><path d="M262 124l14-34 14 34z" fill="#3d5a3a"/><path d="M278 124l10-24 10 24z" fill="#466a42"/><rect x="266" y="124" width="28" height="16" fill="#6b4a32"/>
+  <rect x="150" y="140" width="56" height="18" rx="2" fill="#5b4a3a"/>${t?`<text x="312" y="16" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="12" fill="#d8d3c8">${t}</text>`:''}</svg>`}
+function camCard(){return `<div class="card"><button class="cam" data-pop="camera" aria-label="Front porch camera: open">${camSvg('7:42 PM')}<span class="ov"><span class="tag">${ind('slot',1,'var(--cream)')}Live</span><span class="tag">Motion 2 min ago</span></span></button><div class="row"><span class="ltx"><span class="t">Front porch</span><span class="meta">Camera</span></span></div></div>`}
+
+/* ============ popups ============ */
+function popLight(id){const L=LIGHTS[id],on=L.on,C=disp(L.col);
+  if(L.offline)return {eyebrow:'Light'+(L.kind?' · '+L.kind:'')+' · Offline',title:L.name,solo:true,body:`
+  <div class="card" style="border:1.5px dashed var(--offl);background:transparent;box-shadow:none"><div class="row8" style="gap:12px">${ind('slotc big',0)}<span class="ltx"><span class="t">Can't be reached</span><span class="sm">Since 9:12 am · last seen at 40 %</span></span></div>
+  <span class="sm">Usually this means it's switched off at the wall, or its hub lost power. Its controls come back on their own as soon as it answers.</span>
+  <button class="btn sec" data-retry>Try again</button></div>
+  ${L.members?'':`<div class="card"><span class="lab">${L.kind==='Group'?'In this group':'Details'}</span><div class="rows"><div class="r">${ind('led',0)}<span class="ltx"><span>Hub</span><span class="sm">Not answering</span></span><span></span></div><div class="r">${ind('led',0)}<span class="ltx"><span>Bulbs</span><span class="sm">Unknown until the hub answers</span></span><span></span></div></div></div>`}`};
+  return {eyebrow:'Light'+(L.kind?' · '+L.kind:''),title:L.name,attr:`data-lpop="${id}"`,cols:true,body:`
+  <div class="card"><div class="row"><span class="row8" style="gap:12px">${ind('slotc big',on,C,'data-slot')}<span class="t" data-word>${on?'On':'Off'}</span></span>${sw(on,L.name,`data-l="${id}"`,false,C)}</div>
+  <span class="lab">Brightness</span>${fd(on?L.v:0,'Brightness',C,`data-lf="${id}"`,'big')}</div>
+  ${L.wled?`<div class="card"><span class="lab">Presets</span><div class="g3k" data-group>${['Solid','Aurora','Candle','Ocean','Rainbow','Twinkle'].map((n,i)=>`<button class="key" aria-pressed="${i===0}">${ind('sq',i===0)}${n}</button>`).join('')}</div></div>`
+  :`<div class="card"><span class="lab">White</span><div class="g3k" style="grid-template-columns:repeat(5,minmax(0,1fr));gap:6px">${CCT.map(([n,k,c])=>`<button class="key" style="flex-direction:column;align-items:stretch;gap:6px;padding:8px 7px;font-size:13px" data-lcol="${c}" aria-pressed="${L.col===c}">${ind('swatch',1,disp(c))}<span>${n}</span><span class="u" style="font-size:12px;letter-spacing:0">${k.replace(' K','K')}</span></button>`).join('')}</div></div>`}
+  <div class="card"><span class="lab">Colour</span><div style="display:flex;gap:8px;flex-wrap:wrap">${COL.map(c=>`<button class="key" style="padding:0;width:44px;justify-content:center" data-lcol="${c}" aria-pressed="${L.col===c}" aria-label="Colour ${c}">${ind('cdot',1,disp(c))}</button>`).join('')}</div>${OPT.wh==='p3'?'<span class="sm">A colour too close to the orange key is drawn a little lighter (Amber here); the lamp itself gets the exact colour.</span>':''}</div>
+  ${L.members?`<div class="card" style="gap:0;padding:8px 16px"><span class="lab" style="padding:6px 0">In this group</span>${L.members.map(m=>`<div style="display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--rule)"><span>${m[0]}</span>${fd(m[1],m[0]+' brightness',C,'data-mf')}${sw(!!m[2],m[0],'',false,C)}</div>`).join('')}</div>`:''}
+  <div class="card"><span class="lab">Turn off in</span><div class="g3k" data-group>${['15 min','30 min','1 hour'].map(t=>`<button class="key" aria-pressed="false">${ind('sq',0)}${t}</button>`).join('')}</div></div>`}}
+function popSource(){return {eyebrow:'TV · Phoster',title:'Source',solo:true,body:srcBody()}}
+function srcBody(){const t=(s,i)=>{const on=TV.on&&TV.src===i;return `<button class="tile" data-src="${i}" aria-pressed="${on}"><span class="tp">${ind('slot',on,s[2])}${IC[s[3]]}</span><span class="tn"><i class="ptab" style="--c:${s[2]}" aria-hidden="true"></i><span>${s[0]}</span><span class="u">${on?'On now':s[1]||'Android TV'}</span></span></button>`};
+  return `<span class="lab">Inputs</span><div class="tiles">${SRC.slice(0,2).map((s,i)=>t(s,i)).join('')}</div><span class="lab">Apps</span><div class="tiles">${SRC.slice(2).map((s,i)=>t(s,i+2)).join('')}</div>`}
+function popRemote(){return {eyebrow:'TV · Phoster',title:'Remote',solo:true,body:`<div class="remote" data-remote>
+  <i class="irlens" data-ir aria-hidden="true"></i>
+  <div class="rg"><span class="engr">TV</span><button class="rkey round" data-k data-rpw="tv" data-on="${TV.on}" aria-label="TV power">${IC.pwr}</button></div>
+  <div class="dpad"><button class="dz u" data-k aria-label="Up">${IC.up}</button><button class="dz d" data-k aria-label="Down">${IC.down}</button><button class="dz l" data-k aria-label="Left">${IC.left}</button><button class="dz r" data-k aria-label="Right">${IC.right}</button><button class="okk" data-k>OK</button></div>
+  <div class="rk4"><button class="rkey" data-k>${IC.back}Back</button><button class="rkey" data-k>${IC.home}Home</button><button class="rkey" data-k>${IC.menu}Menu</button><button class="rkey" data-k>${IC.set}Setup</button></div>
+  <div class="rk3"><button class="rkey" data-k aria-label="Rewind">${IC.rew}</button><button class="rkey" data-k aria-label="Play or pause">${IC.play}</button><button class="rkey" data-k aria-label="Forward">${IC.ff}</button></div>
+  <div class="seam"></div>
+  <div class="rg"><span class="engr">Stereo</span><button class="rkey round" data-k data-rpw="st" data-on="true" aria-label="Stereo power">${IC.pwr}</button></div>
+  <div class="rk3"><button class="rkey" data-k aria-label="Volume down">${IC.minus}</button><button class="rkey" data-k>${IC.mute}Mute</button><button class="rkey" data-k aria-label="Volume up">${IC.plus}</button></div>
+  <div class="rk3 inp" data-group>${['TV','Turntable','Music sync'].map((t,i)=>`<button class="rkey" data-k aria-pressed="${i===0}">${ind('sq',i===0)}${t}</button>`).join('')}</div>
+  <span class="engr" style="justify-self:center">Phoster</span></div>`}}
+function popSpeaker(arg){const k=arg==='kitchen',S=k?KSPK:SPK,p=S.playing,grp=arg==='group';return {eyebrow:'Speaker · '+(k?'Kitchen':'Living room'),title:k?'Kitchen':'Living room',cols:true,body:`
+  <div class="card"><div class="np"><span class="sleeve" style="${art(1)}"></span><span class="ltx"><span class="lab row8">${ind('slot',p)}${p?'Playing':'Paused'}</span><span class="t">Saturn</span><span class="sm">The Olympians</span></span></div>
+  <div class="trans"><button class="btn sec" aria-label="Previous">${IC.prev}</button><button ${pri(p?3:1,`data-spkplay="${k?'k':''}"`)} aria-label="${p?'Pause':'Play'}">${p?IC.pause:IC.play}</button><button class="btn sec" aria-label="Next">${IC.next}</button></div>
+  <div class="vrow"><span class="lab">Volume</span>${fd(S.vol,'Volume','',`data-vol="${k?'k':''}"`)}</div></div>
+  ${k?'':`<div class="card"><div class="row"><span class="ltx"><span class="lab">Speakers</span><span class="sm" data-grplab>${grpText()}</span></span><button class="btn sec" data-grptoggle aria-expanded="${grp}">${IC.spk}${grp?'Done':'Group or split'}</button></div>
+  <div class="grp" data-grppanel ${grp?'':'hidden'}>${[['','Living room','This speaker'],['kitchen','Kitchen'],['master','Master'],['phoster','Phoster (TV)']].map(([key,n,fix])=>{const on=fix?true:SPK.grp[key];return `<div class="r">${ind('slot',on)}<span class="ltx"><span>${n}</span><span class="sm" data-gw>${fix||(on?'Grouped':'Separate')}</span></span>${fix?'<span></span>':sw(on,'Group '+n,`data-g="${key}"`)}</div>`}).join('')}</div></div>`}
+  <div class="card"><div class="row"><span class="lab">Pinned</span><button class="btn sec">Browse</button></div><div class="shelf">${[['Kind of Blue','Miles Davis'],['Rumours','Fleetwood Mac'],['Moon Safari','Air'],['Aja','Steely Dan'],['Blue Train','John Coltrane'],['Discovery','Daft Punk']].map(([t,a],i)=>`<div class="rec"><span class="sleeve" style="${art(i)}"></span><span>${t}</span><span class="sm">${a}</span></div>`).join('')}</div></div>`}}
+function popPC(){return {eyebrow:'NerveOS · PC',title:PC.game||'Idle',right:`<button class="rkey round" data-k data-pcpw data-on="${PC.on}" aria-label="PC power" style="background:var(--band-key)">${IC.pwr}</button>`,cols:true,body:`
+  <div class="card"><div class="row"><span class="row8">${ind('slot',PC.on&&!!PC.game)}<span class="meta">${PC.on?(PC.game?'Playing · 1 h 12 min':'On · idle'):'Asleep'}</span></span></div>
+  <div class="g3k"><button class="btn sec">Sleep</button><button class="btn sec" data-confirm="Quit Hades II?">Quit game</button><button class="btn sec">${IC.mute}Mute</button></div>
+  <div class="vrow"><span class="lab">Volume</span>${fd(79,'PC volume')}</div></div>
+  <div class="card"><span class="lab">Remote</span><div class="dpad" style="transform:scale(.82);margin:-14px auto"><button class="dz u" aria-label="Up">${IC.up}</button><button class="dz d" aria-label="Down">${IC.down}</button><button class="dz l" aria-label="Left">${IC.left}</button><button class="dz r" aria-label="Right">${IC.right}</button><button class="okk" style="background:#55534e;color:#ece8df;box-shadow:0 0 0 6px #00000040,0 3px 0 #000">OK</button></div>
+  <div class="g3k"><button class="btn sec">${IC.back}Back</button><button class="btn sec">${IC.home}Guide</button><button class="btn sec">${IC.menu}Menu</button></div></div>`}}
+function popCamera(){return {eyebrow:'Camera',title:'Front porch',cols:true,body:`
+  <div class="card"><div class="cam" style="cursor:default">${camSvg('7:42 PM')}<span class="ov"><span class="tag">${ind('slot',1,'var(--cream)')}Live</span></span></div><div class="duo"><button class="btn sec">Snapshot</button><button class="btn sec">Full screen</button></div></div>
+  <div class="card" style="gap:0"><span class="lab" style="padding-bottom:8px">Today</span>${[['Motion','7:40 pm'],['Doorbell','6:10 pm'],['Motion','5:55 pm'],['Package left','2:12 pm']].map(([w,t])=>`<div class="evrow"><span class="th2">${camSvg('')}</span><span>${w}</span><span class="sm">${t}</span></div>`).join('')}</div>`}}
+function popHist(id){const S=SENS[id];return {eyebrow:'History',title:S.name.split(' · ')[1]+' · '+S.name.split(' · ')[0],cols:true,body:`
+  <div class="card"><div class="g3k" data-group>${['24 h','7 days','30 days'].map((t,i)=>`<button class="key" aria-pressed="${i===0}">${ind('sq',i===0)}${t}</button>`).join('')}</div>
+  ${sparkSvg(S.d,150,4)}<span class="axis"><span>Midnight</span><span>6 am</span><span>Noon</span><span>6 pm</span><span>Now</span></span></div>
+  <div class="card"><span class="lab">Since midnight</span><div class="readouts"><div><span class="lab">Low</span><b>${S.lo}${S.unit}</b></div><div><span class="lab">High</span><b>${S.hi}${S.unit}</b></div><div><span class="lab">Average</span><b>${S.avg}${S.unit}</b></div></div><span class="sm">Now: ${S.now} ${S.unit}</span></div>`}}
+function popRoom(arg){const [what,where]=arg.split(':');
+  if(where==='living'&&what==='lights')return {eyebrow:'Living room',title:'Lights',sheet:true,body:`<div class="ks l3"><div class="kcol">${scenesCard()}${swCard('tree')}${purifier()}<button class="btn sec wide alloff" data-alloff data-room="living">All lights off</button></div>${lightCard('lr','k')}${lightCard('kl','k')}${lightCard('tvl','k')}</div>`};
+  if(what==='tv')return {eyebrow:'Living room',title:'TV',sheet:true,body:`<div class="ks tv2">${tvCard('k')}${pcPanel()}</div>`};
+  if(where==='living'&&what==='music')return {eyebrow:'Living room',title:'Music',sheet:true,body:`<div class="ks">${spkCard('wide')}</div>`};
+  if(where==='kitchen'&&what==='lights')return {eyebrow:'Kitchen',title:'Lights',sheet:true,body:`<div class="ks" style="grid-template-rows:minmax(0,1fr) auto"><div class="g3e">${lightCard('kl','k')}${lightCard('cp','k')}${lightCard('st','k')}</div><button class="btn sec wide alloff" data-alloff data-room="kitchen">All lights off</button></div>`};
+  return {eyebrow:'Kitchen',title:'Music',sheet:true,body:`<div class="ks">${spkCard('kitchen')}</div>`}}
+const POPS={light:popLight,source:popSource,remote:popRemote,speaker:popSpeaker,pc:popPC,camera:popCamera,hist:popHist,room:popRoom};
+
+/* ============ dashboards ============ */
+/* every scope (device, library, comparison panel) carries the page choices; keys passed in o are pinned and ignore the page controls */
+const hostAttrs=(o={})=>{const q={...OPT,...o};return `data-scope data-paddle="${q.paddle}" data-cap="${q.cap}" data-lc="${q.lc}" data-dock="${q.dock}" data-trk="${q.trk}" data-pw="${q.pw}" data-pin="${Object.keys(o).join(' ')}"`};
+const VIEWS={living:()=>`${house()}${roomHead('Living room',['73.6 °F','62.1 %'])}${scenes(['Normal','Movie time','Vibes','Spooky vibes'],0)}
+  <div class="g2">${lightCard('lr')}${lightCard('kl')}${lightCard('tvl')}${swCard('tree')}</div>${purifier()}${tvCard()}${pcCard()}${spkCard()}`,
+ kitchen:()=>`${house()}${roomHead('Kitchen',['74.1 °F','66 %'])}<div class="g2">${lightCard('kl')}${lightCard('st')}${lightCard('cp')}</div>${spkCard('kphone')}`,
+ master:()=>`${house()}${roomHead('Master',['70.2 °F','49 %'])}<div class="g2">${lightCard('bs')}${lightCard('ds')}${lightCard('mc')}</div>${dehum()}${swList(['fan','blanket'],'Bed')}`,
+ /* Music tab (pass 3): one speaker per player. Nothing else is playing in this view, so the first Play takes the orange. */
+ music:()=>`${roomHead('Music',[])}${spkCard()}${spkCard('kphone')}`};
+function phoneView(o={},view='living'){return `<div class="bh ph" data-host data-view="${view}" ${hostAttrs(o)}>
+  <header class="hbar"><span class="hic">${IC.burger}</span><nav class="htabs" role="tablist">${[['Living','living'],['Kitchen','kitchen'],['Master','master'],['Music','music']].map(([t,k])=>`<button class="htab" role="tab" data-view="${k}" aria-selected="${k===view}">${t}${ind('slot',k===view)}</button>`).join('')}</nav><span class="hic">${IC.search}</span></header>
+  <div class="pscroll"><div class="pcol">${VIEWS[view]()}</div></div></div>`}
+function kioskHome(o){const locked=DOOR==='locked';const lightsOn=Object.entries(LIGHTS).filter(([k,L])=>o.lights.includes(k)&&L.on&&!L.offline).length; /* the Tree is a switch, not a light: not counted (pass 1 audit #12) */
+  const tiles=o.dock.map(d=>{if(d==='lights')return `<button class="dk" data-pop="room" data-arg="lights:${o.room}">${ind('led',lightsOn>0)}<span class="dn">Lights</span><span class="ds">${lightsOn?lightsOn+' on':'All off'}</span></button>`;
+    if(d==='tv')return `<button class="dk" data-pop="room" data-arg="tv:${o.room}">${ind('slot',TV.on)}<span class="dn">TV</span><span class="ds">${TV.on?SRC[TV.src][0]:'Off'}</span></button>`;
+    if(d==='music'){const S=o.room==='kitchen'?KSPK:SPK;return `<button class="dk" data-pop="room" data-arg="music:${o.room}">${ind('slot',S.playing)}<span class="dn">Music</span><span class="ds">${S.playing?'Saturn':'Idle'}</span></button>`}
+    return `<button class="dk action" data-alloff data-room="${o.room}"><span class="dn">All off</span><span class="ds">Lights</span></button>`}).join('');
+  return `<div class="bh k kh" data-host ${hostAttrs()} style="--kp:${o.kp}px;--kt:${o.kt}px;--ld:${o.ld}px;--kc:${o.kc}px;--kg:${o.kg}px;--dh:${o.dh}px">
+  <div class="ktop"><div class="krule"></div><div class="lockc"><button class="lock ${locked?'':'alert'}" ${locked?'':'data-lock'} aria-label="Front door ${locked?'locked':'unlocked. Tap to lock'}">${locked?IC.lock:IC.unlock}</button><span class="lockw ${locked?'':'alert'}">${ind('led',1,locked?'var(--ok)':'var(--alert)')}Front door · ${locked?'Locked':'Unlocked'}</span></div></div>
+  <div class="kmid"><div><div class="kclock" aria-label="2:30 pm"><span>2</span><span class="co">:</span><span>30</span><span class="ap">PM</span></div><div class="kdate">Tuesday · October 27</div><div class="kfacts">${o.facts}</div></div>
+  <div class="kwx"><span class="lab" style="font-size:18px">Outside</span><span class="wt">64° cloudy</span><span class="ws">Sunny at 3 · high 70°</span></div></div>
+  <div class="dock">${tiles}</div></div>`}
+const DEV={phone:(o,view)=>phoneView(o,view||'living'),
+  ipad:()=>kioskHome({room:'living',lights:['lr','kl','tvl'],dock:['lights','tv','music'],kp:56,kt:40,ld:96,kc:168,kg:30,dh:112,facts:'67° inside · 63% humidity · air good'}),
+  echo:()=>kioskHome({room:'kitchen',lights:['kl','st','cp'],dock:['lights','music','alloff'],kp:48,kt:30,ld:80,kc:124,kg:22,dh:96,facts:'74° inside · 66% humidity · air good'})};
+
+/* ============ theme sheet ============ */
+const TOK=[['--bg','Page','#e7e3da','#1c1c1a'],['--card','Card face','#f2efe8','#2a2a27'],['--key','Keys','#e4e0d6','#34342f'],['--groove','Track groove (new in pass 3)','#e4e0d6','#34342f'],['--cap','Fader cap',null],['--rule','Hairline','#d6d1c6','#3d3d38'],['--ink','Text','#262626','#ece9e2'],['--dim','Secondary text','#605c54','#aca89f'],
+ ['--band','Black band (ribbed)',null],['--walnut','Walnut rule',null],['--win','Window recess',null],['--orange','The one primary per screen','#f07d1e','#f28a2e'],['--sw-pad','Rocker paddle (quiet)','#6f8f3a','#6f8f3a'],['--deep','Primary under-edge',null],
+ ['--cream','Lit: on, selected',null,null,1],['--ok','Lit: ok, power on','#6f8f3a','#6f8f3a',1],['--warn','Lit: open, warn',null,null,1],['--alert','Lit: alert · the fix key','#d9482b','#e5583a',1],['--alert-ink','Alert words','#b32205','#ff8668'],['--warn-ink','Warn words',null]];
+const CPAIRS=[['Text on card','--ink','--card'],['Secondary on card','--dim','--card'],['Secondary on page','--dim','--bg'],['Band text','--band-ink','--band'],['Band secondary','--band-dim','--band'],['Ink on orange','#1d1c1a','--orange'],['Ink on alert (fix key)','#1d1c1a','--alert'],['Alert words on card','--alert-ink','--card'],['Warn words on card','--warn-ink','--card'],['Dim on keys','--dim','--key'],['Cream lamp on card (HA toggle thumb)','--cream','--card'],['Ink on cap (kiosk column number)','#1d1c1a','--cap']];
+function tpanel(mode){return `<div class="${mode==='night'?'night':''}"><div class="bh tpanel" data-tp data-pm="quiet">
+  <div class="tphead"><span class="ltx"><span class="lab">${mode==='night'?'Night · anthracite':'Day · warm white'}</span><span class="t">${mode==='night'?'Jam Theme, night':'Jam Theme, day'}</span></span><span class="sm">HA picks with the device's light/dark</span></div>
+  <div class="toks">${TOK.map(([v,n,bd,bn,lit])=>`<div class="tok">${lit?ind('big0',1,`var(${v})`):`<span class="sw0" style="background:${v==='--band'?'var(--ribs) var(--band)':`var(${v})`}"></span>`}<span class="ltx"><b>${n}</b><code>${v.replace('--','jam-')} <span data-hex="${v}"></span></code>${bd?`<span class="was">Jam Braun <i style="background:${mode==='night'?bn:bd}"></i>${mode==='night'?bn:bd}</span>`:''}</span></div>`).join('')}</div>
+  <div class="card" style="gap:6px"><span class="lab">Contrast, computed now</span><table class="ctab" data-ctab></table></div>
+  <div class="card"><span class="lab">The parts, in this palette</span><div class="live">${sw(true,'Sample on')}${sw(false,'Sample off')}<button class="key" aria-pressed="true">${ind('sq',1)}Chosen</button><button class="key">${ind('sq',0)}Key</button><button class="btn pri">${IC.play}Play</button>${ind('led',1,'var(--ok)')}${ind('slot',1)}${bars(5,3)}</div>${fd(62,'Sample light fader',disp('#f4d8a4'))}${fd(40,'Sample volume fader')}</div></div></div>`}
+function specHtml(){const states=[['on','Lit window, fader revealed, rocker up. The strongest form.',lightCardMini('on')],['off','Present but quiet. Window dark, title dims.',lightCardMini('off')],['offline','Broken form: no face, no shadow, dashed edge, the word.',lightCardMini('offline')],['action','Happening now. Slot lit, word says what.',`<div class="card"><div class="row8">${ind('slot',1)}<span class="meta">Starting</span></div><span class="t">NerveOS</span></div>`],['alert','Red window + the word + the one action.',`<div class="card"><div class="row8">${ind('led',1,'var(--alert)')}<span class="meta w-alert" style="color:var(--alert-ink)">Unlocked</span></div><span class="t">Front door</span></div>`]];
+  const curves=[['glide','cubic-bezier(.2,.8,.2,1)','160ms','focus, hover, small moves'],['decelerate','cubic-bezier(.16,1,.3,1)','280ms','sheets, reveals, arrivals'],['settle','cubic-bezier(.3,1.3,.5,1)','260ms','rocker paddle (overshoot ≤ 1.3)'],['leave','cubic-bezier(.4,0,1,1)','180ms','things leaving']];
+  return `<div class="card"><h3>Type</h3><span class="sm">Jost for words, IBM Plex Mono for small numbers. Kiosk sizes in brackets.</span>
+   <div class="tyrow"><span style="font:300 64px/1 var(--f);letter-spacing:-.02em">2<span style="color:var(--dim)">:</span>30</span><code>Clock · Jost 300<br>168 iPad / 124 Echo</code></div>
+   <div class="tyrow"><span class="rtitle">Living room</span><code>Room · 500 · 28</code></div>
+   <div class="tyrow"><span style="font:500 24px var(--f)">Light popup</span><code>Sheet title · 500 · 24 (30)</code></div>
+   <div class="tyrow"><span class="t">Kitchen lamp</span><code>Card title · 500 · 19 (22)</code></div>
+   <div class="tyrow"><span>Last played: Saturn</span><code>Body · 400 · 16 (18)</code></div>
+   <div class="tyrow"><span class="sm">Can't be reached since 9:12 am</span><code>Secondary · 400 · 14 (16)</code></div>
+   <div class="tyrow"><span class="lab">On · Group</span><code>Label · 500 · 12 caps +.14em (13)</code></div>
+   <div class="tyrow"><span style="font:500 14px var(--mono)">71.3 °F · 7:42 pm</span><code>Numbers · Plex Mono 500 · 14</code></div>
+   <div class="tyrow">${seg7('004')}<code>Seven-segment · appliances only<br>DSEG in production</code></div></div>
+  <div class="card"><h3>Shape, space, depth</h3>
+   <span class="lab">Radii</span><div class="radii">${[['16','card, sheet'],['12','key, screen'],['8','rocker'],['999','chip'],['3','slot']].map(([r,n])=>`<div><i style="border-radius:${r==='999'?'999px':r+'px'}"></i>${r}<span class="sm" style="font-family:var(--f)">${n}</span></div>`).join('')}</div>
+   <span class="lab">Spacing (4 px steps)</span><div class="space">${[4,8,12,16,24,32].map(s=>`<div><i style="width:${s}px"></i>${s}</div>`).join('')}</div><span class="sm">Card padding 16 · gaps 12 · page gutter 14 phone, 16–24 kiosk.</span>
+   <span class="lab">Elevation (Braun keeps one soft shadow; depth is mostly press-in)</span><div class="elev"><div><i style="box-shadow:var(--e1)"></i>Card</div><div><i style="background:var(--key);box-shadow:var(--ekey)"></i>Key, raised 2 px</div><div><i style="background:var(--pressed);box-shadow:var(--epress)"></i>Key, pressed in</div><div><i style="background:var(--ribs) var(--band)"></i>Black band, flat</div></div></div>
+  <div class="card"><h3>State words</h3><span class="sm">The same five words and hooks as Jam Cards' state grammar (<code>data-state</code>, <code>data-alert</code>).</span><div class="states">${states.map(([w,d,h])=>`<div class="stx"><b style="font-weight:600">${w}</b>${h}<span class="sm">${d}</span></div>`).join('')}</div></div>
+  <div class="card"><h3>Indicator windows</h3><span class="sm">Always a dark recess, day and night. Lit = flat colour, no halo. Colour by meaning: cream on/selected, green ok/power, amber open, red alert, or the light's own colour.</span>
+   <div class="inds">${[['led','Round · status'],['sq','Square · mode chosen'],['slot','Slot · running'],['bars','Bar group · count']].map(([s,n])=>`<div><span class="il">${s==='bars'?bars(5,0)+bars(5,3):ind(s,0)+ind(s,1)}</span><span>${n}</span></div>`).join('')}<div><span class="il">${ind('led',1,'var(--ok)')}${ind('slot',1,'var(--warn)')}${ind('led',1,'var(--alert)')}${ind('slotc',1,'#7fb6ff')}</span><span>ok · warn · alert · light</span></div></div>
+   <span class="sm">Orange is never a light. It's the one main button per screen, and nothing else.</span></div>
+  <div class="card"><h3>Tracks (pass 3)</h3><span class="sm">A window is a recess. Small windows (LED, square, slot, paddle) are a dark recess in both modes so a lit one reads from across the room. A long track (fader, kiosk column) is a recess in the card's own material: a light groove by day, the dark recess at night. The cap is light plastic; the fill is the light's display colour, or deeper cream for volume.</span>
+   <div style="display:grid;gap:10px">${fd(68,'Groove sample light',disp('#f4ca8a'))}${fd(35,'Groove sample volume')}</div></div>
+  <div class="card"><h3>Light display colours (pass 3)</h3><span class="sm">HA stores the real kelvin or colour; this is how Jam draws it in the slot, paddle window, band, fader and swatch (all the same value). Whites sit on an amber-to-cream line. Anything closer than ${GUARD} (OKLab) to the control orange, day or night, is mixed toward cream until it isn't. Worked out as the page renders.</span>
+   ${whitesTable()}</div>
+  <div class="card"><h3>Orange budget (pass 3)</h3><span class="sm">Counted per screen, not per card.</span>
+   <div class="rows"><div class="r"><span class="ltx" style="grid-column:1/3"><span>One orange per screen</span><span class="sm">It goes to what's happening: playing (3) beats on (2) beats idle (1), then page order. Every other main button is drawn as a plain key in the same place.</span></span><span></span></div>
+   <div class="r"><span class="ltx" style="grid-column:1/3"><span>Alert outranks orange</span><span class="sm">While an alert's fix is on screen (Lock), the fix is solid alert red with ink text, and nothing is orange.</span></span><span></span></div>
+   <div class="r"><span class="ltx" style="grid-column:1/3"><span>One per popup or sheet</span><span class="sm">A popup is its own screen. The page under the veil doesn't count.</span></span><span></span></div>
+   <div class="r"><span class="ltx" style="grid-column:1/3"><span>Rocker paddles are never orange</span><span class="sm">On = paddle up + an 18 × 7 lit window on the paddle (the light's display colour, or cream).</span></span><span></span></div>
+   <div class="r"><span class="ltx" style="grid-column:1/3"><span>The losing main key rests</span><span class="sm">It keeps its place, width and a bigger glyph, and it's the first to take the orange when the winner stops. Play is always orange in its own popup, its kiosk sheet and the Music tab.</span></span><span></span></div>
+   <div class="r"><span class="ltx" style="grid-column:1/3"><span>No control restyles another</span><span class="sm">A control's look never changes because a different control changed. (Adaptive paddles, if chosen, are decided once when a view opens.)</span></span><span></span></div></div></div>
+  <div class="card"><h3>Motion</h3><span class="sm">Smooth, one-shot, transform and opacity only. Nothing loops on a kiosk. Press = 1 px down.</span><div class="curves" data-curves>${curves.map(([n,c,d,u])=>`<div class="cv" style="--ease:${c};--d:${d}"><span><b style="font-weight:500">${n}</b><br><span class="sm">${d}</span></span><span style="display:grid;gap:4px"><span class="tr"><i></i></span><span class="sm">${u}</span></span></div>`).join('')}</div><button class="btn sec" data-playcurves>${IC.play}Play the curves</button></div>
+  <div class="card"><h3>How the theme reaches HA</h3><span class="sm">The tokens stay the single source (jam-cards <code>tokens/</code>); the generator writes the theme YAML. HA's own dialogs only see these keys, so they get the colours but not the rockers.</span>
+   <table class="hamap"><tr><th>HA key (2026.10)</th><th>Day / Night</th><th>What it reaches</th></tr>
+   <tr><td><code>lovelace-background</code>, <code>primary-background-color</code></td><td>jam-bg</td><td>Page</td></tr>
+   <tr><td><code>card-background-color</code>, <code>ha-card-background</code></td><td>jam-card</td><td>Dialogs and any HA card</td></tr>
+   <tr><td><code>primary-text-color</code> / <code>secondary-text-color</code>, <code>divider-color</code></td><td>jam-ink / jam-dim, jam-rule</td><td></td></tr>
+   <tr><td><code>ha-color-primary-40</code> (+ <code>-30</code> hover)</td><td>jam-orange (+ deep)</td><td><b>Verified.</b> <code>primary-color</code> itself defaults to this, and <code>ha-button</code>'s loud fill reads it, not <code>primary-color</code>. Confirm buttons. Also links.</td></tr>
+   <tr><td><code>ha-color-primary-80/90/95</code> · <code>-05/10/20</code></td><td>jam-key tones</td><td><b>Verified.</b> Quiet and normal fills (selected chips, the switch fallback). Neutral, so nothing turns pale orange.</td></tr>
+   <tr><td><code>primary-color</code></td><td>jam-orange</td><td>Older parts (sidebar selection, <code>slider-color</code>). Set it too, matching the ramp.</td></tr>
+   <tr><td><code>ha-switch-checked-background-color</code>, <code>-border-color</code>, <code>-thumb-background-color</code></td><td>jam-band, jam-band, jam-cream</td><td><b>Verified</b> in <code>ha-switch</code>. Small switches: dark track, cream thumb.</td></tr>
+   <tr><td><code>switch-checked-*</code> (pass 2)</td><td>drop</td><td><b>Not read</b> by any 2026.10 component (only HA's demo themes set it).</td></tr>
+   <tr><td><code>state-switch-active-color</code>, <code>state-fan-active-color</code>, <code>state-input_boolean-active-color</code></td><td>jam-ink / jam-cream</td><td><b>Verified:</b> the more-info big toggle takes its on colour from the state colour. Cream disappears on a Day card (1.1:1), so Day uses ink.</td></tr>
+   <tr><td><code>state-light-active-color</code></td><td>jam-ink / jam-cream</td><td>Lights without a colour of their own. Coloured lights fill the slider with their own colour (HA adjusts it for contrast).</td></tr>
+   <tr><td><code>accent-color</code></td><td>jam-ink</td><td>Keeps HA from spending a second orange.</td></tr>
+   <tr><td><code>error-color</code> / <code>warning-color</code> / <code>success-color</code></td><td>alert-ink / warn-ink / ok</td><td>Text-safe variants, not the lamp colours.</td></tr>
+   <tr><td><code>ha-card-border-radius</code>, <code>ha-card-box-shadow</code></td><td>16px, e1</td><td>Jam Braun: 14px</td></tr></table></div>`}
+function whitesTable(){const row=(n,k,p3,p2)=>{const g=guard(p3),d3=toOrange(g),d2=toOrange(p2);return `<tr><td>${n}<br><span class="sm">${k}</span></td><td><span class="sw2" style="--c:${p2}"></span> <code>${p2}</code><br><span class="sm">${d2.toFixed(2)}</span></td><td><span class="sw2" style="--c:${g}"></span> <code>${g}</code><br><span class="sm">${d3.toFixed(2)} ${d3>=GUARD?'clear':'too close'}</span></td></tr>`};
+  return `<table class="whtab"><tr><th>White</th><th>Pass 2 · distance</th><th>Pass 3 · distance</th></tr>${CCT.map(([n,k,p3,p2])=>row(n,k,p3,p2)).join('')}${row('Amber pick','colour','#ff9a5a','#ff9a5a')}</table><span class="sm">Distance = OKLab ΔE to the nearer of day and night orange. Pass 2's Cozy was ${toOrange('#ffb565').toFixed(2)}; an amber colour pick is drawn as the guarded value shown.</span>`}
+function lightCardMini(st){const on=st==='on';return `<div class="card light" data-state="${st}" style="padding:12px"><div class="lhead"><span class="row8">${ind('slotc',on,disp('#f4d8a4'))}<span class="ltx"><span class="t" style="font-size:16px">Lamp</span><span class="meta">${st==='offline'?'Offline':on?'On':'Off'}</span></span></span>${sw(on,'Lamp','',st==='offline',disp('#f4d8a4'))}</div>${st==='offline'?'':fd(on?60:0,'Lamp',disp('#f4d8a4'))}</div>`}
+
+/* ============ library ============ */
+function libHtml(){const S=(name,dom,pop,body)=>`<div class="spc"><header><b>${name}</b><span>${dom}${pop?' · popup: '+pop:''}</span></header>${body}</div>`;
+  return S('jam-light','light.* · on, off, offline (offline opens a Try again sheet)','tap the name',`<div class="g2">${lightCard('lr')}${lightCard('tvl')}${lightCard('cp')}${lightCard('st')}</div>`)
+   +S('jam-light · kiosk column','size: kiosk · tall fader, number printed on the cap','tap the name',`<div class="g2 k" style="height:380px;font-size:18px">${lightCard('lr','k')}${lightCard('kl','k')}</div>`)
+   +S('jam-switch','switch.* · Tree and the fan are just switched devices','',`<div class="g2">${swCard('tree')}${swCard('fan')}</div>${swList(['blanket','plug'],'Master')}`)
+   +S('jam-climate','climate.* · sample, Jam Home has no thermostat yet','',climCard())
+   +S('jam-tv','media_player (TV) · lit power symbol','Remote, Source',tvCard())
+   +S('jam-speaker','media_player (Music Assistant)','tap the grille or name; speaker key = group or split',spkCard())
+   +S('jam-media · NerveOS','media_player (PC) · one row','⋯',pcCard())
+   +S('jam-appliance','fan.* / humidifier.* · seven-segment lives here only','',purifier()+dehum())
+   +S('jam-sensor','sensor.* with 24 h history','tap for history',`<div class="g2">${sensCard('t')}${sensCard('h')}</div>`)
+   +S('jam-scenes','scene.* · chosen key presses in','',scenesCard())
+   +S('jam-house + jam-person','house strip on a black band; people with an LED','',house()+peopleCard())
+   +S('jam-doors','lock.* / binary_sensor.* · amber = open, red = alert','',doorsCard())
+   +S('jam-camera','camera.* · sample, illustration only','tap the picture',camCard())}
+
+/* ============ comparisons (pass 2) ============ */
+const ORANGE_OPTS=[[{paddle:'orange',cap:'card'},'A · Pass 1','Orange paddles, one orange button per card.'],
+  [{paddle:'adaptive',cap:'card'},'B · Adaptive paddles','Orange paddles while one or two are on. Three or more on in view and all of them go quiet. One orange per card.'],
+  [{paddle:'quiet',cap:'screen'},'C · Quiet + one per screen (the build)','Paddles never orange; a lit window on the paddle shows on. One orange button on the whole screen.']];
+function cmpOrangeHtml(){return ORANGE_OPTS.map(([o,t,d])=>`<figure><div class="cmphead"><b>${t}</b><span class="muted">${d}</span><span class="count" data-count><i></i>…</span></div><div class="frame phone dev"><div class="screen"><div class="scaler" data-w="390" data-h="844" data-dev="phone" data-opt='${JSON.stringify(o)}'></div></div></div></figure>`).join('')}
+const LC_OPTS=[['band','1 · Band (the build)','The fader strip at the bottom of a lit card is tinted the light\'s colour (30 % on the card by day, 30 % on a lifted base at night). The name, word and rocker stay on a plain face, so the card stays calm and the colour sits where the level is.'],
+  ['edge','2 · Edge slot','A full-height slot window on the left edge lights in the colour. Pure window grammar (a dark recess, lit flat) and the strongest "lamp" read, but it\'s a thin line at arm\'s length.'],
+  ['wash','3 · Wash','The whole card is tinted lightly (18 % day, 22 % night), close to Jam Braun today. The most colour and the most familiar, but it\'s the loudest, and a 2×2 of warm whites becomes a peach block.']];
+function cmpColourHtml(){const grid=()=>`<div class="g2">${lightCard('lr')}${lightCard('kl')}${lightCard('tvl')}${lightCard('cp')}</div>`;
+  return LC_OPTS.map(([k,t,d])=>`<figure><div class="cmphead"><b>${t}</b><span class="muted">${d}</span></div>
+   <div><div class="bh lcgrid" ${hostAttrs({lc:k})}><span class="lab">Day</span>${grid()}</div></div>
+   <div class="night"><div class="bh lcgrid" ${hostAttrs({lc:k})}><span class="lab">Night</span>${grid()}</div></div></figure>`).join('')}
+function cmpTrackHtml(){const panel=(p2)=>{WHF=p2?'p2':'p3';const o=p2?{trk:'dark'}:{trk:'groove'};
+    const h=`<figure><div class="cmphead"><b>${p2?'Pass 2: black recess, raw whites':'Pass 3: light groove, display whites'}</b><span class="muted">${p2?'Every empty track is the window recess; Cozy is #ffb565.':'The empty track is a groove in the card; Cozy is pale amber and the caps are light.'}</span></div>
+     <div class="bh lcgrid" ${hostAttrs(o)} data-whpin="${p2?'p2':'p3'}"><div class="g2">${lightCard('lr')}${lightCard('kl')}${lightCard('cp')}${swCard('tree')}</div>
+     <div class="card"><div class="vrow"><span class="lab">Volume</span>${fd(40,'Sample volume')}</div></div>
+     <div class="g3 k" style="height:300px;font-size:18px">${lightCard('lr','k')}${lightCard('kl','k')}${lightCard('cp','k')}</div></div></figure>`;WHF=null;return h};
+  return panel(true)+panel(false)}
+function rollHtml(){const R=[
+ ['Jam Theme tokens','Jam Braun palette: page #e7e3da / card #f2efe8, signal #f07d1e, olive toggles, ET66 yellow, five room hues','Braun-based Jam Theme: surfaces nudged (#e3e1dc / #f1efeb), orange #ec7c22, new window / groove / cream / band / walnut, lamp vs word colours for ok, warn, alert. Olive, ET66 yellow and room hues retired.','jam-cards <code>tokens/</code> → a new generated theme next to "Jam Braun" (which stays installed)','M'],
+ ['Fonts','Archivo','Jost (words) + IBM Plex Mono (small numbers), self-hosted','look pack + <code>/hacsfiles</code>; measure first paint on the Echo first','S'],
+ ['jam-light (phone)','Card tinted in the light colour, LED dot, "75%", olive toggle, orange strip','Plain face; slot window + word; rocker with a lit paddle window; fader in a tinted band; light groove; value on the cap while dragging; display whites','jam-light + rocker/fader parts in the look pack','M'],
+ ['jam-light, kiosk','Same card as the phone, 4 wide cards on the sheet','Tall column fader with the number on its cap ("Off" at 0); offline = narrow column with Try again','new <code>size: kiosk</code> variant of jam-light','M'],
+ ['jam-tile switches (Tree, fan, blanket)','Tile + olive toggle','Glyph + name + word + rocker; name and glyph dim when off. The Tree isn\'t counted as a light.','jam-tile look rules; jam-kiosk count','S'],
+ ['jam-scenes','Pills; chosen = ET66 yellow','Keys; chosen presses in and lights a square window. Kiosk keys 20 px, 60 tall.','jam-scenes look rules','S'],
+ ['jam-heading','4 px rule in the room colour','Walnut rule on every room','look pack','S'],
+ ['jam-house','Panel strip, "Air · Poor", red dot + red text chip','Black ribbed band; no air word; "Door unlocked" word chip with a red LED + a red Lock key (the fix)','jam-house','S'],
+ ['jam-fan: air purifier','Toggle + four speed pills (chosen = orange)','Small appliance: grille, seven-segment PM2.5, lit power symbol, speed keys pressed in','jam-fan appliance variant','M'],
+ ['Dehumidifier','jam-tile','Appliance sibling: RH readout, "Dry to" keys','same appliance variant','S'],
+ ['jam-tv','Poster art, ink band, orange Play, volume rocker','Black ribbed screen band, lit power symbol; Pause/Play is orange only when it wins the screen','jam-tv','M'],
+ ['TV Source sheet','3-column colour tiles; chosen outlined + "On now"','Same grid; printed colour tab on every tile; chosen presses in and lights its slot','jam-tv Source','S'],
+ ['jam-remote','Groups, colour-coded keys','Soft plastic remote; red IR emitter at the top flashes on each press; lit power symbols; orange OK','jam-remote','M'],
+ ['jam-speaker','Grille art with an orange dot, tinted band, orange Play, orange volume fill, "40"','Grille dot lights cream only while playing; Play orange when it wins (always on the Music tab, popup, kiosk sheet), otherwise a resting key; volume with no number; Speakers key → Group or split','jam-speaker + music panel','M'],
+ ['jam-media: NerveOS','Row with an orange ⋯','Ribbed NV mark, word, running slot, quiet ⋯','jam-media','S'],
+ ['jam-popup','Full-screen veil + sheet','One sheet grammar: Close top right, Esc and veil close, no orange Done; kiosk = inset, two columns, no scroll','jam-popup','M'],
+ ['jam-kiosk home + dock','Room bar, orange clock colon, room-tinted blocks with a dot','Walnut rule, dim colon. Day: card blocks with a top-right indicator window. Night: black ribbed band.','jam-kiosk','M'],
+ ['Kiosk sheets','Phone-size cards on a full-screen sheet','Kiosk-size controls; light columns; offline collapses; nothing scrolls','jam-kiosk sheets','M'],
+ ['HA more-info, switches, confirm','primary-color = signal orange','ha-color-primary ramp (40 = orange, the rest neutral), ha-switch-checked-* = band + cream, state-*-active-color = ink by day, cream at night','jam-theme YAML only (no card-mod)','S'],
+ ['HA header tabs','Restyled by card-mod','Only the current tab shows its lit window','jam-theme card-mod rules','S']];
+  return `<tr><th>Card or part</th><th>Jam Braun today</th><th>Recommended build</th><th>Where it would change</th><th>Size</th></tr>`+R.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><span class="sz">${r[4]}</span></td></tr>`).join('')}
+function builtinsHtml(){const S=(name,dom,body)=>`<div class="spc"><header><b>${name}</b><span>${dom}</span></header>${body}</div>`;
+  const big='--tr:color-mix(in srgb,var(--hst) 20%,var(--card));--kn:var(--hst)';
+  const dlgLight=`<div class="hadlg"><div class="hd"><i>✕</i><span style="flex:1">Living room</span><i>⋮</i></div><span class="sm" style="text-align:center">On · 75 % · 2700 K</span>
+    <div class="habig" style="--h:75%;--hc:#ffcf94"><i class="fill"></i><i class="knob"></i></div>
+    <div class="habtns"><span style="background:color-mix(in srgb,var(--hst) 20%,var(--card));color:var(--ink)">⏻</span><span>CT</span><span>RGB</span><span>FX</span></div></div>`;
+  const dlgSwitch=`<div class="hadlg"><div class="hd"><i>✕</i><span style="flex:1">Tree</span><i>⋮</i></div><span class="sm" style="text-align:center">On</span><div class="hasw" style="${big}"></div></div>`;
+  const rows=`<div class="hadlg" style="gap:0"><span class="lab" style="padding-bottom:6px">Entities card · small switches</span>${[['Bedroom fan',1],['Blanket',1],['Desk plug',0]].map(([n,on])=>`<div class="row" style="padding:10px 0;border-top:1px solid var(--rule)"><span>${n}</span>${on?'<span class="hasmall"></span>':'<span class="hasmall" style="background:var(--key);box-shadow:inset 0 0 0 1px var(--rule)"></span>'}</div>`).join('')}</div>`;
+  const conf=`<div class="hadlg"><span class="t">Turn off all lights?</span><span class="sm">Living room: 3 lights and the Tree.</span><div class="haconf"><span>Cancel</span><span style="background:var(--orange);color:#1d1c1a">Turn off</span></div></div>`;
+  return S('More-info · light','The slider is the light\'s own colour as HA sends it, not Jam\'s display colour: a theme can\'t reach it. The power button takes the state colour (ink by day, cream at night).',dlgLight)
+   +S('More-info · switch','state-switch-active-color: ink by day, cream at night. Never orange.',dlgSwitch)
+   +S('ha-switch in HA cards','ha-switch-checked-*: dark track, cream thumb in both modes.',rows)
+   +S('Confirm dialog','ha-color-primary-40 = orange: the dialog\'s one button. A dialog is its own screen.',conf)}
+
+/* ============ mount ============ */
+function mountAll(){closeAll(true);
+  document.getElementById('tpair').innerHTML=tpanel('day')+tpanel('night');
+  document.getElementById('spec').innerHTML=specHtml();
+  const lib=document.getElementById('lib');lib.innerHTML=libHtml();setScope(lib,{cap:'card'});
+  const bi=document.getElementById('builtins-host');bi.innerHTML=builtinsHtml();setScope(bi,{cap:'card'});
+  document.getElementById('cmpOrange').innerHTML=cmpOrangeHtml();
+  document.getElementById('cmpColour').innerHTML=cmpColourHtml();
+  document.getElementById('cmpTrack').innerHTML=cmpTrackHtml();
+  document.getElementById('rtab').innerHTML=rollHtml();
+  document.querySelectorAll('.scaler').forEach(sc=>{sc.style.width=sc.dataset.w+'px';sc.style.height=sc.dataset.h+'px';sc.innerHTML=DEV[sc.dataset.dev](sc.dataset.opt?JSON.parse(sc.dataset.opt):{},sc.dataset.view);
+    if(sc.dataset.open){const h=sc.querySelector('[data-host]');openPop('room',sc.dataset.open,h,true)}});
+  fillTheme();fit();postAll();buildBadge()}
+/* a scope element that isn't rendered by hostAttrs (library, built-ins) */
+function setScope(el,o){const q={...OPT,...o};el.setAttribute('data-scope','');Object.entries(q).forEach(([k,v])=>el.dataset[k]=v);el.dataset.pin=Object.keys(o).join(' ')}
+/* apply a page control to every scope that hasn't pinned that key */
+function applyOpt(key){document.querySelectorAll('[data-scope]').forEach(h=>{if(!(h.dataset.pin||'').split(' ').includes(key)){h.dataset[key]=OPT[key];if(key==='paddle')delete h.dataset.pmf}});postAll();buildBadge()}
+function buildBadge(){const diff=Object.keys(REC).filter(k=>OPT[k]!==REC[k]);const b=document.getElementById('build');if(!b)return;b.dataset.custom=diff.length>0;
+  b.querySelector('[data-buildtxt]').textContent=diff.length?'Custom: '+diff.map(k=>OPTNAMES[k]).join(', '):'Recommended build';b.querySelector('[data-reset]').hidden=!diff.length;
+  document.querySelectorAll('.seg[data-pg]').forEach(g=>{const k=g.dataset.pg;if(k in OPT)g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===OPT[k]))})}
+/* paddles (adaptive counts lit rockers in view) + one orange per screen + alert outranks orange */
+function post(h){const mode=h.dataset.paddle||'quiet',cap=h.dataset.cap||'screen';
+  const scopeOf=el=>el.closest('.layer')||h;
+  /* adaptive (compare only): decided once when the view opens, so turning one light on never restyles the others (pass 2 audit 5) */
+  if(mode==='adaptive'){if(!h.dataset.pmf){const lit=[...h.querySelectorAll('.sw[aria-pressed="true"]')].filter(x=>scopeOf(x)===h).length;h.dataset.pmf=lit>=3?'quiet':'orange'}h.dataset.pm=h.dataset.pmf}
+  else{delete h.dataset.pmf;h.dataset.pm=mode}
+  const groups=new Map();h.querySelectorAll('[data-pri]').forEach(b=>{const k=scopeOf(b);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(b)});
+  groups.forEach((bs,root)=>{if(cap==='card'){bs.forEach(b=>{b.classList.add('pri');b.classList.remove('sec','rest')});return}
+    const alert=[...root.querySelectorAll('[data-alertfix]')].some(a=>scopeOf(a)===root);
+    const win=alert?null:[...bs].sort((a,b)=>(+b.dataset.pri)-(+a.dataset.pri))[0];
+    bs.forEach(b=>{b.classList.toggle('pri',b===win);b.classList.toggle('sec',b!==win);b.classList.toggle('rest',b!==win)})})}
+let countT;
+function postAll(){document.querySelectorAll('[data-scope]').forEach(post);document.querySelectorAll('.fixedhost .bh').forEach(post);clearTimeout(countT);countT=setTimeout(countAll,360)}
+/* count what is actually painted the control orange, on the whole view (layers excluded) */
+function countAll(){document.querySelectorAll('.ph[data-host]').forEach(h=>{const fig=h.closest('figure');const out=fig&&fig.querySelector('[data-count]');if(!out)return;
+  const o=hex2rgb(getComputedStyle(h).getPropertyValue('--orange'));const want=`rgb(${o.join(', ')})`;let n=0;
+  h.querySelectorAll('*').forEach(el=>{if(el.closest('.layer'))return;if(getComputedStyle(el).backgroundColor===want)n++});
+  out.innerHTML=`<i></i>${n} orange mark${n===1?'':'s'} in this view`})}
+function fit(){document.querySelectorAll('.scaler').forEach(sc=>{const w=sc.parentElement.clientWidth;sc.style.transform=`scale(${w/+sc.dataset.w})`})}
+addEventListener('resize',fit);
+function hex2rgb(h){h=h.trim();if(h.startsWith('#')){h=h.slice(1);if(h.length===3)h=[...h].map(c=>c+c).join('');return [0,2,4].map(i=>parseInt(h.substr(i,2),16))}return [0,0,0]}
+function lum(rgb){const [r,g,b]=rgb.map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*r+.7152*g+.0722*b}
+function ratio(a,b){const A=lum(hex2rgb(a)),B=lum(hex2rgb(b));return (Math.max(A,B)+.05)/(Math.min(A,B)+.05)}
+function fillTheme(){document.querySelectorAll('[data-tp]').forEach(p=>{const cs=getComputedStyle(p);const g=v=>v.startsWith('#')?v:cs.getPropertyValue(v).trim();
+  p.querySelectorAll('[data-hex]').forEach(e=>e.textContent=g(e.dataset.hex));
+  p.querySelector('[data-ctab]').innerHTML=CPAIRS.map(([n,f,b])=>{const r=ratio(g(f),g(b));return `<tr><td><span class="pv" style="color:${g(f)};background:${g(b)}">Aa</span> ${n}</td><td class="${r>=4.5?'pass':'fail'}">${r.toFixed(1)}:1 ${r>=4.5?'AA':'below AA'}</td></tr>`}).join('')})}
+
+/* ============ popups: one layer system ============ */
+const STACK=[];
+function hostFor(el){const h=el.closest('[data-host]');if(h)return h;
+  let fh=document.querySelector('.fixedhost');if(!fh){fh=document.createElement('div');fh.className='fixedhost '+(MODE==='night'?'night':'');fh.innerHTML='<div class="bh" data-host data-fixed></div>';document.body.appendChild(fh);setScope(fh.firstChild,{})}
+  return fh.firstChild}
+function openPop(kind,arg,opener,instant){const P=POPS[kind](arg);const host=hostFor(opener);const isK=host.classList.contains('k');
+  const L=document.createElement('div');L.className='layer';L.dataset.kind=kind;L.dataset.arg=arg||'';
+  L.innerHTML=`<div class="veil" data-close></div><div class="sheet ${P.sheet?'ksheet':P.cols&&isK?'cols':isK?'solo':''}" role="dialog" aria-modal="true" aria-label="${P.title}" ${P.attr||''}><div class="shd"><span class="ltx"><span class="lab">${P.eyebrow}</span><span class="st">${P.title}</span></span><span class="row8">${P.right||''}<button class="btn sec" data-close>Close</button></span></div><div class="sbody">${P.body}</div></div>`;
+  host.appendChild(L);STACK.push(L);if(instant){L.classList.add('in');return}requestAnimationFrame(()=>requestAnimationFrame(()=>L.classList.add('in')));
+  L._opener=opener;setTimeout(()=>L.querySelector('[data-close].btn')?.focus({preventScroll:true}),60)}
+function closeLayer(L,now){if(!L)return;const i=STACK.indexOf(L);if(i>-1)STACK.splice(i,1);L.classList.remove('in');const host=L.parentElement;const done=()=>{L.remove();if(host&&host.hasAttribute('data-fixed')&&!host.querySelector('.layer'))host.parentElement?.remove()};if(now)done();else setTimeout(done,240)}
+function closeAll(now){[...STACK].forEach(L=>closeLayer(L,now));document.querySelectorAll('.fixedhost').forEach(x=>x.remove())}
+function rerenderPop(L){const P=POPS[L.dataset.kind](L.dataset.arg);L.querySelector('.sbody').innerHTML=P.body;L.querySelector('.st').textContent=P.title}
+
+/* ============ sync ============ */
+function syncLight(id){const L=LIGHTS[id];const on=L.on;
+  document.querySelectorAll(`[data-lid="${id}"]`).forEach(c=>{if(L.offline)return;const C=dispAt(c,L.col);c.dataset.state=on?'on':'off';c.style.setProperty('--lc',C);const s=c.querySelector('[data-slot]');s.classList.toggle('on',on);s.style.setProperty('--c',C);const f=c.querySelector('.fd');setFd(f,on?L.v:0);f.style.setProperty('--lc',C);c.querySelector('[data-word]').textContent=lword(L);const r=c.querySelector('.sw');r.setAttribute('aria-pressed',on);r.style.setProperty('--pc',C)});
+  document.querySelectorAll(`[data-lpop="${id}"]`).forEach(p=>{const C=disp(L.col);const s=p.querySelector('[data-slot]');s.classList.toggle('on',on);s.style.setProperty('--c',C);p.querySelector('[data-word]').textContent=on?'On':'Off';p.querySelectorAll('.sw').forEach(x=>x.style.setProperty('--pc',C));p.querySelector('.sw[data-l]').setAttribute('aria-pressed',on);const f=p.querySelector('[data-lf]');setFd(f,on?L.v:0);
+    p.querySelectorAll('.fd').forEach(x=>x.style.setProperty('--lc',C));p.querySelectorAll('[data-lcol]').forEach(k=>k.setAttribute('aria-pressed',k.dataset.lcol===L.col))});
+  refresh('ipad')}
+function setFd(f,v){if(!f)return;f.style.setProperty('--v',v+'%');f.setAttribute('aria-valuenow',v);const t=f.querySelector('.tv');if(t)t.textContent=f.classList.contains('v')&&!v?'Off':v}
+function refresh(comp,skip){
+  if(comp==='ipad'||comp==='echo'){document.querySelectorAll('.kh .dock').forEach(d=>{const sc=d.closest('.scaler');const tmp=document.createElement('div');tmp.innerHTML=DEV[sc.dataset.dev]();d.innerHTML=tmp.querySelector('.dock').innerHTML});return}
+  const R={tv:tvCard,spk:spkCard,pc:pcCard,pcp:pcPanel,pur:purifier,deh:dehum,clim:climCard,doors:doorsCard,house:house};
+  document.querySelectorAll(`[data-comp="${comp}"]`).forEach(el=>{el.outerHTML=R[comp](el.dataset.v||'')});
+  if(['tv','spk','pc'].includes(comp))refresh('ipad')}
+
+/* ============ events (delegated, so re-rendered parts need no wiring) ============ */
+let irT;
+document.addEventListener('click',e=>{const t=e.target;let x;
+  if(t.closest('.bh'))queueMicrotask(postAll);
+  if(x=t.closest('.seg[data-pg] button')){const g=x.parentElement,pg=g.dataset.pg;g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===x));
+    if(pg==='mode'){MODE=x.dataset.v;['libwrap','specwrap','builtwrap'].forEach(id=>document.getElementById(id).classList.toggle('night',MODE==='night'));document.querySelectorAll('.fixedhost').forEach(f=>f.classList.toggle('night',MODE==='night'))}
+    else if(pg==='door'){DOOR=x.dataset.v;mountAll()}
+    else if(pg==='wh'){OPT.wh=x.dataset.v;mountAll()}
+    else{OPT[pg]=x.dataset.v;applyOpt(pg)}return}
+  if(x=t.closest('[data-reset]')){Object.assign(OPT,REC);mountAll();return}
+  if(x=t.closest('[data-playcurves]')){const c=x.closest('.card').querySelectorAll('.cv');c.forEach(v=>{v.style.setProperty('--w',v.querySelector('.tr').clientWidth+'px');v.classList.toggle('go')});return}
+  if(!t.closest('.bh'))return;
+  if(x=t.closest('[data-k]')){const ir=x.closest('[data-remote]')?.querySelector('[data-ir]');if(ir){ir.classList.add('tx');clearTimeout(irT);irT=setTimeout(()=>ir.classList.remove('tx'),120)}}
+  if(x=t.closest('[data-close]')){closeLayer(x.closest('.layer'));return}
+  if(x=t.closest('[data-pop]')){openPop(x.dataset.pop,x.dataset.arg,x);return}
+  if(x=t.closest('[data-lock]')){DOOR='locked';document.querySelectorAll('.seg[data-pg="door"] button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==='locked'));mountAll();return}
+  if(x=t.closest('.sw')){if(x.disabled)return;const on=x.getAttribute('aria-pressed')!=='true';
+    if(x.dataset.l){const L=LIGHTS[x.dataset.l];L.on=on;if(on&&!L.v)L.v=60;syncLight(x.dataset.l);return}
+    if(x.dataset.s){const S=SW[x.dataset.s];S.on=on;document.querySelectorAll(`[data-swid="${x.dataset.s}"]`).forEach(r=>{r.dataset.state=on?'on':'off';r.querySelector('.sw').setAttribute('aria-pressed',on);r.querySelector('[data-word]').textContent=swword(S)});refresh('ipad');return}
+    x.setAttribute('aria-pressed',on);
+    if(x.dataset.g!==undefined){SPK.grp[x.dataset.g]=on;const r=x.closest('.r');r.querySelector('.ind').classList.toggle('on',on);r.querySelector('[data-gw]').textContent=on?'Grouped':'Separate';document.querySelectorAll('[data-grplab]').forEach(l=>l.textContent=grpText());refresh('spk')}
+    return}
+  if(x=t.closest('[data-lcol]')){const id=x.closest('[data-lpop]').dataset.lpop;const L=LIGHTS[id];L.col=x.dataset.lcol;if(!L.on){L.on=true;L.v=L.v||60}syncLight(id);return}
+  if(x=t.closest('[data-src]')){TV.src=+x.dataset.src;TV.on=true;refresh('tv');rerenderPop(x.closest('.layer'));return}
+  if(x=t.closest('[data-tvpw],[data-tvon]')){TV.on=x.dataset.tvon!==undefined?true:!TV.on;refresh('tv');return}
+  if(x=t.closest('[data-tvplay]')){TV.playing=!TV.playing;refresh('tv');return}
+  if(x=t.closest('[data-rpw]')){const on=x.dataset.on!=='true';x.dataset.on=on;if(x.dataset.rpw==='tv'){TV.on=on;refresh('tv')}return}
+  if(x=t.closest('[data-pcpw]')){PC.on=!PC.on;x.dataset.on=PC.on;refresh('pc');refresh('pcp');return}
+  if(x=t.closest('[data-spkplay]')){const S=x.dataset.spkplay==='k'?KSPK:SPK;S.playing=!S.playing;refresh('spk');const L=x.closest('.layer');if(L&&L.dataset.kind==='speaker')rerenderPop(L);return}
+  if(x=t.closest('[data-grptoggle]')){const p=x.closest('.card').querySelector('[data-grppanel]');p.hidden=!p.hidden;x.setAttribute('aria-expanded',!p.hidden);x.innerHTML=IC.spk+(p.hidden?'Group or split':'Done');return}
+  if(x=t.closest('[data-akey]')){PUR.on=true;PUR.speed=+x.dataset.akey;refresh('pur');return}
+  if(x=t.closest('[data-apwr]')){PUR.on=!PUR.on;refresh('pur');return}
+  if(x=t.closest('[data-dkey]')){DEH.on=true;DEH.target=+x.dataset.dkey;refresh('deh');return}
+  if(x=t.closest('[data-dpwr]')){DEH.on=!DEH.on;refresh('deh');return}
+  if(x=t.closest('[data-ct]')){if(CLIM.mode===0)CLIM.mode=1;CLIM.target=Math.max(60,Math.min(80,CLIM.target+ +x.dataset.ct));refresh('clim');return}
+  if(x=t.closest('[data-cm]')){CLIM.mode=+x.dataset.cm;refresh('clim');return}
+  if(x=t.closest('[data-alloff]')){if(x.classList.contains('confirm')){const room=x.dataset.room;const ROOMS={kitchen:['kl','st','cp'],living:['lr','kl','tvl']};Object.keys(LIGHTS).forEach(k=>{if(!LIGHTS[k].offline&&(ROOMS[room]||ROOMS.living).includes(k)){LIGHTS[k].on=false;syncLight(k)}});if(room!=='kitchen'){SW.tree.on=false;document.querySelectorAll('[data-swid="tree"]').forEach(r=>{r.dataset.state='off';r.querySelector('.sw').setAttribute('aria-pressed',false);r.querySelector('[data-word]').textContent='Off'})}refresh('ipad');return}
+    x.classList.add('confirm');const lab=x.querySelector('.ds');const old=lab?lab.textContent:x.textContent;if(lab)lab.textContent='Tap again';else x.textContent='Tap again to turn them off';
+    setTimeout(()=>{if(!x.isConnected)return;x.classList.remove('confirm');if(lab)lab.textContent=old;else x.textContent=old},3500);return}
+  if(x=t.closest('.htab')){const h=x.closest('[data-host]');x.parentElement.querySelectorAll('.htab').forEach(b=>{b.setAttribute('aria-selected',b===x);b.querySelector('.ind').classList.toggle('on',b===x)});
+    h.dataset.view=x.dataset.view;delete h.dataset.pmf;h.querySelector('.pcol').innerHTML=VIEWS[x.dataset.view]();h.querySelector('.pscroll').scrollTop=0;return}
+  if(x=t.closest('[data-retry]')){const o=x.textContent;x.textContent='Trying…';x.disabled=true;setTimeout(()=>{if(!x.isConnected)return;x.textContent=o;x.disabled=false},1600);return}
+  if(x=t.closest('[data-group] > button')){x.parentElement.querySelectorAll(':scope > button').forEach(b=>{const on=b===x;b.setAttribute('aria-pressed',on);b.querySelector('.ind')?.classList.toggle('on',on)});return}
+});
+/* faders */
+function fdInput(f,v){v=Math.max(0,Math.min(100,Math.round(v)));setFd(f,v);
+  if(f.dataset.lf){const L=LIGHTS[f.dataset.lf],was=L.on;L.on=v>0;if(v>0)L.v=v;syncLight(f.dataset.lf);if(was!==L.on)postAll()}
+  else if(f.dataset.vol!==undefined){(f.dataset.vol==='k'?KSPK:SPK).vol=v}}
+document.addEventListener('pointerdown',e=>{const f=e.target.closest('.fd');if(!f)return;e.preventDefault();f.setPointerCapture(e.pointerId);f.classList.add('drag');
+  const vert=f.classList.contains('v');const fx=ev=>{const r=f.querySelector('.trk').getBoundingClientRect();return vert?(r.bottom-ev.clientY)/r.height*100:(ev.clientX-r.left)/r.width*100};fdInput(f,fx(e));
+  const mv=ev=>fdInput(f,fx(ev));const up=()=>{f.classList.remove('drag');f.removeEventListener('pointermove',mv);f.removeEventListener('pointerup',up);f.removeEventListener('pointercancel',up)};
+  f.addEventListener('pointermove',mv);f.addEventListener('pointerup',up);f.addEventListener('pointercancel',up)});
+document.addEventListener('keydown',e=>{const f=e.target.closest&&e.target.closest('.fd');const v=f?+f.getAttribute('aria-valuenow'):0;
+  if(f&&['ArrowRight','ArrowUp'].includes(e.key)){fdInput(f,v+5);e.preventDefault()}
+  else if(f&&['ArrowLeft','ArrowDown'].includes(e.key)){fdInput(f,v-5);e.preventDefault()}
+  else if(e.key==='Escape'&&STACK.length){closeLayer(STACK[STACK.length-1])}});
+mountAll();
+</script>
