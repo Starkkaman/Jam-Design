@@ -1,0 +1,1161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lobby Lowboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Lobby pass 5: "the lowboard under the window".
+   One 16:9 TV, 1920x1080 design units via cqw (--u = 1 design px). D-pad focus, OK on release.
+   Same room as pass 4 (sky window, walnut sill with picture frames, a dark lowboard holding the app dial,
+   the socket panel and the house plate, the drawer, the blind), now with: a three-band dial with fixed slots,
+   sun times from Home Assistant, a darker sky for bright picture modes, Jam Home's dimmer plate and door swing,
+   warn-by-day / alert-after-dark for the door, All apps A to Z, Arrange the dial, rename an input,
+   Power and Restart the TV, and the idle face. */
+:root{--bg:#e6e3dd;--fg:#1f1d1a;--muted:#5f5a52;--line:#d0cbc2;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--decel:cubic-bezier(.16,1,.3,1);--leave:cubic-bezier(.4,0,1,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#12110f;--fg:#ebe7df;--muted:#a49d91;--line:#2f2c28;--chip:#1d1b18;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12110f;--fg:#ebe7df;--muted:#a49d91;--line:#2f2c28;--chip:#1d1b18;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding:28px 16px 64px;display:grid;gap:18px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}
+p{margin:0;max-width:82ch}.muted{color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:end}
+.ctl>div{display:grid;gap:6px;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:7px 11px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}}
+.seg button:focus-visible,.kb:focus-visible,.tourb:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kb{font:500 13px var(--mono);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer;touch-action:manipulation;user-select:none}
+.tourbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--chip)}
+.tourb{font:600 15px var(--f);border:0;border-radius:9px;padding:9px 16px;cursor:pointer;background:#ec7c22;color:#1d1c1a}
+.tourb.sec{background:transparent;color:var(--fg);border:1px solid var(--line);font-weight:500}
+.tourcap{flex:1 1 300px;min-width:0;font-size:15px}
+.tourcap b{font:500 12px var(--mono);color:var(--muted);margin-right:8px;font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted)}
+.legend span{white-space:nowrap}.legend code{font:500 12px var(--mono);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-right:6px;background:var(--chip)}
+.readout{font:500 13px var(--mono);color:var(--muted);padding:6px 0}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px;align-content:start}
+.note h3{font:600 15px var(--f);margin:0}
+details.more summary{cursor:pointer;font:500 14px var(--f);color:var(--muted)}
+details.more[open] summary{margin-bottom:10px}
+
+/* ================= TV ================= */
+.tv{--u:calc(100cqw / 1920);
+  --cream:#f3e6c8;--ink:#f3ecdc;--ink2:#d4cab6;--ink3:#b3a993;
+  --lac:#1b1612;--lac2:#241d18;--lac3:#2f2620;--glass:#0c0a08;--walnut:#6b4428;--walnutEdge:#3f2716;
+  --orange:#f08a2c;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;
+  position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;background:var(--lac);color:var(--ink);font-family:var(--f);
+  overflow:hidden;border-radius:12px;box-shadow:0 0 0 10px #0d0c0b,0 20px 50px #0000004d;outline:none;-webkit-tap-highlight-color:transparent}
+.tv:focus-visible{box-shadow:0 0 0 10px #0d0c0b,0 0 0 13px #f08a2c}
+.layer{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity 220ms var(--decel),visibility 0s 220ms}
+.layer.on{opacity:1;visibility:visible;transition:opacity 220ms var(--decel),visibility 0s}
+.calm .layer,.calm .layer.on{transition-duration:140ms}
+kbd{display:inline-grid;place-items:center;min-width:calc(var(--u)*38);height:calc(var(--u)*36);padding:0 calc(var(--u)*8);border-radius:99px;border:calc(var(--u)*2) solid currentColor;font:500 calc(var(--u)*22) var(--mono);margin-right:calc(var(--u)*10);vertical-align:middle}
+
+/* indicator windows (the shared vocabulary): always a dark recess; lit = flat colour */
+.ind{position:relative;display:inline-block;flex:none;background:#090706;box-shadow:inset 0 calc(var(--u)*1) calc(var(--u)*2) #000,0 0 0 calc(var(--u)*1) #ffffff14}
+.ind::after{content:"";position:absolute;inset:calc(var(--u)*3);border-radius:inherit;background:var(--c,var(--cream));opacity:0}
+.ind.on::after{opacity:1}
+.ind.led{width:calc(var(--u)*18);height:calc(var(--u)*18);border-radius:50%}
+.ind.sq{width:calc(var(--u)*18);height:calc(var(--u)*18);border-radius:calc(var(--u)*3)}
+.ind.slot{width:calc(var(--u)*40);height:calc(var(--u)*13);border-radius:calc(var(--u)*3)}
+.ind.ok{--c:var(--ok)}.ind.warn{--c:var(--warn)}.ind.alert{--c:var(--alert)}
+.tri{color:var(--warn)}
+
+/* ---------- the window (sky) ---------- */
+.sky{position:absolute;left:0;right:0;top:0;height:calc(var(--u)*584);overflow:hidden}
+.skyl{position:absolute;inset:0;opacity:0;transition:opacity 1200ms linear}
+.skyl.on{opacity:1}
+.skyl .b{position:absolute;left:0;right:0}
+.disc{position:absolute;border-radius:50%}
+.cloud{position:absolute;height:calc(var(--u)*30);border-radius:99px}
+.star{position:absolute;width:calc(var(--u)*3);height:calc(var(--u)*3);border-radius:50%;background:#cfc7b2;opacity:.55}
+.sill{position:absolute;left:0;right:0;top:calc(var(--u)*584);height:calc(var(--u)*68);background:var(--walnut)}
+.sill::after{content:"";position:absolute;left:0;right:0;bottom:calc(var(--u)*-8);height:calc(var(--u)*8);background:var(--walnutEdge)}
+
+/* header written on the glass */
+.hdr{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*58);display:flex;align-items:flex-start;gap:calc(var(--u)*24)}
+.house{font:500 calc(var(--u)*22)/1.2 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+.clock{font:300 calc(var(--u)*70)/1 var(--f);font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:calc(var(--u)*4)}
+.clock small{font-size:calc(var(--u)*30);font-weight:400;margin-left:calc(var(--u)*8);color:var(--ink2)}
+.date{font:400 calc(var(--u)*24)/1.2 var(--f);color:var(--ink2);margin-top:calc(var(--u)*4)}
+.hkeys{margin-left:auto;display:flex;gap:calc(var(--u)*12);margin-top:calc(var(--u)*30)}
+.hk{position:relative;display:flex;align-items:center;gap:calc(var(--u)*12);height:calc(var(--u)*60);padding:0 calc(var(--u)*20) calc(var(--u)*6);font:500 calc(var(--u)*26) var(--f);color:var(--ink2);white-space:nowrap}
+.hk .v{font-weight:400;color:var(--ink2)}
+.hk .in{display:flex;align-items:center;gap:calc(var(--u)*12);transition:transform 150ms var(--glide)}
+.hk .bw{position:absolute;left:calc(var(--u)*20);right:calc(var(--u)*20);bottom:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3);background:#00000059}
+.hk.f{color:var(--ink)}.hk.f .v{color:var(--ink)}
+.hk.f .bw{background:var(--cream)}
+.hk.f .in{transform:translateY(calc(var(--u)*-3))}
+.calm .hk.f .in{transform:none}
+
+/* the sign: the focused thing, written on the glass */
+.sign{position:absolute;left:calc(var(--u)*96);top:calc(var(--u)*204);width:calc(var(--u)*1150);display:grid;gap:calc(var(--u)*4);transition:opacity 100ms linear}
+.sign.swap{opacity:0;transition-duration:50ms}
+.sign .eb{font:500 calc(var(--u)*22)/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:flex;gap:calc(var(--u)*12);align-items:center}
+.sign .tt{font:500 calc(var(--u)*58)/1.05 var(--f);white-space:nowrap;overflow:hidden;letter-spacing:-.005em}
+.sign .tt.long{font-size:calc(var(--u)*46);line-height:1.15}
+.sign .tt.wrap{white-space:normal}
+.sign .ln{display:flex;gap:calc(var(--u)*28);align-items:center;font:400 calc(var(--u)*26)/1.3 var(--f);color:var(--ink2);min-width:0}
+.sign .ln .t{min-width:0}
+.sign .ln .do{display:inline-flex;align-items:center;color:var(--ink);font-weight:500;flex:none;white-space:nowrap}
+.grp{position:absolute;left:calc(var(--u)*96);top:calc(var(--u)*348);font:500 calc(var(--u)*22) var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:flex;gap:calc(var(--u)*16)}
+.grp .n{letter-spacing:0;text-transform:none;color:var(--ink);opacity:0}
+.grp.cur .n{opacity:1}
+.first .grp .n{display:none}
+
+/* the shelf: Continue stands on the sill as picture frames (one light, top left: hard shadow down and right) */
+.shelf{position:absolute;left:0;right:0;top:calc(var(--u)*380);height:calc(var(--u)*272);overflow:hidden}
+.track{position:absolute;left:calc(var(--u)*96);top:0;bottom:0;display:flex;gap:calc(var(--u)*36);transition:transform 220ms var(--glide)}
+.calm .track{transition:none}
+.fr{position:relative;flex:none;width:calc(var(--u)*316);height:100%}
+.fr .pic{position:absolute;left:0;right:0;top:calc(var(--u)*12);height:calc(var(--u)*185);padding:calc(var(--u)*8);background:#2a221c;border-radius:calc(var(--u)*4);box-shadow:calc(var(--u)*5) calc(var(--u)*6) 0 #00000040;transition:transform 150ms var(--glide)}
+.fr .art{position:relative;width:100%;height:100%;overflow:hidden;border-radius:calc(var(--u)*2)}
+.fr .pg{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*8);background:#0a0807}
+.fr .pg i{display:block;height:100%;background:var(--cream);opacity:.85}
+.fr .plq{position:absolute;left:0;right:0;top:calc(var(--u)*212);display:flex;align-items:flex-start;gap:calc(var(--u)*12);font:500 calc(var(--u)*24)/1.1 var(--f);color:var(--ink2)}
+.fr .plq .ind{margin-top:calc(var(--u)*7);background:#2b1909;box-shadow:inset 0 calc(var(--u)*1) calc(var(--u)*2) #000}
+.fr .plq .t{min-width:0}
+.fr.f .pic{transform:translateY(calc(var(--u)*-12));box-shadow:calc(var(--u)*8) calc(var(--u)*18) 0 #00000033}
+.fr.f .plq{color:var(--ink)}
+.fr.f .plq .ind::after{opacity:1}
+.calm .fr.f .pic{transform:none}
+.endstop{flex:none;width:calc(var(--u)*6);height:calc(var(--u)*185);margin-top:calc(var(--u)*12);border-radius:calc(var(--u)*3);background:var(--walnutEdge)}
+.empty{position:relative;flex:none;width:calc(var(--u)*1100);height:calc(var(--u)*185);margin-top:calc(var(--u)*12);border-radius:calc(var(--u)*6);background:#00000047;box-shadow:inset 0 calc(var(--u)*2) calc(var(--u)*6) #0000008c;display:flex;align-items:center;gap:calc(var(--u)*36);padding:0 calc(var(--u)*40);font:400 calc(var(--u)*26)/1.35 var(--f);color:var(--ink)}
+.empty p{max-width:none;flex:1}
+
+/* ---------- the lowboard ---------- */
+.face{position:absolute;left:0;right:0;top:calc(var(--u)*660);bottom:0;background:var(--lac)}
+/* the app dial: three band scales on one glass, six fixed slots each, one needle across all three */
+.dial{position:absolute;left:calc(var(--u)*96);width:calc(var(--u)*1728);top:calc(var(--u)*10);height:calc(var(--u)*178);border-radius:calc(var(--u)*10);background:var(--glass);box-shadow:inset 0 calc(var(--u)*2) calc(var(--u)*8) #000,0 0 0 calc(var(--u)*2) #2c241e}
+.scale{position:absolute;left:0;width:calc(var(--u)*1500);height:calc(var(--u)*54)}
+.scale[data-b="Watch"]{top:calc(var(--u)*8)}.scale[data-b="Play"]{top:calc(var(--u)*62)}.scale[data-b="Listen"]{top:calc(var(--u)*116)}
+.gut{position:absolute;left:calc(var(--u)*22);top:calc(var(--u)*2);height:calc(var(--u)*32);display:flex;align-items:center;gap:calc(var(--u)*10);font:500 calc(var(--u)*22) var(--mono);letter-spacing:.12em;color:var(--ink3);white-space:nowrap}
+.gut .pos{letter-spacing:0;color:var(--ink);opacity:0}
+.scale.cur .pos{opacity:1}
+.scale.tuned .gut{color:var(--ink2)}
+.sline{position:absolute;left:calc(var(--u)*250);right:0;top:calc(var(--u)*42);height:calc(var(--u)*10);
+  background:linear-gradient(#3a3129 0 0) bottom/100% calc(var(--u)*2) no-repeat,repeating-linear-gradient(90deg,#3a3129 0 calc(var(--u)*2),transparent calc(var(--u)*2) calc(var(--u)*26)) bottom/100% calc(var(--u)*6) no-repeat}
+.slotm{position:absolute;top:calc(var(--u)*36);width:calc(var(--u)*2);height:calc(var(--u)*16);margin-left:calc(var(--u)*-1);background:#6d6052}
+.st{position:absolute;top:0;transform:translateX(-50%);z-index:2;display:grid;justify-items:center;gap:calc(var(--u)*3);padding:0 calc(var(--u)*8);background:var(--glass);font:400 calc(var(--u)*26)/1.15 var(--f);color:var(--ink2);white-space:nowrap}
+.st .code{width:calc(var(--u)*28);height:calc(var(--u)*4);border-radius:2px;background:var(--code);opacity:.8}
+.st .nm{transition:transform 150ms var(--glide)}
+.st.f{color:var(--ink);font-weight:500}
+.st.f .nm{transform:translateY(calc(var(--u)*-2))}
+.calm .st.f .nm{transform:none}
+.stop{position:absolute;left:calc(var(--u)*232);top:calc(var(--u)*12);bottom:calc(var(--u)*12);width:calc(var(--u)*8);border-radius:calc(var(--u)*3);background:var(--walnut)}
+.stop.r{left:calc(var(--u)*1500)}
+.needle{position:absolute;left:0;top:calc(var(--u)*6);bottom:calc(var(--u)*6);width:calc(var(--u)*5);margin-left:calc(var(--u)*-2.5);border-radius:calc(var(--u)*3);background:#5c5246;z-index:1;transition:transform 140ms var(--glide)}
+.calm .needle{transition:none}
+.dial.cur .needle{background:var(--cream)}
+.allk{position:absolute;left:calc(var(--u)*1524);right:calc(var(--u)*16);top:calc(var(--u)*16);bottom:calc(var(--u)*16);display:grid;align-content:center;justify-items:center;gap:calc(var(--u)*4);border-radius:calc(var(--u)*8);background:var(--lac2);transition:transform 150ms var(--glide)}
+.allk .n{font:500 calc(var(--u)*28) var(--f);color:var(--ink2)}
+.allk .g{font:400 calc(var(--u)*22) var(--f);color:var(--ink3)}
+.allk .bw,.ak .bw,.mk .bw,.pc .bw{position:absolute;left:30%;right:30%;bottom:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3) calc(var(--u)*3) 0 0;background:#0a0807}
+.allk.f{background:var(--lac3);transform:translateY(calc(var(--u)*-4))}.allk.f .n{color:var(--ink)}.allk.f .g{color:var(--ink2)}.allk.f .bw{background:var(--cream)}
+.calm .allk.f{transform:none}
+
+/* the socket panel (inputs) and the house plate (Jam Home's drawings) */
+.bay{position:absolute;left:calc(var(--u)*96);top:calc(var(--u)*198);height:calc(var(--u)*126);display:flex;gap:calc(var(--u)*6);padding:0 calc(var(--u)*12);border-radius:calc(var(--u)*10);background:var(--lac2)}
+.sk{position:relative;display:grid;justify-items:center;align-content:start;padding-top:calc(var(--u)*6);line-height:1.04;min-width:calc(var(--u)*100)}
+.sk .lb{font:500 calc(var(--u)*22)/1.05 var(--mono);color:var(--ink3);letter-spacing:.06em}
+.sk .hole{position:relative;margin:calc(var(--u)*7) 0 calc(var(--u)*6);width:calc(var(--u)*30);height:calc(var(--u)*30);border-radius:50%;background:#0a0807;box-shadow:0 0 0 calc(var(--u)*4) #3a3029;transition:transform 150ms var(--glide)}
+.sk .hole::after{content:"";position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*10);height:calc(var(--u)*10);background:#1e1915;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%)}
+.sk.plug .hole{background:var(--code)}
+.sk.plug .hole::after{background:#0c0a08cc}
+.sk .nm{font:500 calc(var(--u)*24)/1.1 var(--f);color:var(--ink2);white-space:nowrap}
+.sk .s{display:flex;gap:calc(var(--u)*8);align-items:center;height:calc(var(--u)*24);font:400 calc(var(--u)*22)/1.05 var(--f);color:var(--ink3);white-space:nowrap}
+.sk.empty-port .nm{color:var(--ink3);font-weight:400}
+.sk.apps .hole{background:none;box-shadow:none;display:grid;place-items:center}
+.sk.apps .hole::after{display:none}
+.sk.apps .ind.sq{width:calc(var(--u)*26);height:calc(var(--u)*26)}
+.sk.f .hole{box-shadow:0 0 0 calc(var(--u)*4) var(--cream);transform:translateY(calc(var(--u)*-4))}
+.calm .sk.f .hole{transform:none}
+.sk.f .nm,.sk.f .lb{color:var(--ink)}
+.bay .sep{width:calc(var(--u)*2);margin:calc(var(--u)*18) calc(var(--u)*4);background:#3a3129}
+
+.plate{position:absolute;right:calc(var(--u)*96);top:calc(var(--u)*198);height:calc(var(--u)*126);display:flex;gap:calc(var(--u)*8);align-items:center;padding:0 calc(var(--u)*10);border-radius:calc(var(--u)*10);background:var(--lac2)}
+.lu{position:relative;display:flex;align-items:center;height:calc(var(--u)*114);padding:0 calc(var(--u)*14) calc(var(--u)*8) calc(var(--u)*12);border-radius:calc(var(--u)*8)}
+.lu .mv{display:flex;gap:calc(var(--u)*14);align-items:center;transition:transform 150ms var(--glide)}
+.lu.f .mv{transform:translateY(calc(var(--u)*-3))}
+.calm .lu.f .mv{transform:none}
+.lu .bw{position:absolute;left:calc(var(--u)*24);right:calc(var(--u)*24);bottom:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3);background:#0a0807}
+.lu.f .bw{background:var(--cream)}
+.lu .txt{display:grid;gap:calc(var(--u)*1);justify-items:start}
+.lu .nm{font:500 calc(var(--u)*24)/1.15 var(--f);color:var(--ink2);white-space:nowrap}
+.lu .s{display:flex;align-items:center;gap:calc(var(--u)*8);font:400 calc(var(--u)*22)/1.15 var(--f);color:var(--ink3);white-space:nowrap}
+.lu.f .nm{color:var(--ink)}.lu.f .s{color:var(--ink2)}
+/* Jam Home's dimmer plate, TV form: rocker pad (top pressed = on) + slide dimmer; the lamp glyph's shade is the window */
+.pb{display:flex;gap:calc(var(--u)*6)}
+.pad{position:relative;width:calc(var(--u)*44);height:calc(var(--u)*86);border-radius:calc(var(--u)*8);background:#3b332c;overflow:hidden;box-shadow:0 calc(var(--u)*2) 0 #0a0807}
+.pad::before,.pad::after{content:"";position:absolute;left:0;right:0;height:50%}
+.pad::before{top:0}.pad::after{bottom:0;border-top:calc(var(--u)*1) solid #00000080}
+.pad.on::before{box-shadow:inset 0 calc(var(--u)*4) calc(var(--u)*6) #000000a0;background:#00000033}
+.pad.off::after{box-shadow:inset 0 calc(var(--u)*-4) calc(var(--u)*6) #000000a0;background:#00000033}
+.pad .pm{position:absolute;left:50%;z-index:1;background:var(--ink3);opacity:.7}
+.pad .pm.t{top:24%;width:calc(var(--u)*14);height:calc(var(--u)*2);margin-left:calc(var(--u)*-7)}
+.pad .pm.b{bottom:22%;width:calc(var(--u)*10);height:calc(var(--u)*10);margin-left:calc(var(--u)*-5);border-radius:50%;background:none;border:calc(var(--u)*2) solid var(--ink3)}
+.vf{position:relative;width:calc(var(--u)*18);height:calc(var(--u)*86);border-radius:calc(var(--u)*6);background:#090706;box-shadow:inset 0 calc(var(--u)*1) calc(var(--u)*3) #000}
+.vf .fl{position:absolute;left:calc(var(--u)*3);right:calc(var(--u)*3);bottom:calc(var(--u)*3);border-radius:calc(var(--u)*4);background:var(--lc)}
+.vf .cp{position:absolute;left:calc(var(--u)*-3);right:calc(var(--u)*-3);height:calc(var(--u)*8);border-radius:calc(var(--u)*3);background:#8d8981}
+.lg{width:calc(var(--u)*40);height:calc(var(--u)*40);flex:none}
+.lg .o{fill:none;stroke:var(--ink3);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.lg .s{fill:#090706;stroke:var(--ink3);stroke-width:1.6;stroke-linejoin:round}
+.lg.on .s{fill:var(--lc)}
+.lu.f .lg .o,.lu.f .lg .s{stroke:var(--ink)}
+/* Jam Home's door swing: the architect's door symbol is the lock's window */
+.dsw{width:calc(var(--u)*60);height:calc(var(--u)*60);flex:none}
+.dsw .wl{stroke:var(--ink3);stroke-width:3;stroke-linecap:round}
+.dsw .lf{stroke:var(--ink2);stroke-width:2.6;stroke-linecap:round}
+.dsw .sw{fill:none;stroke:var(--ink3);stroke-width:1.3;stroke-dasharray:2 2.5}
+.dsw .hg{fill:var(--ink2)}
+.door.warn .dsw .lf,.door.warn .dsw .sw{stroke:var(--warn)}
+.lu.door{min-width:calc(var(--u)*292)}
+.door .hfill{position:absolute;left:calc(var(--u)*10);right:calc(var(--u)*10);top:0;height:calc(var(--u)*6);border-radius:calc(var(--u)*3);background:var(--cream);transform:scaleX(0);transform-origin:left;opacity:0}
+.holding .hfill{opacity:1}
+/* D84 / CL6: the control that fixes an alert is a solid red key with dark text */
+.door.unl{background:var(--alert)}
+.door.unl .nm,.door.unl .s{color:#1d1c1a}
+.door.unl .dsw .lf,.door.unl .dsw .sw,.door.unl .dsw .wl{stroke:#1d1c1a}
+.door.unl .bw{background:#7a1f15}
+.door.unl.f .bw{background:#1d1c1a}
+.door.unl.f .mv{transform:translateY(calc(var(--u)*-4))}
+.calm .door.unl.f .mv{transform:none}
+
+.hints{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);bottom:calc(var(--u)*54);display:flex;gap:calc(var(--u)*32);align-items:center;font:400 calc(var(--u)*24)/1 var(--f);color:var(--ink3);white-space:nowrap;height:calc(var(--u)*36)}
+.hints span{display:inline-flex;align-items:center}
+.hints kbd{height:calc(var(--u)*34);min-width:calc(var(--u)*34);font-size:calc(var(--u)*24)}
+
+.bump-r{animation:bumpR 180ms var(--glide)}.bump-l{animation:bumpL 180ms var(--glide)}
+.bump-u{animation:bumpU 180ms var(--glide)}
+@keyframes bumpR{50%{translate:calc(var(--u)*-8) 0}}@keyframes bumpL{50%{translate:calc(var(--u)*8) 0}}@keyframes bumpU{50%{translate:0 calc(var(--u)*6)}}
+.calm .bump-r,.calm .bump-l,.calm .bump-u{animation:none}
+
+/* the note in the window (device turned on), and the one-line notes */
+.note-card,.confirm{position:absolute;padding:calc(var(--u)*26) calc(var(--u)*30) calc(var(--u)*30);border-radius:calc(var(--u)*10);background:var(--lac);box-shadow:0 0 0 calc(var(--u)*2) #3a3029, 0 calc(var(--u)*-8) 0 var(--walnut) inset;display:grid;gap:calc(var(--u)*10);opacity:0;transform:translateY(calc(var(--u)*-16));transition:opacity 180ms var(--decel),transform 220ms var(--decel);visibility:hidden;z-index:25}
+.note-card{right:calc(var(--u)*96);top:calc(var(--u)*196);width:calc(var(--u)*560)}
+.confirm{left:calc(var(--u)*520);top:calc(var(--u)*200);width:calc(var(--u)*880);z-index:40}
+.note-card.on,.confirm.on{opacity:1;transform:none;visibility:visible}
+.calm .note-card,.calm .confirm{transform:none}
+.note-card .eb,.confirm .eb{font:500 calc(var(--u)*22) var(--mono);letter-spacing:.1em;color:var(--ink3)}
+.note-card .t,.confirm .t{display:flex;gap:calc(var(--u)*14);align-items:center;font:500 calc(var(--u)*34) var(--f)}
+.confirm p{max-width:none;font:400 calc(var(--u)*26)/1.4 var(--f);color:var(--ink2)}
+.note-card .ks,.confirm .ks{display:flex;gap:calc(var(--u)*14);margin-top:calc(var(--u)*8)}
+.key{position:relative;display:inline-flex;align-items:center;gap:calc(var(--u)*12);height:calc(var(--u)*64);padding:0 calc(var(--u)*26) calc(var(--u)*4);border-radius:calc(var(--u)*8);background:var(--lac3);color:var(--ink2);font:500 calc(var(--u)*26) var(--f);white-space:nowrap;box-shadow:0 calc(var(--u)*4) 0 #0a0807;transition:transform 150ms var(--glide)}
+.key.f{color:var(--ink);background:#3b3029;transform:translateY(calc(var(--u)*-4));box-shadow:0 calc(var(--u)*8) 0 #0a0807}
+.key.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 calc(var(--u)*4) 0 #8a4a12}
+.key.pri.f{background:var(--orange);color:#000;box-shadow:0 calc(var(--u)*10) 0 #6f3a0c}
+.calm .key.f{transform:none}
+.key .ind.slot{width:calc(var(--u)*30);height:calc(var(--u)*10)}
+.key.f .ind.slot::after{opacity:1}
+.key.pri .ind{background:#7a3d0c}
+.toast{position:absolute;right:calc(var(--u)*96);top:calc(var(--u)*196);max-width:calc(var(--u)*600);display:flex;align-items:center;gap:calc(var(--u)*14);padding:calc(var(--u)*16) calc(var(--u)*26);border-radius:calc(var(--u)*10);background:var(--lac);box-shadow:0 0 0 calc(var(--u)*2) #3a3029;font:400 calc(var(--u)*26) var(--f);opacity:0;transition:opacity 180ms linear;visibility:hidden;z-index:26}
+.toast.on{opacity:1;visibility:visible}
+
+/* ---------- the drawer (TV menu and Power) ---------- */
+.drawer{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*262);background:var(--lac);transform:translateY(105%);transition:transform 220ms var(--decel);z-index:20}
+.drawer::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(var(--u)*14);background:var(--walnut)}
+.drawer.on{transform:none}
+.calm .drawer{transition:opacity 140ms linear;transform:none;opacity:0;visibility:hidden}
+.calm .drawer.on{opacity:1;visibility:visible}
+.dh{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*30);display:flex;align-items:center;gap:calc(var(--u)*16);font:500 calc(var(--u)*26) var(--f);white-space:nowrap}
+.dh .over{color:var(--ink2);font-weight:400}
+.dh .hints{position:static;margin-left:auto;height:auto}
+.dk{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*90);display:flex;gap:calc(var(--u)*14)}
+.mk{position:relative;flex:1;display:grid;align-content:center;gap:calc(var(--u)*2);height:calc(var(--u)*110);padding:0 calc(var(--u)*20) calc(var(--u)*12);border-radius:calc(var(--u)*8);background:var(--lac2);transition:transform 150ms var(--glide);min-width:0}
+.mk .n{font:500 calc(var(--u)*26) var(--f);color:var(--ink2);white-space:nowrap}
+.mk .v{font:400 calc(var(--u)*22) var(--f);color:var(--ink3);white-space:nowrap;display:flex;align-items:center;gap:calc(var(--u)*8)}
+.mk.f{background:var(--lac3);transform:translateY(calc(var(--u)*-4))}
+.mk.f .n{color:var(--ink)}.mk.f .v{color:var(--ink2)}
+.mk.f .bw{background:var(--cream)}
+.calm .mk.f{transform:none}
+.mk.unl{background:var(--alert)}.mk.unl .n,.mk.unl .v{color:#1d1c1a}.mk.unl .bw{background:#7a1f15}.mk.unl.f .bw{background:#1d1c1a}
+.mk.narrow{flex:0 0 calc(var(--u)*300)}
+.chooser{position:absolute;bottom:calc(var(--u)*230);width:calc(var(--u)*440);padding:calc(var(--u)*14) 0 calc(var(--u)*10);border-radius:calc(var(--u)*10);background:var(--lac);box-shadow:0 0 0 calc(var(--u)*2) #3a3029;display:none;z-index:21}
+.chooser.on{display:block}
+.chooser .hd{padding:0 calc(var(--u)*24) calc(var(--u)*8);font:500 calc(var(--u)*22) var(--mono);color:var(--ink3);letter-spacing:.08em;display:flex;justify-content:space-between}
+.opt{position:relative;display:flex;align-items:center;gap:calc(var(--u)*16);height:calc(var(--u)*58);padding:0 calc(var(--u)*24) 0 calc(var(--u)*30);font:400 calc(var(--u)*26) var(--f);color:var(--ink2);white-space:nowrap}
+.opt .sub{color:var(--ink3);font-size:calc(var(--u)*22);margin-left:auto}
+.opt .lw{position:absolute;left:0;top:calc(var(--u)*12);bottom:calc(var(--u)*12);width:calc(var(--u)*6);border-radius:0 calc(var(--u)*3) calc(var(--u)*3) 0;background:#0a0807}
+.opt.f{color:var(--ink);background:var(--lac2)}.opt.f .lw{background:var(--cream)}
+.chooser .ft{padding:calc(var(--u)*8) calc(var(--u)*24) 0;font:400 calc(var(--u)*22) var(--f);color:var(--ink3);border-top:calc(var(--u)*2) solid #2c241e;margin-top:calc(var(--u)*6);white-space:nowrap}
+
+/* ---------- picture (what's playing), dark (asleep / restarting) ---------- */
+.picture .art{position:absolute;inset:0}
+.standin{position:absolute;left:calc(var(--u)*96);bottom:calc(var(--u)*96);font:400 calc(var(--u)*26) var(--f);color:#ffffffb3}
+.dark{background:#000}
+.dark .standin{color:#8a8274}
+
+/* ---------- the blind (title card) ---------- */
+.blind{position:absolute;inset:0;z-index:30;background:#16120f;
+  background-image:repeating-linear-gradient(180deg,#ffffff0d 0 calc(var(--u)*1),#00000040 calc(var(--u)*1) calc(var(--u)*3),transparent calc(var(--u)*3) calc(var(--u)*18));
+  transform:translateY(-101%);transition:transform 300ms var(--decel);visibility:hidden}
+.blind.down{transform:none;visibility:visible}
+.blind.up{transform:translateY(-101%);visibility:visible;transition:transform 300ms var(--leave)}
+.calm .blind{transform:none;opacity:0;transition:opacity 140ms linear}
+.calm .blind.down{opacity:1}
+.calm .blind.up{opacity:0;transform:none;transition:opacity 140ms linear}
+.blind::after{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*24);background:var(--walnut)}
+.bc{position:absolute;left:calc(var(--u)*160);right:calc(var(--u)*160);top:calc(var(--u)*300);display:grid;gap:calc(var(--u)*14)}
+.bc .eb{font:500 calc(var(--u)*24) var(--mono);letter-spacing:.14em;color:var(--ink2);text-transform:uppercase}
+.bc .tt{font:500 calc(var(--u)*84)/1.05 var(--f);letter-spacing:-.01em}
+.bc .ln{font:400 calc(var(--u)*28)/1.4 var(--f);color:var(--ink2);max-width:calc(var(--u)*1100)}
+.slats{display:flex;gap:calc(var(--u)*10);margin-top:calc(var(--u)*20)}
+.slats i{width:calc(var(--u)*56);height:calc(var(--u)*12);border-radius:calc(var(--u)*3);background:#0a0807;box-shadow:inset 0 calc(var(--u)*1) calc(var(--u)*2) #000,0 0 0 calc(var(--u)*1) #ffffff14;position:relative}
+.slats i::after{content:"";position:absolute;inset:calc(var(--u)*3);border-radius:2px;background:var(--cream);opacity:0}
+.slats i.l::after{opacity:1}
+.slats.dim i.l::after{opacity:.4}
+.bc .ks{display:flex;gap:calc(var(--u)*16);margin-top:calc(var(--u)*28)}
+.bc .big{display:flex;align-items:center;gap:calc(var(--u)*40)}
+.bigsock{flex:none;width:calc(var(--u)*150);height:calc(var(--u)*150);border-radius:50%;background:var(--code,#3a3029);box-shadow:0 0 0 calc(var(--u)*12) #3a3029;position:relative}
+.bigsock::after{content:"";position:absolute;left:calc(var(--u)*38);right:calc(var(--u)*38);top:calc(var(--u)*55);height:calc(var(--u)*40);background:#0c0a08cc;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%)}
+
+/* ---------- full screens: All apps, Arrange, Settings ---------- */
+.screen{background:var(--lac)}
+.screen::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(var(--u)*10);background:var(--walnut)}
+.sh{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*56);display:flex;align-items:center;gap:calc(var(--u)*24);height:calc(var(--u)*72)}
+.sh .t{font:500 calc(var(--u)*48) var(--f);white-space:nowrap}
+.sh .s{font:400 calc(var(--u)*26) var(--f);color:var(--ink2);white-space:nowrap}
+.sh .c{margin-left:auto;font:400 calc(var(--u)*26) var(--f);color:var(--ink2);white-space:nowrap}
+/* All apps, A to Z: index tabs mark where each letter starts */
+.ag{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*196);display:grid;grid-template-columns:repeat(6,1fr);gap:calc(var(--u)*44) calc(var(--u)*16)}
+.ak{position:relative;display:grid;gap:calc(var(--u)*6);align-content:start;height:calc(var(--u)*150);padding:calc(var(--u)*22) calc(var(--u)*22) 0;border-radius:calc(var(--u)*8);background:var(--lac2);transition:transform 150ms var(--glide)}
+.ak .code{width:calc(var(--u)*40);height:calc(var(--u)*5);border-radius:2px;background:var(--code)}
+.ak .n{font:500 calc(var(--u)*28)/1.15 var(--f);color:var(--ink2)}
+.ak .g{font:400 calc(var(--u)*22) var(--f);color:var(--ink3);white-space:nowrap}
+.ak .tab{position:absolute;left:calc(var(--u)*14);top:calc(var(--u)*-34);height:calc(var(--u)*34);padding:0 calc(var(--u)*12);border-radius:calc(var(--u)*6) calc(var(--u)*6) 0 0;background:var(--lac3);font:500 calc(var(--u)*22)/calc(var(--u)*34) var(--mono);color:var(--ink2)}
+.ak.f{background:var(--lac3);transform:translateY(calc(var(--u)*-4))}.ak.f .n{color:var(--ink)}.ak.f .g{color:var(--ink2)}.ak.f .bw{background:var(--cream)}
+.calm .ak.f{transform:none}
+/* Arrange the dial: the three bands drawn large, six slots each, and the tray of apps not on the dial */
+.arr{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*170);display:grid;gap:calc(var(--u)*18)}
+.arow{position:relative;height:calc(var(--u)*126);border-radius:calc(var(--u)*10);background:var(--glass);box-shadow:inset 0 calc(var(--u)*2) calc(var(--u)*8) #000,0 0 0 calc(var(--u)*2) #2c241e}
+.arow .ag2{position:absolute;left:calc(var(--u)*24);top:calc(var(--u)*18);display:grid;gap:calc(var(--u)*6);font:500 calc(var(--u)*22) var(--mono);letter-spacing:.1em;color:var(--ink2)}
+.arow .ag2 .cnt{letter-spacing:0;color:var(--ink3);font-weight:400;font-family:var(--f)}
+.arow .ag2 .cnt.full{color:var(--ink)}
+.arow .msg{color:var(--ink)}
+.slots{position:absolute;left:calc(var(--u)*250);right:calc(var(--u)*16);top:calc(var(--u)*16);bottom:calc(var(--u)*16);display:grid;grid-template-columns:repeat(6,1fr);gap:calc(var(--u)*12)}
+.slotc{border-radius:calc(var(--u)*8);border:calc(var(--u)*2) dashed #3a3129;display:grid;place-items:center;font:400 calc(var(--u)*22) var(--f);color:var(--ink3)}
+.pc{position:relative;display:grid;align-content:center;justify-items:start;gap:calc(var(--u)*6);padding:0 calc(var(--u)*18) calc(var(--u)*6);border-radius:calc(var(--u)*8);background:var(--lac2);transition:transform 150ms var(--glide);min-width:0}
+.pc .code{width:calc(var(--u)*36);height:calc(var(--u)*5);border-radius:2px;background:var(--code)}
+.pc .n{font:500 calc(var(--u)*26)/1.1 var(--f);color:var(--ink2);white-space:nowrap}
+.pc .dn{font:400 calc(var(--u)*22) var(--f);color:var(--ink3);white-space:nowrap}
+.pc.f{background:var(--lac3);transform:translateY(calc(var(--u)*-4))}.pc.f .n{color:var(--ink)}.pc.f .bw{background:var(--cream)}
+.calm .pc.f{transform:none}
+.pc.carry{background:#3b3029;transform:translateY(calc(var(--u)*-12));box-shadow:0 0 0 calc(var(--u)*3) var(--cream),calc(var(--u)*6) calc(var(--u)*12) 0 #000000a0}
+.pc.carry .n{color:var(--ink)}
+.calm .pc.carry{transform:none}
+.tray{position:relative;display:grid;gap:calc(var(--u)*12);padding-top:calc(var(--u)*8)}
+.tray .gl{font:500 calc(var(--u)*22) var(--mono);letter-spacing:.12em;color:var(--ink3);text-transform:uppercase}
+.tray .tk{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:calc(var(--u)*116);gap:calc(var(--u)*12)}
+.tray .pc .n{white-space:normal}
+
+.slist{position:absolute;left:calc(var(--u)*96);top:calc(var(--u)*160);width:calc(var(--u)*640);display:grid;gap:calc(var(--u)*4)}
+.srow{position:relative;display:flex;align-items:center;gap:calc(var(--u)*16);height:calc(var(--u)*70);padding:0 calc(var(--u)*24) 0 calc(var(--u)*34);border-radius:calc(var(--u)*8);font:500 calc(var(--u)*28) var(--f);color:var(--ink2);white-space:nowrap}
+.srow .v{margin-left:auto;font:400 calc(var(--u)*24) var(--f);color:var(--ink3);display:flex;align-items:center;gap:calc(var(--u)*10);white-space:nowrap}
+.srow .lw{position:absolute;left:0;top:calc(var(--u)*16);bottom:calc(var(--u)*16);width:calc(var(--u)*6);border-radius:0 calc(var(--u)*3) calc(var(--u)*3) 0;background:#0a0807}
+.srow.f{background:var(--lac2);color:var(--ink)}.srow.f .lw{background:var(--cream)}.srow.f .v{color:var(--ink2)}
+.srow.here:not(.f) .lw{background:#8d806c}
+.srow.here .v .val{display:none}
+.srow .v .arrow{display:none}.srow.here .v .arrow{display:inline}
+.sdet{position:absolute;left:calc(var(--u)*800);right:calc(var(--u)*96);top:calc(var(--u)*160);display:grid;gap:calc(var(--u)*16);align-content:start}
+.sdet h3{margin:0;font:500 calc(var(--u)*36) var(--f)}
+.sdet h4{margin:calc(var(--u)*6) 0 0;font:500 calc(var(--u)*22) var(--mono);letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
+.sdet p{margin:0;max-width:calc(var(--u)*960);font:400 calc(var(--u)*26)/1.45 var(--f);color:var(--ink2)}
+.sdet .stack{display:grid;gap:calc(var(--u)*12);justify-items:start}
+.sdet .facts{display:grid;grid-template-columns:auto 1fr;gap:calc(var(--u)*8) calc(var(--u)*30);font:400 calc(var(--u)*26) var(--f);color:var(--ink2)}
+.sdet .facts b{font-weight:500;color:var(--ink)}
+.sdet .mini{font:400 calc(var(--u)*24) var(--f);color:var(--ink3)}
+.key .sub{color:var(--ink3);font-weight:400}
+.key.f .sub{color:var(--ink2)}
+/* the day strip (Settings › The window): the sky's stops across today, NOW as a cream rule */
+.sunstrip{position:relative;height:calc(var(--u)*150);width:calc(var(--u)*960)}
+.sunstrip .bar{position:absolute;left:0;right:0;top:calc(var(--u)*40);height:calc(var(--u)*44);border-radius:calc(var(--u)*6);overflow:hidden;background:#0a0807}
+.sunstrip .bar i{position:absolute;top:0;bottom:0}
+.sunstrip .bar .past{position:absolute;left:0;top:0;bottom:0;background:#00000073}
+.sunstrip.miss .bar{outline:calc(var(--u)*2) dashed var(--ink3);outline-offset:calc(var(--u)*4)}
+.sunstrip .now{position:absolute;top:calc(var(--u)*30);height:calc(var(--u)*64);width:calc(var(--u)*4);margin-left:calc(var(--u)*-2);background:var(--cream);border-radius:2px}
+.sunstrip .nl{position:absolute;top:0;font:500 calc(var(--u)*22) var(--mono);color:var(--ink);white-space:nowrap;transform:translateX(-50%)}
+.sunstrip .tl{position:absolute;top:calc(var(--u)*100);font:400 calc(var(--u)*22) var(--f);color:var(--ink2);white-space:nowrap}
+.sunstrip .tk{position:absolute;top:calc(var(--u)*84);width:calc(var(--u)*2);height:calc(var(--u)*14);background:var(--ink3)}
+.srcline{display:flex;align-items:center;gap:calc(var(--u)*12);font:400 calc(var(--u)*24) var(--f);color:var(--ink2)}
+
+/* the TV keyboard: a drawer that rises taller, 12-unit grid, Done the one orange, steady caret */
+.kbd{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*660);background:var(--lac);z-index:35;transform:translateY(105%);transition:transform 220ms var(--decel)}
+.kbd::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(var(--u)*14);background:var(--walnut)}
+.kbd.on{transform:none}
+.calm .kbd{transition:opacity 140ms linear;transform:none;opacity:0;visibility:hidden}.calm .kbd.on{opacity:1;visibility:visible}
+.kh{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*34);display:flex;align-items:center;gap:calc(var(--u)*16);font:500 calc(var(--u)*30) var(--f);white-space:nowrap}
+.kh .over{font:400 calc(var(--u)*24) var(--f);color:var(--ink2)}
+.field{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*90);height:calc(var(--u)*80);border-radius:calc(var(--u)*8);background:var(--glass);box-shadow:inset 0 calc(var(--u)*2) calc(var(--u)*6) #000;display:flex;align-items:center;padding:0 calc(var(--u)*28);font:400 calc(var(--u)*40) var(--f)}
+.field .caret{display:inline-block;width:calc(var(--u)*3);height:calc(var(--u)*46);background:var(--cream);margin-left:calc(var(--u)*3)}
+.field .cnt{margin-left:auto;font:500 calc(var(--u)*22) var(--mono);color:var(--ink3)}
+.kgrid{position:absolute;left:calc(var(--u)*96);right:calc(var(--u)*96);top:calc(var(--u)*196);display:grid;grid-template-columns:repeat(12,1fr);gap:calc(var(--u)*10)}
+.kk{position:relative;height:calc(var(--u)*74);border-radius:calc(var(--u)*8);background:var(--lac2);display:grid;place-items:center;font:400 calc(var(--u)*30) var(--f);color:var(--ink2);transition:transform 150ms var(--glide);box-shadow:0 calc(var(--u)*3) 0 #0a0807}
+.kk.w2{grid-column:span 2}.kk.w4{grid-column:span 4}
+.kk .sm{font:500 calc(var(--u)*24) var(--f)}
+.kk.f{background:var(--lac3);color:var(--ink);transform:translateY(calc(var(--u)*-3));box-shadow:0 calc(var(--u)*6) 0 #0a0807,inset 0 calc(var(--u)*-5) 0 var(--cream)}
+.kk.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 calc(var(--u)*3) 0 #8a4a12}
+.kk.pri.f{color:#000;box-shadow:0 calc(var(--u)*8) 0 #6f3a0c,inset 0 calc(var(--u)*-5) 0 #1d1c1a}
+.kk.on{box-shadow:inset 0 calc(var(--u)*3) calc(var(--u)*4) #000}
+.calm .kk.f{transform:none}
+.kbd .hints{bottom:calc(var(--u)*54)}
+
+/* ---------- the idle face: the window, drawn tall ---------- */
+.isky{position:absolute;inset:0;overflow:hidden}
+.isky .skyl{transition:opacity 1200ms linear}
+.isill{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*40);background:var(--walnut)}
+.iblock{position:absolute;display:grid;gap:calc(var(--u)*10);transition:opacity 600ms linear}
+.iclock{font:300 calc(var(--u)*200)/.95 var(--f);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.iclock small{font-size:calc(var(--u)*64);font-weight:400;margin-left:calc(var(--u)*14);color:var(--ink2)}
+.idate{font:400 calc(var(--u)*32) var(--f);color:var(--ink2)}
+.ihouse{display:flex;gap:calc(var(--u)*14);align-items:center;font:400 calc(var(--u)*28) var(--f);color:var(--ink2)}
+
+/* picture-mode preview filters: a stand-in for the panel's processing (applied to the layer under the menu) */
+.pm-film{filter:saturate(.94) brightness(.97)}.pm-std{filter:brightness(1.05)}.pm-vivid{filter:saturate(1.35) brightness(1.12) contrast(.94)}
+.pm-sport{filter:saturate(1.15) brightness(1.1) contrast(.96)}.pm-game{filter:contrast(1.04)}.pm-eco{filter:brightness(.82)}
+.pm-dyn{filter:saturate(1.25) brightness(1.16) contrast(.92)}.pm-cal{filter:saturate(.9) sepia(.08)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="eyebrow">Jam Design · TV launcher (Lobby) · Pass 5</div>
+    <h1>Lobby: the lowboard under the window</h1>
+    <p class="muted">Pass 4's living room, carried into every screen. The window's sky now follows the real sunrise and sunset from Home Assistant, and steps darker when the TV is in a bright picture mode. The app dial has three bands of six fixed slots, so it shows how many it holds. The lamps and the front door are drawn the way Jam Home draws them. An unlocked door is a warn by day and an alert after dark or when nobody's home. New this pass: All apps A to Z, Arrange the dial, Rename an input, Power and Restart the TV, and the idle face. Press <b>Tour</b> to watch it without a remote. All titles, art and names are made up.</p>
+  </div>
+  <div class="tourbar">
+    <button class="tourb" id="tourBtn">▶ Tour</button>
+    <button class="tourb sec" id="tourNext">Next step ›</button>
+    <div class="tourcap" id="tourCap"><b>TOUR</b>Steps through every state on its own, about 4 seconds each. Click the TV or press a key to take over.</div>
+  </div>
+  <div class="legend">
+    <span><code>← ↑ → ↓</code>Move</span><span><code>Enter</code>OK (acts on release; hold to unlock)</span><span><code>Esc</code><code>Backspace</code>Back (Backspace deletes while typing)</span><span><code>H</code>Home</span><span><code>G</code><code>Q</code>TV menu</span><span><code>I</code>Inputs</span><span><code>P</code>Power</span><span><code>a–z</code>Type, when the keyboard is open</span>
+  </div>
+  <div class="keys" id="remote"><span class="eyebrow">Remote</span>
+    <button class="kb" data-k="ArrowUp">↑</button><button class="kb" data-k="ArrowDown">↓</button><button class="kb" data-k="ArrowLeft">←</button><button class="kb" data-k="ArrowRight">→</button>
+    <button class="kb" data-k="Enter">OK</button><button class="kb" data-k="hold">Hold OK</button><button class="kb" data-k="Escape">Back</button><button class="kb" data-k="h">⌂ Home</button><button class="kb" data-k="g">TV menu</button><button class="kb" data-k="p">⏻ Power</button>
+  </div>
+
+  <div class="tv" id="tv" tabindex="0" aria-label="TV, 1920 by 1080. Click, then use the arrow keys and Enter.">
+    <!-- HOME -->
+    <section class="layer on" id="home" data-rows="top shelf dialW dialP dialL bay">
+      <div class="sky" id="sky"><div class="skyl on" id="skyA"></div><div class="skyl" id="skyB"></div></div>
+      <div class="sill"></div>
+      <div class="hdr">
+        <div>
+          <div class="house">Bungalo</div>
+          <div class="clock" id="clock">8:24<small>PM</small></div>
+          <div class="date" id="date">Thursday, November 5 · 57° cloudy</div>
+        </div>
+        <div class="hkeys">
+          <div class="hk" data-f data-row="top" data-act="tvmenu" id="kTV"><div class="in"><span>TV</span><span class="v" id="kTVv">Theater night · Optical</span></div><i class="bw"></i></div>
+          <div class="hk" data-f data-row="top" data-act="settings" id="kSet"><div class="in"><span class="ind led" id="updLed"></span><span>Settings</span></div><i class="bw"></i></div>
+        </div>
+      </div>
+      <div class="sign" id="sign"><div class="eb" id="sEb"></div><div class="tt" id="sTt"></div><div class="ln"><span class="t" id="sLn"></span><span class="do" id="sDo"></span></div></div>
+      <div class="grp" id="gShelf">Continue<span class="n" id="gShelfN">1 of 6</span></div>
+      <div class="shelf"><div class="track" id="track"></div></div>
+      <div class="face">
+        <div class="dial" id="dial"></div>
+        <div class="bay" id="bay"></div>
+        <div class="plate" id="plate"></div>
+        <div class="hints" id="hints"></div>
+      </div>
+      <div class="note-card" id="cec">
+        <div class="eb">HDMI 2 · JUST NOW</div>
+        <div class="t"><span class="ind led ok on"></span><span id="cecT">Switch 2 turned on</span></div>
+        <div class="ks"><div class="key pri" data-f data-row="cec" data-act="cec-go"><span class="ind slot"></span>Switch to it</div><div class="key" data-f data-row="cec" data-act="cec-stay"><span class="ind slot"></span>Stay on Home</div></div>
+      </div>
+      <div class="toast" id="toast"></div>
+    </section>
+
+    <!-- PICTURE (what's on the TV: a film, an input, an app) -->
+    <section class="layer picture" id="pic"><div class="art" id="picArt"></div><div class="standin" id="picNote"></div></section>
+
+    <!-- ALL APPS, A TO Z -->
+    <section class="layer screen" id="apps" data-rows="ah g0 g1 g2 g3">
+      <div class="sh"><span class="t">All apps</span><span class="s" id="appsSub">A to Z</span><span class="c"><span class="key" data-f data-row="ah" data-act="arrange" id="kArr"><span class="ind slot"></span>Arrange the dial</span></span></div>
+      <div class="ag" id="ag"></div>
+      <div class="hints" id="hintsA"><span><kbd>OK</kbd>Open</span><span><kbd>Back</kbd>Home</span><span id="clockA">8:24 PM</span></div>
+    </section>
+
+    <!-- ARRANGE THE DIAL -->
+    <section class="layer screen" id="arrange" data-rows="r-Watch r-Play r-Listen r-off0 r-off1">
+      <div class="sh"><span class="t" id="arrT">Arrange the dial</span><span class="s" id="arrS">OK picks an app up. Arrows move it. OK puts it down.</span><span class="c" id="clockR">8:24 PM</span></div>
+      <div class="arr" id="arr"></div>
+      <div class="hints" id="hintsR"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="layer screen" id="settings" data-rows="sl sd" data-axis="y">
+      <div class="sh"><span class="t">Settings</span><span class="s">Lobby and the TV</span><span class="c" id="clockS">8:24 PM</span></div>
+      <div class="slist" id="slist"></div>
+      <div class="sdet" id="sdet"></div>
+      <div class="hints" id="hintsS"><span><kbd>OK</kbd>Choose</span><span><kbd>Back</kbd>Home</span></div>
+    </section>
+
+    <!-- IDLE FACE -->
+    <section class="layer" id="idle">
+      <div class="isky" id="isky"><div class="skyl on" id="iskyA"></div><div class="skyl" id="iskyB"></div></div>
+      <div class="isill"></div>
+      <div class="iblock" id="iblock"><div class="iclock" id="iclock">8:24<small>PM</small></div><div class="idate" id="idate"></div><div class="ihouse" id="ihouse"></div></div>
+    </section>
+
+    <!-- DARK: asleep, restarting -->
+    <section class="layer dark" id="dark"><div class="standin" id="darkNote"></div></section>
+
+    <!-- THE DRAWER: TV menu, or Power -->
+    <div class="drawer" id="drawer" data-rows="mk">
+      <div class="dh"><span class="ind slot on"></span><span id="dTitle">TV menu</span><span class="over" id="dOver">over Home</span>
+        <span class="hints"><span><kbd>OK</kbd>Choose</span><span><kbd>Back</kbd>Close</span><span id="dClock">8:24 PM</span></span></div>
+      <div class="dk" id="dk"></div>
+    </div>
+    <div class="chooser" id="chooser" data-rows="opt" data-axis="y"></div>
+
+    <!-- CONFIRM (Restart the TV) -->
+    <div class="confirm" id="confirm" data-rows="cf">
+      <div class="eb">POWER</div><div class="t">Restart the TV?</div>
+      <p id="cfText">Whatever is playing stops. The screen stays dark for about a minute while the TV starts up, then Lobby comes back on its own.</p>
+      <div class="ks"><div class="key" data-f data-row="cf" data-act="cf-cancel"><span class="ind slot"></span>Cancel</div><div class="key" data-f data-row="cf" data-act="cf-restart"><span class="ind slot"></span>Restart the TV</div></div>
+    </div>
+
+    <!-- KEYBOARD (rename an input) -->
+    <div class="kbd" id="kbd" data-rows="k0 k1 k2 k3">
+      <div class="kh"><span class="ind slot on"></span><span id="kTitle">Rename HDMI 2</span><span class="over">Shows on the socket panel and in the TV menu.</span></div>
+      <div class="field"><span id="kfText"></span><i class="caret"></i><span class="cnt" id="kfCnt"></span></div>
+      <div class="kgrid" id="kgrid"></div>
+      <div class="hints"><span><kbd>OK</kbd>Type</span><span><kbd>Back</kbd>Cancel</span><span id="kKeep">Back keeps “Switch 2”</span></div>
+    </div>
+
+    <!-- BLIND (title card + failure layer) -->
+    <div class="blind" id="blind" data-rows="bk"><div class="bc" id="bc"></div></div>
+  </div>
+
+  <div class="ctl">
+    <div><span class="eyebrow">Clock</span><div class="seg" data-ctl="clock">
+      <button data-v="380">6:20 AM</button><button data-v="555">9:15 AM</button><button data-v="870">2:30 PM</button><button data-v="965">4:05 PM</button><button data-v="1040">5:20 PM</button><button data-v="1140">7:00 PM</button><button data-v="1224">8:24 PM</button><button data-v="live">Live</button></div></div>
+    <div><span class="eyebrow">Date</span><div class="seg" data-ctl="season"><button data-v="nov">Nov 5</button><button data-v="jun">Jun 21</button></div></div>
+    <div><span class="eyebrow">Sun times</span><div class="seg" data-ctl="sun"><button data-v="ha">From Home Assistant</button><button data-v="missing">Missing</button></div></div>
+    <div><span class="eyebrow">TV picture mode</span><div class="seg" data-ctl="pm"><button data-v="Theater night">Theater night</button><button data-v="Vivid">Vivid</button><button data-v="Dynamic">Dynamic</button></div></div>
+  </div>
+  <div class="readout" id="skyRead"></div>
+  <details class="more" open><summary>More page controls</summary>
+  <div class="ctl">
+    <div><span class="eyebrow">Front door</span><div class="seg" data-ctl="door"><button data-v="locked">Locked</button><button data-v="unlocked">Unlocked</button></div></div>
+    <div><span class="eyebrow">Who's home</span><div class="seg" data-ctl="who"><button data-v="someone">Someone</button><button data-v="nobody">Nobody</button></div></div>
+    <div><span class="eyebrow">Motion</span><div class="seg" data-ctl="motion"><button data-v="full">Full</button><button data-v="calm">Calm</button></div></div>
+    <div><span class="eyebrow">Home</span><div class="seg" data-ctl="home"><button data-v="lived">Lived-in</button><button data-v="first">First run</button></div></div>
+    <div><span class="eyebrow">Switch 2</span><div class="seg" data-ctl="sw"><button data-v="on">On</button><button data-v="asleep">Asleep</button></div></div>
+    <div><span class="eyebrow">Netflix</span><div class="seg" data-ctl="nf"><button data-v="opens">Opens</button><button data-v="fails">Won't open</button></div></div>
+    <div><span class="eyebrow">TV menu over apps</span><div class="seg" data-ctl="over"><button data-v="yes">Allowed</button><button data-v="home">Home only</button></div></div>
+    <div><span class="eyebrow">Lobby update</span><div class="seg" data-ctl="upd"><button data-v="no">Up to date</button><button data-v="yes">1.4 ready</button></div></div>
+    <div><span class="eyebrow">Page</span><div class="seg" data-ctl="theme"><button data-v="auto">Auto</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div></div>
+  </div>
+  </details>
+  <div class="ctl"><div><span class="eyebrow">Jump to</span><div class="seg" data-ctl="jump">
+    <button data-v="home">Home</button><button data-v="dial">App dial</button><button data-v="bay">Socket panel</button><button data-v="lamps">Lamps</button><button data-v="doorwarn">Door: warn by day</button><button data-v="dooralert">Door: alert after dark</button><button data-v="menu">TV menu over a film</button><button data-v="input">Input chooser</button><button data-v="nosig">No signal</button><button data-v="fail">App won't open</button><button data-v="cec">Device turned on</button><button data-v="apps">All apps A to Z</button><button data-v="arrange">Arrange the dial</button><button data-v="window">Settings › The window</button><button data-v="rename">Rename an input</button><button data-v="power">Power</button><button data-v="restart">Restart the TV</button><button data-v="idle">Idle face</button><button data-v="first">First run</button></div></div></div>
+
+  <div class="notes">
+    <div class="note"><h3>Purpose first</h3><span class="muted">Three people walk past this screen all day. It should be calm when nobody's using it, get anyone (a guest too) to their thing in a few presses, say what the TV is doing, and never sell anything. So it's furniture: a window, a sill, a lowboard.</span></div>
+    <div class="note"><h3>New in pass 5</h3><span class="muted">Three-band dial with fixed slots · All apps A to Z with index tabs · Arrange the dial · sun times from Home Assistant, with a day strip in Settings · darker sky for bright picture modes · Jam Home's dimmer plate and door swing · door warn by day, alert after dark · keyboard drawer to rename an input · Power and Restart the TV · the idle face.</span></div>
+    <div class="note"><h3>Read with</h3><span class="muted"><code>notes/pass5-tv-launcher.md</code>: what changed since pass 4, the language check, the conflicts and holes it assumes, the rules it broke, the audit and the questions for Isaac.</span></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const tv=$('tv');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* ---------------- data (all made up; household names from the Lobby README) ---------------- */
+const SKY={
+  night:{label:'Night',b:['#0e1424','#121a2e','#172036','#1f2840','#283149'],disc:['#e6dcc4',34],cloud:'#1a2236',stars:true},
+  dawn:{label:'Dawn',b:['#151a33','#231f3d','#352446','#6a3c55','#a8625e'],disc:['#efb488',54],cloud:'#2d2443'},
+  morning:{label:'Morning',b:['#1d3a52','#244561','#2c5170','#5d82a0','#8fadc0'],disc:['#f1e3c4',46],cloud:'#335a7a'},
+  afternoon:{label:'Afternoon',b:['#1b4060','#214b6e','#28567c','#5f8db0','#9bbccd'],disc:['#f3e9d2',40],cloud:'#2f5f86'},
+  golden:{label:'Golden hour',b:['#262b47','#3a3352','#573b55','#a5605a','#d99263'],disc:['#f4c784',56],cloud:'#463757'},
+  dusk:{label:'Dusk',b:['#121628','#1d1c35','#2e2240','#5a3150','#8f4a4f'],disc:['#e8956a',60],cloud:'#271f39'}
+};
+const BAND_Y=[0,210,330,430,510,584];
+const BRIGHT=['Vivid','Dynamic','Sports'];
+const STARS=[[1080,70],[1190,120],[1330,64],[1420,150],[1700,90],[1810,170],[1240,300],[1380,380],[1760,330],[1650,40],[1120,220],[1520,120],[1880,260],[1010,160]];
+const SUNS={nov:{rise:401,set:1012,yrise:400,yset:1013,date:'Thursday, November 5',wx:'57° cloudy'},jun:{rise:331,set:1229,yrise:331,yset:1229,date:'Sunday, June 21',wx:'78° clear'}};
+const ARTS={
+  copper:{sky:'#6b3a2a',sun:['#e8a25a',.72,.42,.16],hills:[['#3a2019','0 72%,18% 64%,40% 70%,62% 58%,100% 66%,100% 100%,0 100%']],city:'#2a1712'},
+  signal:{sky:'#1d2a44',sun:null,hills:[['#2f3b57','0 58%,100% 50%,100% 100%,0 100%'],['#121827','30% 100%,46% 58%,54% 58%,70% 100%']],lamps:'#e9cf8a'},
+  keeper:{sky:'#24323d',sun:['#e9d7b0',.2,.3,.08],hills:[['#16222a','0 70%,100% 74%,100% 100%,0 100%'],['#cfc3a8','62% 74%,64% 30%,68% 30%,70% 74%'],['#e9cf8a','63.5% 22%,68.5% 22%,68.5% 30%,63.5% 30%']]},
+  duel:{sky:'#17213a',sun:['#e7dfc8',.7,.3,.14],hills:[['#25304c','0 70%,30% 62%,60% 72%,100% 60%,100% 100%,0 100%'],['#0f1424','22% 100%,24% 52%,27% 52%,29% 100%'],['#0f1424','70% 100%,72% 50%,75% 50%,77% 100%']]},
+  harbour:{sky:'#2f4a55',sun:['#e9d7b0',.36,.4,.13],hills:[['#26414b','0 62%,100% 62%,100% 100%,0 100%'],['#e9d7b0','74% 60%,80% 34%,82% 60%'],['#162a32','0 82%,100% 82%,100% 100%,0 100%']]},
+  orbit:{sky:'#2b2a3f',sun:['#d9874f',.3,.5,.2],hills:[['#3c3b58','0 76%,100% 60%,100% 100%,0 100%'],['#b9ad96','62% 30%,64% 30%,64% 32%,62% 32%']]},
+  game:{sky:'#3d6f8c',sun:['#f2d27a',.82,.22,.1],hills:[['#5b9a5e','0 66%,25% 58%,50% 66%,75% 56%,100% 64%,100% 100%,0 100%'],['#8a5a34','0 86%,100% 86%,100% 100%,0 100%'],['#e9c36a','40% 52%,44% 52%,44% 58%,40% 58%']]},
+  live:{sky:'#26323b',sun:null,hills:[['#34444f','0 60%,100% 60%,100% 100%,0 100%'],['#c7b79a','10% 20%,52% 20%,52% 26%,10% 26%']]},
+  app:{sky:'#1e1b18',sun:null,hills:[]}
+};
+const CONT=[
+  {id:'copper',t:'The Copper City',app:'Jamfin',kind:'Film',ln:'A railway town, and the night all its lights went out.',meta:'41 min left · paused by Isaac',act:'Resume from 1:12:04',p:.71},
+  {id:'signal',t:'Signal Street',app:'Jamfin',kind:'Show · S2 E4',ln:'The Long Shift · 24 min left.',meta:'',act:'Resume from 0:19:40',p:.34},
+  {id:'keeper',t:'Everything Stops for the Lighthouse Keeper',app:'Jamfin',kind:'Film',ln:'A storm, a keeper, and one night without the light.',meta:'1 h 38 min left',act:'Resume from 0:12:10',p:.11},
+  {id:'duel',t:'Moonlit Duel',app:'Moonlight',kind:'Game · on the PC',ln:'Played Tuesday. Two players, one controller each.',meta:'',act:'Continue',p:0},
+  {id:'harbour',t:'The Harbour Hour',app:'Dropout',kind:'Show · S1 E7',ln:'Fog Warning · 6 min left.',meta:'',act:'Resume from 0:18:02',p:.62},
+  {id:'orbit',t:'Paper Orbit',app:'YouTube',kind:'Video',ln:'Building a cardboard planetarium, part 2.',meta:'',act:'Resume from 0:08:44',p:.4}
+];
+/* every app on the TV; dn = the dial name, for a name wider than its slot (190 px at 26 px, about 16 letters) */
+const APPS={
+  'Jamfin':{code:'#8f7bb3',d:'Our films and shows.'},
+  'YouTube':{code:'#b9534a',d:'Videos.'},
+  'Netflix':{code:'#9b4a46',d:'Films and shows.'},
+  'Prime Video':{code:'#4f86a6',d:'Films and shows.'},
+  'Dropout':{code:'#b79d45',d:'Comedy shows.'},
+  'YouTube TV':{code:'#a85a50',d:'Live channels.'},
+  'Moonlight':{code:'#5f7fb0',d:'Games streamed from the PC.'},
+  'Steam Link':{code:'#5c7489',d:'Steam, from the PC.'},
+  'RetroArch':{code:'#8a6aa0',d:'Old consoles, on the TV.'},
+  'House music':{code:'#b08a52',d:'The house music group, on the stereo.'},
+  'Spotify':{code:'#5f9a64',d:'Music on the TV speakers or the stereo.'},
+  'YouTube Music':{code:'#a8584e',d:'Music and playlists.'},
+  'Sendspin':{code:'#6a9a8a',d:'Music in step with the other rooms.'},
+  'Corridor Digital':{code:'#5a78b8',d:'Videos about visual effects.'},
+  'Android settings':{code:'#6b6052',d:"The TV's own settings menus."},
+  'Play Store':{code:'#6a7f6a',d:'Install and update apps.'},
+  'Podcasts':{code:'#8a7a5a',d:'Shows to listen to.'},
+  'Radio':{code:'#6a8a7a',d:'Local stations, streamed.'},
+  'The Criterion Channel':{code:'#7a7060',d:'Classic and art-house films.',dn:'Criterion'}
+};
+const BANDS=['Watch','Play','Listen'];const CAP=6;
+const PICMODES=[['Theater night',''],['Filmmaker','pm-film'],['Standard','pm-std'],['Calibrated','pm-cal'],['Vivid','pm-vivid'],['Sports','pm-sport'],['Game','pm-game'],['Energy saving','pm-eco'],['Dynamic','pm-dyn']];
+const SNDMODES=['Standard','Theater','Music','Speech','Late night','Sports','Stereo','Auto'];
+const SLEEPS=['Off','15 min','30 min','60 min','90 min'];
+const LGL={floor:'<path class="s" d="M10 4h10l3 9H7z"/><path class="o" d="M15 13v13M10 26h10"/>',
+ table:'<path class="s" d="M9 6h12l3 9H6z"/><path class="o" d="M13 15h4v7h-4zM9 25h12"/>',
+ strip:'<rect class="s" x="3" y="12" width="24" height="7" rx="3.5"/><path class="o" d="M7 22v3M23 22v3"/>'};
+
+const S={min:1224,live:false,season:'nov',sunSrc:'ha',calm:false,first:false,sw:true,nf:true,upd:false,over:'yes',screen:'home',
+  lamps:{floor:{n:'Floor lamp',g:'floor',on:true,lvl:40,c:'#f2c98a'},table:{n:'Table lamp',g:'table',on:false,lvl:70,c:'#f3dcae'},mood:{n:'Mood lighting',g:'strip',on:true,lvl:60,c:'#c9a0e8'}},
+  door:'locked',doorSince:null,doorFrom:'this TV',armed:0,who:'someone',unlockTV:'Allowed',
+  pic:'Theater night',snd:'Standard',out:'Optical',slp:'Off',cecPref:'Ask',skyPref:'Follow the sun',idlePref:'The window',
+  bands:{Watch:['Jamfin','YouTube','Netflix','Prime Video','Dropout','YouTube TV'],Play:['Moonlight','Steam Link','RetroArch',null,null,null],Listen:['House music','Spotify','YouTube Music','Sendspin',null,null]},
+  inputs:{h1:{lb:'HDMI 1',nm:null},h2:{lb:'HDMI 2',nm:'Switch 2',code:'#a4483d'},h3:{lb:'HDMI 3',nm:null},ant:{lb:'ANT',nm:'Live TV',code:'#6a8a9a',s:'41 channels'}},
+  playing:null,left:null,src:'Apps',dialMem:'Jamfin',shelfMem:0,ret:null,carry:null,idleSpot:0};
+const offDial=()=>Object.keys(APPS).filter(n=>!BANDS.some(b=>S.bands[b].includes(n))).sort((a,b)=>a.localeCompare(b));
+const onDial=()=>BANDS.reduce((a,b)=>a+S.bands[b].filter(Boolean).length,0);
+const bandOf=n=>BANDS.find(b=>S.bands[b].includes(n))||null;
+const dn=n=>APPS[n].dn||n;
+
+/* ---------------- time and the sun ---------------- */
+function fmt(m){m=((Math.round(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=m%60;return `${((h+11)%12)+1}:${String(mm).padStart(2,'0')} ${h<12?'AM':'PM'}`}
+function sunTimes(){const s=SUNS[S.season];return S.sunSrc==='ha'?{rise:s.rise,set:s.set,src:'ha'}:{rise:s.yrise,set:s.yset,src:'kept'}}
+function stopAt(m){const {rise,set}=sunTimes(),mid=(rise+set)/2;
+  return m<rise-50?'night':m<rise+30?'dawn':m<mid?'morning':m<set-75?'afternoon':m<set?'golden':m<set+50?'dusk':'night'}
+function sunUp(){const {rise,set}=sunTimes();return S.min>=rise&&S.min<set}
+function skyStop(){return S.skyPref==='Always night'?'night':stopAt(S.min)}
+function bright(){return BRIGHT.includes(S.pic)}
+function mix(h,t,k){const a=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),b=[1,3,5].map(i=>parseInt(t.slice(i,i+2),16));return '#'+a.map((v,i)=>Math.round(v+(b[i]-v)*k).toString(16).padStart(2,'0')).join('')}
+/* bright picture modes lift the panel's dark blues; the three bands that carry writing step darker to keep their contrast */
+function skyCols(k){const b=SKY[k].b.slice();return bright()?b.map((c,i)=>i<3?mix(c,'#000000',.3):c):b}
+function discAt(k){const {rise,set}=sunTimes();const isSun=k!=='night';let f;
+  if(isSun)f=Math.max(-.06,Math.min(1.06,(S.min-rise)/(set-rise)));else{const len=1440-(set-rise);f=((S.min-set+1440)%1440)/len;f=Math.max(.04,Math.min(.96,f))}
+  return {x:1290+f*490,y:560-Math.sin(Math.PI*f)*320}}
+function drawSky(el,k,H){const s=SKY[k],sc=H/584,cols=skyCols(k);
+  let h=cols.map((c,i)=>`<div class="b" style="background:${c};top:calc(var(--u)*${BAND_Y[i]*sc});height:calc(var(--u)*${(BAND_Y[i+1]-BAND_Y[i])*sc})"></div>`).join('');
+  if(s.stars)h+=STARS.map(([x,y])=>`<i class="star" style="left:calc(var(--u)*${x});top:calc(var(--u)*${y*sc})"></i>`).join('');
+  const[c,r]=s.disc;const p=discAt(k);h+=`<div class="disc" style="background:${c};width:calc(var(--u)*${r*2});height:calc(var(--u)*${r*2});left:calc(var(--u)*${p.x-r});top:calc(var(--u)*${p.y*sc-r})"></div>`;
+  [[1300,276,170],[1440,318,110],[1640,382,210],[1760,288,90]].forEach(([x,y,w])=>h+=`<div class="cloud" style="background:${bright()?mix(s.cloud,'#000000',.3):s.cloud};left:calc(var(--u)*${x});top:calc(var(--u)*${y*sc});width:calc(var(--u)*${w})"></div>`);
+  el.innerHTML=h;el.dataset.k=k}
+const front={sky:'skyA',isky:'iskyA'};
+function paintSky(which,instant){const k=skyStop(),H=which==='sky'?584:1080,A=which==='sky'?'skyA':'iskyA',B=which==='sky'?'skyB':'iskyB';
+  const f=front[which],back=f===A?B:A;drawSky($(back),k,H);
+  if(instant){$(back).style.transition='none';$(f).style.transition='none'}
+  $(back).classList.add('on');$(f).classList.remove('on');front[which]=back;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{$(A).style.transition='';$(B).style.transition=''}))}
+function setClock(m,instant){S.min=m;const t=fmt(m).split(' ');const s=SUNS[S.season];
+  $('clock').innerHTML=`${t[0]}<small>${t[1]}</small>`;$('iclock').innerHTML=`${t[0]}<small>${t[1]}</small>`;
+  ['clockA','clockR','clockS','dClock'].forEach(i=>$(i).textContent=fmt(m));
+  $('date').textContent=`${s.date} · ${s.wx}`;$('idate').textContent=`${s.date} · ${s.wx}`;
+  paintSky('sky',instant);paintSky('isky',instant);drawPlate(true);drawIdle();readout();
+  if(cur&&cur.closest('#home'))sign(cur);if(S.screen==='settings')refreshDetail()}
+function readout(){const {rise,set,src}=sunTimes();$('skyRead').textContent=`Sky: ${SKY[skyStop()].label}${S.skyPref==='Always night'?' (Always night)':''}${bright()?' · darker for '+S.pic:''} · sunrise ${fmt(rise)}, sunset ${fmt(set)} ${src==='ha'?'(from Home Assistant)':"(missing: yesterday's times)"} · door: ${doorLevel()}`}
+
+/* ---------------- drawing: home ---------------- */
+function artHTML(id){const a=ARTS[id];let h=`<div style="position:absolute;inset:0;background:${a.sky}"></div>`;
+  if(a.sun){const[c,x,y,r]=a.sun;h+=`<div style="position:absolute;left:${(x-r*.5625)*100}%;top:${(y-r)*100}%;width:${r*112.5}%;aspect-ratio:1;border-radius:50%;background:${c}"></div>`}
+  if(a.city){for(let i=0;i<9;i++){const w=6+((i*37)%5),hh=22+((i*53)%30),l=4+i*10.5;h+=`<div style="position:absolute;left:${l}%;bottom:18%;width:${w}%;height:${hh}%;background:${a.city}"></div>`}}
+  a.hills.forEach(([c,p])=>h+=`<div style="position:absolute;inset:0;background:${c};clip-path:polygon(${p})"></div>`);
+  if(a.lamps){[[18,46],[34,40],[66,40],[82,46]].forEach(([x,y])=>h+=`<div style="position:absolute;left:${x}%;top:${y}%;width:2.6%;aspect-ratio:1;border-radius:50%;background:${a.lamps}"></div>`)}
+  return h}
+function drawShelf(){const t=$('track');
+  if(S.first){t.innerHTML=`<div class="empty" id="emptyShelf"><p>Nothing on the shelf yet. Films, shows and games you start will stand here.</p><div class="key pri" data-f data-row="shelf" data-act="arrange" id="arrange1"><span class="ind slot"></span>Arrange the dial</div></div>`;return}
+  t.innerHTML=CONT.map((c,i)=>`<div class="fr" data-f data-row="shelf" data-act="launch" data-i="${i}"><div class="pic"><div class="art">${artHTML(c.id)}${c.p?`<div class="pg"><i style="width:${c.p*100}%"></i></div>`:''}</div></div><div class="plq"><span class="ind slot"></span><span class="t">${c.t}</span></div></div>`).join('')+'<div class="endstop"></div>'}
+const SLOTX=i=>250+104+208*i;
+function drawDial(){const d=$('dial');let h='';
+  BANDS.forEach((b,bi)=>{const row='dial'+b[0];
+    h+=`<div class="scale" data-b="${b}"><div class="gut"><span class="ind sq"></span><span>${b.toUpperCase()}</span><span class="pos"></span></div><div class="sline"></div>`;
+    S.bands[b].forEach((n,i)=>{h+=`<i class="slotm" style="left:calc(var(--u)*${SLOTX(i)})"></i>`;
+      if(n)h+=`<div class="st" data-f data-row="${row}" data-act="app" data-n="${esc(n)}" style="left:calc(var(--u)*${SLOTX(i)});--code:${APPS[n].code}"><span class="nm">${esc(dn(n))}</span><span class="code"></span></div>`});
+    h+='</div>'});
+  h+=`<i class="stop"></i><i class="stop r"></i><i class="needle" id="needle"></i><div class="allk" data-f data-row="dialP" data-act="allapps" id="allk"><span class="n">All apps</span><span class="g">A to Z · ${Object.keys(APPS).length}</span><i class="bw"></i></div>`;
+  d.innerHTML=h;if(!bandOf(S.dialMem))S.dialMem=S.bands.Watch.find(Boolean);tune(S.dialMem,false)}
+function tune(n,focused){const b=bandOf(n);if(!b)return;const i=S.bands[b].indexOf(n);$('needle').style.transform=`translateX(calc(var(--u)*${SLOTX(i)}))`;
+  document.querySelectorAll('#dial .scale').forEach(s=>{const on=s.dataset.b===b;s.classList.toggle('tuned',on);s.querySelector('.ind.sq').classList.toggle('on',on);s.classList.toggle('cur',on&&focused);
+    if(on){const L=S.bands[b].filter(Boolean);s.querySelector('.pos').textContent=`${L.indexOf(n)+1} of ${L.length}`}})}
+function drawBay(){const P=[{id:'apps',lb:'APPS',nm:'Apps',s:'on now',apps:true},{id:'h1'},{id:'h2'},{id:'h3'},{id:'ant'}];
+  $('bay').innerHTML=P.map((p,i)=>{if(p.apps)return `<div class="sk apps"><span class="lb">APPS</span><span class="hole"><span class="ind sq on"></span></span><span class="nm">Apps</span><span class="s">on now</span></div><i class="sep"></i>`;
+    const q=S.inputs[p.id];if(!q.nm)return `<div class="sk empty-port"><span class="lb">${q.lb}</span><span class="hole"></span><span class="nm">empty</span><span class="s"></span></div>`;
+    const sig=p.id==='h2'?(S.sw?'<span class="ind led ok on"></span>Signal':'<span class="ind led"></span>Asleep'):(q.s||'');
+    return `<div class="sk plug" data-f data-row="bay" data-act="input" data-port="${p.id}" style="--code:${q.code}"><span class="lb">${q.lb}</span><span class="hole"></span><span class="nm">${esc(q.nm)}</span><span class="s">${sig}</span></div>`}).join('')}
+const lglyph=(L,on)=>`<svg class="lg${on?' on':''}" viewBox="0 0 30 30" style="--lc:${L.c}" aria-hidden="true">${LGL[L.g]}</svg>`;
+function doorSwing(open){return `<svg class="dsw" viewBox="0 0 32 32" aria-hidden="true"><path class="wl" d="M1 28h4M27 28h4"/>${open?'<path class="sw" d="M27 28A21 21 0 0 0 6 7"/><path class="lf" d="M6 28V7"/>':'<path class="sw" style="opacity:.45" d="M27 28A21 21 0 0 0 6 7"/><path class="lf" d="M6 28h21"/><circle class="hg" cx="6" cy="28" r="2.2"/>'}</svg>`}
+function doorLevel(){if(S.door!=='unlocked')return 'locked';return (!sunUp()||S.who==='nobody')?'alert':'warn'}
+function doorWord(){const L=doorLevel();if(L==='alert')return 'Unlocked · OK locks';if(L==='warn')return '<span class="ind led warn on"></span><span class="tri">▲</span>Unlocked';if(S.armed)return 'Press OK again';return '<span class="ind led ok on"></span>Locked'}
+function drawPlate(keep){const k=keep&&cur&&cur.closest('#plate')?(cur.dataset.k||'door'):null;const L=S.lamps;const lv=doorLevel();
+  $('plate').innerHTML=Object.entries(L).map(([k,l])=>`<div class="lu" data-f data-row="bay" data-act="lamp" data-k="${k}"><div class="mv"><div class="pb"><span class="pad ${l.on?'on':'off'}"><i class="pm t"></i><i class="pm b"></i></span><span class="vf" style="--lc:${l.c}">${l.on?`<i class="fl" style="height:calc((100% - var(--u)*6) * ${l.lvl/100})"></i>`:''}<i class="cp" style="bottom:calc((100% - var(--u)*8) * ${l.on?l.lvl/100:0})"></i></span></div><div class="txt">${lglyph(l,l.on)}<span class="nm">${l.n}</span><span class="s">${l.on?'On':'Off'}</span></div></div><i class="bw"></i></div>`).join('')+
+  `<div class="lu door ${lv==='alert'?'unl':lv==='warn'?'warn':''}" data-f data-row="bay" data-act="door" data-hold="1000" id="door"><i class="hfill" id="hfill"></i><div class="mv">${doorSwing(S.door==='unlocked')}<div class="txt"><span class="nm">Front door</span><span class="s" id="doorS">${doorWord()}</span></div></div><i class="bw"></i></div>`;
+  if(k){const el=k==='door'?$('door'):$('plate').querySelector(`[data-k="${k}"]`);cur=null;focus(el,true)}}
+
+/* ---------------- the sign + hints ---------------- */
+function setSign(eb,tt,ln,doTxt){const sg=$('sign');const apply=()=>{$('sEb').innerHTML=eb;const t=$('sTt');t.textContent=tt;t.classList.remove('long','wrap');
+    if(t.scrollWidth>t.clientWidth+1){t.classList.add('long');if(t.scrollWidth>t.clientWidth+1)t.classList.add('wrap')}
+    $('sLn').textContent=ln||'';$('sDo').innerHTML=doTxt?`<kbd>OK</kbd>${doTxt}`:'';sg.classList.remove('swap')};
+  if(S.calm){apply();return}sg.classList.add('swap');clearTimeout(setSign.t);setSign.t=setTimeout(apply,50)}
+function sign(el){if(!el)return;const a=el.dataset.act;
+  if(a==='launch'){const c=CONT[+el.dataset.i];setSign([c.app,c.kind,c.meta].filter(Boolean).join(' · '),c.t,c.ln,c.act)}
+  else if(a==='app'){const n=el.dataset.n,p=APPS[n];setSign(`App · ${bandOf(n)}`,n,p.d,`Open ${dn(n)}`)}
+  else if(a==='allapps')setSign('Lobby','All apps','Every app on the TV, A to Z. Arrange the dial from there.','Open the list');
+  else if(a==='input'){const p=el.dataset.port,q=S.inputs[p];if(p==='h2')setSign('Input · HDMI 2',q.nm,S.sw?'Signal. It\'s on and sending a picture.':'Asleep. Turn it on, or OK and Lobby will tell you what it sees.','Switch to HDMI 2');else setSign('Input · Antenna',q.nm,'41 channels from the roof antenna.','Watch Live TV')}
+  else if(a==='lamp'){const l=S.lamps[el.dataset.k];setSign('House · Living room',l.n,l.on?`On at ${l.lvl}%. Set the level from Jam Home.`:'Off.',l.on?'Turn off':'Turn on')}
+  else if(a==='door'){const lv=doorLevel(),since=S.doorSince!=null?fmt(S.doorSince):'',{set}=sunTimes();
+    if(lv==='alert')setSign('<span class="ind led alert on"></span>House · Alert','The front door is unlocked',`Unlocked since ${since} from ${S.doorFrom}. ${S.who==='nobody'?"Nobody's home.":"It's after sunset."}`,'Lock it');
+    else if(lv==='warn')setSign('<span class="ind led warn on"></span><span class="tri">▲</span>House · Front door','The front door is unlocked',`Since ${since} from ${S.doorFrom}. Someone's home; it turns red at sunset, ${fmt(set)}.`,'Lock it');
+    else if(S.unlockTV==='Lock only')setSign('House · Front door','Front door','Locked. Unlocking from the TV is off (Settings › House).','');
+    else setSign('House · Front door','Front door','Locked. Hold OK for a second, or press it twice, to unlock.',S.armed?'Press OK again to unlock':'Unlock')}
+  else if(a==='tvmenu')setSign('The TV right now','TV menu',`Picture ${S.pic} · Sound ${S.snd} · Sound out ${S.out} · Sleep ${S.slp.toLowerCase()}`,'Open the TV menu');
+  else if(a==='settings')setSign('Lobby',S.upd?'Lobby 1.4 is ready':'Settings',S.upd?'It installs tonight, or now from About.':'Picture, sound, inputs, the window, the dial, the house, power, About.','Open Settings');
+  else if(a==='arrange')setSign('Welcome','Hello. This is Lobby.','Your apps, inputs and lamps, and nothing else. Start by putting your apps on the dial.','');
+  hints(el)}
+function hints(el){const a=el&&el.dataset.act,row=el&&el.dataset.row||'';let h=[];
+  const ok=t=>`<span><kbd>OK</kbd>${t}</span>`;
+  if(row.startsWith('dial'))h=a==='allapps'?[ok('Open'),'<span><kbd>G</kbd>TV menu</span>']:[ok('Open'),'<span>← → Tune · ↑ ↓ Band</span>','<span><kbd>G</kbd>TV menu</span>'];
+  else if(a==='door')h=S.door==='unlocked'?[ok('Lock')]:S.unlockTV==='Lock only'?['<span>Locked</span>']:[ok('Hold to unlock, or press twice')];
+  else if(row==='shelf')h=[ok(S.first?'Arrange the dial':'Resume'),'<span>← → Shelf</span>','<span><kbd>G</kbd>TV menu</span>'];
+  else if(a==='lamp')h=[ok('Switch'),'<span><kbd>G</kbd>TV menu</span>'];
+  else h=[ok('Choose'),'<span><kbd>G</kbd>TV menu</span>','<span><kbd>P</kbd>Power</span>'];
+  $('hints').innerHTML=h.join('')}
+
+/* ---------------- focus engine ---------------- */
+let cur=null;
+const on=id=>$(id).classList.contains('on');
+const ctx=()=>{if($('blind').classList.contains('down')&&$('bc').querySelector('[data-f]'))return $('blind');if(on('confirm'))return $('confirm');if(on('kbd'))return $('kbd');if(on('chooser'))return $('chooser');if(on('drawer'))return $('drawer');
+  if(on('cec'))return $('cec');return $(S.screen==='playing'?'pic':S.screen)};
+function rowsOf(c){const names=(c.dataset.rows||'').split(' ');const all=[...c.querySelectorAll('[data-f]')].filter(e=>e.getClientRects().length);
+  return names.map(n=>all.filter(e=>e.dataset.row===n)).filter(r=>r.length)}
+function focus(el,quiet){if(!el)return;tv.querySelectorAll('.f').forEach(e=>e!==el&&e.classList.remove('f'));cur=el;el.classList.add('f');onFocus(el,quiet)}
+function onFocus(el){const row=el.dataset.row||'';
+  if(el.closest('#home')){const dial=row.startsWith('dial');
+    $('dial').classList.toggle('cur',dial);$('gShelf').classList.toggle('cur',row==='shelf');
+    if(dial&&el.dataset.n){S.dialMem=el.dataset.n;tune(el.dataset.n,true)}else tune(S.dialMem,false);
+    if(row==='shelf'&&!S.first){const i=+el.dataset.i;S.shelfMem=i;$('gShelfN').textContent=`${i+1} of ${CONT.length}`;
+      const first=Math.max(0,i-4);$('track').style.transform=`translateX(calc(var(--u)*${-first*352}))`}
+    sign(el)}
+  if(el.classList.contains('opt'))previewDwell(el);
+  if(el.closest('#settings'))setDetail(el);
+  if(el.closest('#arrange'))arrHints()}
+function bump(t,cl){if(S.calm||!t)return;t.classList.remove('bump-r','bump-l','bump-u');void t.offsetWidth;t.classList.add(cl);setTimeout(()=>t.classList.remove(cl),200)}
+function move(dir){if($('blind').classList.contains('down')&&!$('bc').querySelector('[data-f]'))return;const c=ctx();if(!cur||!c.contains(cur)){const r=rowsOf(c);if(r.length)focus(r[0][0]);return}
+  const rows=rowsOf(c);const ri=rows.findIndex(r=>r.includes(cur));if(ri<0)return;const row=rows[ri];const i=row.indexOf(cur);
+  const ax=c.dataset.axis==='y';const along=ax?(dir==='up'||dir==='down'):(dir==='left'||dir==='right');
+  const r0=cur.dataset.row||'';
+  if(along){const d=(dir==='right'||dir==='down')?1:-1;
+    if(cur.id==='allk'&&d<0){const m=$('dial').querySelector(`[data-n="${CSS.escape(S.dialMem)}"]`);return focus(m)}
+    const n=row[i+d];if(n&&n.id!=='allk')return focus(n);
+    if(d>0&&r0.startsWith('dial')&&cur.id!=='allk')return focus($('allk'));
+    return bump(r0.startsWith('dial')?$('needle'):cur,d>0?'bump-r':'bump-l')}
+  const d=(dir==='down'||dir==='right')?1:-1;const nr=rows[ri+d];if(!nr)return;const nrow=nr[0].dataset.row||'';
+  if(nrow.startsWith('dial')&&!r0.startsWith('dial')){const m=$('dial').querySelector(`[data-n="${CSS.escape(S.dialMem)}"]`);return focus(m||nr[0])}
+  if(nrow==='shelf'&&!S.first)return focus(nr[S.shelfMem]||nr[0]);
+  const rc=cur.getBoundingClientRect();const cx=ax?rc.top+rc.height/2:rc.left+rc.width/2;
+  let best=nr[0],bd=1e9;nr.forEach(e=>{const r=e.getBoundingClientRect();const x=ax?r.top+r.height/2:r.left+r.width/2;const dd=Math.abs(x-cx);if(dd<bd){bd=dd;best=e}});focus(best)}
+
+/* ---------------- actions ---------------- */
+function toast(msg){const t=$('toast');t.innerHTML=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),3200)}
+function show(id){['home','pic','apps','arrange','settings','idle','dark'].forEach(s=>$(s).classList.toggle('on',s===id));S.screen=id==='pic'?'playing':id}
+function goHome(sel){if(S.screen==='playing'&&S.playing&&!S.playing.eb.startsWith('Input'))S.left=S.playing;else if(S.screen!=='home')S.left=S.left;
+  closeDrawer(true);closeConfirm(true);closeKbd(true);hideBlind();show('home');S.src='Apps';S.playing=null;$('picArt').className='art';
+  const el=sel&&document.body.contains(sel)&&sel.closest('#home')?sel:(S.ret&&document.body.contains(S.ret)&&S.ret.closest('#home')?S.ret:$('track').querySelector('[data-f]'));cur=null;focus(el)}
+function activate(el){const a=el.dataset.act;
+  if(a==='launch'){const c=CONT[+el.dataset.i];S.ret=el;launch({eb:c.app,tt:c.t,ln:c.act,art:c.id,note:''})}
+  else if(a==='app'){const n=el.dataset.n;S.ret=el;if(n==='Netflix'&&!S.nf)return launch({eb:'App',tt:'Netflix',ln:'Opening',fail:'app'});
+    launch({eb:'App',tt:n,ln:'Opening',art:'app',note:`Stand-in for ${n}. Lobby hands over to the app here.`})}
+  else if(a==='allapps'){S.ret=el;openApps()}
+  else if(a==='input'){S.ret=el;openInput(el.dataset.port)}
+  else if(a==='lamp'){const l=S.lamps[el.dataset.k];l.on=!l.on;drawPlate(true)}
+  else if(a==='door')doorPress();
+  else if(a==='tvmenu')openDrawer();
+  else if(a==='settings'){S.ret=el;openSettings()}
+  else if(a==='arrange'){if(el.closest('#home'))S.ret=el;openArrange()}
+  else if(a==='cec-go'){closeCec();S.ret=$('bay').querySelector('[data-port="h2"]');openInput('h2')}
+  else if(a==='cec-stay')closeCec();
+  else if(a==='mk')menuKey(el);
+  else if(a==='opt')chooseOpt(el);
+  else if(a==='retry'){const L=S.lastLaunch;if(L.fail==='app'&&!S.nf)return launch(L);if(L.fail==='sig'){openInput('h2');return}launch({...L,fail:null})}
+  else if(a==='bhome')goHome();
+  else if(a==='aopen'){const n=el.dataset.n;S.appsRet=n;launch({eb:'App',tt:n,ln:'Opening',art:'app',note:`Stand-in for ${n}.`,fromApps:true})}
+  else if(a==='pick')pickUp(el);
+  else if(a==='srow'){const first=$('sdet').querySelector('[data-f]');if(first)focus(first)}
+  else if(a==='upd'){S.upd=false;syncSegs();launch({eb:'Lobby · 1.4',tt:'Updating Lobby',ln:'Installing. Home comes back on its own.',home:true,after:()=>toast('<span class="ind led ok on"></span>Lobby is up to date · 1.4')})}
+  else if(a==='pref'){const g=el.dataset.g,v=el.dataset.v;S[g]=v;if(g==='skyPref'){paintSky('sky');paintSky('isky');readout()}if(g==='unlockTV')drawPlate();refreshDetail(v)}
+  else if(a==='rename')openKbd(el.dataset.port);
+  else if(a==='sarrange'){S.arrRet='settings';openArrange()}
+  else if(a==='sleepnow')goSleep();
+  else if(a==='srestart')openConfirm();
+  else if(a==='cf-cancel')closeConfirm();
+  else if(a==='cf-restart')restartTV();
+  else if(a==='kk')kbKey(el);
+}
+function doorPress(){if(S.door==='unlocked'){S.door='locked';S.armed=0;S.doorSince=null;afterDoor();return}
+  if(S.unlockTV==='Lock only'){bump(cur,'bump-u');return}
+  if(S.armed&&Date.now()-S.armed<3000){unlock();return}
+  S.armed=Date.now();afterDoor();clearTimeout(doorPress.t);doorPress.t=setTimeout(()=>{S.armed=0;if(S.door==='locked')afterDoor()},3000)}
+function unlock(){S.door='unlocked';S.armed=0;S.doorSince=S.min;S.doorFrom='this TV';afterDoor()}
+function afterDoor(){drawPlate(true);if(cur&&cur.closest('#home'))sign(cur);refreshMenuDoor();syncSegs();readout()}
+
+/* launch: the slatted blind drops over the window, holds max(load, 600 ms), then rises on the picture */
+let launchGen=0;
+async function launch(L){S.lastLaunch=L;const g=++launchGen;const b=$('blind');closeDrawer(true);
+  $('bc').innerHTML=`<div class="eb">${L.eb}</div><div class="tt">${L.tt}</div><div class="ln">${L.ln||''}</div><div class="slats" id="slats">${'<i></i>'.repeat(12)}</div>`;
+  b.classList.remove('up');b.classList.add('down');if(cur)cur.classList.remove('f');cur=null;
+  const load=L.fail?2200:L.home?2400:900,hold=Math.max(load,600),sl=[...$('slats').children];
+  const stopAt=L.fail?4:12;
+  for(let i=0;i<stopAt;i++){await sleep(hold/12);if(g!==launchGen)return;sl[i].classList.add('l')}
+  if(L.fail){await sleep(500);if(g!==launchGen)return;failLayer(L);return}
+  if(L.home){await sleep(200);if(g!==launchGen)return;show('home');b.classList.replace('down','up');await sleep(320);b.classList.remove('up');goHome(S.ret);L.after&&L.after();return}
+  $('picArt').innerHTML=artHTML(L.art);$('picNote').textContent=L.note||'';show('pic');S.playing=L;
+  b.classList.replace('down','up');await sleep(320);if(g!==launchGen)return;b.classList.remove('up')}
+function hideBlind(){launchGen++;$('blind').classList.remove('down','up')}
+function failLayer(L){$('slats').classList.add('dim');const bc=$('bc');
+  if(L.fail==='app'){bc.querySelector('.eb').textContent='App · Netflix';bc.querySelector('.tt').textContent="Netflix didn't open";bc.querySelector('.ln').textContent='It stopped while starting. Try again. If it keeps happening, restart the TV: Settings › Sleep & power.'}
+  bc.insertAdjacentHTML('beforeend',`<div class="ks"><div class="key pri" data-f data-row="bk" data-act="retry"><span class="ind slot"></span>Try again</div><div class="key" data-f data-row="bk" data-act="bhome"><span class="ind slot"></span>Home</div></div>`);
+  focus(bc.querySelector('[data-act="retry"]'))}
+function openInput(port){const q=S.inputs[port];
+  if(port==='h2'&&!S.sw){const g=++launchGen;const b=$('blind');closeDrawer(true);S.lastLaunch={fail:'sig'};
+    $('bc').innerHTML=`<div class="big"><div class="bigsock" style="--code:${q.code}"></div><div style="display:grid;gap:calc(var(--u)*12)"><div class="eb">HDMI 2 · ${esc(q.nm)}</div><div class="tt">No signal on HDMI 2</div><div class="ln">The ${esc(q.nm)} is plugged in but isn't sending a picture. Turn it on, then try again.</div><div class="slats dim" id="slats">${'<i class="l"></i>'.repeat(3)+'<i></i>'.repeat(9)}</div></div></div>`;
+    b.classList.remove('up');b.classList.add('down');if(cur)cur.classList.remove('f');cur=null;
+    setTimeout(()=>{if(g!==launchGen)return;$('bc').querySelector('.big>div:last-child').insertAdjacentHTML('beforeend',`<div class="ks"><div class="key pri" data-f data-row="bk" data-act="retry"><span class="ind slot"></span>Try again</div><div class="key" data-f data-row="bk" data-act="bhome"><span class="ind slot"></span>Home</div></div>`);focus($('bc').querySelector('[data-act="retry"]'))},700);return}
+  S.src=q.nm;launch({eb:port==='h2'?'Input · HDMI 2':'Input · Antenna',tt:q.nm,ln:port==='h2'?'Switching to HDMI 2':'Tuning channel 4',art:port==='h2'?'game':'live',note:port==='h2'?`Stand-in for the ${q.nm} picture.`:'Stand-in for Live TV.'})}
+
+/* CEC: a note in the window, once */
+let cecT;
+function showCec(){if(S.screen!=='home'||on('drawer')||$('blind').classList.contains('down')){toast(`<span class="ind led ok on"></span>${esc(S.inputs.h2.nm)} turned on · HDMI 2`);return}
+  $('cecT').textContent=`${S.inputs.h2.nm} turned on`;S.cecRet=cur;$('toast').classList.remove('on');$('cec').classList.add('on');focus($('cec').querySelector('[data-act="cec-go"]'));clearTimeout(cecT);cecT=setTimeout(closeCec,15000)}
+function closeCec(){if(!on('cec'))return;clearTimeout(cecT);$('cec').classList.remove('on');const r=S.cecRet&&document.body.contains(S.cecRet)?S.cecRet:$('track').querySelector('[data-f]');cur&&cur.classList.remove('f');cur=null;if(S.screen==='home')focus(r)}
+
+/* the drawer: TV menu, or Power */
+function overText(){if(S.screen==='playing'&&S.playing)return S.playing.eb.startsWith('Input')?`over ${S.playing.tt} · ${S.src===S.inputs.h2.nm?'HDMI 2':'Antenna'}`:`over ${S.playing.tt} · ${S.playing.eb}`;
+  if(S.screen==='home')return S.left?`over Home · you left ${S.left.tt}`:'over Home';return `over ${({apps:'All apps',settings:'Settings',arrange:'Arrange the dial'})[S.screen]||'Home'}`}
+function menuKeys(){$('dOver').textContent=overText();const src=S.screen==='playing'&&S.src!=='Apps'?S.src:'Apps';const lv=doorLevel();
+  const K=[['input','Input',src],['pic','Picture',S.pic],['snd','Sound',S.snd],['out','Sound out',S.out],['slp','Sleep',S.slp],['door','Front door',lv==='alert'?'Unlocked · OK locks':lv==='warn'?'<span class="ind led warn on"></span><span class="tri">▲</span>Unlocked':(S.armed?'Press OK again':'<span class="ind led ok on"></span>Locked')],['set','Settings','Lobby and the TV']];
+  $('dk').innerHTML=K.map(([k,n,v])=>`<div class="mk ${k==='door'&&lv==='alert'?'unl':''}" data-f data-row="mk" data-act="mk" data-k="${k}" ${k==='door'?'data-hold="1000"':''}>${k==='door'?'<i class="hfill"></i>':''}<span class="n">${n}</span><span class="v">${v}</span><i class="bw"></i></div>`).join('')}
+function powerKeys(){$('dOver').textContent=overText();
+  const K=[['pcancel','Cancel','Stay as you are'],['psleep','Sleep','Screen off now'],['prestart','Restart the TV','Asks first']];
+  $('dk').innerHTML=K.map(([k,n,v])=>`<div class="mk narrow" data-f data-row="mk" data-act="mk" data-k="${k}"><span class="n">${n}</span><span class="v">${v}</span><i class="bw"></i></div>`).join('')}
+function refreshMenuDoor(){if(!on('drawer')||S.drawerMode!=='tv')return;const k=cur&&cur.dataset.k;menuKeys();if(k&&cur&&cur.closest('#drawer')){cur=null;focus($('dk').querySelector(`[data-k="${k}"]`))}}
+function openDrawer(k){if($('blind').classList.contains('down')||S.screen==='idle'||S.screen==='dark')return;
+  if(S.screen==='playing'&&S.over==='home'){capNote('Home only: over an app the TV menu key goes to the app, not Lobby. Press H for Home, then the TV readout.');return}
+  closeCec();S.drawerMode='tv';$('dTitle').textContent='TV menu';S.drawerRet=cur;menuKeys();$('drawer').classList.add('on');$('kTVv').textContent='menu open ▼';
+  focus($('dk').querySelector(`[data-k="${k||'input'}"]`)||$('dk').firstChild);if(k)menuKey(cur);if(S.screen==='home')setSign('The TV right now','TV menu','Open below.','')}
+function openPower(){if($('blind').classList.contains('down'))return;if(S.screen==='idle'||S.screen==='dark'){wake();return}
+  closeChooser(true);closeCec();const was=on('drawer');S.drawerMode='power';$('dTitle').textContent='Power';if(!was)S.drawerRet=cur;powerKeys();$('drawer').classList.add('on');focus($('dk').querySelector('[data-k="pcancel"]'))}
+function closeDrawer(silent){closeChooser(true);if(!on('drawer'))return;$('drawer').classList.remove('on');$('kTVv').textContent=`${S.pic} · ${S.out}`;
+  if(!silent){cur&&cur.classList.remove('f');cur=null;const r=S.drawerRet&&document.body.contains(S.drawerRet)&&S.drawerRet.getClientRects().length?S.drawerRet:null;if(r)focus(r);else if(S.screen==='home')focus($('track').querySelector('[data-f]'))}}
+function menuKey(el){const k=el.dataset.k;
+  if(k==='pcancel'){closeDrawer();return}
+  if(k==='psleep'){closeDrawer(true);goSleep();return}
+  if(k==='prestart'){openConfirm();return}
+  if(k==='out'){S.out=S.out==='Optical'?'TV speakers':'Optical';el.querySelector('.v').textContent=S.out;return}
+  if(k==='door'){doorPress();return}
+  if(k==='set'){closeDrawer(true);S.ret=S.screen==='home'?$('kSet'):null;openSettings();return}
+  const L={input:{h:'INPUT',o:[['Apps','Lobby and apps'],[S.inputs.h2.nm,'HDMI 2'],[S.inputs.ant.nm,'Antenna'],['HDMI 1','empty'],['HDMI 3','empty']],v:S.screen==='playing'&&S.src!=='Apps'?S.src:'Apps'},
+    pic:{h:'PICTURE',o:PICMODES.map(m=>[m[0],'']),v:S.pic},snd:{h:'SOUND',o:SNDMODES.map(m=>[m,'']),v:S.snd},slp:{h:'SLEEP',o:SLEEPS.map(m=>[m,'']),v:S.slp}}[k];
+  openChooser(el,k,L)}
+let chooser=null;
+function openChooser(key,k,L){const c=$('chooser');chooser={k,key,L,start:0,orig:L.v};const r=key.getBoundingClientRect(),tr=tv.getBoundingClientRect(),u=tr.width/1920;
+  let left=(r.left-tr.left)/u;left=Math.min(left,1920-96-440);c.style.left=`calc(var(--u)*${left})`;
+  key.querySelector('.v').innerHTML='▲';c.classList.add('on');renderChooser(L.o.findIndex(o=>o[0]===L.v))}
+function renderChooser(fi){const c=$('chooser'),{L,k}=chooser;const n=L.o.length,vis=5;let st=Math.max(0,Math.min(fi-2,n-vis));chooser.start=st;
+  c.innerHTML=`<div class="hd"><span>${L.h}</span><span>${n>vis?`${fi+1} of ${n} ${st>0?'▲':''}${st+vis<n?'▼':''}`:''}</span></div>`+
+    L.o.slice(st,st+vis).map(([o,s],j)=>`<div class="opt" data-f data-row="opt" data-act="opt" data-v="${esc(o)}" data-ix="${st+j}"><i class="lw"></i><span class="ind sq ${o===L.v?'on':''}"></span>${esc(o)}<span class="sub">${s}</span></div>`).join('')+
+    `<div class="ft">${k==='pic'?`OK uses it · Back keeps ${L.v}`:'OK chooses · Back keeps it'}</div>`;
+  cur=null;focus(c.querySelector(`[data-ix="${fi}"]`))}
+function chooserMove(d){const ix=+cur.dataset.ix+d;if(ix<0||ix>=chooser.L.o.length){bump(cur,d>0?'bump-r':'bump-l');return}
+  const st=chooser.start;if(ix<st||ix>=st+5)renderChooser(ix);else focus($('chooser').querySelector(`[data-ix="${ix}"]`))}
+let pvT;
+function previewDwell(el){clearTimeout(pvT);if(!chooser||chooser.k!=='pic')return;pvT=setTimeout(()=>{const m=PICMODES.find(p=>p[0]===el.dataset.v);applyPM(m[1])},500)}
+function applyPM(cls){const t=S.screen==='playing'?$('pic'):$('home');['pic','home','idle'].forEach(i=>PICMODES.forEach(p=>p[1]&&$(i).classList.remove(p[1])));if(cls){t.classList.add(cls);if(t.id==='home')$('idle').classList.add(cls)}}
+function curPMClass(){return PICMODES.find(p=>p[0]===S.pic)[1]}
+function setPic(v){S.pic=v;applyPM(curPMClass());paintSky('sky',true);paintSky('isky',true);$('kTVv').textContent=on('drawer')?'menu open ▼':`${S.pic} · ${S.out}`;readout();syncSegs()}
+function chooseOpt(el){const {k}=chooser;const v=el.dataset.v;
+  if(k==='input'){closeChooser(true);if(v==='Apps'){goHome();return}if(v===S.inputs.h2.nm){openInput('h2');return}if(v===S.inputs.ant.nm){openInput('ant');return}
+    toast(`Nothing is plugged into ${v}`);closeChooser();return}
+  if(k==='pic')setPic(v);if(k==='snd')S.snd=v;if(k==='slp')S.slp=v;
+  closeChooser();menuKeys();focus($('dk').querySelector(`[data-k="${k}"]`))}
+function closeChooser(silent){clearTimeout(pvT);if(!chooser)return;const {k}=chooser;$('chooser').classList.remove('on');chooser=null;applyPM(curPMClass());
+  if(!silent){menuKeys();cur=null;focus($('dk').querySelector(`[data-k="${k}"]`))}}
+
+/* All apps, A to Z */
+function openApps(focusName){const g=$('ag');const names=Object.keys(APPS).sort((a,b)=>a.localeCompare(b));let last='';
+  const rows=Math.ceil(names.length/6);
+  g.innerHTML=names.map((n,i)=>{const L=n[0].toUpperCase(),tab=L!==last?`<span class="tab">${L}</span>`:'';last=L;const b=bandOf(n);
+    return `<div class="ak" data-f data-row="g${Math.floor(i/6)}" data-act="aopen" data-n="${esc(n)}" style="--code:${APPS[n].code}">${tab}<span class="code"></span><span class="n">${esc(n)}</span><span class="g">${b?`On the dial · ${b}`:'Not on the dial'}</span><i class="bw"></i></div>`}).join('');
+  $('appsSub').textContent=`A to Z · ${names.length} apps, ${onDial()} on the dial`;
+  show('apps');cur=null;focus((focusName&&g.querySelector(`[data-n="${CSS.escape(focusName)}"]`))||g.querySelector('[data-f]'))}
+
+/* Arrange the dial */
+function drawArrange(){const piece=(n,row)=>{const tray=row.startsWith('r-off'),nm=tray?n:dn(n),sub=APPS[n].dn?(tray?`Dial name: ${APPS[n].dn}`:n):'';return `<div class="pc${S.carry&&S.carry.n===n?' carry':''}" data-f data-row="${row}" data-act="pick" data-n="${esc(n)}" style="--code:${APPS[n].code}"><span class="code"></span><span class="n">${esc(nm)}</span>${sub?`<span class="dn">${esc(sub)}</span>`:''}<i class="bw"></i></div>`};
+  let h=BANDS.map(b=>{const L=S.bands[b],used=L.filter(Boolean).length,full=used>=CAP;const msg=S.arrMsg&&S.arrMsg.b===b;
+    return `<div class="arow" data-b="${b}"><div class="ag2"><span><span class="ind sq ${S.carry&&bandOf(S.carry.n)===b?'on':''}"></span> ${b.toUpperCase()}</span><span class="cnt${full?' full':''}${msg?' msg':''}">${used} of ${CAP}${full?' · full':''}</span></div><div class="slots">${L.map(n=>n?piece(n,'r-'+b):'<div class="slotc">free</div>').join('')}</div></div>`}).join('');
+  const off=offDial();
+  h+=`<div class="tray"><div class="gl">Not on the dial · ${off.length} · A to Z</div><div class="tk">${off.map((n,i)=>piece(n,'r-off'+Math.floor(i/6))).join('')}</div></div>`;
+  $('arr').innerHTML=h}
+function openArrange(n){S.carry=null;S.arrMsg=null;drawArrange();show('arrange');cur=null;focus((n&&$('arr').querySelector(`[data-n="${CSS.escape(n)}"]`))||$('arr').querySelector('[data-f]'));arrHints()}
+function arrHints(){const c=S.carry;$('arrT').textContent=c?`Moving ${c.n}`:'Arrange the dial';
+  $('arrS').textContent=c?S.arrMsg?S.arrMsg.t:(bandOf(c.n)?`${bandOf(c.n)}, slot ${S.bands[bandOf(c.n)].indexOf(c.n)+1} of ${CAP}`:'Not on the dial'):'OK picks an app up. Arrows move it. OK puts it down.';
+  $('hintsR').innerHTML=c?'<span><kbd>OK</kbd>Put down</span><span>← → Along · ↑ ↓ Band, or off the dial</span><span><kbd>Back</kbd>Put it back</span>':`<span><kbd>OK</kbd>Pick up</span><span><kbd>Back</kbd>${S.arrRet==='settings'?'Settings':'All apps'}</span><span>${fmt(S.min)}</span>`}
+function pickUp(el){const n=el.dataset.n;if(S.carry){S.carry=null;S.arrMsg=null;drawArrange();cur=null;focus($('arr').querySelector(`[data-n="${CSS.escape(n)}"]`));drawDial();return}
+  const b=bandOf(n);S.carry={n,b,i:b?S.bands[b].indexOf(n):-1,snap:JSON.stringify(S.bands)};drawArrange();cur=null;focus($('arr').querySelector(`[data-n="${CSS.escape(n)}"]`))}
+function carryMove(dir){const c=S.carry,n=c.n;let b=bandOf(n);const order=[...BANDS,'off'];S.arrMsg=null;
+  const refocus=()=>{drawArrange();cur=null;focus($('arr').querySelector(`[data-n="${CSS.escape(n)}"]`))};
+  if(dir==='left'||dir==='right'){if(!b){bump(cur,dir==='right'?'bump-r':'bump-l');return}const L=S.bands[b],i=L.indexOf(n),j=i+(dir==='right'?1:-1);
+    if(j<0||j>=CAP){bump(cur,dir==='right'?'bump-r':'bump-l');return}[L[i],L[j]]=[L[j],L[i]];return refocus()}
+  const bi=order.indexOf(b||'off'),ti=bi+(dir==='down'?1:-1);if(ti<0||ti>=order.length){bump(cur,'bump-u');return}const tb=order[ti];
+  if(tb==='off'){const L=S.bands[b];L[L.indexOf(n)]=null;return refocus()}
+  const T=S.bands[tb];
+  if(b){const L=S.bands[b],i=L.indexOf(n);const o=T[i];T[i]=n;L[i]=o;return refocus()}
+  /* from the tray up onto Listen: the nearest free slot, or say it's full */
+  let best=-1;T.forEach((x,i)=>{if(!x&&best<0)best=i});
+  if(best<0){S.arrMsg={b:tb,t:`${tb} is full. Take one off first.`};drawArrange();cur=null;focus($('arr').querySelector(`[data-n="${CSS.escape(n)}"]`));bump(cur,'bump-u');return}
+  T[best]=n;refocus()}
+function putBack(){const c=S.carry;S.bands=JSON.parse(c.snap);S.carry=null;S.arrMsg=null;drawArrange();cur=null;focus($('arr').querySelector(`[data-n="${CSS.escape(c.n)}"]`));drawDial()}
+
+/* Settings */
+const SROWS=[['picture','Picture',()=>S.pic],['sound','Sound',()=>S.snd],['out','Sound out',()=>S.out],['inputs','Inputs',()=>'2 named'],['window','The window',()=>S.skyPref==='Always night'?'Always night':'Follows the sun'],['dial','The dial',()=>`${onDial()} of ${CAP*3}`],['house','House',()=>S.unlockTV==='Lock only'?'Lock only':'Unlock allowed'],['power','Sleep & power',()=>`Idle: ${S.idlePref.toLowerCase()}`],['about','About',()=>S.upd?'<span class="ind led on"></span>Update ready':'Lobby 1.3']];
+function drawSettings(){$('slist').innerHTML=SROWS.map(([k,n,v])=>`<div class="srow" data-f data-row="sl" data-act="srow" data-k="${k}"><i class="lw"></i>${n}<span class="v"><span class="val">${v()}</span><span class="arrow">›</span></span></div>`).join('')}
+function openSettings(k){drawSettings();show('settings');cur=null;const first=$('slist').querySelector(`[data-k="${k||(S.upd?'about':'picture')}"]`);focus(first)}
+function sunStrip(){const {rise,set,src}=sunTimes(),mid=(rise+set)/2;const seg=[['night',0,rise-50],['dawn',rise-50,rise+30],['morning',rise+30,mid],['afternoon',mid,set-75],['golden',set-75,set],['dusk',set,set+50],['night',set+50,1440]];
+  const pc=m=>(m/1440*100).toFixed(2)+'%';const nightAll=S.skyPref==='Always night';
+  return `<div class="sunstrip${src!=='ha'?' miss':''}"><div class="bar">${seg.map(([k,a,b])=>`<i style="left:${pc(a)};width:${pc(b-a)};background:${SKY[nightAll?'night':k].b[3]}"></i>`).join('')}<div class="past" style="width:${pc(S.min)}"></div></div>
+   <div class="now" style="left:${pc(S.min)}"></div><div class="nl" style="left:${pc(Math.min(Math.max(S.min,90),1350))}">Now ${fmt(S.min)} · ${SKY[skyStop()].label}</div>
+   <i class="tk" style="left:${pc(rise)}"></i><i class="tk" style="left:${pc(set)}"></i>
+   <div class="tl" style="left:${pc(rise)};transform:translateX(-50%)">Sunrise ${fmt(rise)}</div><div class="tl" style="left:${pc(set)};transform:translateX(-50%)">Sunset ${fmt(set)}</div></div>`}
+function stackKeys(g,arr,subs){return `<div class="stack">${arr.map((v,i)=>`<div class="key" data-f data-row="sd" data-act="pref" data-g="${g}" data-v="${v}"><span class="ind sq ${S[g]===v?'on':''}"></span>${v}${subs&&subs[i]?` <span class="sub">${subs[i]}</span>`:''}</div>`).join('')}</div>`}
+function setDetail(el,force){if(!el.classList.contains('srow')&&!force)return;const k=el.dataset.k;S.sk=k;$('slist').querySelectorAll('.srow').forEach(r=>r.classList.toggle('here',r===el));
+  const d=$('sdet');let h='';const {src}=sunTimes();
+  if(k==='about')h=`<h3>About</h3><div class="facts"><span>Lobby</span><b>${S.upd?'1.3':'1.4'}</b><span>The TV</span><b>Hisense Google TV · Android 14</b><span>Apps</span><b>Update themselves through the Play Store</b><span>Install overnight</span><b>On</b></div>${S.upd?`<p>What's new in 1.4: the clock comes back right after a power cut, and the dial moves faster on a held key.</p><div class="stack"><div class="key pri" data-f data-row="sd" data-act="upd"><span class="ind slot"></span>Update now</div></div>`:'<p class="mini">Up to date.</p>'}`;
+  else if(k==='inputs'){const I=S.inputs;h=`<h3>Inputs</h3><p>Names show on the socket panel and in the TV menu. Up to 14 letters.</p><div class="stack">${['h2','ant'].map(p=>`<div class="key" data-f data-row="sd" data-act="rename" data-port="${p}"><span class="ind slot"></span>${I[p].lb==='ANT'?'Antenna':I[p].lb} · ${esc(I[p].nm)} <span class="sub">› Rename</span></div>`).join('')}</div><p class="mini">HDMI 1 and HDMI 3 are empty. They get a name when something's plugged in.</p><h4>When a device turns on</h4>${stackKeys('cecPref',['Ask','Switch to it','Stay here'])}`}
+  else if(k==='window')h=`<h3>The window</h3><p>Home's sky follows the sun: the real sunrise and sunset, so a June evening is still afternoon at 7 PM. A stop changes over a minute, in Calm too.</p>${sunStrip()}<div class="srcline">${src==='ha'?'<span class="ind led ok on"></span>Sun times from Home Assistant, today':"<span class=\"ind led\"></span>Sun times missing since 3:10 PM · using yesterday's"}</div><p class="mini">Vivid, Dynamic and Sports make the sky lighter on the screen, so in those modes it's drawn a step darker.</p>${stackKeys('skyPref',['Follow the sun','Always night'])}`;
+  else if(k==='dial')h=`<h3>The dial</h3><p>Three bands (Watch, Play and Listen) of six slots each: ${CAP*3} apps. ${onDial()} are on it now; the rest are in All apps. A name too wide for its slot (about 16 letters) gets a shorter dial name.</p><div class="stack"><div class="key" data-f data-row="sd" data-act="sarrange"><span class="ind slot"></span>Arrange the dial</div></div>`;
+  else if(k==='house')h=`<h3>House</h3><p>An unlocked front door shows amber by day while someone's home, and red after sunset or when nobody's home. Sun times and who's home come from Home Assistant.</p><h4>Unlock from the TV</h4>${stackKeys('unlockTV',['Allowed','Lock only'],['Hold OK, or press twice','The TV can still lock it'])}`;
+  else if(k==='power')h=`<h3>Sleep & power</h3><div class="stack"><div class="key" data-f data-row="sd" data-act="sleepnow"><span class="ind slot"></span>Sleep now</div><div class="key" data-f data-row="sd" data-act="srestart"><span class="ind slot"></span>Restart the TV <span class="sub">› asks first</span></div></div><h4>After 10 minutes with no keys</h4>${stackKeys('idlePref',['The window','Screen off'],['The sky and the clock','Like Sleep'])}<p class="mini">An alert keeps Home awake. The power key opens these too.</p>`;
+  else if(k==='picture')h=`<h3>Picture</h3><p>${S.pic}. Change it from the TV menu, where you can see the picture while you choose.</p>`;
+  else if(k==='sound')h=`<h3>Sound</h3><p>${S.snd}. Change it from the TV menu.</p>`;
+  else if(k==='out')h=`<h3>Sound out</h3><p>${S.out}. Optical goes to the stereo; TV speakers are the set's own.</p>`;
+  d.innerHTML=h}
+function refreshDetail(v){if(S.screen!=='settings')return;const inDet=cur&&cur.closest('#sdet');const keep=inDet?(v||cur.dataset.v||cur.dataset.port||cur.dataset.act):null;drawSettings();const row=$('slist').querySelector(`[data-k="${S.sk||'picture'}"]`);
+  if(inDet){setDetail(row,true);row.classList.add('here');cur=null;focus($('sdet').querySelector(`[data-v="${keep}"]`)||$('sdet').querySelector(`[data-port="${keep}"]`)||$('sdet').querySelector(`[data-act="${keep}"]`)||$('sdet').querySelector('[data-f]'))}else{cur=null;focus(row)}}
+
+/* the keyboard: rename an input */
+const KROWS=['abcdefghijkl','mnopqrstuvwx','yz1234567890'];
+function openKbd(port){S.kb={port,text:S.inputs[port].nm,shift:false,ret:cur};$('kTitle').textContent=`Rename ${port==='ant'?'the antenna':S.inputs[port].lb}`;$('kKeep').textContent=`Back keeps “${S.inputs[port].nm}”`;drawKbd();$('kbd').classList.add('on');cur=null;focus($('kgrid').querySelector('[data-c="a"]'))}
+function drawKbd(){const K=S.kb,sh=K.shift;
+  $('kgrid').innerHTML=KROWS.map((r,ri)=>[...r].map(ch=>`<div class="kk" data-f data-row="k${ri}" data-act="kk" data-c="${ch}">${sh?ch.toUpperCase():ch}</div>`).join('')).join('')+
+   `<div class="kk w2 ${sh?'on':''}" data-f data-row="k3" data-act="kk" data-c="shift"><span class="sm">⇧ Shift</span></div><div class="kk w4" data-f data-row="k3" data-act="kk" data-c="space"><span class="sm">Space</span></div><div class="kk w2" data-f data-row="k3" data-act="kk" data-c="del"><span class="sm">⌫ Delete</span></div><div class="kk w2" data-f data-row="k3" data-act="kk" data-c="clear"><span class="sm">Clear</span></div><div class="kk w2 pri" data-f data-row="k3" data-act="kk" data-c="done"><span class="sm">Done</span></div>`;
+  kbField()}
+function kbField(){$('kfText').textContent=S.kb.text;$('kfCnt').textContent=`${S.kb.text.length} of 14`}
+function kbType(ch){const K=S.kb;if(K.text.length>=14){bump($('kfCnt'),'bump-r');return}let c=K.shift?ch.toUpperCase():ch;if(c!==ch.toLowerCase())c=ch;if(!K.text.length&&/[a-z]/.test(c))c=c.toUpperCase();K.text+=c;if(K.shift){K.shift=false;const c0=cur&&cur.dataset.c;drawKbd();cur=null;focus($('kgrid').querySelector(`[data-c="${c0}"]`))}else kbField()}
+function kbKey(el){const c=el.dataset.c,K=S.kb;
+  if(c==='shift'){K.shift=!K.shift;drawKbd();cur=null;focus($('kgrid').querySelector('[data-c="shift"]'));return}
+  if(c==='space'){if(K.text&&!K.text.endsWith(' '))kbType(' ');return}
+  if(c==='del'){K.text=K.text.slice(0,-1);kbField();return}
+  if(c==='clear'){K.text='';kbField();return}
+  if(c==='done'){const t=K.text.trim();if(!t){bump($('kfText'),'bump-r');return}S.inputs[K.port].nm=t;closeKbd();drawBay();return}
+  kbType(c)}
+function closeKbd(silent){if(!on('kbd'))return;$('kbd').classList.remove('on');const r=S.kb&&S.kb.port;if(silent)return;if(S.kb.ret&&document.body.contains(S.kb.ret))cur=S.kb.ret;refreshDetail(r)}
+
+/* Power: sleep, restart (asks first; focus starts on Cancel, so OK never fires it by accident) */
+function openConfirm(){S.cfRet=cur;$('confirm').classList.add('on');cur=null;focus($('confirm').querySelector('[data-act="cf-cancel"]'))}
+function closeConfirm(silent){if(!on('confirm'))return;$('confirm').classList.remove('on');if(silent)return;const r=S.cfRet;cur=null;if(r&&document.body.contains(r))focus(r)}
+function goSleep(){closeConfirm(true);closeDrawer(true);$('darkNote').textContent='Stand-in: the TV is asleep. Any key wakes it to Home.';show('dark');S.darkMode='sleep';if(cur)cur.classList.remove('f');cur=null}
+let restartGen=0;
+async function restartTV(){const g=++restartGen;closeConfirm(true);closeDrawer(true);if(cur)cur.classList.remove('f');cur=null;S.darkMode='restart';
+  $('darkNote').textContent='Stand-in: the TV restarts and shows its own start-up screen for about a minute. Lobby can\'t draw here.';show('dark');
+  await sleep(2600);if(g!==restartGen||S.screen!=='dark')return;S.left=null;S.playing=null;goHome($('track').querySelector('[data-f]'))}
+function wake(){restartGen++;S.darkMode=null;goHome(S.idleRet&&document.body.contains(S.idleRet)?S.idleRet:null)}
+
+/* the idle face: the window, drawn tall */
+const SPOTS=[[120,400],[170,450],[140,370],[200,420]];
+function drawIdle(){const lv=doorLevel();const L=S.lamps;const lit=Object.values(L).filter(l=>l.on).map(l=>l.n);
+  const lamps=lit.length?`${lit.join(' and ')} on`:'Lamps off';
+  $('ihouse').innerHTML=lv==='warn'?`<span class="ind led warn on"></span><span class="tri">▲</span>Front door unlocked since ${fmt(S.doorSince)} · ${lamps}`:`<span class="ind led ok on"></span>Front door locked · ${lamps}`;
+  const [x,y]=SPOTS[S.idleSpot%4];const b=$('iblock');b.style.left=`calc(var(--u)*${x})`;b.style.top=`calc(var(--u)*${y})`}
+function goIdle(){if(doorLevel()==='alert'){capNote('An alert keeps Home awake: the idle face waits until the door is locked.');return false}
+  if(S.idlePref==='Screen off'){goSleep();return true}
+  closeDrawer(true);closeCec();S.idleRet=cur&&cur.closest('#home')?cur:null;S.idleSpot=(S.idleSpot+1)%4;drawIdle();show('idle');if(cur)cur.classList.remove('f');cur=null;return true}
+
+/* ---------------- keys ---------------- */
+let holdT=null,holdStart=0,held=false,okDown=false;
+function back(){const c=ctx();
+  if(c===$('confirm'))return closeConfirm();
+  if(c===$('kbd'))return closeKbd();
+  if(c===$('chooser'))return closeChooser();
+  if(c===$('drawer'))return closeDrawer();
+  if(c===$('cec'))return closeCec();
+  if(c===$('blind'))return goHome();
+  if(S.screen==='arrange'){if(S.carry)return putBack();drawDial();if(S.arrRet==='settings'){S.arrRet=null;S.sk='dial';openSettings('dial');return}return openApps()}
+  if(S.screen==='apps'){drawDial();return goHome($('allk'))}
+  if(S.screen==='settings'&&cur&&cur.closest('#sdet')){const k=$('slist').querySelector('.here')||$('slist').firstChild;cur.classList.remove('f');cur=null;focus(k);return}
+  if(S.screen!=='home')return goHome();
+  if(cur&&cur.dataset.row!=='shelf')focus($('track').querySelector('[data-f]'))}
+function okDownFn(){if(okDown)return;okDown=true;held=false;const el=cur;if(!el||!el.dataset.hold||S.door==='unlocked'||S.unlockTV==='Lock only')return;
+  if(el.dataset.act==='mk'&&el.dataset.k!=='door')return;
+  const ms=+el.dataset.hold;holdStart=performance.now();const fill=el.querySelector('.hfill');if(fill)el.classList.add('holding');
+  const tick=()=>{const p=Math.min(1,(performance.now()-holdStart)/ms);if(fill)fill.style.transform=`scaleX(${p})`;if(p>=1){held=true;holdT=null;el.classList.remove('holding');unlock();return}holdT=requestAnimationFrame(tick)};holdT=requestAnimationFrame(tick)}
+function okUpFn(){if(!okDown)return;okDown=false;if(holdT){cancelAnimationFrame(holdT);holdT=null;const f=cur&&cur.querySelector('.hfill');if(f){f.style.transform='scaleX(0)';cur.classList.remove('holding')}}
+  if(held){held=false;return}if(S.screen==='arrange'&&S.carry&&cur){pickUp(cur);return}if(cur)activate(cur)}
+function key(k,type){
+  if(type==='down'){
+    /* any key wakes the idle face or a sleeping TV, and that press isn't passed on */
+    if(S.screen==='idle'||(S.screen==='dark'&&S.darkMode==='sleep')){if(k!=='Shift')wake();return}
+    if(S.screen==='dark')return;
+    if(on('kbd')&&k.length===1&&/[a-z0-9 ]/i.test(k)){if(k===' ')return kbKey({dataset:{c:'space'}});return kbType(k)}
+    if(on('kbd')&&k==='Backspace'){S.kb.text=S.kb.text.slice(0,-1);return kbField()}
+    if(k==='Enter'||k===' ')return okDownFn();
+    if(okDown&&holdT){cancelAnimationFrame(holdT);holdT=null;okDown=false;const f=cur&&cur.querySelector('.hfill');if(f){f.style.transform='scaleX(0)';cur.classList.remove('holding')}}
+    if(k.startsWith('Arrow')){const d=k.slice(5).toLowerCase();if(chooser&&(d==='up'||d==='down'))return chooserMove(d==='down'?1:-1);if(chooser)return;
+      if(S.screen==='arrange'&&S.carry&&!on('drawer'))return carryMove(d);return move(d)}
+    if(k==='Escape'||k==='Backspace')return back();
+    if(k==='h'||k==='H')return goHome(S.screen==='home'?cur:null);
+    if(k==='g'||k==='G'||k==='q'||k==='Q'){if(on('drawer')&&S.drawerMode==='tv')return closeDrawer();return openDrawer()}
+    if(k==='i'||k==='I'){if(!on('drawer'))openDrawer('input');return}
+    if(k==='p'||k==='P'){if(on('drawer')&&S.drawerMode==='power')return closeDrawer();return openPower()}
+  }else if(type==='up'&&(k==='Enter'||k===' '))okUpFn()}
+tv.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Backspace','Enter','Escape'].includes(e.key))e.preventDefault();stopTour();if(e.repeat&&(e.key==='Enter'||e.key===' '))return;key(e.key,'down')});
+tv.addEventListener('keyup',e=>{key(e.key,'up')});
+tv.addEventListener('mousedown',()=>stopTour());
+document.querySelectorAll('#remote .kb').forEach(b=>{
+  if(b.dataset.k==='hold'){b.addEventListener('pointerdown',()=>{stopTour();if(S.screen==='idle'||S.screen==='dark')return;okDownFn()});b.addEventListener('pointerup',()=>{okUpFn();tv.focus({preventScroll:true})});b.addEventListener('pointerleave',()=>{if(okDown)okUpFn()});return}
+  b.addEventListener('click',()=>{stopTour();const k=b.dataset.k;if(k==='Enter'){if(S.screen==='idle'||S.screen==='dark')key('Enter','down');else{okDownFn();okUpFn()}}else key(k,'down');tv.focus({preventScroll:true})})});
+function capNote(t){$('tourCap').innerHTML=`<b>NOTE</b>${t}`}
+
+/* ---------------- page controls ---------------- */
+function syncSegs(){const v={clock:S.live?'live':String(S.min),season:S.season,sun:S.sunSrc,pm:S.pic,door:S.door,who:S.who,motion:S.calm?'calm':'full',home:S.first?'first':'lived',sw:S.sw?'on':'asleep',nf:S.nf?'opens':'fails',over:S.over,upd:S.upd?'yes':'no',theme:document.documentElement.dataset.theme||'auto'};
+  document.querySelectorAll('[data-ctl]').forEach(s=>{const n=s.dataset.ctl;s.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(v[n]===b.dataset.v)))})}
+function seg(name,fn){document.querySelector(`[data-ctl="${name}"]`).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{stopTour();fn(b.dataset.v);syncSegs();if(name!=='theme')tv.focus({preventScroll:true})}))}
+let liveT;
+seg('clock',v=>{clearInterval(liveT);if(v==='live'){S.live=true;const tick=()=>{const d=new Date();setClock(d.getHours()*60+d.getMinutes())};tick();liveT=setInterval(tick,30000)}else{S.live=false;setClock(+v)}});
+seg('season',v=>{S.season=v;setClock(S.min)});
+seg('sun',v=>{S.sunSrc=v;setClock(S.min)});
+seg('pm',v=>setPic(v));
+seg('door',v=>{if(v==='unlocked'){S.door='unlocked';S.doorSince=S.doorSince??S.min-12;S.doorFrom='the kitchen kiosk'}else{S.door='locked';S.doorSince=null}S.armed=0;afterDoor();drawIdle()});
+seg('who',v=>{S.who=v;afterDoor();drawIdle()});
+seg('motion',v=>{S.calm=v==='calm';tv.classList.toggle('calm',S.calm)});
+seg('home',v=>setFirst(v==='first'));
+seg('sw',v=>{const was=S.sw;S.sw=v==='on';drawBay();if(cur&&cur.closest('#bay'))focus($('bay').querySelector(`[data-port="${cur.dataset.port}"]`));if(!was&&S.sw&&S.cecPref==='Ask')showCec()});
+seg('nf',v=>{S.nf=v==='opens'});
+seg('over',v=>{S.over=v});
+seg('upd',v=>{S.upd=v==='yes';$('updLed').classList.toggle('on',S.upd);if(cur&&cur.id==='kSet')sign(cur);if(S.screen==='settings'){drawSettings();focus($('slist').querySelector('[data-k="about"]'))}});
+seg('theme',v=>{if(v==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=v});
+seg('jump',v=>jump(v));
+function setFirst(f){S.first=f;$('home').classList.toggle('first',f);drawShelf();$('track').style.transform='';goHome($('track').querySelector('[data-f]'))}
+function reset(){launchGen++;restartGen++;closeCec();closeDrawer(true);closeConfirm(true);closeKbd(true);hideBlind();$('toast').classList.remove('on');S.armed=0;S.carry=null;S.arrRet=null;S.left=null;S.darkMode=null;show('home')}
+function setDoor(state,since,from,who){S.door=state;S.doorSince=state==='unlocked'?since:null;S.doorFrom=from||'this TV';if(who)S.who=who;drawPlate();drawIdle();readout();syncSegs()}
+async function jump(v){reset();
+  if(v==='home'){goHome($('track').querySelector('[data-f]'))}
+  else if(v==='dial'){goHome($('dial').querySelector('[data-n="Prime Video"]'))}
+  else if(v==='bay'){goHome($('bay').querySelector('[data-port="h2"]'))}
+  else if(v==='lamps'){goHome($('plate').querySelector('[data-k="floor"]'))}
+  else if(v==='doorwarn'){S.season='nov';S.who='someone';setClock(870,true);setDoor('unlocked',852,'the kitchen kiosk');goHome($('door'))}
+  else if(v==='dooralert'){S.season='nov';S.who='someone';setClock(1040,true);setDoor('unlocked',1021,'the kitchen kiosk');goHome($('door'))}
+  else if(v==='menu'){goHome();activate($('track').querySelector('[data-f]'));await sleep(1500);openDrawer()}
+  else if(v==='input'){goHome();activate($('track').querySelector('[data-f]'));await sleep(1500);openDrawer('input')}
+  else if(v==='nosig'){S.sw=false;drawBay();syncSegs();goHome($('bay').querySelector('[data-port="h2"]'));openInput('h2')}
+  else if(v==='fail'){S.nf=false;syncSegs();goHome($('dial').querySelector('[data-n="Netflix"]'));activate(cur)}
+  else if(v==='cec'){S.sw=false;drawBay();goHome();await sleep(300);S.sw=true;drawBay();syncSegs();showCec()}
+  else if(v==='first'){setFirst(true);syncSegs()}
+  else if(v==='apps'){goHome($('allk'));openApps()}
+  else if(v==='arrange'){goHome($('allk'));openApps();openArrange('YouTube TV')}
+  else if(v==='window'){goHome($('kSet'));openSettings('window')}
+  else if(v==='rename'){goHome($('kSet'));openSettings('inputs');focus($('sdet').querySelector('[data-port="h2"]'));openKbd('h2')}
+  else if(v==='power'){goHome($('track').querySelector('[data-f]'));openPower()}
+  else if(v==='restart'){goHome($('track').querySelector('[data-f]'));openPower();focus($('dk').querySelector('[data-k="prestart"]'));openConfirm()}
+  else if(v==='idle'){goHome($('track').querySelector('[data-f]'));goIdle()}
+  syncSegs()}
+
+/* ---------------- tour ---------------- */
+const press=async(k,n=1,gap=360)=>{for(let i=0;i<n;i++){key(k,'down');if(k==='Enter')key(k,'up');await sleep(gap)}};
+const night=()=>{S.season='nov';S.sunSrc='ha';S.who='someone';if(S.pic!=='Theater night')setPic('Theater night');setClock(1224,true);setDoor('locked')};
+const STEPS=[
+  ['Home at 8:24 PM. Continue stands on the sill as picture frames; the window behind is tonight\'s sky.',async()=>{night();goHome($('track').querySelector('[data-f]'))}],
+  ['A long title. The plaque wraps to two lines (never "…"), and the sign drops from 58 to 46 px so the whole title fits.',async()=>{night();goHome($('track').querySelector('[data-f]'));await press('ArrowRight',2)}],
+  ['The app dial: three bands (Watch, Play, Listen), six fixed slots each. One needle runs across all three; the band\'s square lights.',async()=>{night();goHome($('dial').querySelector('[data-n="Jamfin"]'));await press('ArrowRight',3,420)}],
+  ['Down a band. The needle moves to the nearest station on Play; "1 of 3" counts the band you\'re in. Empty slots show as bare marks.',async()=>{goHome($('dial').querySelector('[data-n="YouTube"]'));await sleep(300);await press('ArrowDown')}],
+  ['Long names fit: a slot holds about 16 letters at 26 px, so YouTube Music (13) sits on the dial whole. A longer name gets a dial name you can see in Arrange.',async()=>{goHome($('dial').querySelector('[data-n="Spotify"]'));await press('ArrowRight')}],
+  ['The needle remembers. Up to the shelf and back down: focus returns to the station the needle is on.',async()=>{goHome($('dial').querySelector('[data-n="Steam Link"]'));await press('ArrowUp');await sleep(700);await press('ArrowDown')}],
+  ['All apps sits at the dial\'s right end, past the walnut stop. It\'s the way in for guests: every app by name, A to Z.',async()=>{goHome($('dial').querySelector('[data-n="YouTube TV"]'));await press('ArrowRight')}],
+  ['All apps, A to Z. Index tabs mark where each letter starts; each key says where the app lives. No logos, just names.',async()=>{goHome($('allk'));openApps('Netflix')}],
+  ['Arrange the dial. OK picks YouTube TV up: it lifts with a cream outline, and the header says where it is.',async()=>{goHome($('allk'));openApps();openArrange('YouTube TV');await sleep(500);await press('Enter')}],
+  ['Arrows carry it. ↓ moves it into the same slot on Play (a swap, if that slot is taken). From Listen, ↓ takes an app off the dial.',async()=>{if(!S.carry){goHome($('allk'));openApps();openArrange('YouTube TV');await press('Enter')}await press('ArrowDown',1,600)}],
+  ['A full band says so. Corridor Digital can\'t go up onto a full Listen: the band reads "6 of 6 · full" and the header says to take one off first.',async()=>{reset();S.bands.Watch=['Jamfin','YouTube','Netflix','Prime Video','Dropout','YouTube TV'];S.bands.Play=['Moonlight','Steam Link','RetroArch',null,null,null];drawDial();goHome($('allk'));openApps();S.bands.Listen=['House music','Spotify','YouTube Music','Sendspin','Podcasts','Radio'];openArrange('Corridor Digital');await press('Enter');await press('ArrowUp',1,600)}],
+  ['Back puts it back where it was. Leaving Arrange redraws the dial on Home.',async()=>{if(S.screen==='arrange'&&S.carry)await press('Escape');S.bands.Listen=['House music','Spotify','YouTube Music','Sendspin',null,null];S.bands.Play=['Moonlight','Steam Link','RetroArch',null,null,null];S.bands.Watch=['Jamfin','YouTube','Netflix','Prime Video','Dropout','YouTube TV'];drawDial();await sleep(200);reset();goHome($('dial').querySelector('[data-n="YouTube TV"]'))}],
+  ['The socket panel. Every port shows, plugged or empty; focus skips the empty ones. Apps (this screen) is the lit square.',async()=>{goHome($('bay').querySelector('[data-port="h2"]'))}],
+  ['The lamps, drawn the way Jam Home draws them: a rocker (top pressed = on), a slide dimmer, and the lamp\'s shade as its window.',async()=>{night();S.lamps.floor.on=true;drawPlate();goHome($('plate').querySelector('[data-k="floor"]'))}],
+  ['OK switches the floor lamp off in place: the bottom of the rocker presses in and the shade goes dark. No toast.',async()=>{S.lamps.floor.on=true;drawPlate();goHome($('plate').querySelector('[data-k="floor"]'));await sleep(600);await press('Enter')}],
+  ['The front door is Jam Home\'s door swing. Locked: the leaf sits in the wall. One press arms it: "Press OK again".',async()=>{S.lamps.floor.on=true;drawPlate();night();goHome($('door'));await sleep(500);await press('Enter')}],
+  ['2:30 PM, someone home, door unlocked from the kitchen: a warn. Amber light + ▲ + word, the leaf drawn open. Not red.',async()=>{jump('doorwarn')}],
+  ['5:20 PM: past sunset (4:52 PM today), the same door becomes an alert: the solid red key with dark text.',async()=>{jump('dooralert')}],
+  ['Daytime but nobody\'s home: also an alert, and the sign says why.',async()=>{S.season='nov';S.who='nobody';setClock(870,true);setDoor('unlocked',852,'the kitchen kiosk','nobody');goHome($('door'))}],
+  ['The sky follows Home Assistant\'s sun times. 7:00 PM on November 5 is night…',async()=>{reset();S.who='someone';setDoor('locked');S.season='nov';S.sunSrc='ha';setClock(1140,true);goHome($('track').querySelector('[data-f]'))}],
+  ['…and 7:00 PM on June 21 is still afternoon. Same clock, real sun.',async()=>{S.season='jun';setClock(1140)}],
+  ['Settings › The window: today\'s sky as a day strip, sunrise and sunset ticks, NOW as a cream rule, and where the times came from.',async()=>{S.season='nov';setClock(1224,true);goHome($('kSet'));openSettings('window')}],
+  ['Sun times missing: the strip is dashed, the light goes out, and the line says Lobby is using yesterday\'s times. Always night is right below.',async()=>{S.sunSrc='missing';setClock(S.min);goHome($('kSet'));openSettings('window')}],
+  ['2:30 PM in Vivid. Bright picture modes lift the sky on the panel, so its top three bands step darker; text stays ≥ 4.5:1 through the simulated Vivid.',async()=>{reset();S.sunSrc='ha';S.season='nov';setClock(870,true);setPic('Vivid');goHome($('track').querySelector('[data-f]'))}],
+  ['The TV readout says what the set is doing. OK opens the TV menu in the lowboard\'s drawer.',async()=>{setPic('Theater night');night();goHome($('kTV'));await sleep(500);await press('Enter')}],
+  ['Picture chooser over Home. Rest 500 ms on a mode and the screen previews it; Back keeps Theater night.',async()=>{goHome($('kTV'));openDrawer('pic');await sleep(400);await press('ArrowDown',2,600)}],
+  ['Starting a film: the slatted blind drops over the window, holds as long as the load (at least 600 ms), then rises on the picture.',async()=>{closeDrawer(true);goHome($('track').querySelector('[data-f]'));await sleep(300);await press('Enter')}],
+  ['Over the film, the drawer\'s header says what\'s underneath.',async()=>{S.over='yes';syncSegs();if(S.screen!=='playing'){goHome($('track').querySelector('[data-f]'));activate(cur);await sleep(1500)}openDrawer('input')}],
+  ['Without the accessibility service ("Home only"), the menu key can\'t reach Lobby over an app. Home, then the readout: the header says what you left.',async()=>{reset();goHome($('track').querySelector('[data-f]'));activate(cur);await sleep(1500);S.over='home';syncSegs();await press('h');await sleep(400);focus($('kTV'));await press('Enter')}],
+  ['No signal. The blind stays down and draws the port itself. Try again is the one orange; Home is beside it.',async()=>{S.over='yes';syncSegs();jump('nosig')}],
+  ['An app that won\'t open: the slats stop at a third and dim. Same ending as every failure.',async()=>{jump('fail')}],
+  ['A device turned on: one note in the window, Switch to it the one orange. It leaves after 15 s and never repeats.',async()=>{S.sw=true;S.nf=true;syncSegs();jump('cec')}],
+  ['Rename an input: Settings › Inputs › HDMI 2. The keyboard is the lowboard\'s drawer drawn taller: 12-unit grid, Done the one orange.',async()=>{S.sw=true;drawBay();jump('rename')}],
+  ['Typing. Letters land at the steady caret; the count stops at 14. Done puts the new name on the socket panel.',async()=>{if(!on('kbd'))await jump('rename');S.kb.text='';kbField();for(const c of 'switch 2 isaac'){kbType(c);await sleep(110)}focus($('kgrid').querySelector('[data-c="done"]'))}],
+  ['Power. The power key opens the drawer with focus on Cancel; Sleep is one press. No orange.',async()=>{if(on('kbd'))closeKbd(true);S.inputs.h2.nm='Switch 2';drawBay();jump('power')}],
+  ['Restart the TV asks first. Focus starts on Cancel, so a stray OK can\'t fire it; Restart is a dark key, never red or orange.',async()=>{jump('restart')}],
+  ['Restarting: the TV draws its own start-up screen, then Lobby comes back to Home on its own.',async()=>{if(!on('confirm'))await jump('restart');focus($('confirm').querySelector('[data-act="cf-restart"]'));await sleep(500);await press('Enter')}],
+  ['The idle face, after 10 minutes with no keys: the window drawn tall, the clock, and the house in one line. Nothing moves but the clock.',async()=>{restartGen++;reset();night();jump('idle')}],
+  ['By day with the door on warn, the idle face carries the amber line. (An alert keeps Home awake instead.) Any key wakes it; that press isn\'t passed on.',async()=>{reset();S.season='nov';S.who='someone';setClock(870,true);setDoor('unlocked',852,'the kitchen kiosk');goHome($('track').querySelector('[data-f]'));goIdle()}],
+  ['First run: an empty shelf with one line and Arrange the dial. Nothing suggested, nothing to buy.',async()=>{reset();night();setFirst(true);syncSegs()}],
+  ['Update ready: a cream light on Settings, and nothing pops up.',async()=>{setFirst(false);reset();S.upd=true;$('updLed').classList.add('on');syncSegs();goHome($('kSet'))}]
+];
+let tourOn=false,tourGen=0,tourI=-1;
+async function runStep(i){tourI=i;$('tourCap').innerHTML=`<b>${i+1} / ${STEPS.length}</b>${STEPS[i][0]}`;await STEPS[i][1]();syncSegs()}
+async function playTour(){tourOn=true;$('tourBtn').textContent='■ Stop tour';const g=++tourGen;
+  for(let i=0;i<STEPS.length;i++){if(g!==tourGen)return;await runStep(i);await sleep(4000);if(g!==tourGen)return}
+  stopTour();S.upd=false;$('updLed').classList.remove('on');syncSegs();$('tourCap').innerHTML='<b>TOUR</b>Done. Press Tour to watch again, or click the TV and use the keys.';tourI=-1}
+function stopTour(){if(!tourOn)return;tourOn=false;tourGen++;$('tourBtn').textContent='▶ Tour'}
+$('tourBtn').addEventListener('click',()=>{if(tourOn)return stopTour();tv.focus({preventScroll:true});playTour()});
+$('tourNext').addEventListener('click',()=>{stopTour();tv.focus({preventScroll:true});runStep((tourI+1)%STEPS.length)});
+
+/* ---------------- start ---------------- */
+drawShelf();drawDial();drawBay();drawPlate();setClock(1224,true);syncSegs();
+focus($('track').querySelector('[data-f]'));
+window.LOBBY={S,STEPS,runStep,jump,key,setClock,setPic,SKY,BAND_Y,skyCols,skyStop,focusEl:()=>cur,goIdle};
+</script>
+</body>
+</html>
