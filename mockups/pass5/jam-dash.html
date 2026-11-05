@@ -1,0 +1,1904 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jam-Dash pass 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- page chrome (follows the existing mockups) ---------- */
+:root{
+  --pg:#e3e1dc; --pg-ink:#1d1c1a; --pg-ink2:#55524b; --pg-line:#c9c5bd; --pg-card:#f1efeb; --pg-key:#f7f5f1;
+  --mono:'IBM Plex Mono',ui-monospace,monospace; --sans:'Jost',system-ui,sans-serif;
+  --dec:cubic-bezier(.16,1,.3,1);
+}
+body[data-light="night"]{ --pg:#1c1c1b; --pg-ink:#ece9e2; --pg-ink2:#aaa59b; --pg-line:#3a3936; --pg-card:#262523; --pg-key:#302f2c; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--pg);color:var(--pg-ink);font:400 16px/1.5 var(--sans);-webkit-text-size-adjust:100%}
+.page{max-width:1500px;margin:0 auto;padding:28px 16px 80px}
+.kicker{font:500 13px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--pg-ink2)}
+h1{font:500 clamp(28px,4vw,44px)/1.1 var(--sans);margin:8px 0 12px;letter-spacing:-.01em}
+h2{font:500 26px/1.2 var(--sans);margin:56px 0 8px}
+.lede{max-width:800px;color:var(--pg-ink2);margin:0 0 16px}
+.page p{max-width:840px}
+.ctl{position:sticky;top:0;z-index:50;background:var(--pg);display:flex;flex-wrap:wrap;gap:10px 22px;padding:12px 0;border-bottom:1px solid var(--pg-line);align-items:center}
+.ctl .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:900px){.ctl{position:static}}
+.ctl .lab{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--pg-ink2)}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--pg-card);border:1px solid var(--pg-line);border-radius:6px;padding:3px;gap:2px}
+.seg button{font:500 15px var(--sans);color:var(--pg-ink);background:none;border:0;border-radius:4px;padding:0 12px;min-height:44px;min-width:44px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--pg-ink);color:var(--pg)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px 40px;max-width:1300px}
+.cols ul{margin:0;padding-left:20px}
+.cols li{margin:0 0 8px}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.pgrow{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;margin-top:16px}
+.cap{font:400 13px/1.5 var(--mono);color:var(--pg-ink2);margin-top:8px;max-width:100%}
+.fit{position:relative;width:100%;max-width:1440px;overflow:hidden}
+.fit>.dev{position:absolute;top:0;left:0;transform-origin:0 0}
+.phwrap{width:390px;max-width:100%;flex:0 0 auto}
+.phwrap .fit{max-width:390px}
+.specs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:16px}
+.spec{background:var(--pg-card);border:1px solid var(--pg-line);border-radius:6px;padding:16px}
+.spec h3{font:500 18px var(--sans);margin:0 0 4px}
+.spec p{font-size:15px;color:var(--pg-ink2);margin:8px 0 0}
+.howto{font-size:15px;color:var(--pg-ink2)}
+.howto b{color:var(--pg-ink);font-weight:500}
+.side{flex:1;min-width:260px;max-width:540px}
+.pgk{min-height:44px;font:500 15px var(--sans);padding:0 14px;border-radius:4px;border:1px solid var(--pg-line);background:var(--pg-key);color:var(--pg-ink);cursor:pointer}
+
+/* ---------- Jam-Dash tokens. Day = lab grey: a light enamel cabinet, light faces, dark windows only where a window holds words or numbers ---------- */
+.dev{
+  --ag:#e2e0da; --panel:#f8f7f4; --panel2:#ecebe6; --ink:#1d1c1a; --ink2:#4f4b45; --ink3:#625e57;
+  --cab:#c8c4bb; --cab-ink:#1d1c1a; --cab-ink2:#3f3c37; --cabin:#b7b3aa; --rail:#d5d1c8; --hole:#8c887f; --walnut:#6b4428; --chan:#bcb8af;
+  --recess:#1f1e1c; --legend:#b3ada1; --cream:#f3e6c8; --track:#3a3935;
+  --unlit:#e8e6e1; --groove:#8a857b; --rim:#1f1e1c; --lit:#ebcd8a;
+  --ok:#7bd651; --warn:#f2c14e; --alert:#ff5a48; --orange:#ec7c22;
+  --warn-ink:#765400; --alert-ink:#ae2a1f; --ok-ink:#2f6b12;
+  --key:#fbfaf8; --key-edge:#b3aea4; --line:#cdc9c0; --field:#ffffff;
+  --tape:#f1f0ec; --tape-ink:#1d1c1a; --tape-dim:#4f4b45; --tape-base:#c9c5bc; --tick:#1d1c1a; --rib:transparent; --tape-line:#c9c5bc;
+  --cord:#2b2a27; --ghost:#66625a; --logbg:#fbfaf8; --mark:#f3e6c8;
+  background:var(--ag);color:var(--ink);font:400 15px/1.4 var(--sans);overflow:hidden;position:relative;
+  border-radius:10px;box-shadow:0 0 0 10px #151514, 0 0 0 11px #3a3936;
+}
+body[data-light="night"] .dev{
+  --ag:#181817; --panel:#2b2926; --panel2:#232220; --ink:#ece9e2; --ink2:#b0aba1; --ink3:#9b968c;
+  --cab:#0e0e0d; --cab-ink:#f3e6c8; --cab-ink2:#b9b3a6; --cabin:#060606; --rail:#1d1d1b; --hole:#000; --walnut:#5a3a23; --chan:#0e0e0d;
+  --recess:#0b0b0a; --legend:#9d988d; --track:#2a2926;
+  --unlit:#0b0b0a; --groove:#0b0b0a; --rim:#000; --lit:#f3e6c8;
+  --orange:#f08a2c; --warn-ink:#f2c14e; --alert-ink:#ff7b6b; --ok-ink:#7bd651;
+  --key:#353330; --key-edge:#4b4945; --line:#3a3936; --field:#1f1e1c;
+  --tape:#070706; --tape-ink:#f3e6c8; --tape-dim:#b9b3a6; --tape-base:#33322f; --tick:#f3e6c8; --rib:rgba(255,255,255,.14); --tape-line:#4a4944;
+  --cord:#f3e6c8; --ghost:#6d6960; --logbg:#0f0f0e; --mark:#f3e6c8;
+}
+.dev button{font:inherit;color:inherit;cursor:pointer}
+.dev :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.dev input{font:400 15px var(--mono);color:var(--ink);background:var(--field);border:1px solid var(--key-edge);border-radius:3px;min-height:30px;padding:0 8px;min-width:0}
+.phone input{min-height:44px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* indicators. On a light face an unlit window is a hairline groove; lit = flat colour in a dark rim (conflict 3, assumed). Windows that hold words or numbers stay dark recesses. */
+.led{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--unlit);box-shadow:inset 0 0 0 1.5px var(--groove);flex:0 0 auto;vertical-align:middle}
+.led.on{background:var(--ok);box-shadow:0 0 0 2px var(--rim)}
+.led.alert{background:var(--alert);box-shadow:0 0 0 2px var(--rim)}
+.led.warn{background:var(--warn);box-shadow:0 0 0 2px var(--rim)}
+.led.offline{background:transparent;box-shadow:none;border:2px dashed var(--ink3)}
+.wp{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto}
+.tri{font-size:12px;line-height:1;color:var(--warn-ink)}
+.slot{display:inline-block;width:18px;height:6px;border-radius:3px;background:var(--unlit);box-shadow:inset 0 0 0 1.5px var(--groove);flex:0 0 auto;vertical-align:middle}
+.slot.lit{background:var(--lit);box-shadow:0 0 0 2px var(--rim)}
+.sq{display:inline-block;width:10px;height:10px;border-radius:1px;background:var(--unlit);box-shadow:inset 0 0 0 1.5px var(--groove);flex:0 0 auto}
+.sq.lit{background:var(--lit);box-shadow:0 0 0 2px var(--rim)}
+
+/* keys */
+.k{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:500 14px/1 var(--sans);min-height:30px;padding:0 12px;border-radius:4px;
+  background:var(--key);color:var(--ink);border:1px solid var(--key-edge);box-shadow:0 2px 0 var(--key-edge);white-space:nowrap}
+.k:active{transform:translateY(2px);box-shadow:0 0 0 var(--key-edge)}
+.k[aria-pressed="true"]{transform:translateY(2px);box-shadow:inset 0 2px 0 rgba(0,0,0,.18)}
+.k.or{background:var(--orange);border-color:#a8540f;box-shadow:0 2px 0 #a8540f;color:#1d1c1a}
+.k.red{background:var(--alert);border-color:#b9382a;box-shadow:0 2px 0 #b9382a;color:#1d1c1a}
+.k.dark{background:#2b2a27;border-color:#111;box-shadow:0 2px 0 #111;color:#f3e6c8}
+.k.link{background:none;border-color:transparent;box-shadow:none;text-decoration:underline;text-underline-offset:3px;padding:0 6px}
+.k[disabled]{cursor:default}
+.k.wait{color:var(--ink2)}
+.phone .k{min-height:44px;min-width:44px;font-size:15px}
+.kh{font:500 13px var(--mono);color:var(--ink2);border:1px solid var(--line);border-radius:3px;padding:0 4px;margin-left:2px}
+
+/* ---------- frame chrome ---------- */
+.lip{height:52px;display:flex;align-items:center;gap:22px;padding:0 24px;border-bottom:1px solid var(--line);background:var(--ag)}
+.wm{font:600 19px var(--sans);letter-spacing:-.01em}
+.nav{display:flex;gap:4px;height:100%}
+.nav button{background:none;border:0;padding:0 10px;font:400 15px var(--sans);color:var(--ink2);position:relative;height:100%}
+.nav button[aria-current]{color:var(--ink)}
+.nav button[aria-current]::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:5px;border-radius:2px 2px 0 0;background:var(--lit);box-shadow:0 0 0 2px var(--rim)}
+.lip .sp{flex:1}
+.find{font:400 14px var(--sans);color:var(--ink2);background:var(--panel);border:1px solid var(--line);border-radius:4px;min-height:30px;padding:0 10px;display:flex;align-items:center;gap:10px}
+.find kbd{font:500 12px var(--mono);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
+.clock{font:500 15px var(--mono);letter-spacing:.04em}
+.deck{display:grid;grid-template-columns:380px 1fr;overflow:auto;scrollbar-width:thin}
+.dev.w1280 .deck{grid-template-columns:340px 1fr}
+.dev.w1280 .status{padding:16px 18px 18px 22px;gap:12px}
+.dev.w1280 .hl{font-size:25px}
+.dev.w1280 .tlab{letter-spacing:0}
+
+/* ---------- status column (was "console" in pass 4; renamed per H18) ---------- */
+.status{padding:16px 22px 20px 24px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.hl{font:500 28px/1.15 var(--sans);letter-spacing:-.01em;margin:0}
+.sub{font:400 15px/1.4 var(--sans);color:var(--ink2);margin:4px 0 0}
+
+/* annunciator: a fixed board of legend windows (words in the light) */
+.ann{display:grid;grid-template-columns:76px 1fr 1fr;gap:4px;background:var(--cab);padding:10px;border-radius:4px}
+.ann .ch{font:500 13px var(--mono);color:var(--cab-ink);padding:2px 4px 4px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.ann .rh{font:500 13px var(--mono);letter-spacing:.06em;color:var(--cab-ink2);display:flex;align-items:center;padding-left:2px}
+.lg{height:29px;border-radius:2px;background:var(--recess);color:var(--legend);font:500 14px/1 var(--sans);display:flex;align-items:center;justify-content:center;gap:6px;border:0;padding:0 6px;text-align:center;white-space:nowrap;
+  box-shadow:inset 0 2px 0 rgba(0,0,0,.45)}
+.lg.alert{background:var(--alert);color:#1d1c1a;box-shadow:inset 0 0 0 2px var(--recess)}
+.lg.warn{background:var(--warn);color:#1d1c1a;box-shadow:inset 0 0 0 2px var(--recess)}
+.lg.info{background:var(--cream);color:#1d1c1a;box-shadow:inset 0 0 0 2px var(--recess)}
+.lg.offline{background:var(--recess);color:var(--cream);outline:2px dashed var(--cream);outline-offset:-5px}
+.lg.unk{color:var(--legend);outline:1px dashed #6d6960;outline-offset:-5px}
+.lg .tri{color:#1d1c1a}
+button.lg{cursor:pointer}
+.ping{animation:ping 1.2s var(--dec) 1}
+@keyframes ping{0%,60%{outline:3px solid var(--ink);outline-offset:2px}100%{outline:3px solid transparent;outline-offset:2px}}
+/* phone board: servers are rows, the five subjects are columns (holds 4 servers) */
+.ann.p{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:8px}
+.ann.p .rh{justify-content:center;padding:0;font-size:13px;letter-spacing:0;min-height:18px}
+.ann.p .srow{grid-column:1/-1;font:500 13px var(--mono);color:var(--cab-ink);padding:4px 2px 0;display:flex;gap:8px;align-items:center}
+.ann.p .srow span{color:var(--cab-ink2);font-weight:400}
+.ann.p .lg{height:44px;font-size:13px;white-space:normal;line-height:1.1;padding:0 3px}
+
+/* maintenance tags (hang on the tag rail) */
+.tags{display:flex;flex-direction:column;gap:10px}
+.tag{--stub:var(--groove);position:relative;background:linear-gradient(to right,var(--stub) 0 7px,var(--panel) 7px);
+  clip-path:polygon(16px 0,100% 0,100% 100%,16px 100%,0 calc(100% - 16px),0 16px);padding:12px 16px 14px 36px}
+.tag::before{content:"";position:absolute;left:15px;top:17px;width:10px;height:10px;border-radius:50%;background:var(--ag);box-shadow:0 0 0 2px var(--ink3)}
+.tag.alert{--stub:var(--alert)}
+.tag.warn{--stub:var(--warn)}
+.tag.offline{background:linear-gradient(to right,transparent 0 7px,var(--panel) 7px),repeating-linear-gradient(to bottom,var(--ink3) 0 7px,var(--ag) 7px 12px)}
+.tag.fixed{--stub:var(--panel2);background:var(--panel2)}
+.tlab{display:flex;align-items:center;gap:8px;font:500 13px var(--mono);letter-spacing:.04em;color:var(--ink2);text-transform:uppercase}
+.ttl{font:500 19px/1.25 var(--sans);margin:4px 0 2px}
+.tsen{font:400 15px/1.4 var(--sans);color:var(--ink2);margin:0}
+.tact{display:flex;flex-wrap:wrap;gap:8px 6px;margin-top:10px;align-items:center}
+.tag.small{padding:8px 12px 8px 36px;display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap}
+.tag.small::before{top:50%;margin-top:-5px}
+.tag.small .ttl{font:400 15px/1.3 var(--sans);margin:0;flex:1 1 120px;min-width:0}
+.tag.row{padding:0 12px 0 36px;min-height:44px;display:flex;align-items:center;gap:10px;width:100%;border:0;text-align:left;color:var(--ink)}
+.tag.row::before{top:50%;margin-top:-5px}
+.tag.row .ttl{font:500 15px/1.3 var(--sans);margin:0;flex:1}
+.quiet{font:400 15px/1.4 var(--sans);color:var(--ink2);margin:0}
+.quiet b{font-weight:500;color:var(--ink)}
+.tags-lab{font:500 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:4px 0 -2px}
+
+/* ---------- the cabinet: racks + cord channel ---------- */
+.bay{padding:8px 20px 8px 0;min-width:0}
+.cabinet{position:relative;display:grid;grid-template-columns:14px minmax(0,1fr) 64px minmax(0,1fr) 14px;background:var(--cab);border-radius:6px;padding:0 0 8px}
+.cabinet.single{grid-template-columns:14px minmax(0,1fr) 14px;padding-top:10px}
+.cheek{background:var(--walnut);border-radius:6px 0 0 6px;margin:0 0 -8px;grid-row:1/span 2;grid-column:1}
+.cabinet.single .cheek{margin-top:-10px;grid-row:auto}
+.cheek.r{border-radius:0 6px 6px 0;grid-column:-2}
+.cabinet.single .cheek{grid-column:auto}
+.cnote{grid-column:2/5;min-height:32px;display:flex;align-items:center;gap:10px;padding:6px 4px;font:400 14px/1.3 var(--sans);color:var(--cab-ink)}
+.cnote .ck{font:500 13px var(--mono);color:var(--cab-ink2);letter-spacing:.04em;white-space:nowrap}
+.cnote svg{flex:0 0 auto}
+.chan{position:relative;background:var(--chan)}
+.rack{position:relative;background:var(--cabin);padding:3px 0;display:flex;flex-direction:column;gap:2px;min-width:0}
+.rack::before,.rack::after{content:"";position:absolute;top:0;bottom:0;width:16px;background-color:var(--rail);
+  background-image:radial-gradient(circle,var(--hole) 0 2px,transparent 2.6px);background-size:16px 12px;background-position:0 3px}
+.rack::before{left:0}.rack::after{right:0}
+.rack>*{position:relative;z-index:1}
+svg.cords{position:absolute;left:0;top:0;pointer-events:none;z-index:3;overflow:visible}
+.cw{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.cw.found{stroke:var(--cord);stroke-width:2.5}
+.cw.yo{stroke:var(--cord);stroke-width:6}
+.cw.yi{stroke:var(--chan);stroke-width:2.5}
+.cw.bu{stroke:var(--rim);stroke-width:5}
+.cw.bk{stroke:var(--warn);stroke-width:2.5;stroke-dasharray:7 5}
+.cords .draw{animation:draw .3s var(--dec) 1}
+@keyframes draw{from{opacity:0}to{opacity:1}}
+.ctag{font:500 13px var(--mono);fill:var(--cab-ink)}
+.ctagbg{fill:var(--cab)}
+
+/* modules */
+.mod{display:grid;grid-template-columns:16px minmax(0,1fr) auto 16px;align-items:center;background:var(--panel);min-height:34px;color:var(--ink);
+  transition:transform .4s var(--dec),box-shadow .4s}
+.mod.u2{min-height:66px}
+.ear{align-self:stretch;position:relative;display:block}
+.ear::after{content:"";position:absolute;left:5px;top:50%;margin-top:-5px;width:6px;height:10px;border-radius:3px;background:var(--groove);opacity:.55}
+.ear.jk::after{display:none}
+.jack{position:absolute;left:3px;top:50%;margin-top:-5px;width:10px;height:10px;border-radius:50%;border:2px solid var(--ink3);background:var(--recess)}
+.mbody{display:flex;flex-direction:column;justify-content:center;min-width:0;background:none;border:0;padding:0 6px;text-align:left;align-self:stretch}
+.mrow{display:flex;align-items:center;gap:9px;min-width:0}
+.mn{font:500 15px/1.2 var(--sans)}
+.mw{font:400 13px/1.2 var(--sans);color:var(--ink2);white-space:nowrap}
+.mm{font:400 13px/1 var(--mono);color:var(--ink3);margin-left:auto;padding-left:8px;white-space:nowrap}
+.mod.s-alert .mw{color:var(--alert-ink);font-weight:500}
+.mod.s-warn .mw{color:var(--warn-ink);font-weight:500}
+.mod.s-action .mw{color:var(--ink);font-weight:500}
+.open{min-height:24px;min-width:28px;padding:0 6px;font-size:14px;margin-right:2px}
+.prev{display:flex;align-items:center;gap:10px;margin:6px 0 0 19px;font:400 13px/1.3 var(--mono);color:var(--ink2);min-width:0}
+.prev .pbar{flex:0 0 90px;height:6px;border-radius:3px;background:var(--recess);position:relative;overflow:hidden}
+.prev .pbar i{position:absolute;left:0;top:0;bottom:0;background:var(--cream)}
+.prev span{min-width:0}
+.mod.pulled{box-shadow:4px 4px 0 rgba(0,0,0,.4);z-index:2}
+body[data-light="night"] .mod.pulled{box-shadow:4px 4px 0 #000,0 0 0 1px var(--ink3)}
+.rack[data-side="r"] .mod.pulled{transform:translateX(-12px)}
+.rack[data-side="l"] .mod.pulled{transform:translateX(12px)}
+.mod.mhl{outline:2px solid var(--ink);outline-offset:-2px}
+.mod.ghost{background:transparent;outline:1px dashed var(--ghost);outline-offset:-1px;color:var(--cab-ink2)}
+.mod.ghost .mn{font-weight:400}
+.mod.ghost .mw,.mod.ghost .mm{color:var(--cab-ink2)}
+.mod.ghost .ear::after{display:none}
+.mod.ghost .jack{border-color:var(--ghost)}
+.mod.newslot{background:transparent;outline:2px dashed var(--cab-ink2);outline-offset:-2px;color:var(--cab-ink)}
+.mod.newslot .mw{color:var(--cab-ink2)}
+.mod.racked{animation:rackin .45s var(--dec) 1}
+@keyframes rackin{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+
+/* head unit (the server itself) */
+.head{display:grid;grid-template-columns:16px minmax(0,.8fr) minmax(0,1.5fr) 16px;align-items:center;gap:0 10px;background:var(--panel);min-height:68px;margin-bottom:2px}
+.head .hn{font:500 21px/1.15 var(--sans)}
+.head .hs{display:flex;align-items:center;gap:8px;font:400 13px/1.2 var(--sans);color:var(--ink2);margin-top:4px}
+.disp{background:var(--recess);border-radius:3px;padding:7px 10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-self:center;margin:6px 0}
+.mt{min-width:0}
+.mt .l{display:flex;flex-direction:column;gap:3px;font:400 13px/1 var(--mono);color:var(--legend)}
+.mt .l b{font:500 15px/1 var(--mono);color:var(--cream);white-space:nowrap}
+.mt .tr{height:5px;border-radius:3px;background:var(--track);margin-top:5px;position:relative;overflow:hidden}
+.mt .tr i{position:absolute;left:0;top:0;bottom:0;background:var(--cream)}
+.mt.warn .tr i{background:var(--warn)}
+.mt.warn .l b{color:var(--warn)}
+.head.off{background:transparent;outline:2px dashed var(--ghost);outline-offset:-2px}
+.head.off .hn{color:var(--cab-ink2)}
+.head.off .hs{color:var(--cab-ink)}
+
+/* shares module (nas) */
+.srow{display:flex;align-items:center;gap:10px;height:22px;font:400 13px/1 var(--mono);color:var(--ink2);position:relative}
+.srow b{font:500 14px var(--sans);color:var(--ink);min-width:72px}
+.mod.ghost .srow,.mod.ghost .srow b{color:var(--cab-ink2)}
+.srow .jack{left:-19px}
+.mod.shares{grid-template-columns:16px 1fr 16px;padding:5px 0}
+.mod.shares .mbody{padding-left:6px}
+
+/* Running plate: healthy modules folded into one plate (busy day, 1280, phone) */
+.plate1{display:grid;grid-template-columns:16px auto minmax(0,1fr) auto 16px;align-items:center;gap:10px;background:var(--panel);min-height:34px;position:relative}
+.plate1 .bt{font:400 14px/1.25 var(--sans);color:var(--ink2);min-width:0}
+.plate1 .bt b{font-weight:500;color:var(--ink)}
+.plate1 .k{min-height:26px}
+.shelf{background:var(--panel2);padding:6px 22px 8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 10px}
+.half{display:flex;align-items:center;gap:8px;min-height:28px;background:none;border:0;padding:0 2px;text-align:left;font:400 14px/1.2 var(--sans);color:var(--ink);min-width:0;border-bottom:1px solid var(--line)}
+.half .mm{font-size:13px}
+/* blanking plate (stopped apps) */
+.blank{display:grid;grid-template-columns:16px auto minmax(0,1fr) auto 16px;align-items:center;gap:10px;background:var(--panel2);min-height:34px}
+.blank .k{min-height:26px}
+.vents{display:flex;gap:4px}
+.vents i{width:3px;height:16px;border-radius:2px;background:var(--groove);opacity:.6}
+.blank .bt{font:400 14px/1.25 var(--sans);color:var(--ink2);min-width:0}
+.blank .bt b{font-weight:500;color:var(--ink)}
+.drawer{background:var(--panel2);padding:8px 22px 10px;display:flex;flex-wrap:wrap;gap:6px}
+.drawer .k{min-height:28px;font-size:14px}
+.empty-u{flex:1;min-height:20px}
+.door{font:400 14px/1.4 var(--sans);color:var(--cab-ink);background:transparent;margin:4px 22px;padding:10px 12px;border-radius:3px;outline:2px dashed var(--ghost);outline-offset:-2px}
+
+/* ---------- event tape (Day: a light strip, no ribs. Night: the black ribbed band) ---------- */
+.tape{position:absolute;left:0;right:0;bottom:0;height:88px;background-color:var(--tape);
+  background-image:repeating-linear-gradient(to bottom,var(--rib) 0 1px,transparent 1px 5px);
+  display:grid;grid-template-columns:300px 1fr;color:var(--tape-ink);border-top:1px solid var(--tape-line)}
+.dev.w1280 .tape{height:80px}
+.tape .tl{padding:8px 18px 8px 24px;display:flex;flex-direction:column;gap:4px;min-width:0;border-right:1px solid var(--tape-line)}
+.tape .tt{font:500 13px var(--mono);letter-spacing:.04em;color:var(--tape-dim);display:flex;justify-content:space-between;align-items:center;gap:6px}
+.tape .tt button,.tlink{background:none;border:0;color:var(--tape-ink);font:500 13px var(--mono);text-decoration:underline;text-underline-offset:3px;padding:0 2px;min-height:24px}
+.zoom{display:inline-flex;white-space:nowrap;gap:2px;border:1px solid var(--tape-line);border-radius:3px;padding:1px}
+.zoom button{background:none;border:0;color:var(--tape-dim);font:500 13px var(--mono);min-height:24px;padding:0 6px;border-radius:2px}
+.zoom button[aria-pressed="true"]{background:var(--tape-ink);color:var(--tape)}
+.tape .ro{font:400 15px/1.3 var(--sans);color:var(--tape-ink);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.lanes{position:relative;padding:8px 70px 0 100px}
+.lane{position:relative;height:22px;margin-bottom:3px}
+.lane .ln{position:absolute;left:-92px;top:3px;font:400 13px var(--mono);color:var(--tape-dim)}
+.lane .base{position:absolute;left:0;right:0;top:10px;height:2px;background:var(--tape-base)}
+.ev{position:absolute;top:-1px;height:24px;min-width:24px;background:none;border:0;padding:0;z-index:2}
+.ev[aria-pressed="true"]{outline:2px solid var(--tape-ink);outline-offset:-2px;border-radius:3px}
+.ev .cl{position:absolute;right:-4px;top:-9px;font:500 13px/1 var(--mono);background:var(--tape);color:var(--tape-ink);border:1px solid var(--tape-ink);border-radius:3px;padding:1px 3px}
+.bar{position:absolute;top:5px;height:12px;border-radius:2px;width:3px}
+.bar.alert{background:var(--alert);min-width:4px;box-shadow:0 0 0 1px var(--rim)}
+.bar.warn{background:var(--warn);top:7px;height:8px;min-width:4px;box-shadow:0 0 0 1px var(--rim)}
+.bar.offline{border:2px dashed var(--tick);top:4px;height:14px;background:transparent;min-width:6px}
+.bar.tick{width:3px !important;background:var(--tick);top:2px;height:18px}
+.axis{position:relative;height:16px;font:400 13px/1 var(--mono);color:var(--tape-dim)}
+.axis span{position:absolute;transform:translateX(-50%);top:2px;white-space:nowrap}
+.nowm{position:absolute;top:6px;bottom:20px;width:3px;background:var(--lit);box-shadow:0 0 0 1px var(--rim)}
+.nowl{position:absolute;right:6px;bottom:4px;font:500 13px var(--mono);color:var(--tape-ink)}
+
+/* ---------- detail ---------- */
+.det{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;padding:18px 24px 28px;overflow:auto;align-content:start}
+.back{background:none;border:0;padding:0 4px;min-height:30px;min-width:44px;font:500 15px var(--sans);color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
+.plate{display:grid;grid-template-columns:22px 1fr 22px;background:var(--panel);margin-top:8px;box-shadow:0 0 0 10px var(--cab)}
+.plate .ear::after{left:8px;width:6px;height:14px;margin-top:-7px}
+.plate .pb{padding:20px 6px 22px;min-width:0}
+.plate .pn{font:500 34px/1.1 var(--sans);letter-spacing:-.01em;margin:6px 0 8px}
+.plate .ps{font:400 17px/1.45 var(--sans);color:var(--ink);margin:0;max-width:56ch}
+.plate .pact{display:flex;flex-wrap:wrap;gap:10px 8px;margin-top:16px}
+.sect{font:500 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:24px 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sect .k{text-transform:none;letter-spacing:0}
+.cpan{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:2px 12px}
+.prow{display:grid;grid-template-columns:80px minmax(0,1fr) auto;align-items:center;gap:4px 12px;min-height:44px;padding:6px 0}
+.prow+.prow{border-top:1px solid var(--line)}
+.prow svg{display:block}
+.pn2{font:500 15px var(--sans);background:none;border:0;color:var(--ink);text-align:left;padding:0;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--ink3)}
+.pw{font:400 13px var(--sans);color:var(--ink2);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.psrc{grid-column:2/-1;font:400 13px/1.35 var(--mono);color:var(--ink2)}
+.psrc b{font-weight:500;color:var(--ink)}
+.prow.sug{background:linear-gradient(var(--panel2),var(--panel2));margin:0 -12px;padding:8px 12px}
+.prow .acts{grid-column:2/-1;display:flex;gap:8px;flex-wrap:wrap}
+.pnone{font:400 15px var(--sans);color:var(--ink2);padding:10px 0}
+.log{background:var(--logbg);border:1px solid var(--line);border-radius:4px;padding:10px 12px;font:400 13px/1.6 var(--mono);color:var(--ink);overflow:hidden}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .bad{color:var(--alert-ink)}
+.log .bad::before{content:"▲ ";color:var(--warn-ink)}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font:400 15px/1.35 var(--sans);margin:0}
+.facts dt{font:400 13px/1.6 var(--mono);color:var(--ink2)}
+.facts dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.mini{position:relative;height:28px;background-color:var(--tape);background-image:repeating-linear-gradient(to bottom,var(--rib) 0 1px,transparent 1px 5px);border-radius:3px;border:1px solid var(--tape-line)}
+.mini .bar{top:7px}
+.mini .bar.tick{top:4px}
+.miniax{display:flex;justify-content:space-between;font:400 13px var(--mono);color:var(--ink2);margin-top:4px}
+
+/* ---------- bench (update and install) ---------- */
+.flowdeck{display:grid;grid-template-columns:440px 1fr;gap:0;overflow:auto}
+.bench{margin:12px 24px 12px 0;overflow:auto;background:var(--panel);border-bottom:10px solid var(--walnut);display:flex;flex-direction:column;min-width:0}
+.bh{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:18px 22px 14px;border-bottom:1px solid var(--line)}
+.bh .t{font:500 24px/1.2 var(--sans)}
+.bh .v{font:500 14px var(--mono);color:var(--ink2);margin-top:4px}
+.steps{display:flex;gap:6px;padding:12px 22px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.stp{display:flex;align-items:center;gap:8px;font:400 14px var(--sans);color:var(--ink2);padding-right:14px}
+.stp.now{color:var(--ink);font-weight:500}
+.stp .n{font:500 13px var(--mono)}
+.bb{padding:18px 22px;flex:1}
+.bb h4{font:500 19px/1.3 var(--sans);margin:0 0 6px}
+.bb p{margin:0 0 10px;color:var(--ink2);max-width:60ch}
+.chk{list-style:none;margin:6px 0 0;padding:0}
+.chk li{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font:400 15px/1.35 var(--sans)}
+.chk li .led,.chk li .slot,.chk li .wp{margin-top:5px}
+.chk li.dim{color:var(--ink3)}
+.chk li .sm{display:block;font-size:13px;color:var(--ink2)}
+.big{height:10px;border-radius:5px;background:var(--recess);position:relative;overflow:hidden;margin:10px 0 8px}
+.big i{position:absolute;left:0;top:0;bottom:0;background:var(--cream)}
+.bf{display:flex;flex-wrap:wrap;gap:10px;padding:14px 22px 18px;border-top:1px solid var(--line);align-items:center}
+.bf .note{font:400 14px var(--sans);color:var(--ink2);margin-left:auto}
+.whatsnew{margin:0 0 12px;padding-left:18px;color:var(--ink)}
+.pick2{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px}
+.pick2 .k{gap:8px}
+.frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0}
+.frow label{font:500 13px var(--mono);color:var(--ink2);letter-spacing:.04em;text-transform:uppercase;min-width:60px}
+.frow input{width:110px}
+.fmsg{font:400 14px/1.35 var(--sans);color:var(--ink2);display:flex;gap:8px;align-items:center}
+.fmsg.w{color:var(--warn-ink)}
+
+/* ---------- Store ---------- */
+.store{display:grid;grid-template-columns:200px minmax(0,1fr) 470px;gap:0;overflow:hidden}
+.cats{padding:18px 8px 18px 24px;display:flex;flex-direction:column;gap:2px}
+.cat{display:flex;justify-content:space-between;align-items:center;min-height:32px;background:none;border:0;padding:0 8px;font:400 15px var(--sans);color:var(--ink2);border-radius:3px;text-align:left}
+.cat[aria-pressed="true"]{color:var(--ink);font-weight:500;background:var(--panel2);box-shadow:inset 0 2px 0 rgba(0,0,0,.08)}
+.cat .mm{margin:0}
+.catwrap{padding:18px 16px 18px 8px;overflow:auto;min-width:0}
+.srch{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.srch input{flex:1;font-family:var(--sans)}
+.drawerbox{background:var(--cab);border-radius:4px;padding:6px;display:flex;flex-direction:column;gap:2px}
+.citem{display:grid;grid-template-columns:16px minmax(0,1fr) auto auto 16px;align-items:center;gap:10px;background:var(--panel);min-height:52px}
+.citem[aria-current="true"]{outline:2px solid var(--ink);outline-offset:-2px}
+.citem .cb{background:none;border:0;padding:6px 0;text-align:left;min-width:0;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.citem .cn{font:500 15px/1.2 var(--sans)}
+.citem .cl2{font:400 13px/1.3 var(--sans);color:var(--ink2)}
+.citem .cs{font:400 13px var(--mono);color:var(--ink3);white-space:nowrap}
+.citem .k{min-height:28px}
+.cfoot{font:400 13px var(--mono);color:var(--ink2);margin-top:10px}
+.spec2{padding:18px 24px 18px 8px;overflow:auto}
+.spec2 .plate{margin:8px 10px 0}
+
+/* ---------- Full log ---------- */
+.logscr{display:flex;flex-direction:column;overflow:hidden}
+.lhead{display:flex;align-items:flex-end;gap:16px;padding:14px 24px 8px;flex-wrap:wrap}
+.lhead h3{font:500 26px/1.15 var(--sans);margin:0}
+.lhead .tlab{margin-bottom:4px}
+.ltools{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap;padding:6px 24px 10px;border-bottom:1px solid var(--line)}
+.ltools input{width:220px;font-family:var(--sans)}
+.ltools .cnt{font:400 13px var(--mono);color:var(--ink2)}
+.scrub{margin:10px 24px 0;position:relative}
+.scrub .lane{margin:0}
+.scrub .ax2{display:flex;justify-content:space-between;font:400 13px var(--mono);color:var(--ink2);margin-top:2px}
+.lbody{flex:1;margin:8px 24px 16px;background:var(--logbg);border:1px solid var(--line);border-radius:4px;overflow:auto;font:400 13px/1.65 var(--mono);color:var(--ink);position:relative}
+.ll{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;padding:0 12px}
+.ll .no{color:var(--ink3);text-align:right;user-select:none}
+.ll .tx{white-space:pre-wrap;overflow-wrap:anywhere}
+.ll.bad .tx{color:var(--alert-ink)}
+.ll.bad .tx::before{content:"▲ ";color:var(--warn-ink)}
+.ll.jump{background:var(--panel2)}
+.ll mark{background:var(--mark);color:#1d1c1a;box-shadow:0 0 0 1px var(--rim);border-radius:2px}
+.lnew{position:sticky;bottom:8px;margin:8px auto 4px;display:flex;justify-content:center}
+.lmore{padding:8px 12px;color:var(--ink2);font-family:var(--sans);font-size:14px;border-bottom:1px solid var(--line)}
+
+/* ---------- Edit setup = the module's rear panel ---------- */
+.rearscr{padding:14px 24px 0}
+.rear{display:grid;grid-template-columns:22px minmax(0,1fr) 22px;background:var(--panel2);box-shadow:0 0 0 10px var(--cab);margin:10px 10px 0}
+.rear .ear::after{left:8px;width:6px;height:14px;margin-top:-7px}
+.rearin{padding:16px 6px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px 28px;min-width:0}
+.rsec h4{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+.rsec h4 .k{text-transform:none;letter-spacing:0;font-family:var(--sans)}
+.term{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.term:first-of-type{border-top:0}
+.term .tn{font:500 14px var(--mono);color:var(--ink);display:flex;gap:8px;align-items:center}
+.term .tv{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.term .tv input{width:120px}
+.term .tv .wide{width:200px}
+.term .note{grid-column:1/-1;font:400 13px/1.35 var(--sans);color:var(--ink2);display:flex;gap:8px;align-items:center}
+.term .note.w{color:var(--warn-ink)}
+.pj{width:16px;height:16px;border-radius:50%;border:2px solid var(--ink3);background:var(--recess);flex:0 0 auto;display:inline-block}
+.dots{font:500 15px var(--mono);letter-spacing:.1em;color:var(--ink)}
+.mono{font-family:var(--mono)}
+.savebar{position:sticky;bottom:0;margin:18px -24px 0;padding:12px 24px;background:var(--ag);border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;z-index:4}
+.savebar .note{font:400 14px var(--sans);color:var(--ink2)}
+.keys3{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---------- Files: places are drive bays ---------- */
+.files{display:grid;grid-template-columns:270px minmax(0,1fr) 320px;overflow:hidden}
+.bays{padding:16px 10px 16px 24px;overflow:auto}
+.bays .drawerbox{gap:2px}
+.bayg{font:500 13px var(--mono);color:var(--cab-ink2);letter-spacing:.06em;text-transform:uppercase;padding:6px 6px 2px}
+.dbay{display:grid;grid-template-columns:12px minmax(0,1fr) 12px;background:var(--panel);min-height:48px;border:0;padding:0;text-align:left;width:100%;color:var(--ink)}
+.dbay[aria-current="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
+.dbay .db{padding:6px 2px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.dbay .dn{display:flex;gap:8px;align-items:center;font:500 15px/1.2 var(--sans)}
+.dbay .df{display:flex;gap:4px 8px;align-items:center;font:400 13px var(--mono);color:var(--ink2);flex-wrap:wrap}
+.dbay .df.g{color:var(--cab-ink2)}
+.dbay .df.g .dfb{flex:1 0 100%;order:3}
+.dbay .dfb{flex:1;height:5px;border-radius:3px;background:var(--recess);position:relative;overflow:hidden;min-width:40px}
+.dbay .dfb i{position:absolute;left:0;top:0;bottom:0;background:var(--cream)}
+.dbay .dfb i.w{background:var(--warn)}
+.flist{padding:16px 12px;overflow:auto;min-width:0;display:flex;flex-direction:column}
+.crumbs{font:400 14px var(--mono);color:var(--ink2);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.crumbs b{color:var(--ink);font-weight:500}
+.ftools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.frow2{display:grid;grid-template-columns:22px minmax(0,1fr) 110px 120px;align-items:center;gap:10px;min-height:36px;border:0;border-bottom:1px solid var(--line);background:none;padding:0 8px;text-align:left;color:var(--ink);width:100%}
+.frow2[aria-current="true"]{background:var(--panel2);box-shadow:inset 0 2px 0 rgba(0,0,0,.08)}
+.frow2 .fs,.frow2 .fd{font:400 13px var(--mono);color:var(--ink2);text-align:right}
+.frow2 .fu{display:block;font:400 13px/1.3 var(--sans);color:var(--ink2)}
+.fhead{font:500 13px var(--mono);color:var(--ink2);letter-spacing:.04em}
+.fhead:hover{background:none}
+.gl{width:18px;height:14px;display:inline-block;position:relative}
+.gl.dir{background:var(--ink3);border-radius:2px;clip-path:polygon(0 0,40% 0,50% 18%,100% 18%,100% 100%,0 100%)}
+.gl.file{width:13px;height:16px;border:2px solid var(--ink3);border-radius:2px;margin-left:2px}
+.fprev{padding:16px 24px 16px 12px;overflow:auto;border-left:1px solid var(--line)}
+.fprev h4{font:500 22px/1.2 var(--sans);margin:4px 0 8px}
+
+/* ---------- Shares ---------- */
+.shares2{padding:16px 24px;overflow:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 28px;align-content:start}
+.shares2 h3{font:500 22px/1.2 var(--sans);margin:4px 0 4px}
+.splate{display:grid;grid-template-columns:16px minmax(0,1fr) 16px;background:var(--panel);margin-top:2px}
+.sbody{padding:12px 4px 12px;min-width:0}
+.stop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stop .sn{font:500 18px/1.2 var(--sans)}
+.addr{display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap}
+.addr code{font:500 14px var(--mono);background:var(--recess);color:var(--cream);padding:4px 8px;border-radius:3px;overflow-wrap:anywhere}
+.badge{font:500 13px var(--mono);color:var(--ink2);border:1px solid var(--line);border-radius:3px;padding:1px 6px;white-space:nowrap}
+.used{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:400 14px/1.35 var(--sans);color:var(--ink2);margin-top:6px}
+
+/* ---------- First run ---------- */
+.frdeck{display:grid;grid-template-columns:minmax(0,1fr) 520px;overflow:hidden}
+.frcab{padding:16px 16px 16px 24px;overflow:hidden}
+.emptyrack{flex:1;min-height:300px;margin:6px 18px;outline:2px dashed var(--ghost);outline-offset:-2px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--cab-ink);font:400 15px/1.4 var(--sans);padding:16px}
+.code{font:500 18px var(--mono);letter-spacing:.12em}
+
+/* ---------- History ---------- */
+.hist{padding:14px 24px 20px;overflow:auto}
+.week{background:var(--tape);background-image:repeating-linear-gradient(to bottom,var(--rib) 0 1px,transparent 1px 5px);border:1px solid var(--tape-line);border-radius:4px;padding:8px 70px 4px 12px;color:var(--tape-ink)}
+.wday{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;min-height:30px}
+.wday .wl{font:500 13px var(--mono);color:var(--tape-dim)}
+.wday .wl.now{color:var(--tape-ink)}
+.wlanes{position:relative;height:28px}
+.wlanes .lane{height:12px;margin:1px 0}
+.wlanes .lane .base{top:5px;height:1px}
+.wlanes .bar{top:1px;height:10px}
+.wlanes .bar.warn{top:2px;height:8px}
+.wlanes .bar.tick{top:0;height:12px}
+.wlanes .bar.offline{top:0;height:12px}
+.wlanes .ev{top:-6px;height:28px}
+.wlanes .ev .cl{top:-4px;right:-14px}
+.hist .week{margin-right:0}
+.wlanes .rest{position:absolute;top:0;bottom:0;right:0;border-left:3px solid var(--cream);box-shadow:-1px 0 0 var(--rim);background:repeating-linear-gradient(135deg,transparent 0 6px,var(--tape-base) 6px 7px);opacity:.9}
+.wax{display:grid;grid-template-columns:110px minmax(0,1fr);font:400 13px var(--mono);color:var(--tape-dim)}
+.wax div{position:relative;height:18px;margin-right:70px}
+.wax{margin-right:-70px}
+.wax span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.hlist{max-width:820px;margin-top:6px}
+.hgrp{font:500 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:18px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.hitem{display:grid;grid-template-columns:22px 56px minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:10px 6px;border-bottom:1px solid var(--line)}
+.hitem[aria-current="true"]{background:var(--panel2);box-shadow:inset 0 2px 0 rgba(0,0,0,.08)}
+.hitem .led,.hitem .slot,.hitem .wp{margin-top:6px}
+.hitem .ht{font:500 14px/1.6 var(--mono);color:var(--ink2)}
+.hitem .hs{font:400 15px/1.4 var(--sans)}
+.hitem .he{display:block;font:400 14px/1.4 var(--sans);color:var(--ink2);margin-top:2px}
+.hitem .he b{font-weight:500;color:var(--ink)}
+.hend{font:400 14px var(--sans);color:var(--ink2);padding:14px 6px;display:flex;gap:10px;align-items:center}
+.hend::before{content:"";width:24px;height:3px;background:var(--walnut)}
+
+/* ---------- sheets ---------- */
+.scrim{position:absolute;inset:0;background:rgba(10,10,9,.45);z-index:20;display:flex;align-items:center;justify-content:center}
+.sheet{background:var(--panel);color:var(--ink);width:520px;max-width:calc(100% - 32px);border-radius:6px;box-shadow:0 0 0 1px var(--line),6px 6px 0 rgba(0,0,0,.35);padding:18px 20px 16px;max-height:calc(100% - 40px);overflow:auto}
+.phone .scrim{align-items:flex-end}
+.phone .sheet{width:100%;max-width:100%;border-radius:12px 12px 0 0;padding:16px 16px 20px;max-height:85%}
+.sheet h4 .k{font-size:15px}
+.sheet h4{font:500 21px/1.25 var(--sans);margin:0 0 6px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sheet p{margin:0 0 10px;color:var(--ink2)}
+.opts{display:flex;flex-direction:column;gap:2px;margin:8px 0;max-height:280px;overflow:auto}
+.opt{display:flex;align-items:center;gap:10px;min-height:36px;background:none;border:0;border-bottom:1px solid var(--line);text-align:left;padding:0 6px;color:var(--ink)}
+.phone .opt{min-height:44px}
+.opt .mm{margin-left:auto}
+.opt[aria-checked="true"]{background:var(--panel2);box-shadow:inset 0 2px 0 rgba(0,0,0,.08)}
+.chkline{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font:400 15px/1.4 var(--sans)}
+.chkline input{min-height:22px;width:22px;margin:0}
+.phone .chkline input{min-height:28px;width:28px}
+.sfoot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+
+/* ---------- phone ---------- */
+.phone{width:390px;height:844px;border-radius:28px;box-shadow:0 0 0 8px #151514,0 0 0 9px #3a3936;display:flex;flex-direction:column}
+.ph-top{height:52px;display:flex;align-items:center;gap:6px;padding:0 6px 0 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.ph-top .wm{font-size:18px;flex:1;min-width:0}
+.ph-top .clock{font-size:14px;margin-right:4px}
+.ib{min-width:44px;min-height:44px;background:none;border:0;display:inline-flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink)}
+.ph-body{flex:1;overflow:auto;scrollbar-width:none;position:relative}
+.ph-body::-webkit-scrollbar{display:none}
+.ph-sec{padding:14px 16px 0}
+.phone .hl{font-size:22px}
+.phone .sub{font-size:15px;margin-top:2px}
+.phone .status{padding:8px 16px 0;gap:9px}
+.phone .tag{padding:8px 14px 10px 34px}
+.phone .tag .ttl{font-size:18px}
+.phone .tact{margin-top:8px}
+.phone .tact .k{flex:0 0 auto}
+.phone .tag.row{min-height:44px;padding:0 10px 0 34px}
+.phone .tags{gap:6px}
+.rpick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 6px}
+.rpick button{min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;font:500 15px var(--mono);background:var(--panel);border:1px solid var(--line);border-radius:4px;color:var(--ink)}
+.rpick button[aria-checked="true"]{background:var(--panel2);box-shadow:inset 0 2px 0 rgba(0,0,0,.15)}
+.phone .cabinet{grid-template-columns:10px minmax(0,1fr) 10px}
+.phone [data-rackstart]{padding-top:8px}
+.phone [data-rackstart] .cabinet.single{padding-top:6px}
+.phone [data-rackstart] .cabinet.single .cheek{margin-top:-6px}
+.phone .rack::before,.phone .rack::after{width:12px;background-size:12px 12px}
+.phone .mod{grid-template-columns:12px minmax(0,1fr) auto 12px;min-height:48px}
+.phone .mod.u2{min-height:92px}
+.phone .ear::after{left:3px}
+.phone .open{min-height:44px;min-width:44px}
+.phone .mbody{min-height:48px}
+.phone .head{grid-template-columns:12px 1fr 12px;padding:4px 0 6px;min-height:0}
+.phone .head .hn{display:none}
+.phone .head>div:not(.disp){display:none}
+.phone .disp{grid-template-columns:repeat(4,minmax(0,1fr))}
+.phone .disp{padding:6px 8px;gap:10px}
+.phone .head .disp{grid-column:2;margin:0}
+.phone .blank,.phone .plate1{grid-template-columns:12px auto minmax(0,1fr) auto 12px;min-height:52px}
+.phone .blank .k,.phone .plate1 .k{min-height:44px}
+.phone .shelf{grid-template-columns:1fr;padding:4px 16px 8px}
+.phone .half{min-height:44px}
+.phone .mod.pulled{transform:none}
+.phone .drawer .k{min-height:44px}
+.ph-tape{margin:16px 16px 0;background-color:var(--tape);background-image:repeating-linear-gradient(to bottom,var(--rib) 0 1px,transparent 1px 5px);border-radius:4px;color:var(--tape-ink);padding:10px 12px 4px;border:1px solid var(--tape-line);width:calc(100% - 32px);text-align:left;display:block}
+.ph-tape .tt{font:500 13px var(--mono);letter-spacing:.04em;color:var(--tape-dim);display:flex;justify-content:space-between}
+.ph-tape .ro{font:400 15px/1.3 var(--sans);margin:4px 0 6px}
+.ph-tape .lane{height:16px;margin:0 0 4px 0}
+.ph-tape .lane .ln{display:none}
+.ph-tape .bar{top:3px;height:10px}
+.ph-tape .bar.tick{top:1px;height:14px}
+.ph-tape .bar.warn{top:4px;height:8px}
+.ph-tape .bar.offline{top:2px;height:12px}
+.ph-tape .lane .base{top:7px}
+.ph-tape .phl{display:flex;justify-content:space-between;font:400 13px var(--mono);color:var(--tape-dim);padding:2px 0 6px}
+.ph-tabs{height:62px;flex:0 0 auto;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:var(--ag)}
+.ph-tabs button{background:none;border:0;font:400 13px var(--sans);color:var(--ink2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:44px}
+.ph-tabs button i{display:block;width:22px;height:5px;border-radius:3px;background:transparent}
+.ph-tabs button[aria-current] {color:var(--ink);font-weight:500}
+.ph-tabs button[aria-current] i{background:var(--lit);box-shadow:0 0 0 2px var(--rim)}
+.phone .det{display:block;padding:8px 16px 24px}
+.phone .det>.back{display:none}
+.phone .plate{grid-template-columns:12px 1fr 12px;box-shadow:0 0 0 6px var(--cab);margin:10px 6px 0}
+.phone .plate .pn{font-size:28px}
+.phone .plate .ps{font-size:16px}
+.phone .plate .pb{padding:16px 4px 18px}
+.phone .prow{grid-template-columns:52px minmax(0,1fr);min-height:52px}
+.phone .prow .pw{grid-column:2}
+.phone .prow svg{grid-row:span 2}
+.phone .pn2{min-height:44px}
+.phone .flowdeck{display:block}
+.phone .bench{margin:0;border-bottom:0;min-height:100%}
+.phone .bh{padding:14px 16px 10px}
+.phone .steps{padding:10px 16px;gap:4px}
+.phone .stp{padding-right:6px}
+.phone .stp .lbl{display:none}
+.phone .stp.now .lbl{display:inline}
+.phone .bb{padding:14px 16px}
+.phone .bf{position:sticky;bottom:0;background:var(--panel);padding:12px 16px 14px}
+.phone .bf .note{margin-left:0;width:100%}
+.phone .citem{grid-template-columns:12px minmax(0,1fr) auto 12px;min-height:60px}
+.phone .citem .cs{display:none}
+.phone .citem .k{min-height:44px}
+.phone .ltools{padding:8px 16px;gap:6px}
+.phone .ltools input{width:100%}
+.phone .lbody{margin:8px 0 0;border-radius:0;border-left:0;border-right:0}
+.phone .ll{grid-template-columns:minmax(0,1fr);padding:0 12px}
+.phone .ll .no{display:none}
+.phone .scrub{margin:8px 16px 0}
+.phone .scrub .ax2 .mid{display:none}
+.phone .term .note{flex-wrap:wrap}
+.phone .term .note .pick2{flex:1 0 100%}
+.phone .rear{grid-template-columns:12px minmax(0,1fr) 12px;box-shadow:0 0 0 6px var(--cab);margin:8px 6px 0}
+.phone .rearin{grid-template-columns:minmax(0,1fr);padding:14px 4px}
+.phone .rearscr{padding:10px 16px 0}
+.phone .savebar{margin:16px -16px 0;padding:10px 16px}
+.phone .term .tv input{width:100%;max-width:150px}
+.phone .frow2{grid-template-columns:22px minmax(0,1fr) 72px;min-height:52px}
+.phone .frow2 .fd{display:none}
+.phone .hitem{grid-template-columns:22px 48px minmax(0,1fr)}
+.phone .hitem>.k{grid-column:3;justify-self:start}
+.phone .k.ib2{min-width:44px}
+.phone .sects{padding:0 16px 16px}
+
+/* motion: once, then rest. Calm = 120 ms changes, no slides */
+body[data-motion="calm"] .dev *{animation:none !important;transition-duration:.12s !important}
+@media (prefers-reduced-motion:reduce){.dev *{animation:none !important;transition-duration:.12s !important}}
+@keyframes pullout{from{transform:none}}
+.mod.pulled.anim{animation:pullout .4s var(--dec) 1}
+.turn{animation:turn .28s var(--dec) 1}
+@keyframes turn{from{transform:translateY(-10px);opacity:.2}to{transform:none;opacity:1}}
+</style>
+</head>
+<body data-light="day" data-motion="full">
+<div class="page">
+  <div class="kicker">Jam design · pass 5 · Jam-Dash</div>
+  <h1>Jam-Dash, pass 5: the whole rack</h1>
+  <p class="lede">Jam-Dash runs Docker apps on two servers, "home-server" and "nas". Pass 4 drew it as equipment: each server a rack, each app a module, a board of lights for the glance, tags for trouble, cords for what needs what, and a tape of the last 24 hours. Pass 5 keeps that idea, fixes the pass-4 audit, and carries the rack into every other screen: the Store, the full log, Edit setup, Files, Shares, first run and History. All names, numbers and log lines are made-up sample data.</p>
+
+  <div class="ctl" role="group" aria-label="Page controls">
+    <div class="grp"><span class="lab">Lighting</span><div class="seg" data-ctl="light"><button data-v="day">Day</button><button data-v="night">Night</button></div></div>
+    <div class="grp"><span class="lab">Situation</span><div class="seg" data-ctl="sit"><button data-v="trouble">Trouble</button><button data-v="allgood">All good</button><button data-v="offline">nas offline</button><button data-v="busy">Busy day · 40 apps</button></div></div>
+    <div class="grp"><span class="lab">Desktop</span><div class="seg" data-ctl="W"><button data-v="1440">1440</button><button data-v="1280">1280</button></div></div>
+    <div class="grp"><span class="lab">Motion</span><div class="seg" data-ctl="motion"><button data-v="full">Full</button><button data-v="calm">Calm</button></div></div>
+  </div>
+
+  <h2>What changed since pass 4</h2>
+  <div class="cols">
+    <ul>
+      <li><b>Cords say where they come from.</b> A solid cord is <b>found</b> in real data: a mount, a compose link, or a proxy host read through Proxy Manager's connection. A hollow cord was <b>drawn by you</b>. A guess is never drawn: it waits on the app's cord panel as a question ("Does Sonarr need Jellyfin?").</li>
+      <li><b>Cords stay tidy at scale.</b> They run in combed lanes down the <b>cord channel</b> (renamed from "patch field"), so many cords make one bundle, not spaghetti. Cords to folded apps end on the plate with a count, and the note above the racks names them.</li>
+      <li><b>A busy day folds.</b> When a rack is taller than the screen, healthy apps fold into a <b>Running plate</b> ("Running · 25"). Trouble, live previews, jobs and apps you keep in view stay out. The plate opens into a shelf of half-width modules.</li>
+      <li><b>Day is light.</b> The cabinet is lab-grey enamel by day. Only windows that hold words or numbers stay dark (the board's legends, the head unit's display). The tape is a light strip by day and the black ribbed band at night.</li>
+    </ul>
+    <ul>
+      <li><b>The tape zooms.</b> "24 h | Last hour". At 24 h, marks closer than 24 px merge into one mark with a count, and pressing it opens the last hour.</li>
+      <li><b>The phone gets the rack sooner.</b> The phone board turns sideways: servers are rows and the five subjects are columns. The rack picker moved to the rack itself. In Trouble the rack now starts on the first screen.</li>
+      <li><b>1280 fits</b> without emergency tightening: the rack folds (Auto) and the tag rail uses its ladder.</li>
+      <li><b>New screens on the rack:</b> Store and install (a catalogue drawer and the bench), the full log (with the app's tape lane as a scrubber), Edit setup (the module's <b>rear panel</b>: ports, folders, environment, secrets, cords), Files (places as <b>drive bays</b>), Shares, first run (an <b>empty cabinet</b> that fills), and History (a week of tape over a reading list).</li>
+    </ul>
+  </div>
+
+  <h2>1 · Home</h2>
+  <p class="howto">Switch <b>Situation</b> above. <b>Point at or Tab to a module</b> to see its cords; the note above the racks says what they are and where they came from. Click a <b>lit light</b> on the board to find its cause. Click an app's name for its detail (Esc or ‹ Home goes back). Press the <b>red key</b> to fix the alert. On the tape, press <b>Last hour</b>, or press a merged mark. In <b>Busy day</b>, open the Running plate. On the phone, the rack picker sits on the rack.</p>
+  <div class="fit" id="fitHome"></div>
+  <div class="cap" id="capHome"></div>
+  <div class="pgrow">
+    <div class="phwrap"><div class="fit" id="phHome"></div><div class="cap" id="capPhHome"></div></div>
+    <div class="side">
+      <p class="howto"><b>Phone.</b> Headline, then the board turned sideways (servers are rows, the subjects keep fixed columns), then the first tag in full, further alerts as rows, and the warns folded into "To look at". The rack follows with its own picker (home-server | nas) and folds its healthy apps into the Running plate, so the phone shows what matters and one row for the rest. The tape at the end opens History.</p>
+      <p class="howto"><b>Busy day.</b> 40 apps: 30 on home-server, 10 on nas. Paperless is down. Proxy Manager serves 17 apps, so point at it: four cords run to modules you can see (Jellyfin, Paperless, Gitea, Nextcloud), and one cord to home-server's Running plate carries the other 13, marked +13. The note above the racks names them.</p>
+      <p class="howto"><b>nas offline.</b> nas's rack turns to ghost modules. On home-server everything mounted from nas waits ("Waiting on nas"), and those cords are dashed amber and always drawn. They're found cords, because they come from the mounts.</p>
+    </div>
+  </div>
+
+  <h2>2 · App detail and its cords</h2>
+  <p class="howto">This follows Situation: <b>Crafty</b> in Trouble, <b>Jellyfin</b> waiting on nas when nas is offline, and <b>Jellyfin</b> with an update ready otherwise. The <b>cord panel</b> lists what the app needs and what needs it, and each row says where the cord came from. A suggested cord waits for your answer. <b>Draw a cord</b> opens a picker; the new cord is hollow, on the panel and on Home.</p>
+  <div class="fit" id="fitDet"></div>
+  <div class="cap" id="capDet"></div>
+  <div class="pgrow"><div class="phwrap"><div class="fit" id="phDet"></div><div class="cap" id="capPhDet"></div></div>
+    <div class="side"><p class="howto"><b>Where cords come from.</b></p><ul class="howto"><li><b>Found · mount:</b> the app's container mounts a folder that is a nas share. Jam-Dash reads that from Docker.</li><li><b>Found · compose:</b> <code>depends_on</code> or <code>links</code> in the app's compose file.</li><li><b>Found · proxy host:</b> read from Proxy Manager, only after you connect it in Settings › Connections. Until then there are no proxy cords, and the note says so.</li><li><b>Yours:</b> drawn by you here or on the rear panel. It's hollow and says when you drew it.</li><li><b>Suggested:</b> two apps share a Docker network. That's a fact, but which one needs the other is a guess, so it's asked, never drawn.</li></ul></div>
+  </div>
+
+  <h2>3 · The bench: update Jellyfin</h2>
+  <p class="howto">Kept from pass 4, now on the Day surfaces. Press <b>Update Jellyfin</b>. The steps are Check → Download → Swap → Watch → Done, and the module in the rack shows the same job. <span class="seg" data-ctl="fail" style="vertical-align:middle"><button data-v="ok">Update works</button><button data-v="fail">Health check fails</button></span> <button class="pgk" id="restartFlow">Start over</button></p>
+  <div class="fit" id="fitFlow"></div>
+  <div class="cap" id="capFlow"></div>
+  <div class="pgrow"><div class="phwrap"><div class="fit" id="phFlow"></div><div class="cap" id="capPhFlow"></div></div></div>
+
+  <h2>4 · The rest of the app, on the rack</h2>
+  <p class="howto">Pass 4 only redrew Home, detail and the update. These are the other screens, in the same parts. Pick one:</p>
+  <div class="seg" data-ctl="more" style="margin:4px 0 12px"><button data-v="store">Store and install</button><button data-v="log">Full log</button><button data-v="setup">Edit setup</button><button data-v="files">Files</button><button data-v="shares">Shares</button><button data-v="first">First run</button><button data-v="history">History</button></div>
+  <p class="howto" id="moreHow"></p>
+  <div class="fit" id="fitMore"></div>
+  <div class="cap" id="capMore"></div>
+  <div class="pgrow"><div class="phwrap"><div class="fit" id="phMore"></div><div class="cap" id="capPhMore"></div></div><div class="side"><p class="howto" id="moreSide"></p></div></div>
+
+  <h2>5 · The parts</h2>
+  <div class="specs">
+    <div class="spec"><h3>Annunciator</h3><p>Five subjects × servers, in fixed places. Dark = fine, and the calm word stays readable in the recess. Lit red = down, amber + ▲ = needs a look, cream = waiting for you, dashed = not answering. Lit lights link to their cause; they never toggle. Holds 3 servers on desktop and 4 on the phone (rows). A fifth server folds calm servers into one row.</p></div>
+    <div class="spec"><h3>Rack, head unit, modules</h3><p>A server is a rack. Its head unit carries three meters in a dark display window. Apps are 1U, or 2U with a live preview, in your order. Bare rails at the foot are room to grow and the visible end of the rack.</p></div>
+    <div class="spec"><h3>Running plate ★</h3><p>When a rack is taller than the screen (Auto), healthy apps fold into one plate with a lit slot: "Running · 25 · Code Server, Crafty and 23 more". It opens into a shelf of half-width modules. Never folded: trouble, live previews, jobs, apps you keep in view.</p></div>
+    <div class="spec"><h3>Cords and the cord channel</h3><p>Drawn only when you point at or focus a module; broken cords always. Solid = found, hollow = yours, dashed amber = broken. They run in combed lanes, at most 6 per module; the rest end on a plate with a count. A guess is asked, not drawn.</p></div>
+    <div class="spec"><h3>Maintenance tag</h3><p>Trouble hangs on the tag rail: a coloured stub, a punched hole, light + label, title, one sentence, the fix. Fixed tags turn grey and say "Fixed 01:53".</p></div>
+    <div class="spec"><h3>Event tape</h3><p>24 hours or the last hour, two lanes. Red = down, amber = warn, dashed = not answering, ticks = changes, a cream NOW rule. At 24 h, marks closer than 24 px merge into one mark with a count.</p></div>
+    <div class="spec"><h3>Bench</h3><p>Updates, installs and first run happen on a bench with a walnut lip, beside the rack they change. Steps light slot windows, one orange per step, and the rack shows the same job.</p></div>
+    <div class="spec"><h3>Rear panel ★</h3><p>Edit setup turns the module round: ports as jacks, folders, the environment as a terminal strip, secrets as dots with Replace, cords, power. Save says what it costs. Checks happen as you type.</p></div>
+    <div class="spec"><h3>Drive bays ★</h3><p>Files' places are drive bays: a light, a name, the free space in a recess bar. A folder that apps mount names them (found).</p></div>
+    <div class="spec"><h3>Empty cabinet ★</h3><p>First run starts with an empty rack. The apps found on this server rack in once (the signature move, under 600 ms in all). Adding a server brings a second empty rack that fills when it connects.</p></div>
+  </div>
+</div>
+<script>
+(()=>{
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+let pref='day'; try{ if(matchMedia('(prefers-color-scheme: dark)').matches) pref='night'; }catch(e){}
+const S={light:pref,sit:'trouble',W:1440,motion:'full',pick:'hs',fixed:{},fixLog:[],dview:'home',pview:'home',zoom:'day',tapeSel:null,tapeMsg:'',drawer:{},plate:{},foldOn:{},
+  fold:true,foldD:true,clock:'01:52',flow:{step:0,prog:0,sub:0,fail:false,result:null},anim:true,userCords:[],removed:{},answered:{},sheet:null,more:'store',
+  ins:{stage:'list',sel:'mealie',srv:'hs',port:'9925',step:0,prog:0,sub:0,cat:'all',done:false},
+  log:{follow:true,prob:false,q:'',range:'hour',extra:0,newc:0,jump:null},
+  setup:{name:'Sonarr',port:'8989',policy:'stop',mem:'2',secret:'set',secretAt:'Oct 2',ro:{},saved:'',saving:false},
+  fr:{step:0,tries:0,conn:0,checks:0,racked:false,pw:''}, hist:{f:'all',sel:null}, files:{place:'media',dir:'',sel:'Films',ptab:'files'}};
+
+/* ---------- data (sample) ---------- */
+const SRV={hs:{id:'hs',name:'home-server',cpu:12,mem:'9.5 GB',memp:59,disk:61,dl:'Disk',up:'12 days',free:'390 GB'},
+           nas:{id:'nas',name:'nas',cpu:4,mem:'4.8 GB',memp:60,disk:92,dl:'Pool',up:'41 days',free:'310 GB'}};
+const N=(to,src,note)=>({to,src,note});
+const BASE=[
+ {id:'codeserver',name:'Code Server',srv:'hs',up:'6 d',port:8443,img:'lscr.io/linuxserver/code-server:4.93',dir:'/srv/code-server',needs:[N('npm','proxy','code.example.net')]},
+ {id:'crafty',name:'Crafty',srv:'hs',up:'4 d',port:8000,img:'registry.gitlab.com/crafty-controller/crafty-4:4.4',dir:'/srv/crafty'},
+ {id:'crowdsec',name:'CrowdSec',srv:'hs',up:'12 d',port:8090,img:'crowdsecurity/crowdsec:1.6',dir:'/srv/crowdsec'},
+ {id:'homebox',name:'Home Box',srv:'hs',up:'8 d',port:3100,img:'ghcr.io/sysadminsmedia/homebox:0.17',dir:'/srv/homebox',needs:[N('npm','proxy','box.example.net')]},
+ {id:'immich',name:'Immich',srv:'hs',up:'3 d',port:2283,img:'ghcr.io/immich-app/immich-server:1.122',dir:'/srv/immich',needs:[N('nas.photos','mount','/mnt/nas/photos'),N('npm','proxy','photos.example.net')]},
+ {id:'jellyfin',name:'Jellyfin',srv:'hs',up:'9 d',port:8096,img:'jellyfin/jellyfin:10.10.7',dir:'/srv/jellyfin',needs:[N('nas.media','mount','/mnt/nas/media'),N('npm','proxy','films.example.net')],upd:'10.11.2',pin:true},
+ {id:'music',name:'Music Assistant',srv:'hs',u:2,up:'12 d',port:8095,img:'ghcr.io/music-assistant/server:2.3',dir:'/srv/music-assistant',prev:'music'},
+ {id:'npm',name:'Nginx Proxy Manager',short:'Proxy Manager',srv:'hs',up:'12 d',port:81,img:'jc21/nginx-proxy-manager:2.12',dir:'/srv/npm',pin:true},
+ {id:'prowlarr',name:'Prowlarr',srv:'hs',up:'4 d',port:9696,img:'lscr.io/linuxserver/prowlarr:1.28',dir:'/srv/prowlarr'},
+ {id:'radarr',name:'Radarr',srv:'hs',up:'9 d',port:7878,img:'lscr.io/linuxserver/radarr:5.16',dir:'/srv/radarr',needs:[N('prowlarr','yours','drawn Oct 12'),N('sab','compose','depends_on'),N('nas.media','mount','/mnt/nas/media')]},
+ {id:'sab',name:'SABnzbd',srv:'hs',u:2,up:'12 d',port:8080,img:'lscr.io/linuxserver/sabnzbd:4.4',dir:'/srv/sabnzbd',needs:[N('nas.downloads','mount','/mnt/nas/downloads')],prev:'sab'},
+ {id:'sonarr',name:'Sonarr',srv:'hs',up:'1 d',port:8989,img:'lscr.io/linuxserver/sonarr:4.0.11',dir:'/srv/sonarr',needs:[N('prowlarr','compose','depends_on'),N('sab','yours','drawn Oct 12'),N('nas.media','mount','/mnt/nas/media'),N('nas.downloads','mount','/mnt/nas/downloads')],upd:'4.0.12'},
+ {id:'terraria',name:'Terraria',srv:'hs',up:'1 d',port:7777,img:'ryshe/terraria:1.4.4.9',dir:'/srv/terraria'},
+ {id:'watchtower',name:'watchtower',srv:'hs',up:'12 d',port:null,img:'containrrr/watchtower:1.7',dir:'—'},
+ {id:'shares',name:'Shares',srv:'nas',kind:'shares'},
+ {id:'gitea',name:'Gitea',srv:'nas',up:'18 d',port:3000,img:'gitea/gitea:1.22',dir:'/volume1/docker/gitea',needs:[N('npm','proxy','git.example.net')]},
+ {id:'runner',name:'Gitea Runner',srv:'nas',up:'18 d',port:null,img:'gitea/act_runner:0.2',dir:'/volume1/docker/runner',needs:[N('gitea','compose','depends_on')]},
+ {id:'jamdash',name:'Jam-Dash',srv:'nas',up:'18 d',port:8484,img:'jam-dash (built here)',dir:'/volume1/docker/jam-dash',pin:true},
+ {id:'kopia',name:'Kopia',srv:'nas',up:'41 d',port:51515,img:'kopia/kopia:0.18',dir:'/volume1/docker/kopia'},
+ {id:'nextcloud',name:'Nextcloud',srv:'nas',up:'6 d',port:8081,img:'nextcloud:30',dir:'/volume1/docker/nextcloud',needs:[N('npm','proxy','cloud.example.net')]},
+ {id:'syncthing',name:'Syncthing',srv:'nas',up:'41 d',port:8384,img:'syncthing/syncthing:1.28',dir:'/volume1/docker/syncthing'},
+];
+const px=(id,name,host,extra)=>({id,name,srv:'hs',up:['2 d','5 d','9 d','12 d','20 d'][id.length%5],port:3000+id.length*37,img:id+':latest',dir:'/srv/'+id,needs:[N('npm','proxy',host+'.example.net')].concat(extra||[])});
+const pl=(id,name,extra)=>({id,name,srv:'hs',up:['3 d','6 d','12 d'][id.length%3],port:4000+id.length*41,img:id+':latest',dir:'/srv/'+id,needs:extra||[]});
+const BUSY=[px('audiobookshelf','Audiobookshelf','books'),pl('bazarr','Bazarr',[N('sonarr','compose','depends_on')]),px('calibre','Calibre-Web','library'), px('freshrss','FreshRSS','news'),px('kavita','Kavita','comics'),pl('lidarr','Lidarr',[N('prowlarr','compose','depends_on')]),px('mealie','Mealie','recipes'),
+ px('navidrome','Navidrome','music',[N('nas.media','mount','/mnt/nas/media')]),px('overseerr','Overseerr','requests'),px('paperless','Paperless','paper'),pl('readarr','Readarr'),
+ px('stirling','Stirling PDF','pdf'),pl('tautulli','Tautulli'),pl('tdarr','Tdarr',[N('nas.media','mount','/mnt/nas/media')]),px('uptime','Uptime Kuma','status'),px('vaultwarden','Vaultwarden','vault'),
+ {id:'duplicati',name:'Duplicati',srv:'nas',up:'12 d',port:8200,img:'duplicati:2',dir:'/volume1/docker/duplicati'},{id:'pihole',name:'Pi-hole',srv:'nas',up:'41 d',port:8053,img:'pihole/pihole:2024',dir:'/volume1/docker/pihole'},
+ {id:'grocy',name:'Grocy',srv:'nas',up:'9 d',port:9283,img:'grocy:4',dir:'/volume1/docker/grocy'},{id:'joplin',name:'Joplin Server',srv:'nas',up:'9 d',port:22300,img:'joplin/server:3',dir:'/volume1/docker/joplin'}];
+const SHARES=[{id:'nas.media',n:'media',p:'/volume1/media'},{id:'nas.photos',n:'photos',p:'/volume1/photos'},{id:'nas.downloads',n:'downloads',p:'/volume1/downloads'}];
+const STOPPED={hs:['Audiobookshelf','Bazarr','Calibre-Web','Kavita','Lidarr','Mealie','Navidrome','Ollama','Paperless','Readarr','Tdarr','Uptime Kuma','Vaultwarden','Whoogle'],nas:['Duplicati']};
+const STOPPED_BUSY={hs:['Ollama','Whoogle','Jupyter','Minecraft Bedrock'],nas:['Photoprism']};
+const SUG=[{a:'sonarr',b:'jellyfin',net:'media',q:'Does Sonarr need Jellyfin?',why:'Both are on the Docker network "media". Sonarr may tell Jellyfin to rescan.'}];
+const apps=()=>S.sit==='busy'?BASE.concat(BUSY):BASE.filter(a=>a.id!=='mealie'||S.ins.done).concat(S.ins.done&&S.sit!=='busy'?[MEALIE()]:[]);
+const MEALIE=()=>({id:'mealie',name:'Mealie',srv:S.ins.srv,up:'just now',port:+S.ins.port||9925,img:'ghcr.io/mealie-recipes/mealie:2.4',dir:(S.ins.srv==='hs'?'/srv/mealie':'/volume1/docker/mealie'),fresh:true});
+const byId=id=>apps().find(a=>a.id===id)||BASE.concat(BUSY).find(a=>a.id===id);
+const nm=id=>id.startsWith('nas.')?('nas · '+id.slice(4)):((byId(id)||{}).short||(byId(id)||{}).name||id);
+const T=(h,m)=>((h*60+m-112)+1440)%1440;
+const stopped=()=>S.sit==='busy'?STOPPED_BUSY:{hs:STOPPED.hs.filter(n=>!(n==='Mealie'&&S.ins.done)),nas:STOPPED.nas};
+
+/* ---------- state ---------- */
+function st(a){
+  const sit=S.sit, f=S.fixed;
+  if(a._flow) return a._flow;
+  if(a.fresh) return {s:'on',word:'Running',meta:'just now'};
+  if(sit==='offline'){
+    if(a.srv==='nas') return {s:'offline',word:'',meta:''};
+    if((a.needs||[]).some(n=>n.to.startsWith('nas.'))) return {s:'warn',word:'Waiting on nas',meta:''};
+  }
+  if(sit==='trouble'){
+    if(a.id==='crafty') return f.crafty?{s:'on',word:'Running',meta:'restarted 01:53'}:{s:'alert',word:'Unhealthy',meta:''};
+    if(a.id==='codeserver') return f.codeserver?{s:'on',word:'Running',meta:'started 01:53'}:{s:'alert',word:'Crashed',meta:''};
+    if(a.id==='immich') return f.immich?{s:'on',word:'Running',meta:'just now'}:{s:'warn',word:'Partly up',meta:''};
+  }
+  if(sit==='busy'&&a.id==='paperless') return f.paperless?{s:'on',word:'Running',meta:'restarted 01:53'}:{s:'alert',word:'Unhealthy',meta:''};
+  return {s:'on',word:'Running',meta:a.up};
+}
+function troubles(){
+  const L=[];
+  if(S.sit==='trouble'){
+    L.push({id:'crafty',lvl:'alert',srv:'hs',time:'01:49',title:'Crafty stopped responding',sen:'It stopped answering at 01:49 and failed its health check 3 times in a row.',fix:'Restart Crafty',job:'Restarting',who:'Crafty',done:'restarted by you'});
+    L.push({id:'codeserver',lvl:'alert',srv:'hs',time:'01:31',title:'Code Server crashed',sen:'It quit at 01:31 because it ran out of memory (it may use 2 GB).',fix:'Start Code Server',job:'Starting',who:'Code Server',done:'started by you'});
+    L.push({id:'immich',lvl:'warn',srv:'hs',time:'01:12',title:'Immich is partly up',sen:'Its machine-learning worker stopped at 01:12. Photos load; face search waits.',fix:'Start the worker',job:'Starting',who:'Immich',done:'worker started by you'});
+    L.push({id:'naspool',lvl:'warn',srv:'nas',time:'18:20',title:"nas's pool is almost full",sen:'310 GB left. It went over 90% at 18:20.',fix:'See disks',nofix:true});
+  }
+  if(S.sit==='busy') L.push({id:'paperless',lvl:'alert',srv:'hs',time:'01:40',title:'Paperless stopped responding',sen:'It stopped answering at 01:40, during its nightly index, and failed its health check 3 times.',fix:'Restart Paperless',job:'Restarting',who:'Paperless',done:'restarted by you'});
+  if(S.sit==='offline') L.push({id:'nasoff',lvl:'offline',srv:'nas',time:'01:12',title:"nas isn't answering",sen:'Jam-Dash lost it at 01:12. Five apps on home-server keep their files there, so they are waiting for it.',fix:'Try again',job:'Trying',nofix:true});
+  return L.map(t=>Object.assign(t,{fixed:!!S.fixed[t.id]}));
+}
+function loud(L){
+  const open=L.filter(t=>!t.fixed);
+  const a=open.find(t=>t.lvl==='alert'); if(a) return {id:a.id,kind:'red'};
+  const o=open.find(t=>t.lvl==='offline'); if(o) return {id:o.id,kind:'or'};
+  const w=open.find(t=>t.lvl==='warn'); if(w) return {id:w.id,kind:'or'};
+  return null;
+}
+function annun(){
+  const off=S.sit==='offline'; const res={};
+  for(const s of ['hs','nas']){
+    const L=apps().filter(a=>a.srv===s&&!a.kind).map(st);
+    const down=L.filter(x=>x.s==='alert').length, warn=L.filter(x=>x.s==='warn').length;
+    const r={};
+    if(s==='nas'&&off){ r.reach={lvl:'offline',w:'Not answering',go:'nasoff'}; for(const k of ['apps','disk','memory','updates']) r[k]={lvl:'unk',w:'Unknown'}; }
+    else {
+      r.reach={lvl:'calm',w:'Answering'};
+      r.apps=down?{lvl:'alert',w:down+' down',go:'alert'}:warn?{lvl:'warn',w:(off?'Waiting':'Partly up'),go:'warn'}:{lvl:'calm',w:'All up'};
+      r.disk=(s==='nas'&&S.sit==='trouble')?{lvl:'warn',w:'Almost full',go:'naspool'}:{lvl:'calm',w:'Fine'};
+      r.memory={lvl:'calm',w:'Fine'};
+      const u=(s==='hs')?(S.sit==='busy'?3:(S.flow.result==='ok'?1:2)):0;
+      r.updates=u?{lvl:'info',w:u+' ready',go:'updates'}:{lvl:'calm',w:'Up to date'};
+    }
+    res[s]=r;
+  }
+  return res;
+}
+function headline(){
+  const L=troubles().filter(t=>!t.fixed), al=L.filter(t=>t.lvl==='alert');
+  const n=apps().filter(a=>!a.kind).length;
+  if(S.sit==='offline') return {h:"nas isn't answering.",s:'home-server is fine, but 5 of its apps are waiting on nas · checked 01:52'};
+  if(al.length===2) return {h:'Crafty and Code Server are down.',s:'Everything else is up · checked '+S.clock};
+  if(al.length===1) return {h:al[0].title.replace(' stopped responding',' is down').replace(' crashed',' is down')+'.',s:(S.sit==='busy'?`The other ${n-1} apps are up`:'Everything else is up')+' · checked '+S.clock};
+  if(L.length) return {h:'Nothing is down.',s:'Two things to look at · checked '+S.clock};
+  return {h:"Everything's fine.",s:`${n} apps up on 2 servers · checked ${S.clock}`};
+}
+function events(){
+  const E=[];
+  E.push({srv:'nas',t:T(3,12),kind:'tick',txt:'03:12 · Kopia restarted after its update'});
+  E.push({srv:'hs',t:T(4,0),kind:'tick',txt:'04:00 · watchtower updated Sonarr to 4.0.11'});
+  E.push({srv:'hs',t:T(22,14),kind:'tick',txt:'22:14 · Jellyfin restarted by itself after a hiccup'});
+  if(S.sit==='allgood') E.push({srv:'hs',t:T(19,5),t2:T(19,9),kind:'alert',txt:'19:05 · Crafty stopped responding. Fixed 19:09 by you.'});
+  if(S.sit==='trouble'){
+    E.push({srv:'nas',t:T(18,20),t2:1440,kind:'warn',txt:"18:20 · nas's pool went over 90%"});
+    E.push({srv:'hs',t:T(1,12),t2:S.fixed.immich?T(1,53):1440,kind:'warn',txt:"01:12 · Immich's worker stopped"+(S.fixed.immich?'. Fixed 01:53.':'')});
+    E.push({srv:'hs',t:T(1,31),t2:S.fixed.codeserver?T(1,53):1440,kind:'alert',txt:'01:31 · Code Server crashed (out of memory)'+(S.fixed.codeserver?'. Fixed 01:53.':'')});
+    E.push({srv:'hs',t:T(1,49),t2:S.fixed.crafty?T(1,53):1440,kind:'alert',txt:'01:49 · Crafty stopped responding'+(S.fixed.crafty?'. Fixed 01:53.':'')});
+  }
+  if(S.sit==='busy'){
+    E.push({srv:'hs',t:T(0,30),kind:'tick',txt:'00:30 · watchtower updated 4 apps'});
+    E.push({srv:'hs',t:T(1,40),t2:S.fixed.paperless?T(1,53):1440,kind:'alert',txt:'01:40 · Paperless stopped responding'+(S.fixed.paperless?'. Fixed 01:53.':'')});
+    E.push({srv:'nas',t:T(1,20),kind:'tick',txt:'01:20 · Duplicati finished the nightly backup'});
+  }
+  if(S.sit==='offline'){
+    E.push({srv:'hs',t:T(1,12),t2:1440,kind:'warn',txt:'01:12 · 5 apps started waiting on nas'});
+    E.push({srv:'nas',t:T(1,12),t2:1440,kind:'offline',txt:'01:12 · nas stopped answering'});
+  }
+  S.fixLog.forEach(x=>E.push(x));
+  return E;
+}
+
+/* ---------- cords: found (mount, compose, proxy host), yours, or asked ---------- */
+function cords(){
+  const C=[];
+  for(const a of apps()) for(const n of (a.needs||[])){
+    const k=n.to+'>'+a.id; if(S.removed[k]) continue;
+    if(n.to.startsWith('nas.')||byId(n.to)) C.push({from:n.to,to:a.id,src:n.src,note:n.note,key:k});
+  }
+  S.userCords.forEach(c=>{ if(!S.removed[c.key]) C.push(c); });
+  return C;
+}
+const SRC={mount:'found · mount',compose:'found · compose',proxy:'found · proxy host',yours:'yours'};
+function cordBroken(c){
+  if(c.from.startsWith('nas.')) return S.sit==='offline';
+  const p=byId(c.from); if(!p) return false; const s=st(p).s; return s==='alert'||s==='offline';
+}
+function sugFor(id){ return SUG.filter(s=>(s.a===id||s.b===id)&&!S.answered[s.a+'>'+s.b]); }
+
+/* ---------- small parts ---------- */
+const ind=(s)=>s==='warn'?'<span class="wp"><i class="led warn"></i><b class="tri" aria-hidden="true">▲</b></span>':
+  s==='action'?'<i class="slot lit"></i>':s==='off'?'<i class="led"></i>':`<i class="led ${s}"></i>`;
+function lg(o,srv,topic){
+  const tri=o.lvl==='warn'?' <b class="tri" aria-hidden="true">▲</b>':'';
+  const lab=`${SRV[srv].name} ${topic}: ${o.w}`;
+  if(o.go) return `<button class="lg ${o.lvl}" data-act="go" data-go="${o.go}" aria-label="${lab}">${o.w}${tri}</button>`;
+  return `<span class="lg ${o.lvl==='calm'?'':o.lvl}" aria-label="${lab}">${o.w}</span>`;
+}
+const SUBJ=[['reach','REACH'],['apps','APPS'],['disk','DISK'],['memory','MEMORY'],['updates','UPDATES']];
+function annH(mode){
+  const R=annun();
+  if(mode==='p'){
+    let h=`<div class="ann p" role="group" aria-label="Status board">${SUBJ.map(([k,t])=>`<span class="rh" aria-hidden="true">${t==='UPDATES'?'UPDATE':t==='MEMORY'?'MEMORY':t}</span>`).join('')}`;
+    for(const s of ['hs','nas']) h+=`<span class="srow">${SRV[s].name}</span>${SUBJ.map(([k,t])=>lg(R[s][k],s,t)).join('')}`;
+    return h+'</div>';
+  }
+  let h=`<div class="ann" role="group" aria-label="Status board"><span></span><span class="ch">${SRV.hs.name}</span><span class="ch">${SRV.nas.name}</span>`;
+  for(const [k,t] of SUBJ) h+=`<span class="rh">${t}</span>${lg(R.hs[k],'hs',t)}${lg(R.nas[k],'nas',t)}`;
+  return h+'</div>';
+}
+function tagH(t,L,mode,compact){
+  const ld=L&&L.id===t.id?L.kind:'';
+  const lvl=t.fixed?'fixed':t.lvl;
+  const led=ind(t.lvl==='offline'?'offline':t.lvl);
+  const lab=t.lvl==='alert'?'Alert':t.lvl==='warn'?'Warn':'Offline';
+  if(t.fixed) return `<div class="tag small fixed" data-tag="${t.id}"><i class="led"></i><span class="ttl">${t.who} · Fixed 01:53 · ${t.done}</span></div>`;
+  const kc=ld==='red'?'red':ld==='or'?'or':'';
+  if(compact==='row') return `<button class="tag row ${lvl}" data-act="unfold" data-tag="${t.id}">${led}<span class="ttl">${t.title}</span><span aria-hidden="true">›</span></button>`;
+  if(compact==='small') return `<div class="tag small ${lvl}" data-tag="${t.id}">${led}<span class="ttl">${t.title}</span>${t.fix?`<button class="k ${kc}" data-act="fix" data-id="${t.id}">${t.fix}</button>`:''}</div>`;
+  const extra = t.id==='nasoff'?`<button class="k" data-act="go" data-go="waiting">What's waiting</button>`:(t.nofix?'':`<button class="k link" data-act="detail" data-id="${t.id}">Why?</button>`);
+  return `<div class="tag ${lvl}" data-tag="${t.id}">
+    <div class="tlab">${led}<span>${lab} · ${SRV[t.srv].name} · ${t.time}</span></div>
+    <div class="ttl">${t.title}</div><p class="tsen">${t.sen}</p>
+    <div class="tact"><button class="k ${kc}" data-act="fix" data-id="${t.id}">${t.fix}</button>${extra}</div></div>`;
+}
+function statusH(mode){
+  const L=troubles(), ld=loud(L), H=headline();
+  let h=`<div><h3 class="hl">${H.h}</h3><p class="sub">${H.s}</p></div>${annH(mode)}`;
+  const open=L.filter(t=>!t.fixed), fixed=L.filter(t=>t.fixed);
+  const big=open.filter(t=>t.lvl!=='warn'), warns=open.filter(t=>t.lvl==='warn');
+  if(!big.length&&warns.length) big.push(warns.shift());
+  h+='<div class="tags" aria-label="Tag rail">';
+  if(mode==='p'){
+    if(big[0]) h+=tagH(big[0],ld,mode);
+    big.slice(1).forEach(t=>h+=tagH(t,ld,mode,'row'));
+    if(warns.length){
+      if(S.fold) h+=`<button class="tag row warn" data-act="fold"><span class="wp"><i class="led warn"></i><b class="tri" aria-hidden="true">▲</b></span><span class="ttl">To look at · ${warns.length}</span><span aria-hidden="true">⌄</span></button>`;
+      else warns.forEach(t=>h+=tagH(t,ld,mode,'small'));
+    }
+  } else {
+    big.forEach((t,i)=>h+=tagH(t,ld,mode,(i>0&&S._tight>=1)?'small':undefined));
+    if(warns.length){
+      if(S._tight>=2&&S.foldD) h+=`<button class="tag row warn" data-act="foldD"><span class="wp"><i class="led warn"></i><b class="tri" aria-hidden="true">▲</b></span><span class="ttl">To look at · ${warns.length}: ${warns.map(w=>w.title.split(' ')[0].replace("'s","")).join(', ')}</span><span aria-hidden="true">⌄</span></button>`;
+      else { h+=`<div class="tags-lab">To look at</div>`; warns.forEach(t=>h+=tagH(t,ld,mode,'small')); }
+    }
+  }
+  fixed.forEach(t=>h+=tagH(t,ld,mode));
+  if(!open.length&&!fixed.length){
+    h+=`<p class="quiet"><b>Nothing needs you.</b></p><p class="quiet">${S.sit==='busy'?'3 updates are':'Jellyfin 10.11.2 and Sonarr 4.0.12 are'} ready to install. They'll wait until you choose.</p><div><button class="k" data-act="updates">Look at updates</button></div>`;
+  }
+  return h+'</div>';
+}
+
+/* ---------- rack ---------- */
+function keep(a){ const s=st(a); return a.kind==='shares'||s.s!=='on'||a.prev||a.pin||a._flow||a.fresh; }
+function modH(a,mode,side){
+  const s=st(a);
+  if(a.kind==='shares'){
+    const g=S.sit==='offline';
+    return `<div class="mod u2 shares ${g?'ghost':''}" data-id="shares"><i class="ear"></i><div class="mbody">${SHARES.map(x=>`<div class="srow">${mode==='d'?`<i class="jack" data-jack="${x.id}"></i>`:''}<b>${x.n}</b><span>${x.p}</span></div>`).join('')}</div><i class="ear"></i></div>`;
+  }
+  const ghost=s.s==='offline';
+  const name=(mode==='d'&&a.short)?a.short:a.name;
+  const pulled=s.s==='alert'?' pulled'+(S.anim?' anim':''):'';
+  const jack=mode==='d'?`<i class="jack" data-jack="${a.id}"></i>`:'';
+  const earL=side==='l'?`<i class="ear jk">${jack}</i>`:'<i class="ear"></i>';
+  const earR=side==='r'?`<i class="ear jk">${jack}</i>`:'<i class="ear"></i>';
+  let prev='';
+  if(a.prev&&!ghost&&s.s!=='warn'){
+    if(a.prev==='sab') prev=`<div class="prev"><span class="pbar"><i style="width:64%"></i></span><span>42 MB/s · about 10 min left</span></div>`;
+    if(a.prev==='music') prev=`<div class="prev"><i class="slot lit"></i><span>Saturn · The Olympians · Living room</span></div>`;
+  } else if(a.prev==='sab'&&s.s==='warn') prev=`<div class="prev"><span class="pbar"><i style="width:64%"></i></span><span>Paused: can't write to nas</span></div>`;
+  const u=(a.u===2&&(prev||ghost))?'u2':'u1';
+  return `<div class="mod ${u} s-${s.s}${pulled}${ghost?' ghost':''}${a.fresh&&S.anim?' racked':''}" data-id="${a.id}">${earL}
+    <button class="mbody" data-act="detail" data-id="${a.id}" aria-label="${a.name}${s.word?': '+s.word:''}"><span class="mrow">${ghost?'':ind(s.s)}<span class="mn">${name}</span><span class="mw">${s.word}</span><span class="mm">${s.meta||''}</span></span>${prev}</button>
+    ${ghost?'<span></span>':`<button class="k open" data-act="launch" aria-label="Open ${a.name}">↗</button>`}${earR}</div>`;
+}
+function headH(s,mode){
+  const v=SRV[s], off=(s==='nas'&&S.sit==='offline');
+  const disk=(s==='nas'&&S.sit!=='trouble')?78:v.disk;
+  const mt=(l,val,p,w)=>`<div class="mt ${w?'warn':''}"><div class="l"><span>${l}</span><b>${val}${w?' ▲':''}</b></div><div class="tr"><i style="width:${p}%"></i></div></div>`;
+  const up=mode==='p'?(off?`<div class="mt"><div class="l"><span>SEEN</span><b>01:12</b></div></div>`:`<div class="mt"><div class="l"><span>UP</span><b>${v.up.replace(' days',' d')}</b></div></div>`):'';
+  const disp=off?`<div class="disp">${up}${mt('CPU','—',0)}${mt(mode==='p'?'MEM':'MEMORY','—',0)}${mt(v.dl.toUpperCase(),'—',0)}</div>`:
+    `<div class="disp">${up}${mt('CPU',v.cpu+'%',v.cpu)}${mt(mode==='p'?'MEM':'MEMORY',v.mem,v.memp)}${mt(v.dl.toUpperCase(),disk+'%',disk,disk>=90)}</div>`;
+  return `<div class="head ${off?'off':''}" data-head="${s}"><i class="ear"></i><div><div class="hn">${v.name}</div><div class="hs">${off?'<i class="led offline"></i>Not answering since 01:12':'<i class="led on"></i>On · up '+v.up}</div></div>${mode==='p'?'':disp}<i class="ear"></i>${mode==='p'?disp:''}</div>`;
+}
+function plateH(s,mode,side,folded){
+  if(!folded.length) return '';
+  const k=s+mode, open=!!S.plate[k];
+  const names=folded.length>2?`${folded[0].name}, ${folded[1].name} and ${folded.length-2} more`:folded.map(a=>a.name).join(', ');
+  const jack=mode==='d'?`<i class="jack" data-jack="plate:${s}"></i>`:'';
+  let h=`<div class="plate1" data-plate="${s}">${side==='l'?`<i class="ear jk">${jack}</i>`:'<i class="ear"></i>'}<i class="slot lit" aria-hidden="true"></i><span class="bt"><b>Running · ${folded.length}</b>${open?'':' · '+names}</span><button class="k" data-act="plate" data-v="${k}" aria-expanded="${open}">${open?'Fold':'Show'}</button>${side==='r'?`<i class="ear jk">${jack}</i>`:'<i class="ear"></i>'}</div>`;
+  if(open) h+=`<div class="shelf">${folded.map(a=>`<button class="half" data-act="detail" data-id="${a.id}"><i class="led on"></i><span>${a.name}</span><span class="mm">${st(a).meta}</span></button>`).join('')}</div>`;
+  return h;
+}
+function blankH(s,mode){
+  const L=stopped()[s]; if(!L.length) return '';
+  const off=(s==='nas'&&S.sit==='offline');
+  const names=L.length>2?`${L.slice(0,2).join(', ')} and ${L.length-2} more`:L.join(', ');
+  const k=s+mode, key=S.drawer[k]?'Close':'Show';
+  let h=`<div class="blank" data-blank="${s}"><i class="ear"></i><span class="vents" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="bt"><b>Stopped · ${L.length}</b>${mode==='d'&&S.W===1280?'':' · '+names}</span>${off?'<span></span>':`<button class="k" data-act="drawer" data-v="${k}" aria-expanded="${!!S.drawer[k]}">${key}</button>`}<i class="ear"></i></div>`;
+  if(S.drawer[k]) h+=`<div class="drawer">${L.map(n=>`<button class="k" data-act="start" data-n="${n}">Start ${n}</button>`).join('')}</div>`;
+  return h;
+}
+function rackParts(s,mode,opts={}){
+  let L=apps().filter(a=>a.srv===s);
+  if(opts.flow) L=L.map(a=>a.id==='jellyfin'?Object.assign({},a,{_flow:opts.flow}):a);
+  const fold=opts.fold!=null?opts.fold:!!S.foldOn[s+mode];
+  if(!fold) return {shown:L,folded:[]};
+  return {shown:L.filter(keep),folded:L.filter(a=>!keep(a))};
+}
+function rackH(s,mode,side,opts={}){
+  const P=rackParts(s,mode,opts);
+  let h=`<div class="rack" data-side="${side}" data-srv="${s}">${headH(s,mode)}`;
+  P.shown.forEach(a=>h+=modH(a,mode,side));
+  if(opts.slot) h+=opts.slot;
+  if(s==='nas'&&S.sit==='offline') h+=`<div class="door">What's in this rack is how it was at 01:12. Nothing here can change until nas answers.</div>`;
+  h+=plateH(s,mode,side,P.folded)+blankH(s,mode)+'<div class="empty-u"></div></div>';
+  return h;
+}
+function resolveJack(id,mode){
+  if(id.startsWith('nas.')) return id;
+  const a=byId(id); if(!a) return null;
+  const P=rackParts(a.srv,mode);
+  return P.folded.some(x=>x.id===id)?'plate:'+a.srv:id;
+}
+const liveEnd=c=>{ const b=byId(c.to); return b&&st(b).s!=='offline'; };
+function cnoteIdle(){
+  const C=cords().filter(cordBroken).filter(liveEnd);
+  const legend=`<span class="ck">KEY</span><svg width="34" height="10" aria-hidden="true"><path d="M2 5H32" class="cw found"/></svg><span>found</span><svg width="34" height="10" aria-hidden="true"><path d="M3 5H31" class="cw yo"/><path d="M3 5H31" class="cw yi"/></svg><span>yours</span>`;
+  if(C.length){ const sh=C.filter(c=>c.from.startsWith('nas.')).length; return `<span class="ck">CORDS</span><span>${sh===C.length?`${C.length} cords run to nas's shares, and nas isn't answering. They come from the apps' mounts (found).`:`${C.length} cords lead to apps that are down.`}</span>`; }
+  return `<span class="ck">CORDS</span><span>Point at an app to see its cords.</span>${legend}`;
+}
+
+/* ---------- tape ---------- */
+function tpos(t){ return S.zoom==='hour'?(t-1380)/0.6:t/14.4; }
+function tapeH(mode,opt={}){
+  const E=events(); const sel=S.tapeSel;
+  const latest=[...E].sort((a,b)=>a.t-b.t).pop();
+  const ro=S.tapeMsg||((sel!=null&&E[sel])?E[sel].txt:(latest?latest.txt:''));
+  const hour=S.zoom==='hour'&&mode!=='p';
+  const vis=e=>!hour||e.t>=1380||(e.t2&&e.t2>=1380);
+  const bar=e=>{ const a=hour?Math.max(e.t,1380):e.t; const l=hour?(a-1380)/0.6:a/14.4; const w=e.t2?(hour?(e.t2-a)/0.6:(e.t2-a)/14.4):0;
+    return `<i class="bar ${e.kind}" style="left:${l}%;${e.t2?`width:calc(${w}% + 4px)`:''}"></i>`; };
+  const lane=(s,btns)=>{
+    const L=E.map((e,i)=>Object.assign({i},e)).filter(e=>e.srv===s&&vis(e)).sort((a,b)=>a.t-b.t);
+    let h=`<div class="lane"><span class="ln">${SRV[s].name}</span><i class="base"></i>${L.map(bar).join('')}`;
+    if(btns){
+      const groups=[];
+      if(!hour){ L.forEach(e=>{ const g=groups[groups.length-1]; if(g&&e.t-g.last<36) { g.items.push(e); g.last=Math.max(g.last,e.t); } else groups.push({items:[e],last:e.t}); }); }
+      else L.forEach(e=>groups.push({items:[e]}));
+      groups.forEach(g=>{
+        const a=g.items[0], b=g.items[g.items.length-1];
+        const st0=hour?Math.max(a.t,1380):a.t; const end=Math.max(...g.items.map(e=>e.t2||e.t)); const en=hour?end:end;
+        const l=tpos(st0), w=Math.max(0,tpos(en)-l);
+        if(g.items.length>1) h+=`<button class="ev" style="left:calc(${l}% - 10px);width:calc(${w}% + 24px)" data-act="cluster" aria-label="${g.items.length} events between ${a.txt.slice(0,5)} and ${b.txt.slice(0,5)}. Show the last hour."><span class="cl">${g.items.length}</span></button>`;
+        else h+=`<button class="ev" style="left:calc(${l}% - 10px);width:calc(${a.t2?w:0}% + 24px)" data-act="ev" data-i="${a.i}" aria-pressed="${sel===a.i}" aria-label="${a.txt}"></button>`;
+      });
+    }
+    return h+'</div>';
+  };
+  if(mode==='p'){
+    return `<button class="ph-tape" data-act="history" aria-label="Last 24 hours. Opens History."><div class="tt"><span>LAST 24 HOURS</span><span>History ›</span></div><div class="ro">${latest?latest.txt:''}</div>${lane('hs',false)}${lane('nas',false)}<div class="phl"><span>02:00</span><span>14:00</span><span>now</span></div></button>`;
+  }
+  const ax=hour?[[0,'01:00'],[10,'01:10'],[20,'01:20'],[30,'01:30'],[40,'01:40'],[50,'01:50']].map(([m,l])=>`<span style="left:${(T(1,m)-1380)/0.6}%">${l}</span>`).join('')
+    :[[4,'04:00'],[8,'08:00'],[12,'12:00'],[16,'16:00'],[20,'20:00'],[0,'00:00']].map(([h,l])=>`<span style="left:${T(h,0)/14.4}%">${l}</span>`).join('');
+  return `<div class="tape" data-tape><div class="tl"><div class="tt"><span class="zoom" role="group" aria-label="Tape scale"><button data-act="zoom" data-v="day" aria-pressed="${!hour}">24 h</button><button data-act="zoom" data-v="hour" aria-pressed="${hour}">Last hour</button></span><button data-act="history">History ›</button></div><div class="ro" aria-live="polite">${ro}</div></div>
+   <div class="lanes">${lane('hs',true)}${lane('nas',true)}<div class="axis">${ax}</div><i class="nowm" style="right:68px"></i><span class="nowl">now ${S.clock}</span></div></div>`;
+}
+
+/* ---------- chrome ---------- */
+function lipH(cur='Home',opt={}){
+  if(opt.bare) return `<header class="lip"><span class="wm">Jam-Dash</span><span class="tlab" style="text-transform:none">Setting up</span><span class="sp"></span><span class="clock" aria-label="Server time">${S.clock}</span></header>`;
+  const nav=['Home','Apps','Store','Files','Shares','System','Settings'].map(n=>`<button ${n===cur?'aria-current="page"':''} data-act="${n==='Home'?'home':'noop'}">${n}</button>`).join('');
+  return `<header class="lip"><span class="wm">Jam-Dash</span><nav class="nav" aria-label="Places">${nav}</nav><span class="sp"></span><span class="find">Find an app <kbd>⌘K</kbd></span><span class="clock" aria-label="Server time">${S.clock}</span></header>`;
+}
+const GEAR='<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3M4 4l2.1 2.1M13.9 13.9 16 16M4 16l2.1-2.1M13.9 6.1 16 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const LENS='<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function phTop(title,back){
+  if(back) return `<div class="ph-top"><button class="ib" data-act="${back}" aria-label="Back">‹</button><span class="wm">${title}</span><span class="clock">${S.clock}</span></div>`;
+  return `<div class="ph-top"><span class="wm">${title}</span><span class="clock">${S.clock}</span><button class="ib" aria-label="Find an app">${LENS}</button><button class="ib" aria-label="Settings">${GEAR}</button></div>`;
+}
+function tabsH(cur='Home'){
+  return `<nav class="ph-tabs" aria-label="Places">${['Home','Apps','Store','Files','System'].map(n=>`<button ${n===cur?'aria-current="page"':''} data-act="${n==='Home'?'home':'noop'}"><i></i>${n}</button>`).join('')}</nav>`;
+}
+
+/* ---------- detail ---------- */
+function detailData(id){
+  const a=byId(id), s=st(a);
+  let sen, keys=[], log=[];
+  if(s.s==='alert'&&id==='crafty'){ sen='Crafty stopped answering at 01:49. It failed its health check 3 times in a row, so Jam-Dash marked it unhealthy. Restarting it usually fixes this; your worlds are kept in its data folder.';
+    log=['01:47:58 [INFO] Saved world "Saturday" (2.1 GB)','01:48:30 [WARN] Java heap at 96%','01:49:02 Health check: no answer on :8000 (1 of 3)','01:49:33 Health check: no answer on :8000 (2 of 3)','01:50:04 Health check: no answer on :8000 (3 of 3)'];
+    keys=[['red','Restart Crafty','fix'],['','Full log','log'],['','Edit setup','setup'],['','Stop']]; }
+  else if(s.s==='alert'){ sen=`${a.name} stopped answering. ${id==='codeserver'?'It ran out of memory (it may use 2 GB). Starting it again works; raising the limit in Edit setup stops it happening again.':'Its health check failed 3 times. Restarting it usually fixes this.'}`;
+    log=['01:30:12 Started','01:30:58 [WARN] Memory 1.9 of 2 GB','01:31:04 Killed: out of memory (exit 137)'];
+    keys=[['red',(id==='codeserver'?'Start ':'Restart ')+a.name,'fix'],['','Full log','log'],['','Edit setup','setup']]; }
+  else if(s.s==='warn'&&S.sit==='offline'){ sen=`${a.name} is running, but it can't reach its files on nas, which hasn't answered since 01:12. It picks them up again by itself when nas is back. Nothing needs restarting.`;
+    log=['01:11:40 Library scan finished','01:12:09 [WARN] /media/films: Host is down','01:12:09 [WARN] Library "Films" is unavailable','01:42:10 [WARN] /media/films: Host is down'];
+    keys=[['or','Try nas again','fixnas'],['','Restart '+a.name],['','Full log','log'],['','Edit setup','setup']]; }
+  else if(s.s==='warn'){ sen='Immich is up, but its machine-learning worker stopped at 01:12. Photos still load. Face search and tagging new photos wait until the worker is back.';
+    log=['01:11:58 [ml] Loading model buffalo_l','01:12:03 [ml] Exited with code 1','01:12:03 [WARN] immich_machine_learning stopped'];
+    keys=[['or','Start the worker','fix'],['','Full log','log'],['','Edit setup','setup']]; }
+  else if(s.s==='offline'){ sen=`This is ${a.name} as it was when nas was last seen at 01:12. Jam-Dash can't reach nas right now, so nothing here can change.`; keys=[['or','Try nas again','fixnas']]; log=['(no lines since 01:12)']; }
+  else { sen=`${a.name} is running and answering on port ${a.port||'—'}. Up ${String(a.up).replace(' d',' days')}.`+(a.upd&&S.flow.result!=='ok'?` Version ${a.upd} is ready to install; ${a.name} is away about 40 seconds while it swaps.`:'');
+    log=['21:02:11 Library scan finished (3 new)','22:14:40 Restarted after a hiccup','22:14:52 Ready on :8096','01:40:03 Played "Dune: Part Two" in Living room'];
+    keys=(a.upd&&S.flow.result!=='ok'?[['or','Update to '+a.upd,'update']]:[]).concat([['','Open ↗'],['','Restart'],['','Full log','log'],['','Edit setup','setup'],['','Stop']]); }
+  return {a,s,sen,keys,log};
+}
+function cordSvg(kind,w=72){
+  const p=`M12 11 C ${w*.4} 2, ${w*.6} 20, ${w-12} 11`;
+  const line=kind==='broken'?`<path d="${p}" class="cw bu"/><path d="${p}" class="cw bk"/>`:kind==='yours'?`<path d="${p}" class="cw yo"/><path d="${p}" class="cw yi" style="stroke:var(--panel)"/>`:kind==='sug'?`<path d="${p}" fill="none" stroke="var(--ink3)" stroke-width="1.5" stroke-dasharray="1 5" stroke-linecap="round"/>`:`<path d="${p}" class="cw found"/>`;
+  return `<svg width="${w}" height="22" viewBox="0 0 ${w} 22" aria-hidden="true"><circle cx="7" cy="11" r="5" fill="var(--recess)" stroke="var(--ink3)" stroke-width="2"/>${line}<circle cx="${w-7}" cy="11" r="5" fill="var(--recess)" stroke="var(--ink3)" stroke-width="2"/></svg>`;
+}
+function srcLine(c){
+  if(c.src==='mount') return `<b>Found</b> · mount: ${byId(c.to)?nm(c.to):''} mounts ${c.from.startsWith('nas.')?nm(c.from):c.from} at ${c.note}`;
+  if(c.src==='compose') return `<b>Found</b> · compose: <span class="mono">${c.note}</span>`;
+  if(c.src==='proxy') return `<b>Found</b> · proxy host ${c.note}, read from Proxy Manager`;
+  return `<b>Yours</b> · ${c.note}. Jam-Dash can't check it.`;
+}
+function cpanH(id,mode){
+  const C=cords();
+  const row=(c,other,dir)=>{
+    let word, brk=cordBroken(c);
+    if(other.startsWith('nas.')) word=S.sit==='offline'?'<i class="led offline"></i>Not answering':'<i class="led on"></i>Shared';
+    else { const s2=st(byId(other)); word=s2.s==='offline'?'<i class="led offline"></i>Not answering':`${ind(s2.s)}${s2.word}`; }
+    const target=other.startsWith('nas.')?'data-act="noop"':`data-act="detail" data-id="${other}"`;
+    const rm=c.src==='yours'?`<button class="k link" data-act="rmcord" data-key="${c.key}">Remove</button>`:'';
+    return `<div class="prow">${cordSvg(brk?'broken':c.src==='yours'?'yours':'found',mode==='p'?46:72)}<button class="pn2" ${target}>${nm(other)}</button><span class="pw">${word}</span><span class="psrc">${srcLine(c)} ${rm}</span></div>`;
+  };
+  const needs=C.filter(c=>c.to===id), by=C.filter(c=>c.from===id);
+  const sug=sugFor(id);
+  const sugRow=(s,other)=>`<div class="prow sug">${cordSvg('sug',mode==='p'?46:72)}<span class="pn2" style="text-decoration:none">${nm(other)}?</span><span class="pw"><i class="led"></i>Asked, not drawn</span><span class="psrc">${s.why}</span><span class="acts"><button class="k" data-act="sug" data-v="yes" data-k="${s.a}>${s.b}">Yes, ${nm(s.a)} needs it</button><button class="k link" data-act="sug" data-v="no" data-k="${s.a}>${s.b}">No</button></span></div>`;
+  const a=byId(id);
+  let h=`<div class="sect"><span>Needs</span><button class="k" data-act="drawcord" data-id="${id}">Draw a cord</button></div><div class="cpan">${needs.length?needs.map(c=>row(c,c.from)).join(''):''}${sug.filter(s=>s.a===id).map(s=>sugRow(s,s.b)).join('')}${!needs.length&&!sug.some(s=>s.a===id)?`<div class="pnone">Nothing found. ${a.name} doesn't mount a share, has no compose links, and isn't behind Proxy Manager.</div>`:''}</div>`;
+  h+=`<div class="sect"><span>Needed by</span></div><div class="cpan">${by.length?by.map(c=>row(c,c.to)).join(''):''}${sug.filter(s=>s.b===id).map(s=>sugRow(s,s.a)).join('')}${!by.length&&!sug.some(s=>s.b===id)?`<div class="pnone">Nothing found that needs ${a.name}.</div>`:''}</div>`;
+  return h;
+}
+function miniTape(id){
+  const a=byId(id); const E=events().filter(e=>e.txt.includes(a.name)||(a.srv==='nas'&&e.srv==='nas'&&e.kind==='offline')||(S.sit==='offline'&&(a.needs||[]).some(n=>n.to.startsWith('nas.'))&&e.kind==='warn'));
+  return `<div class="mini">${E.map(e=>`<i class="bar ${e.kind}" style="left:${e.t/14.4}%;${e.t2?`width:calc(${(e.t2-e.t)/14.4}% + 4px)`:''}"></i>`).join('')}</div><div class="miniax"><span>02:00 yesterday</span><span>${E.length?E.length+(E.length===1?' event':' events'):'Quiet all day'}</span><span>now</span></div>`;
+}
+function detailH(id,mode){
+  const D=detailData(id), a=D.a;
+  const keys=D.keys.map(([c,l,act])=>`<button class="k ${c}" data-act="${act||'noop'}" data-id="${id}">${l}</button>`).join('');
+  const plate=`<button class="back" data-act="home">‹ Home</button><div class="plate"><i class="ear"></i><div class="pb"><div class="tlab">${D.s.s==='offline'?'<i class="led offline"></i>':ind(D.s.s)}<span>${D.s.s==='offline'?'Last seen 01:12':D.s.word} · ${SRV[a.srv].name}${D.s.meta&&D.s.s==='on'?' · '+D.s.meta:''}</span></div><div class="pn">${a.name}</div><p class="ps">${D.sen}</p><div class="pact">${keys}</div></div><i class="ear"></i></div>`;
+  const facts=`<dl class="facts"><dt>Address</dt><dd>${a.port?`http://${SRV[a.srv].name}:${a.port}`:'No web page'}</dd><dt>Image</dt><dd>${a.img}</dd><dt>Data folder</dt><dd>${a.dir}</dd><dt>Restarts</dt><dd>${id==='crafty'&&D.s.s==='alert'?'None yet: it is still up, but not answering':'1 this week'}</dd></dl>`;
+  const right=`<div class="sect" style="margin-top:44px">${a.name} today</div>${miniTape(id)}<div class="sect">Last lines</div><div class="log">${D.log.map(l=>`<div class="${/WARN|Killed|no answer|Exited/.test(l)?'bad':''}">${l}</div>`).join('')}</div><div class="sect">Facts</div>${facts}`;
+  if(mode==='p') return `<div class="det">${plate}${cpanH(id,mode)}${right.replace('margin-top:44px','')}</div>`;
+  return `<div class="det"><div>${plate}${cpanH(id,mode)}</div><div>${right}</div></div>`;
+}
+
+/* ---------- sheets ---------- */
+function sheetH(fid){
+  const X=S.sheet; if(!X||X.frame!==fid) return '';
+  if(X.kind==='cord'){
+    const a=byId(X.id); const dir=X.dir||'needs';
+    const C=cords();
+    const L=apps().filter(x=>!x.kind&&x.id!==X.id).map(x=>x.id).concat(SHARES.map(s=>s.id))
+      .filter(o=>!C.some(c=>(dir==='needs'?(c.to===X.id&&c.from===o):(c.from===X.id&&c.to===o))))
+      .filter(o=>!(dir==='by'&&o.startsWith('nas.')));
+    const q=(X.q||'').toLowerCase();
+    const opts=L.filter(o=>nm(o).toLowerCase().includes(q)).slice(0,40).map(o=>{ const srv=o.startsWith('nas.')?'nas':byId(o).srv;
+      return `<button class="opt" role="radio" aria-checked="${X.pick===o}" data-act="cpick" data-v="${o}"><i class="sq ${X.pick===o?'lit':''}"></i><span>${nm(o)}</span><span class="mm">${SRV[srv].name}</span></button>`; }).join('');
+    return `<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh1"><h4 id="sh1"><span>Draw a cord for ${a.name}</span><button class="k link" data-act="sclose" aria-label="Close">Close</button></h4>
+      <p>Jam-Dash draws it hollow and marks it as yours. It can't check a cord you draw, so it never says one is broken unless the other end is down.</p>
+      <div class="pick2" role="radiogroup" aria-label="Direction"><button class="k" role="radio" aria-pressed="${dir==='needs'}" aria-checked="${dir==='needs'}" data-act="cdir" data-v="needs">${a.name} needs…</button><button class="k" role="radio" aria-pressed="${dir==='by'}" aria-checked="${dir==='by'}" data-act="cdir" data-v="by">…needs ${a.name}</button></div>
+      <input type="search" data-in="cq" value="${X.q||''}" placeholder="Find an app or share" aria-label="Find an app or share" style="width:100%;font-family:var(--sans)">
+      <div class="opts" role="radiogroup" aria-label="Apps and shares">${opts||'<div class="pnone">Nothing matches.</div>'}</div>
+      <div class="sfoot"><button class="k ${X.pick?'or':'wait'}" data-act="cadd" ${X.pick?'':'disabled'}>${X.pick?(dir==='needs'?`Draw ${a.name} → ${nm(X.pick)}`:`Draw ${nm(X.pick)} → ${a.name}`):'Pick one first'}</button><button class="k link" data-act="sclose">Cancel</button></div></div></div>`;
+  }
+  if(X.kind==='remove'){
+    return `<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh2"><h4 id="sh2">Remove Sonarr?</h4>
+      <p>This stops Sonarr and deletes its container. Its settings folder stays, so you can set it up again, unless you tick the box. Radarr and Bazarr keep running; their cords to Sonarr go.</p>
+      <label class="chkline"><input type="checkbox" data-in="rmdata" ${X.data?'checked':''}><span>Also delete <span class="mono">/srv/sonarr</span> (1.3 GB): its settings, history and database. This can't be undone.</span></label>
+      <div class="sfoot"><button class="k" data-act="sclose" data-autofocus>Keep Sonarr</button><button class="k dark" data-act="rmgo">${X.data?'Remove Sonarr and its folder':'Remove Sonarr'}</button></div></div></div>`;
+  }
+  if(X.kind==='places'){
+    return `<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh3"><h4 id="sh3"><span>Places</span><button class="k link" data-act="sclose">Close</button></h4>${baysH('p')}</div></div>`;
+  }
+  return '';
+}
+
+/* ---------- bench: one engine for update, install and first run ---------- */
+const UPD=['Check','Download','Swap','Watch','Done'], INS=['Check','Fetch','Start','Watch','Done'];
+const ok=t=>`<li><i class="led on"></i><span>${t}</span></li>`, wait=t=>`<li class="dim"><i class="led"></i><span>${t}</span></li>`, run=t=>`<li><i class="slot lit"></i><span>${t}</span></li>`, bad=t=>`<li><span class="wp"><i class="led warn"></i><b class="tri">▲</b></span><span>${t}</span></li>`;
+function stepsH(names,step,end){ return names.map((n,i)=>`<span class="stp ${i===step?'now':''}"><i class="slot ${(i<step)||(i===step&&i>0&&i<names.length-1)||(i===names.length-1&&step===names.length-1&&end)?'lit':''}"></i><span class="n">${i+1}</span><span class="lbl">${n}</span></span>`).join(''); }
+function benchShell(title,ver,steps,body,foot,lab,aria){
+  return `<section class="bench" aria-label="${aria}"><div class="bh"><div><div class="t">${title}</div><div class="v">${ver}</div></div>${lab||''}</div><div class="steps" aria-label="Steps">${steps}</div><div class="bb" aria-live="polite">${body}</div><div class="bf">${foot}</div></section>`;
+}
+function flowModState(){
+  const F=S.flow;
+  if(F.step===1) return {s:'action',word:'Downloading 10.11.2',meta:''};
+  if(F.step===2) return {s:'action',word:'Swapping · back in ~40 s',meta:''};
+  if(F.step===3) return {s:'action',word:F.fail&&F.sub>=2?'Putting 10.10.7 back':'Checking 10.11.2',meta:''};
+  if(F.step===4) return F.result==='ok'?{s:'on',word:'Running',meta:'10.11.2 · just now'}:{s:'warn',word:'Rolled back',meta:'10.10.7'};
+  return {s:'on',word:'Running',meta:'10.10.7 · 9 d'};
+}
+function updBench(mode){
+  const F=S.flow; let body='', foot='';
+  if(F.step===0){
+    body=`<h4>What's new in 10.11.2</h4><ul class="whatsnew"><li>Faster library scans</li><li>Fixes subtitles that started late</li><li>Moves the data folder to a new layout once (automatic, about a minute)</li></ul>
+    <h4>Checked before you start</h4><ul class="chk">${ok('Room on home-server: needs 1.2 GB, 390 GB free')}${ok('nas · media is answering')}${ok('The data folder stays where it is: /srv/jellyfin')}${ok('10.10.7 is kept for 7 days, so you can go back')}</ul>`;
+    foot=`<button class="k or" data-act="flowgo">Update Jellyfin</button><button class="k link" data-act="noop">Not now</button><span class="note">Jellyfin is away about 40 s while it swaps.</span>`;
+  } else if(F.step===1){
+    const mb=Math.round(1180*F.prog/100);
+    body=`<h4>Downloading 10.11.2</h4><div class="big" role="progressbar" aria-label="Download" aria-valuenow="${Math.round(F.prog)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${F.prog}%"></i></div><p>${mb.toLocaleString('en')} of 1,180 MB. Jellyfin keeps running while this downloads.</p>`;
+    foot=`<button class="k" data-act="flowcancel">Cancel</button><span class="note">Nothing has changed yet.</span>`;
+  } else if(F.step===2){
+    body=`<h4>Swapping</h4><ul class="chk">${F.sub>=1?ok('Stopped 10.10.7'):run('Stopping 10.10.7')}${F.sub>=2?ok('Data folder moved to the new layout'):F.sub>=1?run('Moving the data folder to the new layout'):wait('Move the data folder to the new layout')}${F.sub>=2?run('Starting 10.11.2'):wait('Start 10.11.2')}</ul><p>This part can't be stopped halfway. About 40 s.</p>`;
+    foot=`<span class="note">Jellyfin is away right now.</span>`;
+  } else if(F.step===3){
+    const c=(i,t)=>F.sub>i?ok(t):F.sub===i?run(t):wait(t);
+    body=`<h4>Watching it for a minute</h4><ul class="chk">${c(0,'Answering on port 8096')}${F.fail&&F.sub>=2?bad('Health check failed 3 times'):c(1,'Health check passes 3 times')}${F.fail&&F.sub>=2?run('Putting 10.10.7 back'):c(2,'Reads its films on nas · media')}</ul>`;
+    foot=`<span class="note">If it doesn't come up cleanly, 10.10.7 goes back by itself.</span>`;
+  } else if(F.result==='ok'){
+    body=`<h4>Jellyfin 10.11.2 is running.</h4><p>It took 1 min 12 s. 10.10.7 is kept until Nov 12 in case you want it back.</p><ul class="chk">${ok('Answering on port 8096')}${ok('Health check passed 3 times')}${ok('Reads its films on nas · media')}</ul>`;
+    foot=`<button class="k or" data-act="flowdone">Done</button><button class="k link" data-act="noop">Go back to 10.10.7</button>`;
+  } else {
+    body=`<h4>10.11.2 didn't start cleanly, so 10.10.7 is back.</h4><p>Its health check failed 3 times at 01:58. Jellyfin is running as before, and nothing in your library changed.</p><div class="log"><div>01:57:41 Starting Jellyfin 10.11.2</div><div class="bad">01:57:59 Migration "LibraryLayout" failed: database is locked</div><div class="bad">01:58:30 Health check: no answer on :8096 (3 of 3)</div><div>01:58:44 Rolled back to 10.10.7 · ready on :8096</div></div>`;
+    foot=`<button class="k or" data-act="flowstart">Try again</button><button class="k" data-act="noop">Full log</button><button class="k link" data-act="flowdone">Done</button>`;
+  }
+  const lab=F.step===4&&F.result==='fail'?'<span class="tlab"><span class="wp"><i class="led warn"></i><b class="tri">▲</b></span>Rolled back</span>':'';
+  return benchShell('Update Jellyfin','10.10.7 → 10.11.2 · home-server',stepsH(UPD,F.step,true),body,foot,lab,'Update Jellyfin');
+}
+
+/* ---------- frames: home, detail, flow ---------- */
+const DIM=()=>S.W===1440?{w:1440,h:900}:{w:1280,h:800};
+const TAPEH=()=>S.W===1440?88:80;
+function cabinetH(mode){
+  return `<div class="cabinet"><i class="cheek"></i><div class="cnote" data-cnote aria-live="polite">${cnoteIdle()}</div><i class="cheek r"></i>${rackH('hs','d','r')}<div class="chan" aria-hidden="true"></div>${rackH('nas','d','l')}<svg class="cords" aria-hidden="true"></svg></div>`;
+}
+function deskHome(view,fid){
+  const {w,h}=DIM();
+  const det=view.startsWith('detail:');
+  const body=det?detailH(view.slice(7),'d'):`<div class="status">${statusH('d')}</div><div class="bay">${cabinetH('d')}</div>`;
+  return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH(det&&fid==='fitDet'?'Apps':'Home')}<div class="deck" style="height:${h-52-TAPEH()}px;${det?'display:block':''}">${body}</div>${tapeH('d')}${sheetH(fid)}</div>`;
+}
+function phoneHome(view,fid){
+  let body;
+  if(view.startsWith('detail:')) body=detailH(view.slice(7),'p');
+  else body=`<div class="status">${statusH('p')}</div><div class="ph-sec" data-rackstart><div class="rpick" role="radiogroup" aria-label="Which rack">${['hs','nas'].map(s=>`<button role="radio" aria-checked="${S.pick===s}" data-act="pick" data-v="${s}"><i class="sq ${S.pick===s?'lit':''}"></i>${SRV[s].name}</button>`).join('')}</div><div class="cabinet single"><i class="cheek"></i>${rackH(S.pick,'p','r')}<i class="cheek r"></i></div></div>${tapeH('p')}<div style="height:24px"></div>`;
+  const top=view.startsWith('detail:')?phTop(byId(view.slice(7)).name,'home'):phTop('Jam-Dash');
+  return `<div class="dev phone">${top}<div class="ph-body">${body}</div>${tabsH(view.startsWith('detail:')&&fid==='phDet'?'Apps':'Home')}${sheetH(fid)}</div>`;
+}
+function focusDetail(){ return S.sit==='trouble'?(S.fixed.crafty?'codeserver':'crafty'):'jellyfin'; }
+function deskFlow(){
+  const {w,h}=DIM();
+  const save=S.sit; S.sit='allgood';
+  const r=`<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('Home')}<div class="flowdeck" style="height:${h-52}px;grid-template-columns:${w===1440?500:450}px 1fr;align-items:start"><div class="bay" style="padding-left:24px"><div class="cabinet single"><i class="cheek"></i>${rackH('hs','d','r',{flow:flowModState(),fold:true})}<i class="cheek r"></i></div></div>${updBench('d').replace('class="bench"',`class="bench" style="height:${h-52-24}px"`)}</div></div>`;
+  S.sit=save; return r;
+}
+function phoneFlow(){
+  return `<div class="dev phone">${phTop('Jellyfin','noop')}<div class="ph-body flowdeck">${updBench('p')}</div></div>`;
+}
+
+/* ================= 4 · the rest of the app ================= */
+
+/* ---------- Store and install ---------- */
+const CAT=[
+ {id:'mealie',name:'Mealie',line:'Recipes, meal plans and a shopping list',cat:'home',size:'0.4 GB',port:9925,from:'CasaOS main'},
+ {id:'actual',name:'Actual Budget',line:'Household budgeting that stays on your server',cat:'home',size:'0.2 GB',port:5006,from:'CasaOS main'},
+ {id:'linkding',name:'linkding',line:'A bookmark keeper',cat:'tools',size:'0.1 GB',port:9090,from:'Community'},
+ {id:'stirling',name:'Stirling PDF',line:'Merge, split and convert PDFs',cat:'tools',size:'0.9 GB',port:8085,from:'CasaOS main'},
+ {id:'freshrss',name:'FreshRSS',line:'A news reader for your feeds',cat:'tools',size:'0.1 GB',port:8086,from:'CasaOS main'},
+ {id:'kavita',name:'Kavita',line:'Comics and books reader',cat:'media',size:'0.3 GB',port:5000,from:'CasaOS main',have:'stopped'},
+ {id:'navidrome',name:'Navidrome',line:'Stream your music collection',cat:'media',size:'0.1 GB',port:4533,from:'Community',have:'stopped'},
+ {id:'jellyfin',name:'Jellyfin',line:'Films and shows for every screen',cat:'media',size:'1.2 GB',port:8096,from:'CasaOS main',have:'running'},
+ {id:'immich',name:'Immich',line:'Photo and video backup',cat:'files',size:'1.6 GB',port:2283,from:'CasaOS main',have:'running'},
+ {id:'syncthing',name:'Syncthing',line:'Keeps folders in sync between devices',cat:'files',size:'0.1 GB',port:8384,from:'CasaOS main',have:'running'},
+ {id:'terraria',name:'Terraria',line:'A dedicated game server',cat:'games',size:'0.6 GB',port:7777,from:'Community',have:'running'},
+];
+const CATS=[['all','All'],['media','Media'],['files','Files and photos'],['home','Home'],['tools','Tools'],['games','Games']];
+const USED={8080:'SABnzbd',8096:'Jellyfin',8000:'Crafty',8989:'Sonarr',7878:'Radarr',81:'Proxy Manager',8443:'Code Server',2283:'Immich',9696:'Prowlarr',3100:'Home Box',8095:'Music Assistant',7777:'Terraria',8090:'CrowdSec'};
+function portCheck(v,self){
+  const n=+v; if(!/^\d+$/.test(String(v))||n<1||n>65535) return {ok:false,msg:'A port is a number from 1 to 65535.'};
+  if(USED[n]&&USED[n]!==self) return {ok:false,msg:`${n} is used by ${USED[n]} on home-server. Pick another.`};
+  return {ok:true,msg:`${n} is free on ${SRV[S.ins.srv].name}.`};
+}
+const insModState=()=>{ const I=S.ins;
+  if(I.step===1) return {s:'action',word:'Fetching',meta:Math.round(412*I.prog/100)+' of 412 MB'};
+  if(I.step===2) return {s:'action',word:'Starting',meta:''};
+  if(I.step===3) return {s:'action',word:'Checking',meta:''};
+  return null; };
+function insSlot(){
+  const I=S.ins; const st0=insModState();
+  if(I.done) return '';
+  if(I.stage!=='bench') return '';
+  if(!st0) return `<div class="mod newslot" data-id="newslot"><i class="ear"></i><span class="mbody"><span class="mrow"><span class="mn">Mealie goes here</span><span class="mw">1U · after you install</span></span></span><span></span><i class="ear"></i></div>`;
+  return `<div class="mod s-action" data-id="newslot"><i class="ear"></i><span class="mbody"><span class="mrow"><i class="slot lit"></i><span class="mn">Mealie</span><span class="mw">${st0.word}</span><span class="mm">${st0.meta}</span></span></span><span></span><i class="ear"></i></div>`;
+}
+function insBench(){
+  const I=S.ins, srv=SRV[I.srv]; let body='',foot='';
+  const pc=portCheck(I.port);
+  if(I.step===0){
+    body=`<h4>Where it goes</h4><div class="pick2" role="radiogroup" aria-label="Server">${['hs','nas'].map(s=>`<button class="k" role="radio" aria-checked="${I.srv===s}" aria-pressed="${I.srv===s}" data-act="inssrv" data-v="${s}"><i class="sq ${I.srv===s?'lit':''}"></i>${SRV[s].name}</button>`).join('')}</div>
+    <h4>Checked as you go</h4><ul class="chk">
+    <li data-portli><span data-portled>${pc.ok?'<i class="led on"></i>':'<span class="wp"><i class="led warn"></i><b class="tri">▲</b></span>'}</span><span style="flex:1"><span class="frow" style="margin:0"><label>Port</label><input data-in="insport" inputmode="numeric" value="${I.port}" aria-label="Port for Mealie's web page"></span><span class="sm" data-portmsg>${pc.msg}</span></span></li>
+    ${ok(`Folder ${I.srv==='hs'?'/srv/mealie':'/volume1/docker/mealie'} will be made for its data`)}
+    ${I.srv==='nas'?bad('nas has 310 GB left: its pool is 92% full. Mealie needs 0.4 GB, so it fits.'):ok('Room on home-server: needs 0.4 GB, 390 GB free')}
+    ${ok('No other app is called Mealie')}${ok(`Runs on ${srv.name} (amd64)`)}</ul>`;
+    foot=`<button class="k ${pc.ok?'or':'wait'}" data-act="insgo" data-insgo ${pc.ok?'':'disabled'}>${pc.ok?'Install Mealie':'Install waits for the port'}</button><button class="k link" data-act="insback">Not now</button><span class="note">It goes into ${srv.name}'s rack, after the last app.</span>`;
+  } else if(I.step===1){
+    body=`<h4>Fetching Mealie</h4><div class="big" role="progressbar" aria-label="Fetch" aria-valuenow="${Math.round(I.prog)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${I.prog}%"></i></div><p>${Math.round(412*I.prog/100)} of 412 MB. Nothing on ${srv.name} has changed yet.</p>`;
+    foot=`<button class="k" data-act="inscancel">Cancel</button>`;
+  } else if(I.step===2){
+    const c=(i,t)=>I.sub>i?ok(t):I.sub===i?run(t):wait(t);
+    body=`<h4>Starting</h4><ul class="chk">${c(0,`Making ${I.srv==='hs'?'/srv/mealie':'/volume1/docker/mealie'}`)}${c(1,'Making the container')}${c(2,`Starting Mealie on port ${I.port}`)}</ul>`;
+    foot=`<span class="note">About 20 s.</span>`;
+  } else if(I.step===3){
+    const c=(i,t)=>I.sub>i?ok(t):I.sub===i?run(t):wait(t);
+    body=`<h4>Watching it for a minute</h4><ul class="chk">${c(0,`Answering on port ${I.port}`)}${c(1,'Health check passes 3 times')}</ul>`;
+    foot=`<span class="note">If it doesn't come up, Jam-Dash says why and leaves the folder for you.</span>`;
+  } else {
+    body=`<h4>Mealie is running on ${srv.name}.</h4><p>It's in the rack, after the last app. Its address is <span class="mono">http://${srv.name}:${I.port}</span>. Sign in there to make your account; Jam-Dash never sees it.</p><ul class="chk">${ok(`Answering on port ${I.port}`)}${ok('Health check passed 3 times')}</ul>`;
+    foot=`<button class="k or" data-act="insdone">Done</button><button class="k" data-act="noop">Open Mealie ↗</button>`;
+  }
+  return benchShell('Install Mealie','From CasaOS main · 2.4',stepsH(INS,I.step,true),body,foot,'','Install Mealie');
+}
+function catList(mode){
+  const I=S.ins;
+  const L=CAT.filter(c=>I.cat==='all'||c.cat===I.cat);
+  const key=c=>{ if(c.have==='running') return `<button class="k" data-act="noop">Open ↗</button>`; if(c.have==='stopped') return `<button class="k" data-act="noop">Start</button>`;
+    if(c.id==='mealie'&&I.done) return `<button class="k" data-act="noop">Open ↗</button>`; return `<button class="k" data-act="get" data-v="${c.id}">Get</button>`; };
+  const have=c=>c.have==='running'||(c.id==='mealie'&&I.done)?'<i class="led on"></i>Running':c.have==='stopped'?'<i class="led"></i>Stopped':'';
+  return `<div class="drawerbox" role="list" aria-label="Catalogue">${L.map(c=>`<div class="citem" role="listitem" aria-current="${mode==='d'&&I.sel===c.id}"><i class="ear"></i><button class="cb" data-act="csel" data-v="${c.id}"><span class="cn">${c.name}</span><span class="cl2">${c.line}</span>${have(c)?`<span class="cl2" style="display:flex;gap:6px;align-items:center;margin-top:2px">${have(c)} · ${c.have?'home-server':SRV[I.srv].name}</span>`:''}</button><span class="cs">${c.size}</span>${key(c)}<i class="ear"></i></div>`).join('')}</div><div class="cfoot">${L.length} of 1,206 apps from 5 catalogues. The list ends here; search for the rest.</div>`;
+}
+function specPlate(){
+  const c=CAT.find(x=>x.id===S.ins.sel)||CAT[0];
+  const can=!c.have&&!(c.id==='mealie'&&S.ins.done);
+  return `<div class="sect" style="margin-top:4px">From ${c.from}</div><div class="plate"><i class="ear"></i><div class="pb"><div class="tlab"><i class="led"></i><span>Not installed</span></div><div class="pn">${c.name}</div><p class="ps">${c.line}.</p>
+   <dl class="facts" style="margin-top:14px"><dt>Needs</dt><dd>1 port (${c.port}), 1 folder, about ${c.size}</dd><dt>Runs on</dt><dd>amd64 and arm64</dd><dt>Cords</dt><dd>None found yet. After install, Proxy Manager can serve it; that cord appears once you add a proxy host.</dd></dl>
+   <div class="pact">${can?`<button class="k or" data-act="get" data-v="${c.id}">Set up ${c.name}</button>`:`<button class="k" data-act="noop">Open ↗</button>`}</div></div><i class="ear"></i></div>`;
+}
+function deskStore(){
+  const {w,h}=DIM(), I=S.ins;
+  if(I.stage==='bench'){
+    return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('Store')}<div class="flowdeck" style="height:${h-52}px;grid-template-columns:${w===1440?500:450}px 1fr;align-items:start"><div class="bay" style="padding-left:24px"><div class="cabinet single"><i class="cheek"></i>${rackH(I.srv,'d','r',{fold:true,slot:insSlot()})}<i class="cheek r"></i></div></div>${insBench().replace('class="bench"',`class="bench" style="height:${h-52-24}px"`)}</div></div>`;
+  }
+  return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('Store')}<div class="store" style="height:${h-52}px;grid-template-columns:${w===1440?'200px minmax(0,1fr) 470px':'180px minmax(0,1fr) 420px'}">
+   <nav class="cats" aria-label="Kinds of app">${CATS.map(([id,n])=>`<button class="cat" data-act="ccat" data-v="${id}" aria-pressed="${I.cat===id}"><span>${n}</span><span class="mm">${id==='all'?CAT.length:CAT.filter(c=>c.cat===id).length}</span></button>`).join('')}</nav>
+   <div class="catwrap"><div class="srch"><input type="search" placeholder="Search 1,206 apps" aria-label="Search the store"><button class="k" data-act="custom">Custom app</button></div>${catList('d')}</div>
+   <div class="spec2">${specPlate()}</div></div></div>`;
+}
+function phoneStore(){
+  const I=S.ins;
+  if(I.stage==='bench') return `<div class="dev phone">${phTop('Install Mealie','insback')}<div class="ph-body flowdeck">${insBench()}</div></div>`;
+  return `<div class="dev phone">${phTop('Store')}<div class="ph-body"><div class="ph-sec"><div class="srch"><input type="search" placeholder="Search 1,206 apps" aria-label="Search the store"></div><div class="pick2" role="group" aria-label="Kinds of app">${CATS.slice(0,4).map(([id,n])=>`<button class="k" aria-pressed="${I.cat===id}" data-act="ccat" data-v="${id}">${n}</button>`).join('')}</div>${catList('p')}<div style="height:16px"></div></div></div>${tabsH('Store')}</div>`;
+}
+
+/* ---------- Full log ---------- */
+function logLines(){
+  const L=[]; let n=4790;
+  const add=(t,x,bad)=>L.push({n:++n,t,x,bad});
+  const mins=['01:20','01:22','01:25','01:28','01:30','01:33','01:35','01:38','01:40','01:42','01:44','01:45','01:46'];
+  mins.forEach((m,i)=>{ add(m+':0'+(i%10),`[INFO] Server "Saturday": ${3-(i%3)} players online, tick 20.0`); if(i%3===0) add(m+':4'+(i%10),'[INFO] Autosave queued'); });
+  add('01:47:58','[INFO] Saved world "Saturday" (2.1 GB)');
+  add('01:48:30','[WARN] Java heap at 96%',true);
+  add('01:48:52','[WARN] Can\'t keep up! Is the server overloaded? Running 4210 ms behind',true);
+  add('01:49:02','Health check: no answer on :8000 (1 of 3)',true);
+  add('01:49:33','Health check: no answer on :8000 (2 of 3)',true);
+  add('01:50:04','Health check: no answer on :8000 (3 of 3)',true);
+  add('01:50:05','Jam-Dash marked Crafty unhealthy');
+  for(let i=0;i<S.log.extra;i++) add('01:5'+(1+Math.floor(i/3))+':'+(10+i*7),(i%2?'[WARN] Watchdog: main thread blocked for 30 s':'[INFO] Waiting for main thread'),i%2===1);
+  return L;
+}
+function logH(mode){
+  const G=S.log; const all=logLines(); const q=G.q.trim().toLowerCase();
+  const shown=G.prob?all.filter(l=>l.bad):all;
+  const hits=q?shown.filter(l=>(l.t+' '+l.x).toLowerCase().includes(q)).length:0;
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const hl=s=>{ s=esc(s); if(!q) return s; const i=s.toLowerCase().indexOf(q); return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+q.length)+'</mark>'+s.slice(i+q.length); };
+  const probs=all.filter(l=>l.bad).length;
+  const visible=G.follow?shown:shown.slice(0,shown.length-G.newc);
+  const lines=visible.map(l=>`<div class="ll ${l.bad?'bad':''} ${G.jump&&l.t.startsWith(G.jump)?'jump':''}" data-t="${l.t}"><span class="no">${l.n}</span><span class="tx">${hl(l.t+' '+l.x)}</span></div>`).join('');
+  const more=G.range==='start'?`<div class="lmore">4,790 earlier lines since Crafty started on Nov 1 · <button class="k link" data-act="noop">Load more</button></div>`:G.range==='hour'?`<div class="lmore">Showing 00:52 to now. Earlier lines are under 24 h or Since start.</div>`:'';
+  const E=[{t:T(1,49),t2:1440,kind:'alert',txt:'01:49 · stopped responding',j:'01:49'},{t:T(1,47),kind:'tick',txt:'01:47 · saved world',j:'01:47'}];
+  const scr=`<div class="scrub"><div class="lane" style="height:24px"><i class="base"></i>${E.map(e=>`<i class="bar ${e.kind}" style="left:${(e.t-1380)/0.6}%;${e.t2?`width:calc(${(e.t2-e.t)/0.6}% + 4px)`:''}"></i><button class="ev" style="left:calc(${(e.t-1380)/0.6}% - 10px);width:24px" data-act="ljump" data-v="${e.j}" aria-label="Jump to ${e.txt}"></button>`).join('')}</div><div class="ax2"><span>00:52</span><span class="mid">Crafty, last hour · press a mark to jump there</span><span>now</span></div></div>`;
+  const follow=`<button class="k" data-act="lfollow" aria-pressed="${G.follow}"><i class="slot ${G.follow?'lit':''}"></i>${G.follow?'Following':'Paused'}</button>`;
+  const tools=mode==='p'
+   ? `<div class="ltools">${follow}<button class="k" data-act="lprob" aria-pressed="${G.prob}">Problems · ${probs}</button><button class="k" data-act="noop">Download</button><input type="search" data-in="lq" value="${esc(G.q)}" placeholder="Find in the log" aria-label="Find in the log">${q?`<span class="cnt">${hits} found</span>`:''}</div>`
+   : `<div class="ltools">${follow}<span class="pick2" style="margin:0" role="group" aria-label="Lines"><button class="k" data-act="lprob" aria-pressed="${!G.prob}" data-v="all">All lines</button><button class="k" data-act="lprob" aria-pressed="${G.prob}" data-v="prob">Problems · ${probs}</button></span><span class="pick2" style="margin:0" role="group" aria-label="Time">${[['hour','Last hour'],['day','24 h'],['start','Since start']].map(([v,l])=>`<button class="k" data-act="lrange" data-v="${v}" aria-pressed="${G.range===v}">${l}</button>`).join('')}</span><input type="search" data-in="lq" value="${esc(G.q)}" placeholder="Find in the log  /" aria-label="Find in the log">${q?`<span class="cnt">${hits} found</span>`:''}<span style="flex:1"></span><button class="k" data-act="noop">Wrap lines</button><button class="k" data-act="noop">Download</button></div>`;
+  const nw=!G.follow&&G.newc?`<div class="lnew"><button class="k" data-act="lnewest">${G.newc} new line${G.newc>1?'s':''} · Jump to newest</button></div>`:'';
+  return `${mode==='p'?'':`<div class="lhead"><div><button class="back" data-act="noop">‹ Crafty</button><div class="tlab">${ind('alert')}<span>Unhealthy · home-server</span></div><h3>Crafty · full log</h3></div></div>`}${tools}${scr}<div class="lbody" data-lbody tabindex="0" aria-label="Log lines">${more}${lines}${nw}</div>`;
+}
+function deskLog(){ const {w,h}=DIM(); return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('Apps')}<div class="logscr" style="height:${h-52}px">${logH('d')}</div></div>`; }
+function phoneLog(){ return `<div class="dev phone">${phTop('Crafty · log','noop')}<div class="ph-body" style="display:flex;flex-direction:column">${logH('p')}</div>${tabsH('Apps')}</div>`; }
+
+/* ---------- Edit setup: the rear panel ---------- */
+function setupChanges(){ const U=S.setup, B=U.base||(U.base={name:'Sonarr',port:'8989',policy:'stop',mem:'2',ro:{}}); let n=0; ['name','port','policy','mem'].forEach(k=>{ if(U[k]!==B[k]) n++; }); if(U.secret==='new') n++; ['cfg','media','dl'].forEach(k=>{ if(!!U.ro[k]!==!!B.ro[k]) n++; }); return n; }
+function setupH(mode){
+  const U=S.setup, pc=portCheck(U.port,'Sonarr'), n=setupChanges();
+  const C=cords(), needs=C.filter(c=>c.to==='sonarr'), sug=sugFor('sonarr').filter(s=>s.a==='sonarr');
+  const fold=(p,inside,word,k)=>`<div class="term"><span class="tn"><i class="pj" aria-hidden="true"></i>${p}</span><span class="tv"><span class="mono">→ ${inside}</span></span><span class="note"><i class="led ${S.sit==='offline'&&p.startsWith('nas')?'offline':'on'}"></i>${S.sit==='offline'&&p.startsWith('nas')?'nas isn\'t answering':word} · <span class="pick2" style="margin:0;display:inline-flex" role="group" aria-label="Access for ${p}"><button class="k" data-act="ro" data-v="${k}" aria-pressed="${!U.ro[k]}">Read and write</button><button class="k" data-act="ro" data-v="${k}" aria-pressed="${!!U.ro[k]}">Read only</button></span></span></div>`;
+  const sec=U.secret==='edit'
+    ? `<div class="term"><span class="tn">SONARR__AUTH__APIKEY</span><span class="tv"><input type="password" data-in="secret" class="wide" autocomplete="off" aria-label="New value for SONARR__AUTH__APIKEY"><button class="k" data-act="seckeep">Keep it</button><button class="k link" data-act="seccancel">Cancel</button></span><span class="note">Type it here only. Jam-Dash keeps it for Sonarr and never shows it again, here or anywhere.</span></div>`
+    : `<div class="term"><span class="tn">SONARR__AUTH__APIKEY</span><span class="tv"><span class="dots" aria-label="Hidden">••••••••</span><button class="k" data-act="secedit">Replace</button></span><span class="note">Set by you ${U.secret==='new'?'just now (saves with the rest)':'on '+U.secretAt}. Never shown back.</span></div>`;
+  const cordRows=needs.map(c=>`<div class="term"><span class="tn">${cordSvg(cordBroken(c)?'broken':c.src==='yours'?'yours':'found',46)}${nm(c.from)}</span><span class="tv" style="justify-content:flex-end">${c.src==='yours'?`<button class="k link" data-act="rmcord" data-key="${c.key}">Remove</button>`:''}</span><span class="note">${srcLine(c)}</span></div>`).join('')
+    + sug.map(s=>`<div class="term"><span class="tn">${cordSvg('sug',46)}${nm(s.b)}?</span><span class="tv"><button class="k" data-act="sug" data-v="yes" data-k="${s.a}>${s.b}">Yes</button><button class="k link" data-act="sug" data-v="no" data-k="${s.a}>${s.b}">No</button></span><span class="note">Asked, not drawn. ${s.why}</span></div>`).join('');
+  const pol=[['stop','If it stops by itself'],['always','Always'],['never','Never']];
+  const saveKey=U.saving?`<button class="k" disabled><i class="slot lit"></i>Saving and restarting…</button>`:
+    !pc.ok?`<button class="k wait" disabled>Save waits for the port</button>`:n?`<button class="k or" data-act="save">Save and restart</button>`:`<button class="k wait" disabled>No changes</button>`;
+  const note=U.saving?'Sonarr is away for about 20 s.':!pc.ok?`Fix the port first.`:n?`${n} change${n>1?'s':''}. Sonarr restarts and is away about 20 s. Its data folder stays.`:(U.saved||'Changes wait here until you save.');
+  return `<div class="rearscr"${mode==='p'?' style="padding-top:10px"':''}>${mode==='p'?'':`<button class="back" data-act="noop">‹ Sonarr</button>`}<div class="tlab" style="margin-top:4px">${ind('on')}<span>Edit setup · Sonarr · home-server</span></div>
+   <div class="rear turn"><i class="ear"></i><div class="rearin">
+    <div class="rsec"><h4>Name on Home</h4><div class="term"><span class="tn">Name</span><span class="tv"><input data-in="sname" value="${U.name}" class="wide" style="font-family:var(--sans)" aria-label="Name on Home"></span></div>
+     <h4 style="margin-top:16px">Ports</h4>
+     <div class="term"><span class="tn"><i class="pj" aria-hidden="true"></i>Web page</span><span class="tv"><input data-in="sport" inputmode="numeric" value="${U.port}" aria-label="Port for the web page"><span class="mono">→ 8989 inside</span></span><span class="note ${pc.ok?'':'w'}" data-sportmsg>${pc.ok?'<i class="led on"></i>':'<span class="wp"><i class="led warn"></i><b class="tri">▲</b></span>'}${pc.ok?`Free. Sonarr's page is http://home-server:${U.port}`:pc.msg}</span></div>
+     <h4 style="margin-top:16px">Folders</h4>${fold('/srv/sonarr','/config','Exists · 1.3 GB','cfg')}${fold('nas · media','/tv','Mounted from nas','media')}${fold('nas · downloads','/downloads','Mounted from nas','dl')}
+     <div style="margin-top:8px"><button class="k" data-act="noop">Add a folder</button></div></div>
+    <div class="rsec"><h4>Environment <button class="k" data-act="noop">Add a variable</button></h4>
+     <div class="term"><span class="tn">PUID</span><span class="tv"><input value="1000" aria-label="PUID"></span></div>
+     <div class="term"><span class="tn">PGID</span><span class="tv"><input value="1000" aria-label="PGID"></span></div>
+     <div class="term"><span class="tn">TZ</span><span class="tv"><input value="Etc/UTC" class="wide" aria-label="TZ"></span></div>${sec}
+     <h4 style="margin-top:16px">Cords <button class="k" data-act="drawcord" data-id="sonarr">Draw a cord</button></h4>${cordRows}
+     <h4 style="margin-top:16px">Power</h4>
+     <div class="term"><span class="tn">Restarts</span><span class="tv pick2" style="margin:0" role="radiogroup" aria-label="When it restarts">${pol.map(([v,l])=>`<button class="k" role="radio" aria-checked="${U.policy===v}" aria-pressed="${U.policy===v}" data-act="spol" data-v="${v}">${l}</button>`).join('')}</span></div>
+     <div class="term"><span class="tn">Memory</span><span class="tv"><input data-in="smem" value="${U.mem}" inputmode="decimal" style="width:70px" aria-label="Memory limit in GB"><span class="mono">GB at most</span></span><span class="note">Sonarr used 610 MB at most this week.</span></div>
+    </div></div><i class="ear"></i></div>
+   <div style="margin:22px 10px 0"><button class="k" data-act="rmapp">Remove Sonarr…</button></div>
+   <div class="savebar" data-savebar>${saveKey}${n&&!U.saving?`<button class="k link" data-act="sundo">Undo changes</button>`:''}<span class="note">${note}</span></div></div>`;
+}
+function deskSetup(fid){ const {w,h}=DIM(); return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('Apps')}<div style="height:${h-52}px;overflow:auto" data-scroll>${setupH('d')}</div>${sheetH(fid)}</div>`; }
+function phoneSetup(fid){ return `<div class="dev phone">${phTop('Sonarr · setup','noop')}<div class="ph-body">${setupH('p')}</div>${sheetH(fid)}</div>`; }
+
+/* ---------- Files ---------- */
+const PLACES=[{g:'hs',id:'srv',n:'App folders',p:'/srv'},{g:'hs',id:'backups',n:'Backups',p:'/srv/backups'},{g:'nas',id:'media',n:'media',p:'/mnt/nas/media'},{g:'nas',id:'photos',n:'photos',p:'/mnt/nas/photos'},{g:'nas',id:'downloads',n:'downloads',p:'/mnt/nas/downloads'}];
+const MEDIA=[{n:'Films',kind:'dir',size:'3.1 TB',d:'Today 00:40',used:['jellyfin','radarr']},{n:'Shows',kind:'dir',size:'4.4 TB',d:'Today 01:05',used:['jellyfin','sonarr']},{n:'Music',kind:'dir',size:'610 GB',d:'Nov 2',used:[]},{n:'Audiobooks',kind:'dir',size:'92 GB',d:'Oct 28',used:[]},{n:'Home videos',kind:'dir',size:'210 GB',d:'Oct 19',used:[]},{n:'README.txt',kind:'file',size:'2 KB',d:'Mar 3',used:[]}];
+const FILMS=['Arrival (2016)','Blade Runner 2049 (2017)','Dune Part Two (2024)','My Neighbour Totoro (1988)','Paprika (2006)','Spirited Away (2001)','The Iron Giant (1999)'].map((n,i)=>({n,kind:'dir',size:[42,58,71,18,22,31,24][i]+' GB',d:['Oct 2','Sep 14','Today 00:40','Aug 9','Jul 30','Jul 30','Jun 2'][i],used:[]}));
+function baysH(mode){
+  const F=S.files, off=S.sit==='offline';
+  const grp=(g)=>{ const v=SRV[g]; const disk=g==='nas'?(S.sit==='trouble'?92:78):61; const free=g==='nas'?(S.sit==='trouble'?'310 GB':'1.1 TB'):'390 GB';
+    return `<div class="bayg">${g==='hs'?'home-server':'nas · mounted here'}</div><div class="dbay" style="min-height:0;background:transparent"><i></i><div class="db" style="padding:0 2px 6px"><div class="df g">${off&&g==='nas'?'<span>Pool: unknown</span>':`<span>${g==='hs'?'Disk':'Pool'} ${disk}%${disk>=90?' ▲':''} · ${free} free</span><span class="dfb"><i class="${disk>=90?'w':''}" style="width:${disk}%"></i></span>`}</div></div><i></i></div>`+
+      PLACES.filter(p=>p.g===g).map(p=>`<button class="dbay" data-act="place" data-v="${p.id}" aria-current="${F.place===p.id}"><i class="ear"></i><span class="db"><span class="dn">${off&&g==='nas'?'<i class="led offline"></i>':'<i class="led on"></i>'}${p.n}</span><span class="df">${p.p}${off&&g==='nas'?' · not answering':''}</span></span><i class="ear"></i></button>`).join(''); };
+  return `<div class="drawerbox" role="list" aria-label="Places">${grp('hs')}${grp('nas')}</div>`;
+}
+function fileList(mode){
+  const F=S.files, off=S.sit==='offline';
+  const place=PLACES.find(p=>p.id===F.place)||PLACES[2];
+  if(off&&place.g==='nas') return `<div class="crumbs"><span>nas</span>›<b>${place.n}</b></div><div class="plate" style="margin:20px 10px"><i class="ear"></i><div class="pb"><div class="tlab"><i class="led offline"></i><span>Not answering since 01:12</span></div><div class="ttl">Can't read nas · ${place.n}</div><p class="tsen">nas hasn't answered since 01:12, so this folder can't be read. Nothing in it has been changed.</p><div class="pact"><button class="k or" data-act="fixnas">Try again</button><button class="k" data-act="home">Go to Home</button></div></div><i class="ear"></i></div>`;
+  const rows=(F.dir==='Films'?FILMS:(F.place==='media'?MEDIA:MEDIA.slice(2,5)));
+  const crumbs=`<div class="crumbs"><span>${place.g==='nas'?'nas':'home-server'}</span>›${F.dir?`<button class="k link" data-act="fup">${place.n}</button>›<b>${F.dir}</b>`:`<b>${place.n}</b>`}</div>`;
+  const tools=`<div class="ftools"><button class="k" data-act="noop">Upload</button><button class="k" data-act="noop">New folder</button><button class="k" data-act="noop">Share this folder</button>${mode==='p'?'':'<span class="mm" style="align-self:center">Drop files here to upload</span>'}</div>`;
+  const head=mode==='p'?'':`<div class="frow2 fhead" aria-hidden="true"><span></span><span>Name</span><span class="fs">Size</span><span class="fd">Changed</span></div>`;
+  const list=rows.map(r=>`<button class="frow2" data-act="fsel" data-v="${r.n}" aria-current="${F.sel===r.n}"><i class="gl ${r.kind}" aria-hidden="true"></i><span>${r.n}${r.used.length?`<span class="fu">Used by ${r.used.map(nm).join(' and ')}</span>`:''}</span><span class="fs">${r.size}</span><span class="fd">${r.d}</span></button>`).join('');
+  return crumbs+tools+head+`<div role="list" aria-label="Files">${list}</div><div class="hend">${rows.length} items · end of folder</div>`;
+}
+function filePrev(){
+  const F=S.files; const r=(F.dir==='Films'?FILMS:MEDIA).find(x=>x.n===F.sel)||MEDIA[0];
+  return `<div class="tlab"><i class="gl ${r.kind}"></i><span>${r.kind==='dir'?'Folder':'File'}</span></div><h4>${r.n}</h4><dl class="facts"><dt>Size</dt><dd>${r.size}</dd><dt>Changed</dt><dd>${r.d}</dd><dt>Where</dt><dd class="mono">/mnt/nas/media${F.dir?'/'+F.dir:''}/${r.n}</dd>${r.used.length?`<dt>Used by</dt><dd>${r.used.map(nm).join(' and ')}. Found: they mount this folder.</dd>`:''}</dl><div class="pact" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">${r.kind==='dir'&&!F.dir&&r.n==='Films'?`<button class="k" data-act="fopen">Open</button>`:''}<button class="k" data-act="noop">Download</button><button class="k" data-act="noop">Rename</button><button class="k" data-act="noop">Move</button><button class="k" data-act="noop">Delete…</button></div>`;
+}
+function deskFiles(fid){ const {w,h}=DIM(); return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('Files')}<div class="files" style="height:${h-52}px;grid-template-columns:${w===1440?'270px minmax(0,1fr) 320px':'250px minmax(0,1fr) 280px'}"><div class="bays">${baysH('d')}</div><div class="flist">${fileList('d')}</div><div class="fprev">${S.sit==='offline'&&['media','photos','downloads'].includes(S.files.place)?'':filePrev()}</div></div></div>`; }
+function phoneFiles(fid,tab){
+  const F=S.files; const place=PLACES.find(p=>p.id===F.place);
+  const seg=`<div class="rpick" role="radiogroup" aria-label="Files or Shares"><button role="radio" aria-checked="${tab==='files'}" data-act="ptab" data-v="files"><i class="sq ${tab==='files'?'lit':''}"></i>Files</button><button role="radio" aria-checked="${tab==='shares'}" data-act="ptab" data-v="shares"><i class="sq ${tab==='shares'?'lit':''}"></i>Shares</button></div>`;
+  const body=tab==='shares'?sharesH('p'):`<button class="k" data-act="places" style="width:100%;justify-content:space-between;margin-bottom:8px"><span>Place: ${place.g==='nas'?'nas · ':''}${place.n}</span><span aria-hidden="true">⌄</span></button>${fileList('p')}`;
+  return `<div class="dev phone">${phTop('Files')}<div class="ph-body"><div class="ph-sec">${seg}${body}<div style="height:16px"></div></div></div>${tabsH('Files')}${sheetH(fid)}</div>`;
+}
+
+/* ---------- Shares ---------- */
+function sharesH(mode){
+  const off=S.sit==='offline';
+  const users={'nas.media':['jellyfin','radarr','sonarr'],'nas.photos':['immich'],'nas.downloads':['sab','sonarr']};
+  const sp=(id,n,who,ro,extra)=>{ const u=users[id]||[];
+    return `<div class="splate"><i class="ear"></i><div class="sbody"><div class="stop">${off?'<i class="led offline"></i>':'<i class="led on"></i>'}<span class="sn">${n}</span><span class="mw">${off?'Last seen 01:12':'Shared'}</span>${ro?`<span class="badge">${ro}</span>`:''}</div>
+      <div class="addr"><code>smb://nas/${n}</code><button class="k" data-act="copy">Copy</button></div>
+      <div class="used">${who}</div>
+      ${u.length?`<div class="used">${cordSvg(off?'broken':'found',46)}<span>Mounted by ${u.map(nm).join(', ').replace(/, ([^,]*)$/,' and $1')} on home-server <span class="mono">(found)</span></span></div>`:''}
+      ${extra||''}</div><i class="ear"></i></div>`; };
+  const left=`<div><h3>Shared from nas</h3><p class="quiet" style="margin:0 0 8px">Folders other devices at home can open.</p><div class="drawerbox">${sp('nas.media','media','Everyone at home can read. Only your account can change it.','')}${sp('nas.photos','photos','Only your account.','')}${sp('nas.downloads','downloads','Everyone at home can read and change it.','')}${sp('nas.public','Public','Anyone on your network can read and change it.','Made by CasaOS',`<div class="used">Jam-Dash leaves it as CasaOS made it. Change it there, or share the folder again here.</div>`)}</div><div class="hend">4 shares · end of list</div><div><button class="k" data-act="noop">Share a folder</button></div></div>`;
+  const mnt=(n,p,u)=>`<div class="splate"><i class="ear"></i><div class="sbody"><div class="stop">${off?'<span class="wp"><i class="led warn"></i><b class="tri">▲</b></span>':'<i class="led on"></i>'}<span class="sn">nas · ${n}</span><span class="mw">${off?'Waiting on nas':'Connected'}</span></div><div class="addr"><span class="mono">→ ${p}</span></div><div class="used">${u}</div></div><i class="ear"></i></div>`;
+  const right=`<div${mode==='p'?' style="margin-top:20px"':''}><h3>Network shares on home-server</h3><p class="quiet" style="margin:0 0 8px">Shares from other machines that home-server opens like its own folders.</p><div class="drawerbox">${mnt('media','/mnt/nas/media','Apps reach it at /tv or /media')}${mnt('photos','/mnt/nas/photos','Apps reach it at /photos')}${mnt('downloads','/mnt/nas/downloads','Apps reach it at /downloads')}</div><div class="hend">3 network shares · end of list</div><div><button class="k" data-act="noop">Add a network share</button></div></div>`;
+  return mode==='p'?left+right:`<div class="shares2">${left}${right}</div>`;
+}
+function deskShares(){ const {w,h}=DIM(); return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('Shares')}<div style="height:${h-52}px;overflow:auto">${sharesH('d')}</div></div>`; }
+
+/* ---------- First run: an empty cabinet that fills ---------- */
+const FR=['Password','This server','Another server','Done'];
+function frRack(s){
+  const R=S.fr; const filled=s==='hs'?R.step>=1:R.conn===2;
+  if(!filled) return `<div class="rack" data-side="r"><div class="head ${s==='nas'?'off':''}"><i class="ear"></i><div><div class="hn">${s==='hs'?'home-server':'Another server'}</div><div class="hs">${s==='hs'?'<i class="led on"></i>This machine':'<i class="led"></i>Not added yet'}</div></div><span></span><i class="ear"></i></div><div class="emptyrack">${s==='hs'?'Nothing racked yet. Set a password first.':'Room for another server. Add one in step 3, or later in Settings › Servers.'}</div></div>`;
+  const L=(s==='hs'?BASE.filter(a=>a.srv==='hs'):BASE.filter(a=>a.srv==='nas'&&!a.kind));
+  const anim=S.anim&&((s==='hs'&&R.step===1)||(s==='nas'&&R.step===2));
+  return `<div class="rack" data-side="r">${headH(s,'d')}${L.map((a,i)=>`<div class="mod u1 s-on ${anim?'racked':''}" style="${anim?`animation-delay:${Math.min(i*25,350)}ms;animation-duration:.25s;animation-fill-mode:both`:''}"><i class="ear"></i><span class="mbody"><span class="mrow"><i class="led on"></i><span class="mn">${a.name}</span><span class="mw">Running</span></span></span><span></span><i class="ear"></i></div>`).join('')}${s==='hs'?`<div class="blank"><i class="ear"></i><span class="vents"><i></i><i></i><i></i><i></i></span><span class="bt"><b>Stopped · 14</b></span><span></span><i class="ear"></i></div>`:''}<div class="empty-u"></div></div>`;
+}
+function frBench(){
+  const R=S.fr; let body='',foot='';
+  if(R.step===0){
+    body=`<h4>Set a password for Jam-Dash</h4><p>Anyone who opens Jam-Dash on your network needs it. Make it long; you'll only type it on new devices.</p><div class="frow"><label>Password</label><input type="password" data-in="frpw" value="${R.pw}" style="width:240px" aria-label="Password" autocomplete="new-password"></div><p class="sm" style="font-size:14px">${R.pw.length>=10?'Long enough.':`At least 10 characters · ${R.pw.length} so far`}</p>`;
+    foot=`<button class="k ${R.pw.length>=10?'or':'wait'}" data-act="frnext" ${R.pw.length>=10?'':'disabled'}>${R.pw.length>=10?'Set password':'Set password (needs 10)'}</button>`;
+  } else if(R.step===1){
+    body=`<h4>This is home-server</h4><p>Jam-Dash found 28 apps here: 14 running and 14 stopped. 26 of them came from CasaOS. They keep running as they are. Jam-Dash changes nothing until you ask.</p><ul class="chk">${ok('Docker is answering')}${ok('28 apps found, in the order CasaOS had them')}${ok('3 network shares from another machine')}</ul><p>You can reorder the rack later; Jam-Dash never reorders it for you.</p>`;
+    foot=`<button class="k or" data-act="frnext">Next</button><button class="k link" data-act="frback">Back</button>`;
+  } else if(R.step===2){
+    const fail=R.tries===1&&R.conn===0;
+    body=`<h4>Add another server <span class="mm" style="font-size:14px">(you can skip this)</span></h4><p>On that server, open Jam-Dash's Settings › Servers › Let another server in. It shows a one-time code that lasts 10 minutes.</p>
+     <div class="frow"><label>Address</label><input value="nas:8484" style="width:200px" aria-label="Address"></div>
+     <div class="frow"><label>Code</label><input value="${R.tries?'K7PD-9MZX':'R4TN-2WQH'}" class="code" style="width:200px" aria-label="One-time code"></div>
+     ${fail?`<p class="fmsg w"><span class="wp"><i class="led warn"></i><b class="tri">▲</b></span>That code didn't match. Codes last 10 minutes; make a new one on nas and type it here.</p>`:''}
+     ${R.conn>=1?`<ul class="chk">${R.checks>0?ok('nas answered at nas:8484'):run('Asking nas:8484')}${R.checks>1?ok('Code accepted'):R.checks>0?run('Checking the code'):wait('Check the code')}${R.checks>2?ok('Docker is answering on nas: 6 apps'):R.checks>1?run('Asking Docker on nas'):wait('Ask Docker on nas')}</ul>`:''}`;
+    foot=R.conn===2?`<button class="k or" data-act="frnext">Next</button>`:R.conn===1?`<span class="note">Connecting…</span>`:`<button class="k or" data-act="frconn">${fail?'Try again':'Connect'}</button><button class="k link" data-act="frskip">Skip</button>`;
+  } else {
+    body=`<h4>Both servers are in.</h4><p>home-server and nas are racked side by side. Home shows them together; the board lights only when something needs you.</p><ul class="chk">${ok('home-server · 28 apps')}${R.conn===2?ok('nas · 6 apps and 3 shares'):wait('No second server (add one in Settings › Servers)')}</ul>`;
+    foot=`<button class="k or" data-act="frdone">Go to Home</button>`;
+  }
+  return benchShell('Set up Jam-Dash',`Step ${R.step+1} of 4`,stepsH(FR,R.step,true),body,foot,'','First run');
+}
+function deskFirst(){ const {w,h}=DIM();
+  return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('',{bare:true})}<div class="frdeck" style="height:${h-52}px;grid-template-columns:minmax(0,1fr) ${w===1440?520:470}px"><div class="frcab"><div class="cabinet" style="grid-template-columns:14px minmax(0,1fr) 40px minmax(0,1fr) 14px;padding-top:10px;height:100%"><i class="cheek" style="grid-row:auto;margin-top:-10px"></i>${frRack('hs')}<div class="chan"></div>${frRack('nas')}<i class="cheek r" style="grid-row:auto;margin-top:-10px"></i></div></div>${frBench().replace('class="bench"',`class="bench" style="height:${h-52-24}px"`)}</div></div>`; }
+function phoneFirst(){ return `<div class="dev phone"><div class="ph-top"><span class="wm">Jam-Dash</span><span class="clock">${S.clock}</span></div><div class="ph-body flowdeck">${frBench()}</div></div>`; }
+
+/* ---------- History: a week of tape over a reading list ---------- */
+const DAYS=['Thu 5','Wed 4','Tue 3','Mon 2','Sun 1','Sat 31','Fri 30'];
+function histItems(){
+  const f=S.fixed, tr=S.sit==='trouble';
+  const L=[
+   {id:'h1',d:0,hh:1,mm:49,kind:'alert',txt:'Crafty stopped responding',open:tr&&!f.crafty,end:tr?(f.crafty?'Fixed 01:53 · restarted by you':''):'Fixed 01:53 · restarted by you',srv:'hs',dur:4},
+   {id:'h2',d:0,hh:1,mm:31,kind:'alert',txt:'Code Server crashed: out of memory',open:tr&&!f.codeserver,end:f.codeserver?'Fixed 01:53 · started by you':'Started again by you at 01:40',srv:'hs',dur:9},
+   {id:'h3',d:0,hh:1,mm:12,kind:'warn',txt:"Immich's machine-learning worker stopped",open:tr&&!f.immich,end:f.immich?'Fixed 01:53 · worker started by you':'Back at 01:30 by itself',srv:'hs',dur:18},
+   {id:'h4',d:1,hh:22,mm:14,kind:'tick',txt:'Jellyfin restarted by itself after a hiccup',end:'Back at 22:14 by itself',srv:'hs'},
+   {id:'h5',d:1,hh:18,mm:20,kind:'warn',txt:"nas's pool went over 90%",open:tr,end:tr?'':'Back under 90% at 23:10',srv:'nas',dur:tr?460:290},
+   {id:'h6',d:1,hh:4,mm:0,kind:'tick',txt:'watchtower updated Sonarr to 4.0.11',end:'Running since',srv:'hs'},
+   {id:'h7',d:1,hh:3,mm:12,kind:'tick',txt:'Kopia restarted after its update',end:'',srv:'nas'},
+   {id:'h8',d:2,hh:19,mm:5,kind:'alert',txt:'Crafty stopped responding',end:'Fixed 19:09 · restarted by you',srv:'hs',dur:4},
+   {id:'h9',d:3,hh:2,mm:40,kind:'offline',txt:'nas stopped answering',end:'Back at 02:52 by itself',srv:'nas',dur:12},
+   {id:'h10',d:4,hh:11,mm:0,kind:'tick',txt:'You installed Terraria',end:'',srv:'hs'},
+   {id:'h11',d:5,hh:14,mm:20,kind:'tick',txt:'Immich updated to 1.122',end:'',srv:'hs'},
+   {id:'h12',d:6,hh:21,mm:30,kind:'warn',txt:'Sonarr 4.0.10 didn\'t start cleanly',end:'Rolled back to 4.0.9 by itself',srv:'hs',dur:3},
+  ];
+  return L.filter(x=>S.hist.f==='all'||(S.hist.f==='prob'?x.kind!=='tick':x.kind==='tick'));
+}
+function weekH(mode){
+  const L=histItems(); const sel=S.hist.sel;
+  const rows=DAYS.map((d,di)=>{
+    const lane=s=>{ const X=L.filter(x=>x.d===di&&x.srv===s).map(x=>Object.assign({m:x.hh*60+x.mm},x)).sort((a,b)=>a.m-b.m);
+      const G=[]; X.forEach(x=>{ const g=G[G.length-1]; if(g&&x.m-g.last<36){ g.items.push(x); g.last=x.m+(x.dur||0); } else G.push({items:[x],last:x.m+(x.dur||0)}); });
+      return `<div class="lane"><i class="base"></i>${X.map(x=>`<i class="bar ${x.kind}" style="left:${x.m/14.4}%;${x.dur?`width:calc(${x.dur/14.4}% + 4px)`:''}"></i>`).join('')}${G.map(g=>{ const a=g.items[0]; const l=a.m/14.4, w=(g.last-a.m)/14.4; const ids=g.items.map(x=>x.id).join(',');
+        const lab=g.items.length>1?`${d}: ${g.items.length} events from ${String(a.hh).padStart(2,'0')}:${String(a.mm).padStart(2,'0')}`:`${d} ${String(a.hh).padStart(2,'0')}:${String(a.mm).padStart(2,'0')} · ${a.txt}`;
+        return `<button class="ev" style="left:calc(${l}% - 10px);width:calc(${w}% + 24px)" data-act="hsel" data-v="${ids}" aria-pressed="${sel===ids}" aria-label="${lab}">${g.items.length>1?`<span class="cl">${g.items.length}</span>`:''}</button>`; }).join('')}</div>`; };
+    return `<div class="wday"><span class="wl ${di===0?'now':''}">${d}${di===0?' · now':''}</span><div class="wlanes">${lane('hs')}${lane('nas')}${di===0?`<i class="rest" style="left:${112/14.4}%" aria-hidden="true"></i>`:''}</div></div>`; }).join('');
+  const ax=[0,6,12,18].map(hh=>`<span style="left:${hh*60/14.4}%">${String(hh).padStart(2,'0')}:00</span>`).join('');
+  return `<div class="week" aria-label="The last 7 days, two lanes per day: home-server on top, nas below">${rows}<div class="wax"><i></i><div>${ax}</div></div></div>`;
+}
+function histList(mode){
+  const L=histItems(); const sel=S.hist.sel;
+  const grp=[['Tonight',x=>x.d===0||(x.d===1&&x.hh>=18)],['Wed 4 Nov',x=>x.d===1&&x.hh<18],['Earlier this week',x=>x.d>=2]];
+  let h='';
+  grp.forEach(([g,f])=>{ const G=L.filter(f); if(!G.length) return; h+=`<div class="hgrp">${g}</div>`;
+    G.forEach(x=>{ const t=`${x.d>=2?DAYS[x.d].split(' ')[0]+' ':''}${String(x.hh).padStart(2,'0')}:${String(x.mm).padStart(2,'0')}`;
+      const led=x.open?ind(x.kind==='tick'?'on':x.kind):x.kind==='tick'?'<i class="slot"></i>':'<i class="led"></i>';
+      const key=x.open?`<button class="k" data-act="noop">Go to it</button>`:'<span></span>';
+      h+=`<div class="hitem" data-hid="${x.id}" aria-current="${!!sel&&sel.split(',').includes(x.id)}">${led}<span class="ht">${t}</span><span><span class="hs">${x.txt}</span><span class="he">${x.open?'<b>Open now</b>':x.end||'Done'} · ${SRV[x.srv].name}</span></span>${key}</div>`; }); });
+  return `<div class="hlist">${h||'<p class="quiet">Nothing of this kind this week.</p>'}<div class="hend">Jam-Dash keeps 7 days. That's the end of the list.</div></div>`;
+}
+function histH(mode){
+  const f=S.hist.f;
+  const seg=`<div class="pick2" role="group" aria-label="Show">${[['all','Everything'],['prob','Problems'],['chg','Changes']].map(([v,l])=>`<button class="k" data-act="hfilt" data-v="${v}" aria-pressed="${f===v}">${l}</button>`).join('')}</div>`;
+  if(mode==='p') return `<div class="ph-sec">${seg}${weekH('p')}${histList('p')}</div>`;
+  return `<div class="hist">${mode==='p'?'':`<button class="back" data-act="home">‹ Home</button>`}<div style="display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin:4px 0 10px"><h3 class="hl" style="margin:0">History</h3><span class="quiet">The tape, a week long, and what happened, in words. No bells or unread counts: open things live on Home.</span><span style="flex:1"></span>${seg}</div>${weekH('d')}${histList('d')}</div>`;
+}
+function deskHist(){ const {w,h}=DIM(); return `<div class="dev desk w${w}" style="width:${w}px;height:${h}px">${lipH('Home')}<div style="height:${h-52}px;overflow:auto">${histH('d')}</div></div>`; }
+function phoneHist(){ return `<div class="dev phone">${phTop('History','home')}<div class="ph-body">${histH('p')}<div style="height:20px"></div></div>${tabsH('Home')}</div>`; }
+
+/* ================= render ================= */
+const scaleOf={};
+function place(id,html){ const el=document.getElementById(id); el.innerHTML=html; return el; }
+function fit(id){
+  const box=document.getElementById(id), dev=box.firstElementChild; if(!dev) return;
+  const k=Math.min(1,box.clientWidth/dev.offsetWidth); dev.style.transform=`scale(${k})`; box.style.height=(dev.offsetHeight*k)+'px'; scaleOf[id]=k;
+}
+/* cords: combed lanes down the cord channel */
+function route(p1,p2,lane){
+  const r=6, d1=Math.sign(lane-p1.x)||1, d2=Math.sign(p2.x-lane)||1, dv=Math.sign(p2.y-p1.y)||1;
+  if(Math.abs(p2.y-p1.y)<2*r+1) return `M${p1.x} ${p1.y} L${lane} ${p1.y} L${lane} ${p2.y} L${p2.x} ${p2.y}`;
+  return `M${p1.x} ${p1.y} L${lane-d1*r} ${p1.y} Q${lane} ${p1.y} ${lane} ${p1.y+dv*r} L${lane} ${p2.y-dv*r} Q${lane} ${p2.y} ${lane+d2*r} ${p2.y} L${p2.x} ${p2.y}`;
+}
+function drawCords(root,hov){
+  const cab=root.querySelector('.cabinet:not(.single)'); if(!cab||!cab.querySelector('.chan')) return;
+  const svg=cab.querySelector('svg.cords'); if(!svg) return;
+  const cr=cab.getBoundingClientRect(), k=cr.width/cab.offsetWidth||1;
+  svg.setAttribute('width',cab.offsetWidth); svg.setAttribute('height',cab.offsetHeight);
+  const ch=cab.querySelector('.chan').getBoundingClientRect(), cx0=(ch.left-cr.left)/k, cw=ch.width/k;
+  const P=id=>{ const e=cab.querySelector(`[data-jack="${id}"]`); if(!e) return null; const r=e.getBoundingClientRect(); return {x:(r.left+r.width/2-cr.left)/k,y:(r.top+r.height/2-cr.top)/k}; };
+  const C=cords();
+  const rel=hov?C.filter(c=>c.from===hov||c.to===hov||(hov==='shares'&&c.from.startsWith('nas.'))):[];
+  const always=C.filter(cordBroken).filter(liveEnd).filter(c=>!rel.includes(c));
+  const group=(L)=>{ const G={}; L.forEach(c=>{ const a=resolveJack(c.from,'d'), b=resolveJack(c.to,'d'); if(!a||!b||a===b) return; const key=a+'|'+b;
+      (G[key]=G[key]||{a,b,items:[]}).items.push(c); }); return Object.values(G); };
+  const GA=group(always), GH=group(rel);
+  const shownH=GH.slice(0,6), restH=GH.slice(6);
+  const srcs=[...new Set(GA.map(g=>g.a))];
+  let out='';
+  const draw=(g,lane,anim)=>{
+    const p1=P(g.a), p2=P(g.b); if(!p1||!p2) return;
+    const d=route(p1,p2,lane); const brk=g.items.some(cordBroken), yours=g.items.every(c=>c.src==='yours');
+    const cls=anim?' draw':'';
+    if(brk) out+=`<path class="cw bu${cls}" d="${d}"/><path class="cw bk${cls}" d="${d}"/>`;
+    else if(yours) out+=`<path class="cw yo${cls}" d="${d}"/><path class="cw yi${cls}" d="${d}"/>`;
+    else out+=`<path class="cw found${cls}" d="${d}"/>`;
+    if(g.items.length>1){ const end=g.b.startsWith('plate:')?p2:(g.a.startsWith('plate:')?p1:p2); const tx=lane+(end.x>lane?6:-34);
+      out+=`<rect class="ctagbg" x="${tx-2}" y="${end.y-21}" width="32" height="17" rx="2"/><text class="ctag" x="${tx}" y="${end.y-8}">+${g.items.length}</text>`; }
+  };
+  GA.forEach(g=>draw(g,cx0+14+Math.min(3,srcs.indexOf(g.a))*12,S.anim));
+  shownH.forEach((g,i)=>draw(g,cx0+cw/2+(i-(shownH.length-1)/2)*4,true));
+  svg.innerHTML=out;
+  $$('.mod.mhl,.plate1.mhl',root).forEach(x=>x.classList.remove('mhl'));
+  const note=cab.querySelector('[data-cnote]');
+  if(hov){
+    const ids=new Set(); shownH.forEach(g=>{ids.add(g.a);ids.add(g.b);});
+    ids.forEach(i=>{ const el=i.startsWith('plate:')?root.querySelector(`[data-plate="${i.slice(6)}"]`):root.querySelector(`.mod[data-id="${i.startsWith('nas.')?'shares':i}"]`); if(el) el.classList.add('mhl'); });
+    if(note) note.innerHTML=hoverNote(hov,rel,GH,restH);
+  } else if(note) note.innerHTML=cnoteIdle();
+}
+function hoverNote(id,rel,GH,restH){
+  const name=id==='shares'?"nas's shares":nm(id);
+  if(!rel.length) return `<span class="ck">CORDS</span><span>${name}: none found. Its rear panel can draw one.</span>`;
+  const needs=rel.filter(c=>c.to===id), by=rel.filter(c=>c.from===id);
+  const and=a=>a.length>1?a.slice(0,-1).join(', ')+' and '+a[a.length-1]:a[0];
+  const fmt=L=>{ const G={}; L.forEach(c=>(G[c.src]=G[c.src]||[]).push(nm(c.to===id?c.from:c.to))); return Object.entries(G).map(([k,v])=>`${and(v)} (${SRC[k]})`).join(', '); };
+  if(by.length>6||GH.some(g=>g.items.length>1)){
+    const srcs=[...new Set(by.map(c=>SRC[c.src]))].join(', ');
+    const onPlate=GH.filter(g=>g.b.startsWith('plate:')).map(g=>`${g.items.length} on ${SRV[g.b.slice(6)].name}'s Running plate`);
+    const drawn=GH.filter(g=>!g.b.startsWith('plate:')).map(g=>nm(g.b));
+    return `<span class="ck">CORDS</span><span>${name} serves ${by.length} apps (${srcs}). Drawn: ${drawn.join(', ')}${onPlate.length?'; '+onPlate.join(', '):''}${restH.length?`; and ${restH.length} more`:''}.</span>`;
+  }
+  return `<span class="ck">CORDS</span><span>${name}${needs.length?' needs '+fmt(needs):''}${needs.length&&by.length?' · ':''}${by.length?(needs.length?'needed by ':' is needed by ')+fmt(by):''}.</span>`;
+}
+
+function measureFold(root,mode,s){
+  const k=scaleOf[root.id]||1;
+  const rack=root.querySelector(`.rack[data-srv="${s}"]`); if(!rack) return false;
+  const items=[...rack.children].filter(c=>!c.classList.contains('empty-u'));
+  const top=rack.getBoundingClientRect().top, bottom=Math.max(...items.map(c=>c.getBoundingClientRect().bottom));
+  if(mode==='p') return (bottom-top)/k>560;
+  const deck=root.querySelector('.deck'); return (bottom-deck.getBoundingClientRect().top)/k+14>deck.clientHeight;
+}
+function tight(root){
+  const deck=root.querySelector('.deck'), tags=root.querySelector('.status .tags'); if(!deck||!tags) return false;
+  const k=scaleOf[root.id]||1; return (tags.getBoundingClientRect().bottom-deck.getBoundingClientRect().top)/k>deck.clientHeight;
+}
+function renderHome(){
+  const R=$('#fitHome');
+  S._tight=0;
+  const home=S.dview==='home';
+  const auto=['hs','nas'].filter(s=>S.foldOn[s+'d']===undefined);
+  auto.forEach(s=>S.foldOn[s+'d']=false);
+  place('fitHome',deskHome(S.dview,'fitHome')); fit('fitHome');
+  if(home&&auto.length){ let ch=false; auto.forEach(s=>{ if(measureFold(R,'d',s)){ S.foldOn[s+'d']=true; ch=true; } }); if(ch){ place('fitHome',deskHome(S.dview,'fitHome')); fit('fitHome'); } }
+  else auto.forEach(s=>{ if(!home) delete S.foldOn[s+'d']; });
+  while(home&&S._tight<2&&tight(R)){ S._tight++; place('fitHome',deskHome(S.dview,'fitHome')); fit('fitHome'); }
+  if(home) drawCords(R,null);
+  const pk=S.pick+'p';
+  const pa=S.foldOn[pk]===undefined; if(pa) S.foldOn[pk]=false;
+  place('phHome',phoneHome(S.pview,'phHome')); fit('phHome');
+  if(S.pview==='home'&&pa&&measureFold($('#phHome'),'p',S.pick)){ S.foldOn[pk]=true; place('phHome',phoneHome(S.pview,'phHome')); fit('phHome'); }
+  else if(S.pview!=='home'&&pa) delete S.foldOn[pk];
+  measureHome(); focusSheet('fitHome'); focusSheet('phHome');
+}
+function measureHome(){
+  const box=$('#fitHome'), deck=$('.deck',box), k=scaleOf.fitHome||1;
+  if(S.dview==='home'){
+    const over=Math.max(0,deck.scrollHeight-deck.clientHeight), dr=deck.getBoundingClientRect();
+    const tags=$$('.status .tag',box); const lastTag=tags.length?Math.max(...tags.map(t=>t.getBoundingClientRect().bottom)):dr.top;
+    const heads=$$('[data-head]',box).map(h=>h.getBoundingClientRect().bottom);
+    const okFirst=(lastTag-dr.top)/k<=deck.clientHeight && heads.every(b=>(b-dr.top)/k<=deck.clientHeight);
+    const folds=['hs','nas'].filter(s=>S.foldOn[s+'d']).map(s=>SRV[s].name);
+    const nApps=apps().filter(a=>!a.kind).length;
+    $('#capHome').textContent=`Desktop ${DIM().w} × ${DIM().h} · ${{trouble:'Trouble',allgood:'All good',offline:'nas offline',busy:'Busy day'}[S.sit]} · ${nApps} apps · the deck runs ${over} px past the first screen · tag ladder step ${S._tight} · Running plate (Auto): ${folds.length?folds.join(' and '):'not needed'} · board, every tag and both head units on the first screen: ${okFirst?'yes':'NO'}`;
+  } else $('#capHome').textContent=`Desktop · ${byId(S.dview.slice(7)).name} detail (Esc or ‹ Home goes back)`;
+  const ph=$('#phHome'), body=$('.ph-body',ph), pk=scaleOf.phHome||1;
+  if(S.pview==='home'){
+    const y=el=>el?Math.round((el.getBoundingClientRect().top-body.getBoundingClientRect().top)/pk+52):'—';
+    const first=$('.rack .mod, .rack .plate1',ph);
+    $('#capPhHome').textContent=`Phone 390 × 844 · the rack picker starts at ${y($('.rpick',ph))} px, the head unit at ${y($('.head',ph))} px, the first module at ${y(first)} px; the first screen ends at 782 px above the tabs${S.foldOn[S.pick+'p']?' · healthy apps folded into the Running plate':''}`;
+  } else $('#capPhHome').textContent='Phone · detail';
+}
+function renderDet(){
+  const id=focusDetail();
+  place('fitDet',deskHome('detail:'+id,'fitDet')); fit('fitDet');
+  place('phDet',phoneHome('detail:'+id,'phDet')); fit('phDet');
+  const sc=$('#phDet .ph-body'), k=scaleOf.phDet||1;
+  const o=(detailData(id).keys.find(x=>x[0]==='or')||['','none'])[1];
+  $('#capDet').textContent=`Desktop ${DIM().w} × ${DIM().h} · ${byId(id).name} · ${st(byId(id)).s==='alert'?'one loud thing: the red key':'one orange: '+o} · "Draw a cord" is plain`;
+  $('#capPhDet').textContent=`Phone 390 × 844 · the detail scrolls (${Math.round(sc.scrollHeight)} px); the keys end at ${Math.round(($('#phDet .pact').getBoundingClientRect().bottom-sc.getBoundingClientRect().top)/k)} px`;
+  focusSheet('fitDet'); focusSheet('phDet');
+}
+function renderFlow(){
+  place('fitFlow',deskFlow()); fit('fitFlow');
+  place('phFlow',phoneFlow()); fit('phFlow');
+  const F=S.flow;
+  $('#capFlow').textContent=`Desktop ${DIM().w} × ${DIM().h} · step ${F.step+1} of 5: ${UPD[F.step]}${F.step===4?(F.result==='ok'?' (updated)':' (rolled back: warn, D101)'):''} · the rack is folded so Jellyfin's module sits beside the bench`;
+  $('#capPhFlow').textContent='Phone 390 × 844 · the bench is a full screen; its keys stay in a sticky bar';
+}
+const MORE={
+ store:{how:'Pick a kind of app, choose one, and press <b>Set up Mealie</b> (or <b>Get</b>). The bench opens beside the rack it will go into, with a dashed slot where the new module goes. Try port <b>8080</b> in the Check step: it is taken, so Install waits. Then install and watch the slot fill.',
+  side:'<b>Store.</b> The catalogue is a drawer of unplugged modules: same faces as the rack, no light and no jack yet. The spec plate on the right says what the app needs before you commit. One orange: the next step. Installs use the same bench as updates, so "where will it go and what will it cost" is answered the same way. On the phone, Get goes straight to the bench.'},
+ log:{how:'<b>Following</b> lights its slot; new lines arrive while you watch (six in this mock). Press it to pause: new lines are counted, not scrolled in. Try <b>Problems</b>, type in Find, or press a mark on the scrubber to jump to 01:49.',
+  side:"<b>Full log.</b> The app's own lane of tape sits above the lines as a scrubber, so the tape and the log are one thing at two zooms. Failing lines carry ▲ and the alert ink. It's a reading surface: light in Day, no orange anywhere. On the phone the controls fit two rows and line numbers hide."},
+ setup:{how:'This is <b>Sonarr</b>, because it has every kind of cord. Type <b>8080</b> as the port (taken by SABnzbd: Save waits), change the restart rule, press <b>Replace</b> on the secret, answer the suggested cord, or <b>Draw a cord</b>. Save says what it costs. <b>Remove Sonarr…</b> opens the confirm sheet.',
+  side:'<b>Edit setup is the rear panel.</b> Turning a module round is where real equipment keeps its ports and wiring, so the setup reads as the back of the same object. Ports are jacks with numbers, the environment is a terminal strip, secrets are dots with Replace (D165), and cords are listed with where they came from. Changes wait in the save bar, which counts them and says Sonarr is away about 20 s.'},
+ files:{how:'Pick a place on the left (drive bays). Select a folder; <b>Films</b> opens. Switch Situation to <b>nas offline</b> to see the folder error with Try again and Go to Home.',
+  side:'<b>Files.</b> Places are drive bays grouped by machine, with the free space said once per machine, not per folder. A folder that apps mount says so ("Used by Jellyfin and Radarr"): the same found cords as Home, in words. The list ends visibly. No orange: browsing is calm. On the phone, Files and Shares share one tab, and places open in a sheet.'},
+ shares:{how:'Read-only view of what nas shares and what home-server mounts. Switch Situation to <b>nas offline</b>.',
+  side:'<b>Shares.</b> Each share is a plate with its address in a dark window and Copy, who can open it, and which apps mount it (a found cord, drawn small). Shares that CasaOS made stay as CasaOS made them and say so. Mounts on home-server go amber with "Waiting on nas" when nas is down.'},
+ first:{how:'Type any 10 characters, press <b>Set password</b>, then <b>Next</b>. In step 3 the first code fails on purpose; press <b>Try again</b> and the second rack fills.',
+  side:'<b>First run.</b> An empty cabinet: home-server\'s rack has bare rails until the password is set, then its apps rack in once (the signature move: 25 ms apart, under 600 ms in all). The second rack is a dashed outline until another server connects. Step mode with slot windows and one orange per step (D66, D145).'},
+ history:{how:'Press a mark on the week of tape to find it in the list. Filter Problems or Changes. Open items are lit and say "Open now".',
+  side:'<b>History.</b> Seven days of tape, one strip per day, two lanes each, over a reading list grouped Tonight / Wed 4 Nov / Earlier. Finished items are unlit and say how they ended ("Fixed 01:53 · restarted by you", "Back at 02:52 by itself"). No bells, no unread counts. The list ends with a walnut rule: Jam-Dash keeps 7 days.'},
+};
+function renderMore(){
+  const m=S.more; const lb=$('#fitMore [data-lbody]'), pb=$('#phMore [data-lbody]');
+  const keep={d:lb?lb.scrollTop:0,p:pb?pb.scrollTop:0};
+  const D={store:deskStore,log:deskLog,setup:()=>deskSetup('fitMore'),files:()=>deskFiles('fitMore'),shares:deskShares,first:deskFirst,history:deskHist}[m];
+  const P={store:phoneStore,log:phoneLog,setup:()=>phoneSetup('phMore'),files:()=>phoneFiles('phMore',S.files.ptab),shares:()=>phoneFiles('phMore','shares'),first:phoneFirst,history:phoneHist}[m];
+  place('fitMore',D()); fit('fitMore'); place('phMore',P()); fit('phMore');
+  $('#moreHow').innerHTML=MORE[m].how; $('#moreSide').innerHTML=MORE[m].side;
+  if(m==='log'){ [['fitMore','d'],['phMore','p']].forEach(([id,k])=>{ const b=$(`#${id} [data-lbody]`); if(!b) return;
+      if(S.log.jump){ const j=$(`#${id} .ll.jump`); if(j) b.scrollTop=j.offsetTop-40; } else b.scrollTop=S.log.follow?b.scrollHeight:keep[k]; }); }
+  const caps={store:S.ins.stage==='bench'?`step ${S.ins.step+1} of 5: ${INS[S.ins.step]} · the rack shows where Mealie goes`:'catalogue · one orange: Set up',log:`${logLines().length} lines in view · ${S.log.follow?'following':'paused'} · no orange`,setup:`${setupChanges()} change(s) waiting · orange only when Save can run`,files:'drive bays · no orange',shares:'no orange',first:`step ${S.fr.step+1} of 4: ${FR[S.fr.step]}`,history:`${histItems().length} items in view · no orange`};
+  $('#capMore').textContent=`Desktop ${DIM().w} × ${DIM().h} · ${caps[m]}`;
+  $('#capPhMore').textContent=`Phone 390 × 844 · ${m==='shares'?'Shares lives inside the Files tab on the phone (five tabs at most)':m==='files'?'Files and Shares share one tab; places open in a sheet':'same state as the desktop frame'}`;
+  focusSheet('fitMore'); focusSheet('phMore');
+}
+function focusSheet(id){ if(!S.sheet||S.sheet.frame!==id||S._sheetFocused===id) return; const sh=$(`#${id} .sheet`); if(!sh) return; S._sheetFocused=id; const f=sh.querySelector('[data-autofocus]')||sh.querySelector('input,button'); if(f) f.focus({preventScroll:true}); }
+function renderAll(){
+  document.body.dataset.light=S.light; document.body.dataset.motion=S.motion;
+  $$('.seg[data-ctl]').forEach(g=>{ const c=g.dataset.ctl; const v=c==='fail'?(S.flow.fail?'fail':'ok'):String(S[c]); $$('button',g).forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v)); });
+  renderHome(); renderDet(); renderFlow(); renderMore();
+  S.anim=false;
+}
+/* re-render a frame group but keep focus in the same input */
+function keepFocus(fn){
+  const a=document.activeElement; const key=a&&a.dataset&&a.dataset.in; const fr=a&&a.closest&&a.closest('.fit'); const pos=a&&a.selectionStart;
+  fn();
+  if(key&&fr){ const n=$(`#${fr.id} [data-in="${key}"]`); if(n){ n.focus({preventScroll:true}); try{ n.setSelectionRange(pos,pos); }catch(e){} } }
+}
+
+/* ================= interaction ================= */
+function ping(sel,root){ $$(sel,root).forEach(e=>{ e.classList.remove('ping'); void e.offsetWidth; e.classList.add('ping'); }); }
+function doFix(id,btn){
+  if(id==='nasoff'||id==='fixnas'){
+    if(btn){ btn.innerHTML='<i class="slot lit"></i>Trying…'; btn.disabled=true; }
+    setTimeout(()=>{ if(btn){ btn.textContent='Still not answering. Check that nas has power'; btn.disabled=false; } },1400);
+    return;
+  }
+  const t=troubles().find(x=>x.id===id); if(!t||t.nofix) return;
+  $$(`[data-act="fix"][data-id="${id}"]`).forEach(b=>{ b.innerHTML=`<i class="slot lit"></i>${t.job}…`; b.disabled=true; });
+  setTimeout(()=>{ S.fixed[id]=true; S.clock='01:53'; S.fixLog.push({srv:t.srv,t:1440,kind:'tick',txt:`01:53 · ${t.who} ${t.done}`}); S.anim=true; renderAll(); },1600);
+}
+const T0=[]; function stopT(){ T0.forEach(clearTimeout); T0.length=0; }
+function at(ms,fn,r){ T0.push(setTimeout(()=>{fn(); r();},ms)); }
+function runFlow(){
+  stopT(); const F=S.flow; Object.assign(F,{step:1,prog:0,sub:0,result:null}); renderFlow();
+  let t=0; for(let p=8;p<=100;p+=8){ t+=160; const pp=Math.min(100,p); at(t,()=>{F.prog=pp;},renderFlow); }
+  t+=250; at(t,()=>{F.step=2;F.sub=0;},renderFlow); t+=700; at(t,()=>{F.sub=1;},renderFlow); t+=700; at(t,()=>{F.sub=2;},renderFlow);
+  t+=700; at(t,()=>{F.step=3;F.sub=0;},renderFlow); t+=700; at(t,()=>{F.sub=1;},renderFlow); t+=800; at(t,()=>{F.sub=2;},renderFlow); t+=900;
+  at(t,()=>{ F.step=4; F.result=F.fail?'fail':'ok'; },()=>{ renderFlow(); renderHome(); });
+}
+function runInstall(){
+  stopT(); const I=S.ins; Object.assign(I,{step:1,prog:0,sub:0}); renderMore();
+  let t=0; for(let p=10;p<=100;p+=10){ t+=150; const pp=p; at(t,()=>{I.prog=pp;},renderMore); }
+  t+=250; at(t,()=>{I.step=2;I.sub=0;},renderMore); t+=500; at(t,()=>{I.sub=1;},renderMore); t+=500; at(t,()=>{I.sub=2;},renderMore);
+  t+=500; at(t,()=>{I.step=3;I.sub=0;},renderMore); t+=600; at(t,()=>{I.sub=1;},renderMore); t+=700; at(t,()=>{I.sub=2;},renderMore);
+  t+=300; at(t,()=>{ I.step=4; I.done=true; S.anim=true; S.foldOn={}; S.ins.stage='bench'; },()=>{ renderMore(); renderHome(); S.anim=false; });
+}
+let LT=setInterval(()=>{ if(S.more!=='log'||S.log.extra>=6) return; S.log.extra++; if(!S.log.follow) S.log.newc++; keepFocus(renderMore); },2600);
+
+const resetSit=()=>{ Object.assign(S,{fixed:{},fixLog:[],foldD:true,dview:'home',pview:'home',tapeSel:null,tapeMsg:'',clock:'01:52',fold:true,anim:true,pick:'hs',foldOn:{},plate:{},drawer:{},sheet:null,zoom:'day'}); };
+document.addEventListener('click',e=>{
+  const segb=e.target.closest('.seg[data-ctl] button');
+  if(segb){ const c=segb.closest('.seg').dataset.ctl, v=segb.dataset.v;
+    if(c==='W'){ S.W=+v; S.foldOn={}; }
+    else if(c==='fail') S.flow.fail=v==='fail';
+    else if(c==='more'){ S.more=v; S.sheet=null; renderAll(); return; }
+    else S[c]=v;
+    if(c==='sit') resetSit();
+    renderAll(); return; }
+  const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
+  const act=b.dataset.act, frame=b.closest('.fit'), fid=frame&&frame.id, isPhone=fid&&fid.startsWith('ph');
+  const rr=()=>{ if(fid==='fitHome'||fid==='phHome') renderHome(); else if(fid==='fitDet'||fid==='phDet') renderDet(); else if(fid==='fitMore'||fid==='phMore') renderMore(); else renderAll(); };
+  switch(act){
+    case 'detail': { const id=b.dataset.id; const a=byId(id); if(!a||a.kind) return;
+      if(fid==='phHome') S.pview='detail:'+id; else if(fid==='fitHome') S.dview='detail:'+id; else { S.dview='detail:'+id; $('#fitHome').scrollIntoView({block:'start'}); }
+      renderHome(); return; }
+    case 'home': if(fid==='phHome') S.pview='home'; else if(fid==='fitHome') S.dview='home'; else { $('#fitHome').scrollIntoView({block:'start'}); } renderHome(); return;
+    case 'fix': doFix(b.dataset.id,b); return;
+    case 'fixnas': doFix('fixnas',b); return;
+    case 'pick': S.pick=b.dataset.v; renderHome(); return;
+    case 'fold': S.fold=false; renderHome(); return;
+    case 'foldD': S.foldD=false; renderHome(); return;
+    case 'unfold': { const id=b.dataset.tag; if(byId(id)) S.pview='detail:'+id; renderHome(); return; }
+    case 'drawer': S.drawer[b.dataset.v]=!S.drawer[b.dataset.v]; rr(); return;
+    case 'plate': S.plate[b.dataset.v]=!S.plate[b.dataset.v]; rr(); return;
+    case 'ev': S.tapeSel=+b.dataset.i; S.tapeMsg=''; renderHome(); return;
+    case 'cluster': S.zoom='hour'; S.tapeSel=null; S.tapeMsg=b.getAttribute('aria-label').replace('. Show the last hour.','')+'. Showing the last hour.'; renderHome(); return;
+    case 'zoom': S.zoom=b.dataset.v; S.tapeMsg=''; S.tapeSel=null; renderHome(); return;
+    case 'go': { const g=b.dataset.go, root=frame||document;
+      if(g==='alert'){ ping('.mod.s-alert',root); ping('.tag.alert',root); }
+      else if(g==='warn'||g==='waiting'){ ping('.mod.s-warn',root); ping('.tag.warn',root); }
+      else if(g==='naspool'){ ping('[data-head="nas"]',root); ping('[data-tag="naspool"]',root); }
+      else if(g==='nasoff'){ ping('[data-head="nas"]',root); ping('[data-tag="nasoff"]',root); }
+      else if(g==='updates') $('#fitFlow').scrollIntoView({behavior:S.motion==='calm'?'auto':'smooth'});
+      return; }
+    case 'update': case 'updates': $('#fitFlow').scrollIntoView({behavior:S.motion==='calm'?'auto':'smooth'}); return;
+    case 'history': S.more='history'; renderMore(); $('#fitMore').scrollIntoView({behavior:S.motion==='calm'?'auto':'smooth'}); renderAll(); return;
+    case 'log': case 'setup': S.more=act; S.sheet=null; renderAll(); $('#fitMore').scrollIntoView({behavior:S.motion==='calm'?'auto':'smooth'}); return;
+    case 'flowgo': case 'flowstart': runFlow(); return;
+    case 'flowcancel': stopT(); S.flow.step=0; renderFlow(); return;
+    case 'flowdone': stopT(); S.flow={step:0,prog:0,sub:0,fail:S.flow.fail,result:S.flow.result}; renderFlow(); return;
+    case 'start': b.innerHTML='<i class="slot lit"></i>Starting…'; return;
+    /* cords */
+    case 'drawcord': S.sheet={kind:'cord',id:b.dataset.id,frame:fid,dir:'needs',q:'',pick:null}; S._sheetFocused=null; rr(); return;
+    case 'cdir': S.sheet.dir=b.dataset.v; S.sheet.pick=null; rr(); return;
+    case 'cpick': S.sheet.pick=b.dataset.v; rr(); return;
+    case 'cadd': { const X=S.sheet; const from=X.dir==='needs'?X.pick:X.id, to=X.dir==='needs'?X.id:X.pick; const key=from+'>'+to;
+      S.userCords.push({from,to,src:'yours',note:'drawn just now',key}); S.sheet=null; renderAll(); return; }
+    case 'sclose': S.sheet=null; rr(); return;
+    case 'rmcord': S.removed[b.dataset.key]=true; renderAll(); return;
+    case 'sug': { const k=b.dataset.k; S.answered[k]=b.dataset.v; if(b.dataset.v==='yes'){ const [from0,to0]=k.split('>'); S.userCords.push({from:to0,to:from0,src:'yours',note:'confirmed by you just now',key:to0+'>'+from0}); } renderAll(); return; }
+    /* store */
+    case 'ccat': S.ins.cat=b.dataset.v; rr(); return;
+    case 'csel': S.ins.sel=b.dataset.v; if(isPhone){ const c=CAT.find(x=>x.id===b.dataset.v); if(c&&!c.have&&!(c.id==='mealie'&&S.ins.done)){ S.ins.sel=c.id; S.ins.stage='bench'; S.ins.step=0; } } rr(); return;
+    case 'get': if(S.ins.done&&b.dataset.v==='mealie') return; S.ins.sel='mealie'; S.ins.stage='bench'; S.ins.step=0; rr(); return;
+    case 'inssrv': S.ins.srv=b.dataset.v; rr(); return;
+    case 'insgo': if(portCheck(S.ins.port).ok) runInstall(); return;
+    case 'insback': stopT(); S.ins.stage='list'; S.ins.step=0; rr(); return;
+    case 'inscancel': stopT(); S.ins.step=0; rr(); return;
+    case 'insdone': S.ins.stage='list'; S.ins.step=0; rr(); return;
+    case 'custom': return;
+    /* log */
+    case 'lfollow': S.log.follow=!S.log.follow; if(S.log.follow) S.log.newc=0; S.log.jump=null; rr(); return;
+    case 'lprob': S.log.prob=b.dataset.v?b.dataset.v==='prob':!S.log.prob; rr(); return;
+    case 'lrange': S.log.range=b.dataset.v; rr(); return;
+    case 'ljump': S.log.follow=false; S.log.jump=b.dataset.v; rr(); return;
+    case 'lnewest': S.log.newc=0; S.log.follow=true; S.log.jump=null; rr(); return;
+    /* setup */
+    case 'secedit': S.setup.secret='edit'; rr(); { const n=$(`#${fid} [data-in="secret"]`); if(n) n.focus(); } return;
+    case 'seckeep': { const n=$(`#${fid} [data-in="secret"]`); S.setup.secret=(n&&n.value)?'new':'set'; rr(); return; }
+    case 'seccancel': S.setup.secret='set'; rr(); return;
+    case 'spol': S.setup.policy=b.dataset.v; rr(); return;
+    case 'ro': S.setup.ro[b.dataset.v]=b.textContent==='Read only'; rr(); return;
+    case 'sundo': { const B=S.setup.base; Object.assign(S.setup,{name:B.name,port:B.port,policy:B.policy,mem:B.mem,secret:'set',ro:Object.assign({},B.ro),saved:''}); rr(); return; }
+    case 'save': S.setup.saving=true; rr(); setTimeout(()=>{ const U=S.setup; Object.assign(U,{saving:false,saved:'Saved at 01:53. Sonarr restarted and is running.',secretAt:U.secret==='new'?'Nov 5':U.secretAt,secret:'set'}); U.base={name:U.name,port:U.port,policy:U.policy,mem:U.mem,ro:Object.assign({},U.ro)}; renderMore(); },1500); return;
+    case 'rmapp': S.sheet={kind:'remove',frame:fid,data:false}; S._sheetFocused=null; rr(); return;
+    case 'rmgo': S.sheet=null; rr(); { const sb=$(`#${fid} [data-savebar] .note`); if(sb) sb.textContent='Mock: Sonarr would be removed here. Nothing changed.'; } return;
+    /* files */
+    case 'place': S.files.place=b.dataset.v; S.files.dir=''; S.files.sel=b.dataset.v==='media'?'Films':(MEDIA[2].n); if(S.sheet&&S.sheet.kind==='places') S.sheet=null; rr(); return;
+    case 'fsel': S.files.sel=b.dataset.v; if(isPhone&&b.dataset.v==='Films'&&!S.files.dir){ S.files.dir='Films'; S.files.sel='Dune Part Two (2024)'; } rr(); return;
+    case 'fopen': S.files.dir='Films'; S.files.sel='Dune Part Two (2024)'; rr(); return;
+    case 'fup': S.files.dir=''; S.files.sel='Films'; rr(); return;
+    case 'places': S.sheet={kind:'places',frame:fid}; S._sheetFocused=null; rr(); return;
+    case 'ptab': S.files.ptab=b.dataset.v; rr(); return;
+    case 'copy': b.textContent='Copied'; return;
+    /* first run */
+    case 'frnext': S.fr.step=Math.min(3,S.fr.step+1); S.anim=true; renderMore(); S.anim=false; return;
+    case 'frback': S.fr.step=Math.max(0,S.fr.step-1); rr(); return;
+    case 'frskip': S.fr.step=3; rr(); return;
+    case 'frconn': if(S.fr.tries===0){ S.fr.tries=1; rr(); return; }
+      S.fr.conn=1; S.fr.checks=0; rr(); [1,2,3].forEach(i=>setTimeout(()=>{ S.fr.checks=i; if(i===3){ S.fr.conn=2; S.anim=true; } renderMore(); S.anim=false; },i*550)); return;
+    case 'frdone': S.fr={step:0,tries:0,conn:0,checks:0,racked:false,pw:''}; renderMore(); $('#fitHome').scrollIntoView({behavior:S.motion==='calm'?'auto':'smooth'}); return;
+    /* history */
+    case 'hsel': S.hist.sel=b.dataset.v; rr(); { const it=$(`#${fid} [data-hid="${b.dataset.v.split(',')[0]}"]`); if(it) it.scrollIntoView({block:'nearest'}); } return;
+    case 'hfilt': S.hist.f=b.dataset.v; S.hist.sel=null; rr(); return;
+  }
+});
+document.addEventListener('input',e=>{
+  const n=e.target.closest('[data-in]'); if(!n) return; const k=n.dataset.in, v=n.value;
+  if(k==='cq'){ S.sheet.q=v; keepFocus(()=>{ renderHome(); renderDet(); renderMore(); }); }
+  else if(k==='insport'){ S.ins.port=v; keepFocus(renderMore); }
+  else if(k==='lq'){ S.log.q=v; keepFocus(renderMore); }
+  else if(k==='sname'){ S.setup.name=v; keepFocus(renderMore); }
+  else if(k==='sport'){ S.setup.port=v; keepFocus(renderMore); }
+  else if(k==='smem'){ S.setup.mem=v; keepFocus(renderMore); }
+  else if(k==='frpw'){ S.fr.pw=v; keepFocus(renderMore); }
+});
+document.addEventListener('change',e=>{ const n=e.target.closest('[data-in="rmdata"]'); if(n&&S.sheet){ S.sheet.data=n.checked; S._sheetFocused='x'; keepFocus(renderMore); } });
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ if(S.sheet){ const f=S.sheet.frame; S.sheet=null; renderAll(); return; } if(S.dview!=='home'||S.pview!=='home'){ S.dview='home'; S.pview='home'; renderHome(); } }
+  if(e.key==='Enter'&&e.target.closest&&e.target.closest('.sheet')&&e.target.tagName==='INPUT'&&S.sheet&&S.sheet.kind==='remove') e.preventDefault();
+});
+function hover(e,on){
+  const m=e.target.closest&&e.target.closest('#fitHome .mod[data-id]'); if(!m) return;
+  if(!on&&e.relatedTarget&&m.contains(e.relatedTarget)) return;
+  drawCords($('#fitHome'),on?m.dataset.id:null);
+}
+document.addEventListener('mouseover',e=>hover(e,true));
+document.addEventListener('mouseout',e=>hover(e,false));
+document.addEventListener('focusin',e=>hover(e,true));
+document.addEventListener('focusout',e=>hover(e,false));
+$('#restartFlow').addEventListener('click',()=>{ stopT(); S.flow={step:0,prog:0,sub:0,fail:S.flow.fail,result:null}; renderAll(); });
+let rz; addEventListener('resize',()=>{ clearTimeout(rz); rz=setTimeout(()=>{ ['fitHome','phHome','fitDet','phDet','fitFlow','phFlow','fitMore','phMore'].forEach(fit); if(S.dview==='home') drawCords($('#fitHome'),null); measureHome(); },120); });
+window.__S=S; window.__render=renderAll;
+renderAll();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ S.foldOn={}; renderAll(); });
+})();
+</script>
+</body>
+</html>
