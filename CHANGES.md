@@ -49,3 +49,13 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D2. Accent clear zones exclude navigation and chrome, not just titles and buttons.
 - D3. One focus grammar per device: tiles and list rows use the same window logic.
 - D4. The TV minimum (22 px at 1080p) applies to hints and sub-labels too; hints 24 px.
+
+### Pass 1 · Callsheet
+- D5. Calendar clashes and due items use amber + shape + word; category dots never use red.
+- D6. Bar-group (count) indicators need a maximum (~10) and an overflow form.
+- D7. "Moving primary": the one orange action moves to the next thing to do, with a defined order when two compete (e.g. an open security alert vs. replies).
+- D8. New read-only meter: the tuning scale (day timeline with a needle for now).
+- D9. Key hints printed on buttons as a shared desktop component.
+- D10. The Colour bars accent's lighter oranges conflict with "decorative oranges stay darker than control orange" — darken or drop those bars.
+- D11. A quieter form for an alert the user has already seen ("Seen 08:20").
+- D12. The base-window selector extends to phone tab bars.
