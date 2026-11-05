@@ -1,0 +1,1269 @@
+<title>JamFin Pass 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Pass 3 (settling). Layout: a 16:9 TV (1920x1080 design units, written in cqw) running a D-pad focus engine across Profiles,
+   Home, film / series / disc pages (with a filled lower view), Settings > Appearance, the Play title card and the player band with
+   its prompts; a Tour that steps through the key states; plus three phone frames (Home with the profile sheet, Show with a long
+   season, the landscape player). Simplified Braun Hi-Fi: flat, ribs only on fixed bands, base-window selector. */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--decel:cubic-bezier(.16,1,.3,1);--leave:cubic-bezier(.4,0,1,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,36px)/1.1 var(--f);margin:6px 0 8px}h2{font:600 20px var(--f);margin:0}
+p{margin:0;max-width:80ch}.muted{color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end}
+.ctl>div{display:grid;gap:6px;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line)}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 12px;border-radius:9px;cursor:pointer;min-height:36px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#1d1c1a}}
+.seg button:focus-visible,.kb:focus-visible,.jb:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kb,.jb{font:500 13px var(--mono);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer;min-height:34px}
+.jb{font-family:var(--f);font-size:14px}
+.status{font:500 13px var(--mono);color:var(--muted);display:flex;gap:6px 18px;flex-wrap:wrap}
+.status b{color:var(--fg);font-weight:500}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.flow span{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--chip)}
+.flow i{font-style:normal;color:var(--muted);font:500 12px var(--mono)}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}@media (max-width:900px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14px;align-content:start}
+.phones{display:grid;grid-template-columns:repeat(2,minmax(0,330px)) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:1100px){.phones{grid-template-columns:repeat(2,minmax(0,1fr))}.phones>figure:last-child{grid-column:1/-1}}
+@media (max-width:640px){.phones{grid-template-columns:1fr}}
+figure{margin:0;display:grid;gap:8px;min-width:0}
+figcaption{font-size:13px;color:var(--muted)}
+
+/* ================= TV frame ================= */
+.tvf{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;container-type:inline-size;box-shadow:0 0 0 10px #0d0d0c,0 20px 50px #0000004d;outline:none}
+.tvf:focus-visible{box-shadow:0 0 0 10px #0d0d0c,0 0 0 13px #f08a2c}
+/* TV: 1920x1080 design units written as cqw (1cqw = 19.2 design px) */
+.stage{position:absolute;inset:0;overflow:hidden;font-family:var(--f);
+  --ground:#1c1c1b;--card:#2a2a28;--card-f:#373734;--ink:#ece9e2;--lab:#cfcbc2;--dim:#a6a399;--band:#121211;--band-ink:#ece8df;--band-dim:#aba699;
+  --cream:#f3e6c8;--prog:#ada48f;--orange:#f08a2c;--deep:#a9530f;--win:#0b0b0a;--walnut:#6b4428;--ok:#7bd651;--warn:#f2c14e;--alert:#ff5a48;
+  --key:#242422;--key-f:#31312e;--spill:#f3e6c833;--dash:#5f5d57;--sel:#161615;
+  --ribs:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 0.1042cqw,transparent 0.1042cqw 0.4688cqw);
+  background:var(--ground);color:var(--ink)}
+.stage.day{--ground:#bab6ae;--card:#d4d0c8;--card-f:#ece8e0;--ink:#1d1c1a;--lab:#2b2926;--dim:#45423c;--orange:#ec7c22;--deep:#b55a12;--spill:#ffffff99;--dash:#7d7970;--sel:#a9a59d}
+.scr{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateY(0.9375cqw);transition:opacity 220ms var(--decel),transform 260ms var(--decel),visibility 0s 260ms}
+.scr.on{opacity:1;visibility:visible;transform:none;transition:opacity 220ms var(--decel),transform 260ms var(--decel),visibility 0s}
+.calm .scr,.calm .scr.on{transform:none;transition-duration:140ms}
+.trim{position:absolute;top:0;left:0;right:0;height:0.3125cqw;background:var(--walnut);z-index:2}
+.clock{font:500 1.3542cqw var(--f);font-variant-numeric:tabular-nums;color:var(--band-ink)}
+/* indicator windows: always a dark recess, lit = flat colour */
+.ind{position:relative;display:inline-block;flex:none;background:var(--win);box-shadow:inset 0 1px 0.1042cqw #000}
+.ind::after{content:"";position:absolute;inset:0.1563cqw;border-radius:inherit;background:var(--c,var(--cream));opacity:0}
+.ind.on::after{opacity:1}
+.ind.sq{width:1.0417cqw;height:1.0417cqw;border-radius:0.1563cqw}.ind.slot{width:2.0833cqw;height:0.7292cqw;border-radius:0.1563cqw}.ind.led{width:1.0417cqw;height:1.0417cqw;border-radius:50%}
+.ind.off-line{background:transparent;box-shadow:inset 0 0 0 0.1042cqw var(--dim)}
+.ind.off-line::before{content:"";position:absolute;left:50%;top:-0.1042cqw;bottom:-0.1042cqw;width:0.1042cqw;margin-left:-1px;background:var(--dim);transform:rotate(45deg)}
+/* the base window (selector) */
+.w{position:absolute;background:var(--win)}
+.w::after{content:"";position:absolute;inset:0.1563cqw 0.1563cqw 0;border-radius:inherit;background:var(--cream);opacity:0}
+.wb{left:28%;right:28%;bottom:0;height:0.625cqw;border-radius:0.3125cqw 0.3125cqw 0 0}
+.wl{left:0;top:0.7292cqw;bottom:0.7292cqw;width:0.625cqw;border-radius:0 0.3125cqw 0.3125cqw 0}
+.wl::after{inset:0.1563cqw 0.1563cqw 0.1563cqw 0}
+.f>.w::after,.f .face .w::after,.f>.in>.w::after,.f>.w::after{opacity:1}
+/* Day only: an unlit window on a light surface is a hairline groove, not a dark dash; it opens to the full dark-rimmed window when lit */
+.day.groove :is(.cd,.pt,.key:not(.pri),.li,.skey,.rk) .w{background:transparent;box-shadow:inset 0 -0.1042cqw 0 #0000004d}
+.day.groove :is(.key:not(.pri),.li) .wl{box-shadow:inset 0.1042cqw 0 0 #0000004d}
+.day.groove :is(.cd.f,.pt.f,.key.f:not(.pri),.li.f,.skey.f,.rk.f) .w{background:var(--win);box-shadow:none}
+/* row ends: a walnut end mark after the last card; an extra press nudges the focused card (not in Calm) */
+.emark{flex:none;align-self:flex-start;width:0.5208cqw;height:14.0625cqw;border-radius:0.2083cqw;background:var(--walnut);margin-left:0.2083cqw}
+.p-row .emark{height:19.6875cqw}
+.cd.nudge .face{animation:nudge 220ms var(--glide)}
+@keyframes nudge{50%{translate:0.7292cqw 0}}
+.calm .cd.nudge .face{animation:none}
+/* a baked spill: one pre-drawn patch per width, faded by opacity only */
+.spill{position:absolute;left:-6%;right:-6%;bottom:-1.5625cqw;height:2.2917cqw;background:radial-gradient(50% 60% at 50% 0,var(--spill),transparent 100%);opacity:0;pointer-events:none}
+.f>.spill{opacity:1}
+
+/* ---------- shared bands ---------- */
+.sband{position:absolute;left:0;right:0;top:0;height:5.625cqw;background:var(--band);background-image:var(--ribs);display:flex;justify-content:space-between;align-items:flex-end;padding:0 5cqw 0.9375cqw;z-index:3}
+.crumb{display:flex;gap:0.7292cqw;align-items:center;font:500 1.25cqw var(--f);color:var(--band-dim)}
+.crumb kbd{font:500 1.1458cqw var(--mono);color:var(--band-ink);background:#2a2a27;border-radius:0.3125cqw;padding:0.1042cqw 0.5208cqw}
+.eb{font:500 1.1458cqw var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.facts{display:flex;gap:1.4583cqw;font:400 1.3542cqw var(--f);color:var(--dim);white-space:nowrap}
+.facts b{font-weight:500;color:var(--ink)}
+
+/* ---------- Profiles ---------- */
+.prow{position:absolute;left:0;right:0;top:18.2292cqw;display:flex;justify-content:center;gap:2.7083cqw}
+.pq{position:absolute;left:0;right:0;top:10.7292cqw;text-align:center;font:600 2.9167cqw var(--f)}
+.pt{position:relative;width:12.5cqw}
+.pt .face{position:relative;border-radius:0.9375cqw;background:var(--card);transition:transform 150ms var(--glide)}
+.pt .av{height:12.5cqw;display:grid;place-items:center}
+.pt .av svg{width:7.8125cqw;height:7.8125cqw;display:block}
+.pt .nm{position:relative;height:4.1667cqw;display:grid;place-items:center;font:500 1.5625cqw var(--f);color:var(--lab)}
+.pt.f .face{transform:translateY(-0.7292cqw);background:var(--card-f)}
+.pt.f .nm{color:var(--cream)}.day .pt.f .nm{color:#000}
+.psign{position:absolute;left:0;right:0;top:38.5417cqw;display:grid;justify-items:center;gap:0.4167cqw;text-align:center}
+.psign .l1{font:500 1.5625cqw var(--f)}
+.psign .l2{font:400 1.3542cqw var(--f);color:var(--dim)}
+.add .av{color:var(--dim);font:300 6.25cqw var(--f)}
+
+/* ---------- Home: the sign lives in the menu band ---------- */
+.mband{position:absolute;left:0;right:0;top:0;height:13.0208cqw;background:var(--band);background-image:var(--ribs);z-index:3;color:var(--band-ink)}
+.mtop{position:absolute;left:5cqw;right:5cqw;top:2.7083cqw;height:3.0208cqw;display:flex;justify-content:space-between;align-items:stretch}
+.tabs{display:flex}
+.tab{position:relative;display:flex;align-items:center;padding:0 1.1458cqw 0.4167cqw;font:500 1.3542cqw var(--f);color:var(--band-dim)}
+.tab:first-child{padding-left:0}.tab:first-child .w{left:18%;right:38%}
+.tab.cur{color:var(--band-ink)}
+.tab .w{height:0.5208cqw}
+.tab.f{color:var(--cream)}
+.mright{display:flex;gap:1.7708cqw;align-items:center;padding-bottom:0.4167cqw}
+.chip{position:relative;display:flex;gap:0.625cqw;align-items:center;font:500 1.3542cqw var(--f);color:var(--band-ink);padding:0 0.2083cqw 0.4167cqw;height:100%}
+.chip svg{width:2.2917cqw;height:2.2917cqw;display:block;border-radius:50%}
+.chip .w{left:20%;right:20%;height:0.5208cqw}
+.chip.f{color:var(--cream)}
+.mrule{position:absolute;left:5cqw;right:5cqw;top:6.0417cqw;height:0.1042cqw;background:#ffffff14}
+.accent{position:absolute;left:75.3125cqw;top:6.1458cqw;width:24.6875cqw;height:6.875cqw;pointer-events:none;transition:opacity 300ms}
+.accent svg{width:100%;height:100%;display:block}
+.accent.away{opacity:0}
+.sign{position:absolute;left:5cqw;top:6.7708cqw;width:67.7083cqw;display:grid;gap:0.4167cqw;transition:opacity 100ms linear}
+.sign.swap{opacity:0;transition-duration:50ms}
+.sign .ht{font:600 2.8125cqw/1.1 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--band-ink)}
+.sign .facts{color:var(--band-dim)}.sign .facts b{color:var(--band-ink)}
+.rowsvp{position:absolute;left:0;right:0;top:13.75cqw;bottom:0;overflow:hidden}
+.rows{transition:transform 220ms var(--glide)}
+.row{padding-left:5cqw;padding-bottom:0.8333cqw}
+.rowh{display:flex;gap:0.9375cqw;align-items:flex-start;height:2.6042cqw;font:500 1.3542cqw/1.15 var(--f);color:var(--lab)}
+.rowh .n{font:500 1.1458cqw var(--mono);color:var(--dim)}
+.row.cur .rowh{color:var(--ink)}
+.strip{display:flex;gap:1.4583cqw;transition:transform 200ms var(--glide)}
+/* card: the focus target never moves; the face lifts inside it */
+.cd{position:relative;flex:none;width:18.3333cqw}
+.cd.p{width:10.4167cqw}
+.face{position:relative;border-radius:0.7292cqw;background:var(--card);overflow:hidden;transition:transform 150ms var(--glide)}
+.cd.f .face{transform:translateY(-0.7292cqw);background:var(--card-f)}
+.art{position:relative;height:10.3125cqw;overflow:hidden}
+.cd.p .art{height:15.625cqw}
+.art svg{display:block;width:100%;height:100%}
+.toned .art svg,.toned .bd svg,.toned .chp svg,.toned .ept svg{filter:saturate(.38) brightness(.8)}
+.pg{position:absolute;left:0;right:0;bottom:0;height:0.4688cqw;background:var(--win)}
+.pg i{display:block;height:100%;background:var(--prog)}
+.pl{position:relative;padding:0.625cqw 0.9375cqw 1.25cqw;display:grid;gap:0.1042cqw;min-width:0}
+.pl .t{font:500 1.3542cqw/1.15 var(--f);color:var(--lab);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl .s{font:400 1.1458cqw/1.25 var(--f);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd.f .pl .t{color:var(--cream)}
+.day .cd.f .pl .t{color:#000}
+.cd.end .art{display:grid;align-content:end;gap:0.3125cqw;padding:1.1458cqw;background:var(--ground);box-shadow:inset 0.3125cqw 0 0 var(--walnut)}
+.cd.end .art .big{font:600 1.7708cqw/1.1 var(--f);color:var(--ink)}
+.cd.end .art .n{font:500 1.1458cqw var(--mono);color:var(--dim)}
+/* offline: the whole group goes dashed together (D27) */
+.offp{position:absolute;left:5cqw;top:15.625cqw;right:5cqw;display:none;gap:1.7708cqw}
+.offline .offp{display:grid}.offline .rowsvp{display:none}
+.trouble{display:flex;align-items:center;gap:1.3542cqw;font:500 1.4583cqw var(--f)}
+.trouble .st{display:flex;gap:0.625cqw;align-items:center;color:var(--ink)}
+.offkeys{display:flex;gap:0.9375cqw}
+.offkeys .key{width:21.875cqw}
+/* the last-synced rows stay visible, dimmed by a colour filter, inside one dashed outline; they are not focus targets */
+.cache{position:relative;border:0.1042cqw dashed var(--dash);border-radius:1.0417cqw;padding:1.0417cqw 0 1.25cqw 1.25cqw;overflow:hidden}
+.cache .strip{gap:1.4583cqw}
+.cache .art svg{filter:saturate(.15) brightness(.5)}
+.cache .face{background:transparent;box-shadow:inset 0 0 0 0.1042cqw var(--dash)}
+.cache .pl .t,.cache .pl .s{color:var(--dim)}
+.cache .w{display:none}
+.gh{font:500 1.3542cqw var(--f);color:var(--lab);height:2.6042cqw;display:flex;align-items:center;gap:0.9375cqw}
+.gh .n{font:500 1.1458cqw var(--mono);color:var(--dim)}
+
+/* ---------- keys (vertical action lists) ---------- */
+.key{position:relative;height:3.3333cqw;border-radius:0.7292cqw;background:var(--card);color:var(--lab);font:500 1.3542cqw var(--f)}
+.key>.in{position:absolute;inset:0;display:flex;align-items:center;gap:0.8333cqw;padding:0 1.25cqw 0 1.875cqw;transition:transform 150ms var(--glide);white-space:nowrap}
+.key.f{background:var(--card-f);color:var(--cream)}
+.day .key.f{color:#000}
+.key.f>.in{transform:translateX(0.4167cqw)}
+.key .v{color:var(--dim)}
+.key.f .v{color:inherit}
+.key .sp{flex:1}
+/* the one orange key: its own focus cue (D18) — lift + deeper under-edge + black label + lit window on a brown recess */
+.key.pri{background:transparent}
+.key.pri>.in{background:var(--orange);color:#1d1c1a;border-radius:0.7292cqw;box-shadow:0 0.1563cqw 0 var(--deep)}
+.key.pri .w{background:#3b1d06}
+.key.pri.f>.in{transform:translateY(-0.3125cqw);box-shadow:0 0.4688cqw 0 var(--deep);color:#000}
+.key.pri .v{color:#3b1d06}
+.key .cf{position:absolute;right:1.0417cqw;top:1.3021cqw;width:5cqw;height:0.7292cqw;border-radius:0.1563cqw;background:var(--win);overflow:hidden}
+.key .cf::after{content:"";position:absolute;inset:0.1563cqw;border-radius:0.1042cqw;background:var(--cream);transform-origin:left;animation:drain 3s linear forwards}
+@keyframes drain{to{transform:scaleX(0)}}
+/* chooser that drops BELOW its key and covers the keys under it, never the title or the key itself */
+.drop{position:absolute;width:33.3333cqw;background:var(--card);border-radius:0.8333cqw;padding:0.7292cqw 0 0.5208cqw;box-shadow:0 0.5208cqw 0 #00000055;z-index:4;opacity:0;transform:translateY(-0.625cqw);pointer-events:none;transition:opacity 150ms var(--leave),transform 150ms var(--leave)}
+.day .drop{box-shadow:0 0.5208cqw 0 #00000026}
+.drop.on{opacity:1;transform:none;transition:opacity 200ms var(--glide),transform 200ms var(--glide)}
+.drop .eb{padding:0 1.3542cqw 0.3125cqw;display:block}
+.li{position:relative;height:3.125cqw;display:flex;align-items:center;gap:0.8333cqw;padding:0 1.3542cqw 0 1.875cqw;font:500 1.3542cqw var(--f);color:var(--lab);white-space:nowrap}
+.li .sp{flex:1}
+.li.f{background:var(--card-f);color:var(--cream)}
+.day .li.f{color:#000}
+
+/* ---------- film / series / disc page ---------- */
+.dpage{position:absolute;inset:0}
+.dtop{position:absolute;inset:0;transition:opacity 200ms var(--glide),transform 240ms var(--glide)}
+.low .dtop{opacity:0;transform:translateY(-2.0833cqw)}
+.dleft{position:absolute;left:5cqw;top:6.6667cqw;width:42.7083cqw;display:grid;gap:0.625cqw;align-content:start}
+.dtitle{font:600 3.3333cqw/1.06 var(--f);letter-spacing:-.005em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tech{display:flex;gap:0.5208cqw;flex-wrap:wrap}
+.tech span{font:500 1.1458cqw var(--mono);color:var(--dim);border:0.1042cqw solid #ffffff24;border-radius:0.4167cqw;padding:1px 0.5208cqw}
+.day .tech span{border-color:#0000002e}
+.acts{display:grid;gap:0.5208cqw;margin-top:0.7292cqw;width:33.3333cqw}
+.dright{position:absolute;left:51.0417cqw;top:6.6667cqw;width:43.9583cqw;display:grid;gap:1.0417cqw}
+.bd{height:24.7396cqw;border-radius:0.8333cqw;overflow:hidden}
+.bd svg{width:100%;height:100%;display:block}
+.ov{font:400 1.3542cqw/1.45 var(--f);color:var(--lab);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0}
+.cr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0.2083cqw 1.25cqw;font:400 1.25cqw/1.35 var(--f);margin:0}
+.cr dt{color:var(--dim)}.cr dd{margin:0;color:var(--lab);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.why{font:400 1.25cqw/1.4 var(--f);color:var(--lab);display:flex;gap:0.7292cqw;align-items:flex-start}
+.dlow{position:absolute;left:0;right:0;top:45.5208cqw;transition:transform 240ms var(--glide)}
+.seasons{display:flex;gap:0.7292cqw;padding-left:5cqw;margin-bottom:0.8333cqw;align-items:center}
+.rdiv{font:500 1.1458cqw var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0.3125cqw 0 1.0417cqw;padding-left:1.3542cqw;border-left:0.1042cqw solid var(--dash);height:2.0833cqw;display:flex;align-items:center}
+.rk{position:relative;height:3.3333cqw;padding:0 1.25cqw;border-radius:0.7292cqw;background:var(--card);color:var(--lab);font:500 1.3542cqw var(--mono);display:flex;align-items:center}
+.rk .in{transition:transform 150ms var(--glide)}
+.rk.sel{background:var(--sel);box-shadow:inset 0 0.1563cqw 0.3125cqw #000a}
+.rk.f{color:var(--cream)}.day .rk.f{color:#000}.rk.f .in{transform:translateY(-0.1563cqw)}
+.lr.stale .strip{opacity:.4;transition:opacity 120ms}
+.lr .rowh .hint{font:400 1.25cqw var(--f);color:var(--dim)}
+/* the lower view's sign: like Home, a title + facts + two lines above the focused row */
+.lsign{position:absolute;left:5cqw;top:6.6667cqw;width:72.9167cqw;display:grid;gap:0.4167cqw;opacity:0;transition:opacity 150ms;pointer-events:none}
+.low .lsign{opacity:1}
+.lsign .et{font:600 2.0833cqw/1.15 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lsign .ov{-webkit-line-clamp:2}
+/* people: a neutral figure in a dark frame (no faces), name + role on the plinth */
+.sm .cd{width:13.5417cqw}
+.sm .art{height:7.6042cqw}
+.sm .emark{height:12.5cqw}
+.cast .art{background:var(--win);display:grid;place-items:center}
+.cast .art svg{width:4.1667cqw;height:4.1667cqw}
+.skey{position:relative;height:3.3333cqw;padding:0 1.5625cqw;border-radius:0.7292cqw;background:var(--card);color:var(--lab);font:500 1.3542cqw var(--f);display:flex;align-items:center}
+.skey .in{transition:transform 150ms var(--glide)}
+.skey.sel{background:var(--sel);box-shadow:inset 0 0.1563cqw 0.3125cqw #000a}
+.day .skey.sel{box-shadow:inset 0 0.1563cqw 0.3125cqw #0006}
+.skey.f{color:var(--cream)}.day .skey.f{color:#000}
+.skey.f .in{transform:translateY(-0.1563cqw)}
+.toast{position:absolute;left:5cqw;top:6.25cqw;background:#2a2a28;color:#ece9e2;border-radius:0.625cqw;padding:0.7292cqw 1.1458cqw;font:500 1.3542cqw var(--f);display:flex;gap:0.7292cqw;align-items:center;opacity:0;transition:opacity 150ms;z-index:8;box-shadow:0 0.3125cqw 0 #00000055}
+.toast.on{opacity:1}
+#s-pl .toast{top:2.8125cqw}
+
+/* ---------- Settings > Appearance ---------- */
+.cats{position:absolute;left:5cqw;top:7.2917cqw;width:19.7917cqw;display:grid;gap:0.2083cqw}
+.cat{height:3.0208cqw;display:flex;align-items:center;padding:0 1.1458cqw;border-radius:0.625cqw;font:500 1.3542cqw var(--f);color:var(--dim)}
+.cat.sel{background:var(--sel);color:var(--ink);box-shadow:inset 0 0.1563cqw 0.3125cqw #0008}
+.srows{position:absolute;left:29.1667cqw;top:7.2917cqw;width:65.8333cqw;display:grid;gap:0.5208cqw}
+.srows .key{width:100%}
+.shead{font:600 2.0833cqw var(--f);margin-bottom:0.3125cqw;display:flex;gap:0.9375cqw;align-items:baseline}
+.shead span{font:400 1.3542cqw var(--f);color:var(--dim)}
+.snote{font:400 1.3542cqw/1.4 var(--f);color:var(--dim);margin-top:0.7292cqw}
+
+/* ---------- Player ---------- */
+.video{position:absolute;inset:0;background:#000}
+.video svg{width:100%;height:100%;display:block;transition:filter 200ms}
+.video.dim svg{filter:brightness(.35) saturate(.6)}
+.vlabel{position:absolute;right:5cqw;top:2.8125cqw;font:500 1.1458cqw var(--mono);letter-spacing:.12em;color:#ffffff99;text-transform:uppercase}
+.pband{position:absolute;left:0;right:0;bottom:-3.8542cqw;height:14.0625cqw;transition:transform 200ms var(--glide);z-index:3;color:var(--band-ink)}
+.pband.lift{transform:translateY(-3.8542cqw)}
+.pband.hide{transform:translateY(100%);transition:transform 200ms var(--leave)}
+.bar{position:absolute;inset:0;background:var(--band);background-image:var(--ribs);padding:1.0417cqw 5cqw 0;z-index:2}
+.bar::before{content:"";position:absolute;left:0;right:0;top:0;height:0.2083cqw;background:var(--walnut)}
+.ra{display:flex;align-items:center;gap:1.1458cqw;height:2.0833cqw;white-space:nowrap}
+.ra .tt{font:500 1.4583cqw var(--f)}
+.ra .ch{font:400 1.3542cqw var(--f);color:var(--band-dim);overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;transition:opacity 120ms}
+.ra .ch.away{opacity:0}
+.ra .st{display:flex;gap:0.625cqw;align-items:center;font:500 1.3542cqw var(--f)}
+.minislat{position:relative;width:7.2917cqw;height:0.7292cqw;border-radius:0.1563cqw;overflow:hidden;background:var(--cream);display:none}
+.minislat::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 0.4167cqw,#121211 0.4167cqw 0.625cqw)}
+.minislat i{position:absolute;inset:0;background:#34312c;transform:translateX(calc(var(--p,0)*100%))}
+.buffer .minislat{display:block}
+.hints{display:flex;gap:1.1458cqw;font:500 1.25cqw var(--f);color:var(--band-dim)}
+.hints kbd{font:500 1.1458cqw var(--mono);color:var(--band-ink);background:#2a2a27;border-radius:0.3125cqw;padding:1px 0.4688cqw;margin-right:0.4167cqw}
+.ends{font:500 1.3542cqw var(--f)}
+.ends span{color:var(--band-dim);font-weight:400}
+.trk{position:relative;height:0.8333cqw;margin-top:0.9375cqw;border-radius:0.4167cqw;background:var(--win);box-shadow:inset 0 0 0 1px #ffffff17}
+.trk .lit{position:absolute;left:0;top:0;bottom:0;border-radius:0.4167cqw 0 0 0.4167cqw;background:var(--cream)}
+.trk .nt{position:absolute;top:0;bottom:0;width:0.2083cqw;margin-left:-0.1042cqw;background:var(--band);z-index:1}
+.trk .seg{position:absolute;top:-0.4167cqw;height:0.3125cqw;border-radius:0.1563cqw;background:#ffffff40}
+.cap{position:absolute;z-index:2;top:50%;width:1.0417cqw;height:2.1875cqw;margin:-1.0938cqw 0 0 -0.5208cqw;border-radius:0.3125cqw;background:#d8d4cd;box-shadow:0 0.1563cqw 0 #000}
+.rc{position:relative;height:1.5625cqw;margin-top:0.4167cqw}
+.rc .ptm{position:absolute;top:0;font:500 1.25cqw/1.5625cqw var(--mono);transform:translateX(-50%);white-space:nowrap}
+.rc .tot{position:absolute;right:0;top:0;font:500 1.25cqw/1.5625cqw var(--mono);color:var(--band-dim)}
+/* chapters pop above */
+.chap{position:absolute;left:0;right:0;bottom:100%;height:18.3333cqw;background:var(--band);padding:1.25cqw 0 0 5cqw;overflow:hidden;z-index:1;opacity:0;transform:translateY(2.0833cqw);pointer-events:none;transition:opacity 150ms var(--leave),transform 150ms var(--leave)}
+.chap.on{opacity:1;transform:none;transition:opacity 200ms var(--glide),transform 200ms var(--glide)}
+.chap .eb{color:var(--band-dim);margin-bottom:0.625cqw;display:block}
+.chap .cd{width:15.625cqw}
+.chap .art{height:8.8021cqw}
+.chap .face{background:#232321}
+.chap .cd.f .face{background:#2e2e2b}
+.chap .pl .t{color:#cfcbc2}.chap .pl .s{color:#aba699}
+.chap .cd.f .pl .t{color:var(--cream)}
+.chap .num{position:absolute;left:0.625cqw;top:0.625cqw;font:500 1.1458cqw var(--mono);background:#121211;color:#ece8df;border-radius:0.3125cqw;padding:0 0.4688cqw}
+.chap .spill{--spill:#f3e6c833}
+/* settings strip: part of the band, shown when the band lifts */
+.pstrip{position:absolute;left:5cqw;right:5cqw;top:7.2917cqw;height:3.3333cqw;display:flex;gap:0.7292cqw;z-index:2;opacity:0;transition:opacity 120ms}
+.lift .pstrip{opacity:1}
+.skk{position:relative;height:3.3333cqw;padding:0 1.25cqw;border-radius:0.625cqw;background:var(--key);display:flex;align-items:center;font:500 1.3542cqw var(--f);color:#cfcbc2;white-space:nowrap}
+.skk .v{color:#ece8df;margin-left:0.625cqw}
+.skk>.in{display:flex;align-items:center;transition:transform 150ms var(--glide)}
+.skk.f{background:var(--key-f);color:var(--cream)}
+.skk.f .v{color:var(--cream)}
+.skk.f>.in{transform:translateY(-0.1563cqw)}
+.skk .w{height:0.5208cqw}
+.plist{position:absolute;bottom:calc(100% + 0.7292cqw);width:22.9167cqw;background:#232321;border-radius:0.8333cqw;padding:0.7292cqw 0 0.5208cqw;z-index:4;color:#ece8df;opacity:0;transform:translateY(0.8333cqw);pointer-events:none;transition:opacity 150ms var(--leave),transform 150ms var(--leave)}
+.plist.on{opacity:1;transform:none;transition:opacity 200ms var(--glide),transform 200ms var(--glide)}
+.plist .eb{color:#aba699;padding:0 1.3542cqw 0.3125cqw;display:block}
+.plist .li{color:#cfcbc2}.plist .li.f{background:#2e2e2b;color:var(--cream)}
+/* prompts above the band, bottom right: the one orange in the player */
+.prompt{position:absolute;right:5cqw;bottom:11.4583cqw;z-index:5;opacity:0;transform:translateY(0.625cqw);pointer-events:none;transition:opacity 150ms var(--leave),transform 150ms var(--leave)}
+.prompt.on{opacity:1;transform:none;transition:opacity 200ms var(--glide),transform 200ms var(--glide)}
+.bandhidden .prompt{bottom:2.8125cqw}
+.lifted .prompt{bottom:15.3125cqw}
+.chapopen .prompt{opacity:0}
+.pkey{position:relative;height:3.75cqw;display:flex;align-items:center;gap:0.8333cqw;padding:0 1.5625cqw 0 2.0833cqw;border-radius:0.7292cqw;background:var(--orange);color:#1d1c1a;font:500 1.4583cqw var(--f);box-shadow:0 0.1563cqw 0 var(--deep);transition:transform 150ms var(--glide),box-shadow 150ms var(--glide)}
+.pkey .w{background:#3b1d06}.pkey .w::after{opacity:0}
+/* focused prompt = the shared orange-key focus cue (D108): rises, deeper under-edge, black label, lit window */
+.prompt.f .pkey{transform:translateY(-0.3125cqw);box-shadow:0 0.4688cqw 0 var(--deep);color:#000}
+.prompt.f .pkey .w::after{opacity:1}
+/* while a prompt holds focus it shows how long: a slot drains at the trailing end (opposite the focus window) */
+.pkey .hold{display:none;width:3.125cqw;height:0.7292cqw;border-radius:0.1563cqw;background:#3b1d06;overflow:hidden;position:relative;margin-left:0.4167cqw}
+.pkey .hold::after{content:"";position:absolute;inset:0.1563cqw;border-radius:0.1042cqw;background:var(--cream);transform-origin:left}
+.prompt.taken .pkey .hold{display:block}
+.prompt.taken .pkey .hold::after{animation:drain var(--hold,8s) linear forwards}
+.pnote{font:500 1.25cqw var(--f);color:#ece8df;background:#121211e6;border-radius:0.5208cqw;padding:0.3125cqw 0.7292cqw;margin-bottom:0.7292cqw;justify-self:end}
+.pnote kbd{font:500 1.1458cqw var(--mono);background:#2a2a27;border-radius:0.3125cqw;padding:1px 0.4688cqw;margin-right:0.3125cqw}
+.pw{display:grid;justify-items:end}
+.pkey kbd{font:500 1.1458cqw var(--mono);background:#3b1d06;color:#f3e6c8;border-radius:0.3125cqw;padding:1px 0.4688cqw}
+.nextc{width:32.2917cqw;background:#232321;border-radius:0.8333cqw;overflow:hidden;color:#ece8df;display:grid;grid-template-columns:12.5cqw minmax(0,1fr)}
+.nextc .na{height:7.0313cqw}.nextc .na svg{width:100%;height:100%;display:block}
+.nextc .nt2{padding:0.8333cqw 1.1458cqw;display:grid;gap:0.1042cqw;align-content:center;min-width:0}
+.nextc .nt2 .t{font:500 1.3542cqw var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nextc .nt2 .s{font:400 1.25cqw var(--f);color:#aba699}
+.nextc .eb{color:#aba699}
+.nextw{display:grid;gap:1.1458cqw;justify-items:end}
+.panel{position:absolute;left:50%;top:50%;width:46.875cqw;margin-left:-23.4375cqw;transform:translateY(-55%);background:#232321;color:#ece8df;border-radius:1.0417cqw;padding:2.0833cqw 2.2917cqw 1.875cqw;z-index:6;display:none;gap:0.7292cqw}
+.panel.on{display:grid}
+.panel .pt2{font:600 2.2917cqw/1.15 var(--f)}
+.panel .ps{font:400 1.3542cqw/1.4 var(--f);color:#aba699;margin-bottom:0.625cqw}
+.panel .key{background:#2c2c2a;color:#cfcbc2}.panel .key.f{background:#383835;color:var(--cream)}
+.panel .key.pri.f{color:#000}
+
+/* ---------- Title card (shutter + slatted bar, flat) ---------- */
+.tcard{position:absolute;inset:0;z-index:20;visibility:hidden;pointer-events:none}
+.tcard.show{visibility:visible}
+.half{position:absolute;left:0;right:0;height:50.5%;background:#151514;background-image:var(--ribs);overflow:hidden;transition:transform var(--tin,460ms) var(--decel)}
+.half svg{position:absolute;left:0;width:100%;height:200%}
+.half.a{top:0;transform:translateX(-101%);box-shadow:inset 0 -0.1042cqw 0 #ffffff14}
+.half.b{bottom:0;transform:translateX(101%);box-shadow:inset 0 0.1042cqw 0 #ffffff1f}
+.half.b svg{top:-99%}
+.tcard.in .half{transform:none}
+.tcard.out .half{transition:transform var(--tout,300ms) var(--leave)}
+.tcard.out .half.a{transform:translateX(101%)}.tcard.out .half.b{transform:translateX(-101%)}
+.calm .half{transform:none!important;opacity:0;transition:opacity 140ms linear!important}
+.calm .tcard.in .half{opacity:1}.calm .tcard.out .half{opacity:0}
+.tmid{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1.3542cqw;opacity:0;transition:opacity 160ms}
+.tcard.in .tmid{opacity:1;transition-delay:var(--tdel,180ms)}.tcard.out .tmid{opacity:0;transition-delay:0ms;transition-duration:100ms}
+.calm .tcard.in .tmid{transition-delay:0ms}
+/* Day profiles: the card takes the page's lightness, so page -> card is not a big luminance change; only card -> picture is */
+.day.lighttc .half{background:#c3bfb7;background-image:none}
+.day.lighttc .half.a{box-shadow:inset 0 -0.1042cqw 0 #0000001f}.day.lighttc .half.b{box-shadow:inset 0 0.1042cqw 0 #ffffff59}
+.day.lighttc .ttl{color:#1d1c1a}
+.day.lighttc .tmid .eb,.day.lighttc .tsub,.day.lighttc .tback{color:#45423c}
+.day.lighttc .slat{box-shadow:0 0 0 0.1563cqw #151514}
+.tmid .eb{color:#aba699;letter-spacing:.3em}
+.ttl{font:600 4.7917cqw/1 var(--f);letter-spacing:.06em;text-transform:uppercase;color:#ece8df;max-width:64.5833cqw;text-align:center}
+.slat{position:relative;width:29.1667cqw;height:1.0417cqw;border-radius:0.1563cqw;overflow:hidden;background:var(--cream)}
+.slat::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 0.5208cqw,#151514 0.5208cqw 0.7813cqw)}
+.slat .run{position:absolute;inset:0;background:#34312c;transform:translateX(calc(var(--p,0)*100%));transition:transform 120ms linear}
+.tsub{font:500 1.1458cqw var(--mono);color:#aba699;letter-spacing:.12em;text-transform:uppercase;min-height:1.5625cqw;text-align:center}
+.tback{font:500 1.25cqw var(--f);color:#aba699;opacity:0;transition:opacity 150ms}
+.tback.on{opacity:1}
+.tback kbd{font:500 1.1458cqw var(--mono);background:#2a2a27;color:#ece8df;border-radius:0.3125cqw;padding:1px 0.4688cqw;margin-right:0.4167cqw}
+/* end TV */
+
+/* ================= Phones (authored in px, scaled to fit) ================= */
+.phf{position:relative;width:100%;max-width:330px;margin:0 auto;border-radius:44px;background:#0d0d0c;padding:11px;box-shadow:0 20px 50px #0000004d}
+.phf.land{max-width:760px;border-radius:36px;padding:10px}
+.phs{position:relative;aspect-ratio:390/844;border-radius:34px;overflow:hidden}
+.land .phs{aspect-ratio:844/390;border-radius:28px}
+.ph{position:absolute;top:0;left:0;width:390px;height:844px;transform-origin:0 0;font-family:var(--f);overflow:hidden;
+  --bg:#1c1c1b;--card:#2a2a28;--key:#353533;--ink:#ece9e2;--dim:#a6a399;--win:#0b0b0a;--cream:#f3e6c8;--prog:#ada48f;--orange:#f08a2c;--deep:#a9530f;--rule:#3a3a37;--sel:#161615;
+  background:var(--bg);color:var(--ink)}
+.ph.lp{width:844px;height:390px}
+.ph.day{--bg:#e3e1dc;--card:#f1efeb;--key:#e6e3de;--ink:#1d1c1a;--dim:#5a5751;--orange:#ec7c22;--deep:#b55a12;--rule:#d4d1ca;--sel:#cfccc5}
+.ph .w{position:absolute;background:var(--win)}
+.ph .w::after{content:"";position:absolute;inset:0 2px 2px;border-radius:inherit;background:var(--cream);opacity:0}
+.ph .ind{width:16px;height:16px;border-radius:3px;position:relative;display:inline-block;background:var(--win);flex:none}
+.ph .ind::after{content:"";position:absolute;inset:3px;border-radius:2px;background:var(--cream);opacity:0}.ph .ind.on::after{opacity:1}
+.pv{position:absolute;inset:0;display:grid;grid-template-rows:44px minmax(0,1fr) 78px}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:6px 28px 0;font:500 15px var(--f)}
+.sbar span:last-child{font:500 12px var(--mono);color:var(--dim)}
+.phb{overflow-y:auto;scrollbar-width:none;padding:0 0 20px;display:grid;gap:22px;align-content:start}
+.phb::-webkit-scrollbar,.hsc::-webkit-scrollbar{display:none}
+.phh{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0;height:60px}
+.phh .ttl2{font:600 26px var(--f)}
+.icb{width:44px;height:44px;border-radius:12px;border:0;background:var(--key);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
+.icb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pchip{display:flex;gap:8px;align-items:center;height:44px;padding:0 14px 0 6px;border-radius:999px;background:var(--key);font:500 15px var(--f);border:0;color:var(--ink);cursor:pointer}
+.pchip svg{width:32px;height:32px;border-radius:50%;display:block}
+.sech{display:flex;justify-content:space-between;align-items:baseline;padding:0 16px 8px}
+.lab{font:500 13px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.pos{font:500 13px var(--mono);color:var(--dim)}
+.hsc{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 16px;scroll-padding:0 16px;scrollbar-width:none}
+.pc{flex:none;scroll-snap-align:start;background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px #0000001a,0 4px 12px #0000000f}
+.ph:not(.day) .pc{box-shadow:0 1px 2px #00000059}
+.pc.big{width:322px}.pc.big .pa{height:181px}
+.pc.wd{width:200px}.pc.wd .pa{height:112px}
+.pc.po{width:120px}.pc.po .pa{height:180px}
+.pa{position:relative;overflow:hidden}.pa svg{display:block;width:100%;height:100%}
+.ph .pg{position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--win)}.ph .pg i{display:block;height:100%;background:var(--prog)}
+.ph.toned .pa svg,.ph.toned .hero svg,.ph.toned .ept svg{filter:saturate(.38) brightness(.85)}
+.pcl{padding:10px 12px 12px;display:grid;gap:2px;min-width:0}
+.pcl .t{font:500 16px/1.25 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcl .s{font:400 13px/1.35 var(--f);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc.big .pcl{padding:12px 14px 14px;gap:4px}.pc.big .pcl .t{font-size:19px}
+.pbtns{display:flex;gap:8px;margin-top:8px}
+.pbtn{appearance:none;border:0;cursor:pointer;font:500 15px var(--f);border-radius:12px;min-height:44px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--key);color:var(--ink);box-shadow:0 2px 0 #0000001f;transition:background-color 150ms,color 150ms}
+.pbtn.pri{background:var(--orange);color:#1d1c1a;box-shadow:0 2px 0 var(--deep)}
+.pbtns .pbtn:first-child{flex:1}
+/* one orange per frame: the page behind an open sheet gives up its orange (D97) */
+.ph.sheet-open .phb .pbtn.pri{background:var(--key);color:var(--ink);box-shadow:0 2px 0 #0000001f}
+.pbtn svg{width:16px;height:16px;fill:currentColor}
+.ptabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border-top:1px solid var(--rule);padding:0 6px 14px}
+.ptab{appearance:none;border:0;background:none;cursor:pointer;position:relative;display:grid;justify-items:center;align-content:start;gap:5px;padding-top:16px;font:500 12px var(--f);color:var(--dim);min-height:64px}
+.ptab .w{top:0;left:30%;right:30%;height:6px;border-radius:0 0 4px 4px}
+.ptab[aria-selected="true"]{color:var(--ink)}
+.ptab[aria-selected="true"] .w::after{opacity:1}
+.ptab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.offb{margin:0 16px;padding:12px 14px;border-radius:14px;border:1.5px dashed var(--dim);display:flex;gap:12px;align-items:center;font:500 15px var(--f)}
+.offb .sp{flex:1}.offb small{display:block;font:400 13px var(--f);color:var(--dim)}
+/* phone show page */
+.hero{position:relative;height:220px}.hero svg{width:100%;height:100%;display:block}
+.hero .icb{position:absolute;left:12px;top:10px;background:#1d1c1acc;color:#ece9e2}
+.shd{padding:14px 16px 0;display:grid;gap:6px}
+.shd h3{margin:0;font:600 28px/1.1 var(--f)}
+.shd .fx{font:400 14px var(--f);color:var(--dim)}
+.shd .ovp{font:400 15px/1.45 var(--f);margin:4px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.prow2{display:flex;gap:8px;padding:0 16px}
+.prow2 .pbtn{flex:1;padding:0 8px;font-size:14px}
+.pbtn.wide{width:calc(100% - 32px);margin:0 16px}
+.seasonbar{display:flex;justify-content:space-between;align-items:center;padding:0 16px}
+.eps{display:grid;gap:4px;padding:0 8px}
+.ep{display:grid;grid-template-columns:128px minmax(0,1fr) 44px;gap:12px;align-items:center;padding:8px;border-radius:14px}
+.ep.cur{background:var(--card)}
+.ept{position:relative;height:72px;border-radius:10px;overflow:hidden}.ept svg{width:100%;height:100%;display:block}
+.ep .t{font:500 15px/1.3 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep .s{font:400 13px/1.35 var(--f);color:var(--dim)}
+.veil{position:absolute;inset:0;background:#0000008c;opacity:0;pointer-events:none;transition:opacity 200ms;z-index:5}
+.veil.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:22px 22px 0 0;padding:12px 16px 26px;z-index:6;transform:translateY(105%);transition:transform 240ms var(--decel)}
+.sheet.on{transform:none}
+.shh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.shh b{font:600 19px var(--f)}
+.sopt{appearance:none;border:0;width:100%;display:flex;align-items:center;gap:12px;min-height:52px;padding:0 14px;border-radius:12px;background:transparent;color:var(--ink);font:500 16px var(--f);cursor:pointer;text-align:left}
+.sopt .sp{flex:1}
+.sopt[aria-pressed="true"]{background:var(--sel)}
+/* phone player (landscape) */
+.lp .video svg{width:100%;height:100%;display:block}
+.lp .ptop{position:absolute;left:0;right:0;top:0;display:flex;gap:12px;align-items:center;padding:14px 24px;color:#ece9e2;z-index:2;transition:opacity 150ms}
+.lp .ptop.away{opacity:0;pointer-events:none}
+.lp .ptop .t{font:500 17px var(--f)}.lp .ptop .s{font:400 13px var(--f);color:#c9c5bc}
+.lp .ptop .icb{background:#1d1c1acc;color:#ece9e2}
+.lp .mid{position:absolute;left:0;right:0;top:126px;display:flex;justify-content:center;gap:40px;z-index:2;transition:opacity 150ms}
+.lp .mid .icb{width:56px;height:56px;border-radius:16px;background:#1d1c1acc;color:#ece9e2}
+.lp .mid .icb.big{width:68px;height:68px}
+.lp .mid svg{width:24px;height:24px}
+.lpb{position:absolute;left:0;right:0;bottom:-58px;height:162px;background:#121211;background-image:repeating-linear-gradient(0deg,#ffffff0f 0 1px,#0000002e 1px 2px,transparent 2px 7px);color:#ece8df;padding:14px 28px 0;transition:transform 200ms var(--glide);z-index:3}
+.lpb::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:#6b4428}
+.lpb.lift{transform:translateY(-58px)}
+.lpr{display:flex;gap:14px;align-items:center;height:22px;font:400 13px var(--f);color:#aba699;white-space:nowrap}
+.lpr .sp{flex:1}.lpr b{color:#ece8df;font-weight:500}
+.ltrk{position:relative;height:10px;margin:12px 0 0;border-radius:5px;background:#0b0b0a;box-shadow:inset 0 0 0 1px #ffffff17}
+.ltrk .lit{position:absolute;left:0;top:0;bottom:0;border-radius:5px 0 0 5px;background:#f3e6c8}
+.ltrk .cap{width:14px;height:28px;margin:-14px 0 0 -7px;border-radius:5px}
+.ltrk .nt{position:absolute;top:0;bottom:0;width:3px;margin-left:-1.5px;background:#121211;z-index:1}
+.lrc{position:relative;height:22px;margin-top:6px;font:500 13px var(--mono)}
+.lrc .ptm{position:absolute;transform:translateX(-50%)}.lrc .tot{position:absolute;right:0;color:#aba699}
+.lkeys{display:flex;gap:8px;margin-top:6px}
+.lk{appearance:none;border:0;cursor:pointer;height:44px;padding:0 14px;border-radius:11px;background:#242422;color:#cfcbc2;font:500 14px var(--f);white-space:nowrap;position:relative}
+.lk b{color:#ece8df;font-weight:500;margin-left:6px}
+.lk[aria-pressed="true"]{background:#0d0d0c;box-shadow:inset 0 2px 5px #000;color:#ece8df}
+.lstrip{position:absolute;left:28px;right:28px;top:104px;display:flex;gap:8px;opacity:0;transition:opacity 120ms;pointer-events:none}
+.lift .lstrip{opacity:1;pointer-events:auto}
+.lchap{position:absolute;left:0;right:0;bottom:100%;background:#121211;padding:12px 0 12px 28px;display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity 150ms,transform 150ms}
+.lchap.on{opacity:1;transform:none;pointer-events:auto}
+.lchap button{appearance:none;border:0;flex:none;width:150px;background:#232321;border-radius:10px;overflow:hidden;padding:0;color:#cfcbc2;text-align:left;cursor:pointer}
+.lchap button svg{width:150px;height:84px;display:block}
+.lchap button span{display:block;padding:6px 8px 8px;font:500 13px var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.llist{position:absolute;bottom:calc(100% + 112px);width:240px;background:#232321;border-radius:14px;padding:8px;color:#ece8df;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity 150ms,transform 150ms;z-index:4}
+.llist.on{opacity:1;transform:none;pointer-events:auto}
+.llist{max-height:200px;overflow-y:auto;scrollbar-width:none}
+.llist .sopt{color:#ece8df;min-height:44px;font-size:15px}
+.llist .sopt[aria-pressed="true"]{background:#0d0d0c}
+.lskip{position:absolute;right:28px;bottom:122px;z-index:4;appearance:none;border:0;cursor:pointer;height:44px;padding:0 18px;border-radius:12px;background:var(--orange);color:#1d1c1a;font:500 15px var(--f);box-shadow:0 2px 0 var(--deep);transition:opacity 150ms}
+.lskip.gone{opacity:0;pointer-events:none}
+.llist .lh{display:block;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#aba699;padding:4px 14px 6px}
+.rch{display:flex;gap:8px;padding:0 16px;overflow-x:auto;scrollbar-width:none;min-height:40px}
+.rch .pbtn{min-height:40px;font:500 14px var(--mono);padding:0 12px;flex:none}
+.rch .pbtn[aria-pressed="true"]{background:var(--sel);box-shadow:inset 0 2px 4px #0005}
+.sheet .sopt small{display:block;font:400 13px var(--f);color:var(--dim)}
+.sheet .who{display:flex;gap:12px;align-items:center;padding:4px 6px 12px;border-bottom:1px solid var(--rule);margin-bottom:6px}
+.sheet .who svg{width:44px;height:44px;border-radius:50%}
+.sheet .who b{font:600 18px var(--f)}.sheet .who small{display:block;font:400 13px var(--f);color:var(--dim)}
+.sopt .chv{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;color:var(--dim)}
+/* tour */
+.tourbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.tbtn{font:600 15px var(--f);border:0;border-radius:10px;padding:0 18px;min-height:42px;background:#1d1c1a;color:#f2efe9;cursor:pointer}
+:root[data-theme="dark"] .tbtn{background:#e9e7e2;color:#1d1c1a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tbtn{background:#e9e7e2;color:#1d1c1a}}
+.tbtn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.tcap{font:500 14px var(--f);min-height:21px;flex:1;min-width:220px}
+.tcap b{font:500 13px var(--mono);color:var(--muted);margin-right:8px}
+@media (prefers-reduced-motion:reduce){.stage *,.ph *{transition-duration:1ms!important;transition-delay:0ms!important;animation-duration:1ms!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Jam Design · Overnight pass 3 of 3 · JamFin</span>
+    <h1>JamFin in Braun Hi-Fi, pass 3: settled rules for the TV and the phone</h1>
+    <p class="muted">The Jellyfin client for the living-room Hisense and the phone. Pass 3 settles pass 2's open items: what OK does while Skip intro or Next episode shows, how seasons change, long seasons, the Day title card and windows, the lower views, offline Home, and the phone's way to Discover and Settings. Press <b>Tour</b> to step through the key states, or click the TV and use the arrow keys, Enter (OK), Esc (Back), M (Menu) and G (Guide). All titles, people and art are made up.</p>
+  </header>
+
+  <div class="tourbar"><button class="tbtn" id="tour">Tour</button><span class="tcap" id="tcap" aria-live="polite">Steps through 16 states, about 3 seconds each. Any key on the TV stops it.</span></div>
+
+  <div class="ctl">
+    <div><span class="eyebrow">Profile</span><div class="seg" data-g="prof"><button data-v="0" aria-pressed="true">Ada</button><button data-v="1" aria-pressed="false">Ben</button><button data-v="2" aria-pressed="false">Cleo</button></div></div>
+    <div><span class="eyebrow">Lighting (this profile)</span><div class="seg" data-g="light"><button data-v="night" aria-pressed="true">Night</button><button data-v="day" aria-pressed="false">Day</button></div></div>
+    <div><span class="eyebrow">Covers (this profile)</span><div class="seg" data-g="covers"><button data-v="full" aria-pressed="true">Full colour</button><button data-v="toned" aria-pressed="false">Toned</button></div></div>
+    <div><span class="eyebrow">Motion (this profile)</span><div class="seg" data-g="motion"><button data-v="full" aria-pressed="true">Full</button><button data-v="calm" aria-pressed="false">Calm</button></div></div>
+    <div><span class="eyebrow">Server</span><div class="seg" data-g="server"><button data-v="online" aria-pressed="true">Online</button><button data-v="offline" aria-pressed="false">Offline</button></div></div>
+    <div><span class="eyebrow">Stream ready after</span><div class="seg" data-g="load"><button data-v="0.4" aria-pressed="true">0.4 s</button><button data-v="1.1" aria-pressed="false">1.1 s</button><button data-v="4" aria-pressed="false">4 s</button><button data-v="13" aria-pressed="false">13 s</button></div></div>
+  </div>
+  <div class="ctl">
+    <div><span class="eyebrow">Skip intro and OK</span><div class="seg" data-g="prompt"><button data-v="take" aria-pressed="true">Pass 3: takes focus 8 s</button><button data-v="strict" aria-pressed="false">Strict: OK always pauses</button><button data-v="p2" aria-pressed="false">Pass 2</button></div></div>
+    <div><span class="eyebrow">Season change</span><div class="seg" data-g="season"><button data-v="rest" aria-pressed="true">After a 500 ms rest</button><button data-v="ok" aria-pressed="false">Only on ↓ or OK</button></div></div>
+    <div><span class="eyebrow">Day windows</span><div class="seg" data-g="win"><button data-v="groove" aria-pressed="true">Groove (pass 3)</button><button data-v="recess" aria-pressed="false">Recess (pass 2)</button></div></div>
+    <div><span class="eyebrow">Day title card</span><div class="seg" data-g="tcd"><button data-v="light" aria-pressed="true">Light (pass 3)</button><button data-v="dark" aria-pressed="false">Dark (pass 2)</button></div></div>
+  </div>
+
+  <div class="keys"><span class="eyebrow">Jump to</span>
+    <button class="jb" data-jump="prof">Profiles</button><button class="jb" data-jump="home">Home</button><button class="jb" data-jump="film">Film page</button><button class="jb" data-jump="filmlow">Film · lower view</button><button class="jb" data-jump="series">Show page · episodes</button><button class="jb" data-jump="long">Long season (22)</button><button class="jb" data-jump="disc">Disc house menu</button><button class="jb" data-jump="set">Settings › Appearance</button><button class="jb" data-jump="player">Player</button><button class="jb" data-jump="offline">Offline Home</button>
+  </div>
+  <div class="keys"><span class="eyebrow">Player states</span>
+    <button class="jb" data-ps="skip">Skip intro</button><button class="jb" data-ps="next">Next episode</button><button class="jb" data-ps="still">Still watching?</button><button class="jb" data-ps="buffer">Loading after a seek</button><button class="jb" data-ps="err">Playback error</button>
+  </div>
+
+  <div class="flow" aria-label="The resume path"><span>Profiles · focus on the last one</span><i>OK</i><span>Home · Continue 1</span><i>OK</i><span>Page · Resume</span><i>OK</i><span>Title card (as long as the load)</span><i>→</i><span>Player band</span><i>OK pauses · ↑ chapters · ↓ settings</i></div>
+
+  <div class="keys"><span class="eyebrow">Remote</span><button class="kb" data-key="ArrowUp">↑</button><button class="kb" data-key="ArrowDown">↓</button><button class="kb" data-key="ArrowLeft">←</button><button class="kb" data-key="ArrowRight">→</button><button class="kb" data-key="Enter">OK</button><button class="kb" data-key="Escape">Back</button><button class="kb" data-key="m">Menu</button><button class="kb" data-key="g">Guide</button></div>
+
+  <figure>
+    <div class="tvf" id="tvf" tabindex="0" aria-label="JamFin on the TV. Arrow keys move, Enter is OK, Escape is Back, M is Menu.">
+      <div class="stage" id="stage">
+        <!-- PROFILES -->
+        <section class="scr" id="s-prof">
+          <div class="sband"><i class="trim"></i><span class="crumb">Jamfin · Living room TV</span><span class="clock" data-clock></span></div>
+          <div class="pq">Who's watching?</div>
+          <div class="prow" id="prow"></div>
+          <div class="psign" id="psign"><span class="l1" id="ps1"></span><span class="l2" id="ps2"></span></div>
+        </section>
+        <!-- HOME -->
+        <section class="scr" id="s-home">
+          <div class="mband"><i class="trim"></i>
+            <div class="mtop"><nav class="tabs" id="tabs"></nav><div class="mright"><span class="chip" id="chip"></span><span class="clock" data-clock></span></div></div>
+            <i class="mrule"></i>
+            <div class="accent" id="accent" aria-hidden="true"><svg viewBox="0 0 480 140"><g fill="none" stroke-width="22"><path d="M60 0V28A98 98 0 0 0 158 126H500" stroke="#6b3416"/><path d="M88 0V28A70 70 0 0 0 158 98H500" stroke="#b04a1c"/><path d="M116 0V28A42 42 0 0 0 158 70H500" stroke="#d69a2e"/></g></svg></div>
+            <div class="sign" id="sign"><span class="ht" id="h-t"></span><span class="facts" id="h-f"></span></div>
+          </div>
+          <div class="rowsvp"><div class="rows" id="rows"></div></div>
+          <div class="offp" id="offp"></div>
+        </section>
+        <!-- FILM / SERIES / DISC -->
+        <section class="scr" id="s-det">
+          <div class="sband"><i class="trim"></i><span class="crumb"><kbd>Back</kbd><span id="crumb">Home</span></span><span class="clock" data-clock></span></div>
+          <div class="dpage" id="dpage">
+            <div class="dtop">
+              <div class="dleft"><span class="eb" id="d-eb"></span><span class="dtitle" id="d-t"></span><span class="facts" id="d-f"></span><div class="tech" id="d-tech"></div><div class="acts" id="acts"></div></div>
+              <div class="dright" id="dright"></div>
+            </div>
+            <div class="lsign" id="lsign"><span class="eb" id="ls-eb"></span><span class="et" id="es-t"></span><span class="facts" id="es-f"></span><p class="ov" id="es-o"></p></div>
+            <div class="dlow" id="dlow"></div>
+          </div>
+          <div class="drop" id="drop"></div>
+          <div class="toast" id="dtoast"></div>
+        </section>
+        <!-- SETTINGS > APPEARANCE -->
+        <section class="scr" id="s-set">
+          <div class="sband"><i class="trim"></i><span class="crumb"><kbd>Back</kbd><span>Home</span></span><span class="clock" data-clock></span></div>
+          <div class="cats" id="cats"></div>
+          <div class="srows" id="srows"></div>
+        </section>
+        <!-- PLAYER -->
+        <section class="scr" id="s-pl">
+          <div class="video" id="video"></div><span class="vlabel">Sample frame</span>
+          <div class="toast" id="toast"></div>
+          <div class="prompt" id="skip"><div class="pw"><span class="pnote" id="skip-note"></span><div class="pkey"><i class="w wl"></i><kbd id="skip-k">OK</kbd>Skip intro<i class="hold"></i></div></div></div>
+          <div class="prompt" id="nextp"><div class="nextw"><div class="nextc"><div class="na" id="n-art"></div><div class="nt2"><span class="eb">Next episode</span><span class="t" id="n-t"></span><span class="s" id="n-s"></span></div></div><div class="pkey"><i class="w wl"></i><kbd id="next-k">↑</kbd>Play next episode</div></div></div>
+          <div class="panel" id="still"><span class="pt2" id="still-t"></span><span class="ps" id="still-s"></span><div class="acts" id="still-k" style="margin:0"></div></div>
+          <div class="panel" id="err"><span class="pt2" id="err-t"></span><span class="ps" id="err-s"></span><div class="acts" id="err-k" style="margin:0"></div></div>
+          <div class="pband" id="pband">
+            <div class="chap" id="chap"><span class="eb" id="chap-h"></span><div class="strip" id="chap-s"></div></div>
+            <div class="bar" id="bar">
+              <div class="ra"><span class="st" id="p-st"></span><span class="tt" id="p-t"></span><span class="ch" id="p-ch"></span><span class="hints" id="p-hints"></span><span class="ends" id="p-end"></span></div>
+              <div class="trk" id="trk"><i class="lit" id="p-lit"></i><i class="cap" id="p-cap"></i></div>
+              <div class="rc"><span class="ptm" id="p-pt"></span><span class="tot" id="p-tot"></span></div>
+              <div class="pstrip" id="pstrip"></div>
+            </div>
+            <div class="plist" id="plist"></div>
+          </div>
+        </section>
+        <!-- TITLE CARD -->
+        <div class="tcard" id="tcard" aria-hidden="true">
+          <div class="half a" id="ha"></div><div class="half b" id="hb"></div>
+          <div class="tmid"><span class="eb" id="tc-eb"></span><span class="ttl" id="tc-t"></span><div class="slat" id="slat"><i class="run"></i></div><span class="tsub" id="tc-s"></span><span class="tback" id="tc-b"><kbd>Back</kbd>Stop loading</span></div>
+        </div>
+      </div>
+    </div>
+    <figcaption><span class="status"><span>Screen <b id="st-scr">Profiles</b></span><span>Focus <b id="st-foc"></b></span><span>Presses since Home <b id="st-pr">0</b></span><span>Title card <b id="st-tc">not played yet</b></span><span id="st-msg"></span></span></figcaption>
+  </figure>
+
+  <section style="display:grid;gap:14px">
+    <h2>What changed since pass 2</h2>
+    <div class="notes">
+      <div class="note"><b>OK presses what is lit</b><span class="muted">On the timeline OK pauses. Skip intro takes the light for 8 seconds when it appears (a slot drains on the key), so OK skips only while the prompt is visibly focused; then focus goes back to the timeline and ↑ reaches the prompt. Next episode never takes focus: it starts by itself, OK pauses and holds the countdown, ↑ then OK starts it now.</span></div>
+      <div class="note"><b>Seasons, and long seasons</b><span class="muted">Moving across season keys never loads anything until focus rests 500 ms (the house preview rule); ↓ or OK opens that season at once. A season with more than 12 episodes gets range keys (1–10 · 11–20 · 21–22) in the same row, so episode 21 is four presses away, not twenty.</span></div>
+      <div class="note"><b>Day, settled</b><span class="muted">Unlit windows on light surfaces are a hairline groove instead of a dark dash; lit, they open to the full window with its dark rim. The title card takes the profile's lighting, so a Day Play makes one big luminance change (card to picture), not two.</span></div>
+      <div class="note"><b>Lower views filled</b><span class="muted">Below the actions the page works like Home: a sign (title, facts, two lines), the focused row, and the next row's name and cards: More like this then Cast (films), Seasons, episodes then Cast (shows), Chapters then Extras (discs).</span></div>
+      <div class="note"><b>Offline Home that does something</b><span class="muted">Try again (orange), a key back to the TV's own Home, and a quiet automatic retry every 30 s. The last-synced Continue watching row stays visible, dimmed inside one dashed outline, so you can see what is waiting; it isn't focusable, because none of it can play.</span></div>
+      <div class="note"><b>One grammar with the launcher and NervOS</b><span class="muted">Guide is never JamFin's (G shows that Lobby's TV menu takes it). Rows stop with a walnut end mark and a nudge. Press-twice confirms drain in 3 s. Full shutter on the first Play of a session, short form after. Phone: the profile chip opens Switch profile, Discover and Settings.</span></div>
+    </div>
+  </section>
+
+  <div class="phones">
+    <figure><div class="phf"><div class="phs" id="phs1"><div class="ph" id="ph1"></div></div></div><figcaption>Phone Home, 390 × 844. Tap the profile chip: Switch profile, Discover, Settings and Downloads live in that labelled sheet (no "More" tab). The orange Resume follows the card you stop on.</figcaption></figure>
+    <figure><div class="phf"><div class="phs" id="phs2"><div class="ph" id="ph2"></div></div></div><figcaption>Phone show page. "Season 3" opens the shared bottom sheet. A long season gets range chips (1–10 · 11–20 · 21–22) that scroll the list.</figcaption></figure>
+    <figure><div class="phf land"><div class="phs" id="phs3"><div class="ph lp" id="ph3"></div></div></div><figcaption>Phone player, 844 × 390 landscape. Touch has no focus problem: Skip intro is a button you tap, and tapping the picture shows or hides the controls. Lists now carry their heading.</figcaption></figure>
+  </div>
+</div>
+
+<script>
+/* ================= sample data (all made up) ================= */
+const NOW=21*60+47;
+const pad=n=>String(n).padStart(2,'0');
+const clock=m=>{m=((Math.round(m)%1440)+1440)%1440;let h=Math.floor(m/60),mi=m%60,ap=h>=12?'PM':'AM';h=h%12||12;return `${h}:${pad(mi)} ${ap}`};
+const hms=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${h}:${pad(m)}:${pad(x)}`:`${m}:${pad(x)}`};
+const words=s=>{const h=Math.floor(s/3600),m=Math.round(s%3600/60);return h?`${h} h ${m} min`:`${m} min`};
+const ends=it=>clock(NOW+(it.dur-it.pos)/60);
+const Q=n=>(n/19.2).toFixed(4)+'cqw';
+const EPN=['Pilot','Two Keys','Night Market','The Long Shift','Static','Fog Warning','Low Bridge','Last Call','Copper Wire','Open Water','Small Hours','The Relay','Lantern','North Line','Quiet Car','Grand Reopening','Dry Dock','Paper Trail'];
+const EPO=['A caller asks for someone who moved out in 1988.','The night desk gets a new rule, and Mira breaks it before midnight.','Every stall at the market sells the same key.','Mira covers a double shift and the block goes quiet. Too quiet.','A storm takes the phones down, but the calls keep coming.','The harbour fog rolls in early and nobody can find the lighthouse keeper.','Felix finds the first logbook, and it is in his handwriting.','The block holds a party; the dispatcher is the only guest who knows why.'];
+const CHN=['Opening','Arrival','The Plan','The Night Market','Crossroads','The Archive','Copper Wire','Low Tide','The Tower','Night Drive','Homecoming','End credits'];
+const SER={
+  'Signal Street':{y:'2019–2024',age:'12',seasons:3,line:'A night dispatcher and the street that keeps calling her back.',ov:'Every call to the overnight desk on Signal Street seems to come from the same block. Mira starts writing them down, and the block starts writing back.',cast:'June Okoro, Felix Arden, Ines Kalb',made:'Okafor & Lund'},
+  'The Harbour Hour':{y:'2022–2025',age:'PG',seasons:2,line:'A local radio show broadcast from a fishing harbour.',ov:'A two-person radio station keeps a small harbour town informed, entertained and occasionally confused, one hour a night.',cast:'Theo Varga, Ruth Amsel',made:'Pia Navarro'},
+  'Velvet Street':{y:'2021–2023',age:'15',seasons:2,line:'Four neighbours, one shared roof garden.'},
+  'Lantern Street':{y:'2024',age:'12',seasons:1,line:'A locksmith inherits a box of keys with no doors.'},
+  'Copper Street':{y:'2020–2022',age:'PG',seasons:2,line:'A tram line, its drivers and its regulars.'},
+  'Orbit Diner':{y:'2018–2021',age:'PG',seasons:3,line:'A roadside diner on the way to the launch site.'},
+  'Night Ferry':{y:'2025',age:'15',seasons:1,line:'The last crossing of the night, every night.'},
+  'Small Planets':{y:'2023–2025',age:'U',seasons:2,line:'A model maker builds whole worlds on a kitchen table.'},
+  'Blue Hour Radio':{y:'2026',age:'12',seasons:1},'The Cartographers':{y:'2026',age:'15',seasons:1},'Desk 9':{y:'2025–2026',age:'12',seasons:2},'Dry Season':{y:'2026',age:'15',seasons:1},'Field Notes':{y:'2025',age:'U',seasons:1},'Moth & Lamp':{y:'2026',age:'12',seasons:1}
+};
+for(const k in SER){const s=SER[k];s.line=s.line||'A new series in your library.';s.ov=s.ov||(s.line+' Added to your library this month; every episode of season 1 is here.');s.cast=s.cast||'Sample cast';s.made=s.made||'Sample creator'}
+const film=(t,o)=>Object.assign({type:'film',t,pos:0,age:'12',tech:['1080p','SDR','Stereo'],dir:'Sample director',cast:'Sample cast',line:'A film in your library.',ov:'A made-up film for this mockup. The overview is three lines at most on the TV; the rest opens with OK.'},o);
+const ep=(series,s,e,o)=>Object.assign({type:'ep',series,s,e,t:series,en:EPN[(s*5+e)%EPN.length],dur:2700,pos:0,tech:['1080p','HDR10','5.1']},o);
+const CONT=[
+  film('The Copper City',{y:1984,dur:9060,pos:4324,tech:['4K','HDR10','5.1'],line:'A surveyor maps a city that rebuilds itself every night.',ov:'Every morning the survey is wrong. Hal Prentice has thirty days to map a city that rebuilds itself while it sleeps, before the people who hired him decide it should stop.',dir:'Mara Lindqvist',cast:'Theo Varga, June Okoro, Ilse Brandt'}),
+  ep('Signal Street',2,4,{en:'The Long Shift',pos:1880,dur:2760}),
+  film('The Velvet Machine',{y:1979,dur:6420,pos:2100,line:'Two rival inventors share one workshop for a winter.',ov:'Two rival inventors are forced to share one workshop for a winter. Only one machine will be finished by spring.',dir:'Pia Navarro',cast:'Omar Diallo, Rosa Lind'}),
+  ep('The Harbour Hour',1,7,{en:'Fog Warning',pos:600,dur:3000}),
+  film('The Static Protocol',{y:2023,dur:6540,pos:5400,tech:['4K','Dolby Vision','Atmos'],line:'A signal from an empty station starts answering back.',ov:'A radio engineer picks up a signal from a station that closed in 1971. It answers her questions before she asks them.',dir:'Juno Park',cast:'Tova Reyes, Lev Marek'}),
+  film('Kite Weather',{y:2016,dur:5700,pos:900,line:'A summer on the coast, one kite at a time.',dir:'Lina Haas',cast:'Agnes Wu, Eli Brooks'})
+];
+const NEXT=[ep('Velvet Street',2,3,{en:'Night Market'}),ep('Lantern Street',1,2,{en:'Two Keys'}),ep('Copper Street',1,5),ep('Orbit Diner',3,1,{en:'Grand Reopening'}),ep('Night Ferry',1,2),ep('Small Planets',1,4)];
+const MOV=['Paper Moons:2026','Saturn Hotel:2025','Glass Orchard:2026','The Last Tram:2025','Low Tide:2026','Neon Psalm:2024','Field Day:2025','Iron Lullaby:2026'].map((x,i)=>{const[t,y]=x.split(':');return film(t,{y:+y,dur:5400+i*420,line:'Added to your library this week.'})});
+const SHOWS=['Blue Hour Radio','The Cartographers','Desk 9','Dry Season','Field Notes','Moth & Lamp'].map(t=>({type:'series',t,series:t}));
+const DISCS=[
+  film('Harbour Lights',{type:'disc',y:2011,dur:7080,tech:['Blu-ray','1080p','DTS-HD 5.1'],line:'Disc image · 24 chapters',ov:'A lighthouse keeper and a radio ham argue across a bay for one winter.',dir:'Ayo Mensah',cast:'Rosa Lind, Nils Avery',why:"This disc's own menu needs BD-J, and it didn't start this time. Jamfin built this menu from the disc.",extras:6,chs:24}),
+  film('Moon Garage',{type:'disc',y:2008,dur:6120,tech:['Blu-ray','1080p','LPCM 2.0'],line:'Disc image · 18 chapters',ov:'Two mechanics fix a car that only runs at night.',dir:'Kit Mendes',cast:'Dana Kowal, Kenji Obi',why:"This disc's menu is still loading its Java part. Jamfin built this menu from the disc.",extras:3,chs:18}),
+  film('The Glass Orchard',{type:'disc',y:2014,dur:6600,tech:['Blu-ray','1080p','DTS-HD 7.1'],line:'Disc image · 20 chapters',ov:'An orchard of glass trees, and the family who has to sell it.',dir:'Sol Ferreira',cast:'Hana Ito, Pim de Vries',why:"This disc's own menu didn't start. Jamfin built this menu from the disc.",extras:4,chs:20})
+];
+const END=k=>({type:'end',k});
+const ROWS=[{h:'Continue watching',k:'w',items:CONT},{h:'Next up',k:'w',items:NEXT},{h:'Latest movies',k:'p',items:[...MOV,END('films')]},{h:'Latest shows',k:'p',items:[...SHOWS,END('shows')]},{h:'Blu-ray',k:'p',items:[...DISCS,END('discs')]}];
+const ENDS={films:['All films','214 in the library'],shows:['All shows','63 in the library'],discs:['All discs','41 disc images']};
+const epCount=(series,s)=>series==='Signal Street'&&s===3?22:8;
+const nEps=series=>{let n=0;for(let s=1;s<=SER[series].seasons;s++)n+=epCount(series,s);return n};
+const rangesOf=n=>n>12?Array.from({length:Math.ceil(n/10)},(_,i)=>[i*10+1,Math.min(n,i*10+10)]):[];
+const SEASONLINE={1:'Mira takes the night desk and starts writing the calls down.',2:'The block starts writing back, and Felix finds the first logbook.',3:'A new switchboard, a deputy for Mira, and twenty-two nights of calls.'};
+const ROLES=['Hal Prentice','Mira Dene','Felix Arden','Ilse Brandt','The caller','Night porter'];
+const castOf=str=>str.split(', ').concat(['Noor Haddad','Ken Ito']).slice(0,6).map((n,i)=>({n,role:ROLES[i%ROLES.length]}));
+const EXTRAS=[['Building the lighthouse','Featurette · 14 min'],['Deleted scenes','6 scenes · 11 min'],["Director's commentary",'Audio track · 1 h 58 min'],['Trailer','2 min'],['Storyboards','Gallery · 40 pictures'],['On the bay','Featurette · 9 min']];
+const LISTS={subs:{h:'Subtitles',o:['Off','English','English (SDH)','Français','Deutsch','Español','Italiano'],v:0},audio:{h:'Audio',o:['English 5.1','English Stereo','Commentary','Français 5.1'],v:0},speed:{h:'Speed',o:['0.75×','1×','1.25×','1.5×'],v:1},pic:{h:'Picture',o:['Fit','Fill','Zoom','Original'],v:0}};
+const TABS=['Home','Movies','Shows','Blu-ray','Discover','Search','Settings'];
+const TABLINE={Home:'Continue watching, next up and what is new',Movies:'Every film, A to Z, with Sort and Filter',Shows:'Every series, A to Z','Blu-ray':'Your disc images, with their own menus',Discover:'Trending, popular and requests',Search:'Type, or press the Voice key',Settings:'Profile, Appearance, Captions, Audio, Playback and more'};
+const PROFILES=[
+  {n:'Ada',light:'night',covers:'full',motion:'full',pal:['#2c4656','#e0b04a','#c2652e'],last:true},
+  {n:'Ben',light:'day',covers:'toned',motion:'full',pal:['#4a5f3a','#e3cf9f','#a8452c']},
+  {n:'Cleo',light:'night',covers:'toned',motion:'calm',pal:['#5b3a5f','#e39a3a','#2e5a66']}
+];
+
+/* ================= flat art (generated shapes; no real posters, no faces) ================= */
+const PAL=[['#2c4656','#e0b04a','#c2652e','#1a242a'],['#7a3326','#2f6b70','#cdbd98','#2a1a16'],['#2e3a66','#d9c08a','#4f7a45','#161a2c'],['#4a5f3a','#e3cf9f','#a8452c','#1e2616'],['#5b3a5f','#e39a3a','#2e5a66','#1e1424'],['#20343a','#c9cfbd','#b07a2a','#0f1a1d'],['#8a6a2a','#2a3f5a','#d8c49a','#2a2010'],['#3a2a24','#c94f2c','#c9a35e','#140f0d']];
+const hash=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h};
+function art(key,shape){const h=hash(key),p=PAL[h%PAL.length],r=(n,m)=>((h>>>n)%m);
+  if(shape==='p'){const cx=20+r(3,60),cy=30+r(5,40),rad=14+r(7,14);return `<svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid slice"><rect width="100" height="150" fill="${p[0]}"/><circle cx="${cx}" cy="${cy}" r="${rad}" fill="${p[1]}"/><rect x="${8+r(9,20)}" y="${70+r(11,14)}" width="${40+r(13,30)}" height="${20+r(4,16)}" fill="${p[2]}"/><rect y="122" width="100" height="28" fill="${p[3]}"/></svg>`}
+  if(shape==='d'){return `<svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid slice"><rect width="100" height="150" fill="${p[3]}"/><rect x="8" y="8" width="84" height="134" rx="4" fill="${p[0]}"/><circle cx="50" cy="66" r="30" fill="${p[1]}"/><circle cx="50" cy="66" r="7" fill="${p[0]}"/><rect x="8" y="8" width="84" height="12" fill="#1f3550"/><rect x="18" y="112" width="${40+r(3,24)}" height="8" fill="${p[2]}"/></svg>`}
+  const cx=30+r(3,100),cy=22+r(5,20),rad=12+r(7,12),px=20+r(9,100);
+  return `<svg viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice"><rect width="160" height="90" fill="${p[0]}"/><circle cx="${cx}" cy="${cy}" r="${rad}" fill="${p[1]}"/><path d="M-10 72 L${px} ${36+r(11,12)} L170 70 V90 H-10Z" fill="${p[2]}"/><rect y="74" width="160" height="16" fill="${p[3]}"/></svg>`}
+const figure='<svg viewBox="0 0 40 40"><circle cx="20" cy="14" r="7" fill="#6a675f"/><path d="M6 38c0-8 6-13 14-13s14 5 14 13z" fill="#6a675f"/></svg>';
+function avatar(p){const [a,b,c]=p.pal;return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="${a}"/><circle cx="50" cy="44" r="22" fill="${b}"/><path d="M0 72 Q50 52 100 72 V100 H0Z" fill="${c}"/></svg>`}
+function scene(key){const h=hash(key);let b='';let x=0,i=0;while(x<1920){const w=90+((h>>>(i%20))%5)*40,ht=260+((h*(i+3))%7)*55;b+=`<rect x="${x}" y="${1080-ht}" width="${w-8}" height="${ht}" fill="#141b24"/>`;for(let wy=1080-ht+30;wy<1040;wy+=46)for(let wx=x+16;wx<x+w-28;wx+=34)if(((wx*7+wy*3+h)%5)===0)b+=`<rect x="${wx}" y="${wy}" width="14" height="20" fill="#d9a548" opacity=".8"/>`;x+=w;i++}
+  return `<svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"><rect width="1920" height="1080" fill="#1f2b3b"/><rect y="560" width="1920" height="520" fill="#273548"/><circle cx="${1200+h%400}" cy="250" r="86" fill="#e6d8b2"/>${b}</svg>`}
+const stripes=`<svg viewBox="0 0 1920 1080" preserveAspectRatio="none"><g fill="none" stroke-width="44"><path d="M1560 -40 V560 A210 210 0 0 0 1770 770 H1980" stroke="#6b3416"/><path d="M1612 -40 V560 A158 158 0 0 0 1770 718 H1980" stroke="#b04a1c"/><path d="M1664 -40 V560 A106 106 0 0 0 1770 666 H1980" stroke="#d69a2e"/></g></svg>`;
+
+/* ================= helpers ================= */
+const $=id=>document.getElementById(id);
+const stage=$('stage'),tvf=$('tvf');
+const U=()=>tvf.clientWidth/1920;
+document.querySelectorAll('[data-clock]').forEach(e=>e.textContent=clock(NOW));
+$('ha').innerHTML=stripes;$('hb').innerHTML=stripes;
+const keyOf=it=>it.e?`${it.series}${it.s}${it.e}`:it.t;
+const pct=it=>it.dur?Math.round(it.pos/it.dur*100):0;
+function subOf(it){if(it.type==='ep')return `S${it.s} E${it.e} · ${it.en}`;if(it.type==='series'){const n=SER[it.t].seasons;return `${n} season${n>1?'s':''}`}if(it.type==='disc')return 'Disc image';return String(it.y)}
+function cardHTML(it,shape,o={}){
+  if(it.type==='person')return `<div class="cd"><i class="spill"></i><div class="face"><div class="art">${figure}</div><div class="pl"><span class="t">${it.n}</span><span class="s">as ${it.role}</span><i class="w wb"></i></div></div></div>`;
+  if(it.type==='end'){const [a,b]=ENDS[it.k];return `<div class="cd ${shape==='p'?'p':''} end"><i class="spill"></i><div class="face"><div class="art"><span class="big">${a}</span><span class="n">${b}</span></div><div class="pl"><span class="t">Open the library</span><span class="s">End of this row</span><i class="w wb"></i></div></div></div>`}
+  const p=o.noBar?0:(it.type==='film'||it.type==='ep')&&it.pos<it.dur?pct(it):0;
+  const t=o.t||(it.type==='ep'?it.series:it.t),s=o.s||subOf(it);
+  return `<div class="cd ${shape==='p'?'p':''}"><i class="spill"></i><div class="face"><div class="art">${art(o.artKey||keyOf(it),it.type==='disc'?'d':shape)}${p?`<div class="pg"><i style="width:${p}%"></i></div>`:''}${o.extra||''}</div><div class="pl"><span class="t">${t}</span><span class="s">${s}</span><i class="w wb"></i></div></div></div>`}
+
+/* ================= state ================= */
+const OPT={load:0.4,server:'online',prompt:'take',season:'rest',win:'groove',tcd:'light'};
+const S={scr:'prof',pf:0,prof:0,home:{zone:'rows',mi:0,oi:0,r:0,c:[0,0,0,0,0]},det:null,set:{i:0},pl:null,presses:0,busy:false,plays:0,tc:null,offTry:null,stack:[]};
+const PR=()=>PROFILES[S.prof];
+let msgT;function msg(t){$('st-msg').textContent=t;clearTimeout(msgT);msgT=setTimeout(()=>$('st-msg').textContent='',5000)}
+const NAMES={'s-prof':'Profiles','s-home':'Home','s-det':'Page','s-set':'Settings › Appearance','s-pl':'Player'};
+function show(id){['s-prof','s-home','s-det','s-set','s-pl'].forEach(x=>$(x).classList.toggle('on',x===id));S.scr=id;$('st-scr').textContent=NAMES[id]}
+function nudge(el){if(!el)return;el.classList.remove('nudge');void el.offsetWidth;el.classList.add('nudge');setTimeout(()=>el.classList.remove('nudge'),260)}
+let toastT;function toast(t,el='toast'){const e=$(el);e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),2400)}
+
+/* ================= PROFILES ================= */
+const lookLine=p=>`Braun Hi-Fi · ${p.light==='day'?'Day':'Night'} · ${p.covers==='full'?'Full-colour covers':'Toned covers'} · ${p.motion==='calm'?'Calm motion':'Full motion'}`;
+function buildProfiles(){$('prow').innerHTML=PROFILES.map(p=>`<div class="pt"><i class="spill"></i><div class="face"><div class="av">${avatar(p)}</div><div class="nm">${p.n}<i class="w wb"></i></div></div></div>`).join('')+`<div class="pt add"><i class="spill"></i><div class="face"><div class="av">+</div><div class="nm">Add profile<i class="w wb"></i></div></div></div>`;renderProfiles()}
+function renderProfiles(){[...$('prow').children].forEach((t,i)=>t.classList.toggle('f',i===S.pf));
+  const p=PROFILES[S.pf];
+  if(p){$('ps1').textContent=lookLine(p);$('ps2').textContent=p.last?'Last on this TV · each profile keeps its own look':'Each profile keeps its own look'}
+  else{$('ps1').textContent='Sign in with a Jellyfin user, or use Quick Connect';$('ps2').textContent='Only users already signed in on this TV are shown'}
+  $('st-foc').textContent=p?p.n:'Add profile'}
+function keyProf(k){if(k==='ArrowRight')S.pf=Math.min(PROFILES.length,S.pf+1);else if(k==='ArrowLeft')S.pf=Math.max(0,S.pf-1);
+  else if(k==='Enter'){if(S.pf===PROFILES.length){msg('Add profile opens sign-in (not drawn in this pass).');return}pickProfile(S.pf);return}
+  else if(k==='Escape'){msg('Back on Profiles would ask to leave Jamfin.');return}else return;renderProfiles()}
+function pickProfile(i){S.prof=i;PROFILES.forEach((p,j)=>p.last=j===i);syncSegs();applyOpts();S.home={zone:OPT.server==='offline'?'off':'rows',mi:0,r:0,c:[0,0,0,0,0]};show('s-home');renderHome(true);S.presses=0;$('st-pr').textContent=0}
+
+/* ================= HOME ================= */
+function buildHome(){
+  $('tabs').innerHTML=TABS.map((t,i)=>`<span class="tab ${i===0?'cur':''}">${t}<i class="w wb"></i></span>`).join('');
+  $('rows').innerHTML=ROWS.map((row,ri)=>`<div class="row ${row.k==='p'?'p-row':''}" data-r="${ri}"><div class="rowh"><span>${row.h}</span><span class="n"></span></div><div class="strip">${row.items.map(it=>cardHTML(it,row.k,it.type==='ep'&&ri===1?{noBar:true}:{})).join('')}<i class="emark" title="End of the row"></i></div></div>`).join('');
+  $('offp').innerHTML=`<div class="trouble"><span class="st"><i class="ind led off-line"></i>Offline</span><div class="offkeys"><div class="key pri" id="offkey"><div class="in"><i class="w wl"></i><span id="offlab">Try again</span></div></div><div class="key" id="offhome"><div class="in"><i class="w wl"></i><span>TV Home</span></div></div></div><span class="facts" id="offnote"></span></div>
+    <div class="cache"><div class="gh">Continue watching <span class="n">waiting for the server · last synced 9:12 PM</span></div><div class="strip">${CONT.slice(0,5).map(it=>cardHTML(it,'w')).join('')}</div></div>
+    <div class="gh">Next up <span class="n">waiting for the server</span></div>`}
+let retryLeft=30;
+setInterval(()=>{if(OPT.server!=='offline'||S.scr!=='s-home'||S.offTry)return;retryLeft--;if(retryLeft<=0){retryLeft=30;tryServer(true)}const n=$('offnote');if(n&&!S.offTry)n.innerHTML=`<span>Tries again by itself in ${retryLeft} s</span>`},1000);
+function tryServer(auto){const H=S.home;if(S.offTry)return;$('offlab').textContent='Trying…';S.offTry=setTimeout(()=>{S.offTry=null;$('offlab').textContent='Try again';retryLeft=30;if(OPT.server==='online'){H.zone='rows';renderHome()}else{$('offnote').innerHTML=`<span>Still not answering · tried ${clock(NOW+1)}${auto?' (by itself)':''}</span>`}},1200)}
+function renderHome(first){const H=S.home,off=OPT.server==='offline';
+  $('s-home').classList.toggle('offline',off);$('accent').classList.toggle('away',off);
+  const p=PR();$('chip').innerHTML=`${avatar(p)}${p.n}<i class="w wb"></i>`;
+  $('tabs').querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('f',H.zone==='menu'&&H.mi===i));
+  $('chip').classList.toggle('f',H.zone==='menu'&&H.mi===TABS.length);
+  $('offkey').classList.toggle('f',H.zone==='off'&&H.oi===0);$('offhome').classList.toggle('f',H.zone==='off'&&H.oi===1);
+  const rows=[...$('rows').children];
+  rows.forEach((rowEl,ri)=>{const row=ROWS[ri],n=row.items.length,c=H.c[ri],cur=H.zone==='rows'&&H.r===ri;
+    rowEl.classList.toggle('cur',cur);rowEl.querySelector('.n').textContent=cur?`${c+1} of ${n}`:n;
+    rowEl.querySelectorAll('.cd').forEach((cd,i)=>cd.classList.toggle('f',cur&&i===c));
+    const step=row.k==='w'?380:228,vis=row.k==='w'?4:7;
+    const sh=Math.min(Math.max(0,c-1),Math.max(0,n-vis))*step;rowEl.querySelector('.strip').style.transform=`translateX(-${Q(sh)})`});
+  const top=rows[H.zone==='rows'?H.r:0].offsetTop/U();$('rows').style.transform=`translateY(-${Q(top)})`;
+  const it=H.zone==='rows'?ROWS[H.r].items[H.c[H.r]]:null;
+  const set=()=>{
+    if(H.zone==='off'){if(H.oi===1){$('h-t').textContent="Back to the TV's Home";$('h-f').innerHTML=`<span>Other apps and inputs still work</span><span>Jamfin keeps your place</span>`;return}$('h-t').textContent="Can't reach the Jellyfin server";$('h-f').innerHTML=`<span>Last seen <b>9:12 PM</b></span><span>Check the server is on, then try again</span>`;return}
+    if(H.zone==='menu'){if(H.mi===TABS.length){$('h-t').textContent=`${p.n}'s profile`;$('h-f').innerHTML=`<span>Switch profile, or change how Jamfin looks for ${p.n}</span>`}else{$('h-t').textContent=TABS[H.mi];$('h-f').innerHTML=`<span>${TABLINE[TABS[H.mi]]}</span>`}return}
+    if(it.type==='end'){const [a,b]=ENDS[it.k];$('h-t').textContent=a;$('h-f').innerHTML=`<span>${b}</span><span>Sort, Filter and A–Z</span>`;return}
+    /* the sign never repeats the focused card's plinth (year, S/E): it adds what the card doesn't say */
+    if(it.type==='film')$('h-f').innerHTML=`<span>${words(it.dur)}</span><span>Rated ${it.age}</span><span>${it.tech[0]}</span><span>Ends at <b>${ends(it)}</b></span>`;
+    else if(it.type==='ep')$('h-f').innerHTML=`<span>${words(it.dur)}</span><span>Rated ${SER[it.series].age}</span><span>Ends at <b>${ends(it)}</b></span>`;
+    else if(it.type==='disc')$('h-f').innerHTML=`<span>${it.y}</span><span>${words(it.dur)}</span><span>${it.tech[2]}</span><span>Ends at <b>${ends(it)}</b></span>`;
+    else{const se=SER[it.t];$('h-f').innerHTML=`<span>${se.y}</span><span>Rated ${se.age}</span><span>${se.line}</span>`}
+    $('h-t').textContent=it.type==='ep'?it.series:it.t};
+  if(first){set()}else{const h=$('sign');h.classList.add('swap');setTimeout(()=>{set();h.classList.remove('swap')},50)}
+  $('st-foc').textContent=H.zone==='off'?(H.oi?'TV Home':'Try again'):H.zone==='menu'?(H.mi===TABS.length?'Profile chip':`Menu: ${TABS[H.mi]}`):it.type==='end'?ENDS[it.k][0]:it.type==='ep'?`${it.series} S${it.s}E${it.e}`:it.t}
+function keyHome(k){const H=S.home;
+  if(H.zone==='off'){
+    if(k==='ArrowUp'){H.zone='menu';H.mi=0}
+    else if(k==='ArrowRight')H.oi=1;else if(k==='ArrowLeft')H.oi=0;
+    else if(k==='Enter'){if(H.oi===1){msg("Would open Lobby, the TV's own Home. Jamfin keeps this screen and retries in the background.");return}tryServer(false);return}
+    else return;renderHome();return}
+  if(H.zone==='menu'){const n=TABS.length;
+    if(k==='ArrowLeft')H.mi=Math.max(0,H.mi-1);else if(k==='ArrowRight')H.mi=Math.min(n,H.mi+1);
+    else if(k==='ArrowDown')H.zone=OPT.server==='offline'?'off':'rows';
+    else if(k==='Enter'){if(H.mi===n){S.pf=S.prof;show('s-prof');renderProfiles();return}if(TABS[H.mi]==='Settings'){openSettings();return}if(H.mi===0){H.zone=OPT.server==='offline'?'off':'rows'}else{msg(`${TABS[H.mi]} isn't drawn in this pass.`);return}}
+    else if(k==='Escape'){if(H.mi!==0){H.mi=0}else{msg('Back on Home with the menu focused asks to leave Jamfin.');return}}else return;renderHome();return}
+  const n=ROWS[H.r].items.length;
+  if(k==='ArrowRight'){if(H.c[H.r]===n-1){nudge($('rows').children[H.r].querySelectorAll('.cd')[n-1]);msg('End of the row: the walnut mark, a nudge, and no wrap.');return}H.c[H.r]++}
+  else if(k==='ArrowLeft'){if(H.c[H.r]===0)return;H.c[H.r]--}
+  else if(k==='ArrowDown'){if(H.r===ROWS.length-1)return;H.r++}
+  else if(k==='ArrowUp'){if(H.r===0){H.zone='menu';H.mi=0}else H.r--}
+  else if(k==='Escape'){if(H.r===0&&H.c[0]===0){H.zone='menu';H.mi=0}else{H.r=0;H.c[0]=0}}
+  else if(k==='Enter'){const it=ROWS[H.r].items[H.c[H.r]];if(it.type==='end'){msg(`${ENDS[it.k][0]} opens the library grid (not drawn in this pass).`);return}openDetail(it,'Home');return}
+  else return;renderHome()}
+
+/* ================= FILM / SERIES / DISC PAGE ================= */
+function epsOf(series,season,cur){const n=epCount(series,season);return Array.from({length:n},(_,i)=>{const e=i+1;let pos=0,dur=2580+((e*7)%5)*60;
+  if(cur){if(season<cur.s||(season===cur.s&&e<cur.e))pos=dur;else if(season===cur.s&&e===cur.e){pos=cur.pos;dur=cur.dur}}
+  return ep(series,season,e,{pos,dur,en:cur&&season===cur.s&&e===cur.e?cur.en:EPN[(season*5+e)%EPN.length]})})}
+function nextUpIn(D,season){const i=epsOf(D.series,season,D.cur).findIndex(e=>e.pos<e.dur);return Math.max(0,i)}
+function openDetail(it,from){
+  let D;
+  if(it.type==='film')D={kind:'film',it,zone:'acts',a:0};
+  else if(it.type==='disc')D={kind:'disc',it,zone:'acts',a:0};
+  else{const series=it.series,cur=it.type==='ep'?it:ep(series,1,1);D={kind:'series',series,cur,season:cur.s,zone:'acts',a:0,sf:cur.s-1,e:cur.e-1}}
+  D.lr=0;D.col={};D.pend=null;
+  if(S.det&&S.scr==='s-det')S.stack.push(S.det);else S.stack=[];
+  D.from=from;S.det=D;$('dpage').classList.remove('low');buildDetail();show('s-det')}
+function actsFor(D){const L=id=>D.pop===id?null:LISTS[id].o[LISTS[id].v];
+  if(D.kind==='film'){const it=D.it,A=[];
+    A.push(it.pos>0?{id:'resume',l:`Resume from ${hms(it.pos)}`,pri:true}:{id:'play',l:'Play',pri:true});
+    if(it.pos>0)A.push({id:'start',l:'Play from the start'});
+    A.push({id:'audio',l:'Audio:',v:L('audio')},{id:'subs',l:'Subtitles:',v:L('subs')},{id:'watched',l:'Mark as watched',ind:!!it.watched},{id:'fav',l:'Add to favourites',ind:!!it.fav});return A}
+  if(D.kind==='disc')return [{id:'play',l:'Play main feature',pri:true},{id:'chapters',l:`Chapters`,v:`${D.it.chs}`},{id:'extras',l:'Extras',v:`${D.it.extras}`},{id:'audio',l:'Audio:',v:L('audio')},{id:'subs',l:'Subtitles:',v:L('subs')},{id:'discmenu',l:"Try the disc's own menu"}];
+  const c=D.cur,se=SER[D.series],nEp=nEps(D.series);
+  return [c.pos>0?{id:'resume',l:`Resume S${c.s} E${c.e} from ${hms(c.pos)}`,pri:true}:{id:'play',l:`Play S${c.s} E${c.e}`,pri:true},
+    D.confirm?{id:'watched',l:`Press OK again to mark ${nEp} episodes`,cf:true}:{id:'watched',l:'Mark as watched',ind:!!se.watched},{id:'fav',l:'Add to favourites',ind:!!se.fav}]}
+function buildDetail(){const D=S.det;let right='';
+  if(D.kind==='film'||D.kind==='disc'){const it=D.it;
+    $('d-eb').textContent=D.kind==='disc'?'Blu-ray · disc image':'Film';$('d-t').textContent=it.t;
+    $('d-f').innerHTML=`<span>${it.y}</span><span>${words(it.dur)}</span>${D.kind==='film'?`<span>Rated ${it.age}</span>`:''}<span>Ends at <b>${ends(it)}</b></span>`;
+    $('d-tech').innerHTML=it.tech.map(x=>`<span>${x}</span>`).join('');
+    right=`<div class="bd">${art(keyOf(it),'w')}</div>`+(D.kind==='disc'?`<p class="why"><i class="ind led on" style="--c:var(--warn);margin-top:8px"></i><span>${it.why}</span></p><p class="ov" style="-webkit-line-clamp:2">${it.ov}</p>`:`<p class="ov">${it.ov}</p><dl class="cr"><dt>Director</dt><dd>${it.dir}</dd><dt>Cast</dt><dd>${it.cast}</dd></dl>`)}
+  else{const se=SER[D.series],c=D.cur;
+    $('d-eb').textContent='Series';$('d-t').textContent=D.series;$('d-f').innerHTML=`<span>${se.y}</span><span>Rated ${se.age}</span><span>${nEps(D.series)} episodes</span>`;
+    $('d-tech').innerHTML=c.tech.map(x=>`<span>${x}</span>`).join('');
+    right=`<div class="bd">${art(keyOf(c),'w')}</div><p class="ov">${se.ov}</p><dl class="cr"><dt>Created by</dt><dd>${se.made}</dd><dt>Cast</dt><dd>${se.cast}</dd></dl>`}
+  $('dright').innerHTML=right;renderActs();buildLow();focusDetail()}
+/* the lower view works like Home: a sign above the focused row, and the next row below it */
+const people=str=>castOf(str).map(p=>Object.assign({type:'person'},p));
+function lowRows(D){
+  if(D.kind==='film')return [{id:'more',h:'More like this',items:MOV.slice(0,6),k:'w'},{id:'cast',h:'Cast',items:people(D.it.cast),k:'c'}];
+  if(D.kind==='disc'){const it=D.it;return [{id:'chapters',h:'Chapters',items:Array.from({length:it.chs},(_,i)=>i),k:'w'},{id:'extras',h:'Extras',items:EXTRAS.slice(0,it.extras),k:'c'}]}
+  return [{id:'seasons',k:'keys'},{id:'eps',h:'',items:[],k:'w'},{id:'cast',h:'Cast',items:people(SER[D.series].cast),k:'c'}]}
+function seasonKeys(D){const se=SER[D.series],K=Array.from({length:se.seasons},(_,i)=>({t:'s',s:i+1}));rangesOf(epCount(D.series,D.season)).forEach(r=>K.push({t:'r',r}));return K}
+function buildLow(){const D=S.det;D.rows=lowRows(D);
+  if(D.kind==='series'){D.eps=epsOf(D.series,D.season,D.cur);D.rows[1].items=D.eps;D.e=Math.min(D.e,D.eps.length-1)}
+  $('dlow').innerHTML=D.rows.map((R,ri)=>{
+    if(R.k==='keys')return `<div class="lr seasons" id="lr-keys"></div>`;
+    const cards=R.items.map((x,i)=>R.id==='chapters'?cardHTML({type:'chap'},'w',{t:CHN[i%12]+(i>=12?' II':''),s:hms(i*D.it.dur/D.it.chs),artKey:D.it.t+'c'+i,extra:`<span style="position:absolute;left:${Q(12)};top:${Q(12)};font:500 ${Q(22)} var(--mono);background:#121211;color:#ece8df;border-radius:${Q(6)};padding:0 ${Q(9)}">${i+1}</span>`})
+      :R.id==='extras'?cardHTML({type:'x'},'w',{t:x[0],s:x[1],artKey:D.it.t+'x'+i})
+      :R.id==='eps'?cardHTML(x,'w',{t:`E${x.e} · ${x.en}`,s:x.pos>=x.dur?`Watched · ${words(x.dur)}`:words(x.dur)})
+      :cardHTML(x,'w')).join('');
+    return `<div class="lr row ${R.k==='c'?'sm':''} ${R.id==='cast'?'cast':''}" style="padding-bottom:${Q(16)}"><div class="rowh"><span class="h"></span><span class="n"></span><span class="hint"></span></div><div class="strip">${cards}<i class="emark"></i></div></div>`}).join('');
+  if(D.kind==='series')renderKeys()}
+function renderKeys(){const D=S.det;D.keys=seasonKeys(D);const ri=D.keys.findIndex(k=>k.t==='r');
+  $('lr-keys').innerHTML=D.keys.map((k,i)=>(i===ri?`<span class="rdiv">Episodes</span>`:'')+(k.t==='s'?`<span class="skey ${k.s===D.season?'sel':''}"><span class="in">Season ${k.s}</span><i class="w wb"></i></span>`:`<span class="rk"><span class="in">${k.r[0]}–${k.r[1]}</span><i class="w wb"></i></span>`)).join('')}
+function renderActs(){const D=S.det;D.acts=actsFor(D);$('acts').innerHTML=D.acts.map(a=>`<div class="key ${a.pri?'pri':''}"><div class="in"><i class="w wl"></i><span>${a.v==null?a.l.replace(/:$/,''):a.l}${a.v?` <span class="v">${a.v}</span>`:''}</span><span class="sp"></span>${a.ind!==undefined?`<i class="ind sq ${a.ind?'on':''}"></i>`:''}</div>${a.cf?'<i class="cf"></i>':''}</div>`).join('')}
+function focusDetail(){const D=S.det;
+  [...$('acts').children].forEach((k,i)=>k.classList.toggle('f',D.zone==='acts'&&D.a===i&&!D.pop));
+  const low=D.zone==='low';$('dpage').classList.toggle('low',low);
+  $('crumb').textContent=low?`${D.kind==='series'?D.series:D.it.t} (top of page)`:D.from;
+  const rowsEl=[...$('dlow').querySelectorAll('.lr')];
+  D.rows.forEach((R,ri)=>{const el=rowsEl[ri],cur=low&&D.lr===ri;
+    if(R.k==='keys'){[...el.querySelectorAll('.skey,.rk')].forEach((k,i)=>{k.classList.toggle('f',cur&&D.sf===i);const K=D.keys[i];if(K.t==='r')k.classList.toggle('sel',low&&D.lr===1&&D.e+1>=K.r[0]&&D.e+1<=K.r[1])});return}
+    const c=R.id==='eps'?D.e:(D.col[R.id]||0),n=R.items.length,cards=[...el.querySelectorAll('.cd')];
+    cards.forEach((cd,i)=>cd.classList.toggle('f',cur&&i===c));
+    const step=R.k==='c'?288:380,vis=R.k==='c'?6:4;
+    el.querySelector('.strip').style.transform=`translateX(-${Q(Math.min(Math.max(0,c-1),Math.max(0,n-vis))*step)})`;
+    let hint='';if(R.id==='eps'&&D.pend&&D.pend!==D.season)hint=OPT.season==='rest'?`Rest on Season ${D.pend}, or press ↓, to show it`:`↓ or OK shows Season ${D.pend}`;
+    el.querySelector('.h').textContent=R.id==='eps'?`Season ${D.season}`:R.h;
+    el.querySelector('.n').textContent=cur?`${c+1} of ${n}`:(R.id==='eps'?`${n} episodes`:n);
+    el.querySelector('.hint').textContent=hint;
+    el.classList.toggle('stale',!!hint)});
+  /* top view: the first lower row peeks at y 874. Lower view: rows start at y 336 under the sign, scrolled only as far as the
+     focused row needs to end above the bottom safe line (1026). */
+  let off=0;if(low){const tops=rowsEl.map(e=>e.offsetTop/U()),bot=(rowsEl[D.lr].offsetTop+rowsEl[D.lr].offsetHeight)/U();for(let i=0;i<=D.lr;i++){if(bot-tops[i]<=1026-336){off=tops[i];break}}}
+  $('dlow').style.transform=low?`translateY(-${Q(874-336+off)})`:'none';
+  if(low)renderLsign();
+  const a=D.acts[D.a],R=D.rows[D.lr];
+  $('st-foc').textContent=D.pop?`${LISTS[D.pop].h}: ${LISTS[D.pop].o[D.pi]}`:D.zone==='acts'?a.l+(a.v?' '+a.v:''):R.id==='seasons'?(D.keys[D.sf].t==='s'?`Season ${D.keys[D.sf].s} key`:`Episodes ${D.keys[D.sf].r.join('–')} key`):R.id==='eps'?`S${D.season} E${D.e+1}`:`${R.h} ${(D.col[R.id]||0)+1}`}
+/* the sign never repeats what the focused card's plinth already says (year, S/E, runtime, role, start time) */
+function renderLsign(){const D=S.det,R=D.rows[D.lr];let eb='',t='',f='',o='';
+  if(R.id==='seasons'){const k=D.keys[D.sf];
+    if(k.t==='s'){const n=epCount(D.series,k.s),w=k.s<D.cur.s?'Watched':k.s===D.cur.s?`${D.cur.e-1} of ${n} watched`:'Not started';eb='Season';t=`${D.series} · Season ${k.s}`;f=`<span>${n} episodes</span><span>${2018+k.s}</span><span>${w}</span>${k.s!==D.season?'<span><b>↓</b> opens it</span>':''}`;o=SEASONLINE[k.s]||''}
+    else{eb='Jump ahead';t=`Season ${D.season} · episodes ${k.r[0]} to ${k.r[1]}`;f=`<span>↓ or OK lands on episode ${k.r[0]}</span><span>The row stops at both ends</span>`}}
+  else if(R.id==='eps'){const e=D.eps[Math.min(D.e,D.eps.length-1)];eb=`Season ${e.s} · episode ${e.e} of ${D.eps.length}`;t=e.en;f=`<span>First shown ${3+e.e%20} March ${2018+e.s}</span>${e.pos>=e.dur?'':`<span>Ends at <b>${ends(e)}</b></span>`}`;o=EPO[(e.e+e.s*3)%EPO.length]+' '+EPO[(e.e+e.s*3+3)%EPO.length]}
+  else if(R.id==='more'){const m=R.items[D.col.more||0];eb='More like this';t=m.t;f=`<span>${words(m.dur)}</span><span>Rated ${m.age}</span><span>Ends at <b>${ends(m)}</b></span>`;o=m.line+' Picked because it shares a director or cast with this film.'}
+  else if(R.id==='cast'){const p=R.items[D.col.cast||0];eb='Cast';t=p.n;f=`<span>3 more titles in your library</span>`;o='OK opens their page: a short biography and every title of theirs in your library.'}
+  else if(R.id==='chapters'){const it=D.it,i=D.col.chapters||0,st=i*it.dur/it.chs;eb='Chapter';t=`Chapter ${i+1} · ${CHN[i%12]}${i>=12?' II':''}`;f=`<span>OK plays from here</span><span>Ends at <b>${clock(NOW+(it.dur-st)/60)}</b></span>`}
+  else if(R.id==='extras'){eb='Extra';t=R.items[D.col.extras||0][0];f=`<span>From the disc</span>`;o='Extras play in the same player; Back returns here.'}
+  $('ls-eb').textContent=eb;$('es-t').textContent=t;$('es-f').innerHTML=f;$('es-o').textContent=o}
+function openDrop(id){const D=S.det,L=LISTS[id];D.pop=id;D.pi=L.v;renderActs();
+  const top=128+$('acts').offsetTop/U()+D.a*74+64+8;$('drop').style.top=Q(top);$('drop').style.left=Q(96);renderDrop();$('drop').classList.add('on');focusDetail()}
+/* a chooser shows at most five rows; longer lists scroll and say where you are */
+function renderDrop(){const D=S.det,L=LISTS[D.pop],n=L.o.length,W=5,st=Math.max(0,Math.min(n-W,D.pi-2));
+  $('drop').innerHTML=`<span class="eb">${L.h}${n>W?` · ${D.pi+1} of ${n} ${st>0?'▲':''}${st+W<n?'▼':''}`:''}</span>`+L.o.slice(st,st+W).map((o,j)=>{const i=st+j;return `<div class="li ${i===D.pi?'f':''}"><i class="w wl"></i><span>${o}</span><span class="sp"></span><i class="ind sq ${i===L.v?'on':''}"></i></div>`}).join('');
+  $('st-foc').textContent=`${L.h}: ${L.o[D.pi]}`}
+function closeDrop(){S.det.pop=null;$('drop').classList.remove('on');renderActs()}
+let cfT,dwellT;
+function setSeason(D,s,toEps){clearTimeout(dwellT);D.pend=null;if(D.season!==s){D.season=s;D.e=s===D.cur.s?D.cur.e-1:nextUpIn(D,s);buildLow()}D.sf=s-1;if(toEps)D.lr=1}
+function keyDetail(k){const D=S.det;
+  if(D.pop){const L=LISTS[D.pop];if(k==='ArrowDown')D.pi=Math.min(L.o.length-1,D.pi+1);else if(k==='ArrowUp')D.pi=Math.max(0,D.pi-1);else if(k==='Enter'){L.v=D.pi;const h=L.h;closeDrop();focusDetail();toast(`${h}: ${L.o[L.v]}`,'dtoast');return}else if(k==='Escape'){closeDrop();focusDetail();return}else return;renderDrop();return}
+  if(k==='Escape'){if(D.zone!=='acts'){D.zone='acts';D.pend=null;clearTimeout(dwellT);focusDetail();return}if(S.stack.length){S.det=S.stack.pop();buildDetail();return}S.det=null;show('s-home');renderHome(true);return}
+  if(D.zone==='acts'){
+    if(k==='ArrowDown'){if(D.a<D.acts.length-1)D.a++;else{D.zone='low';D.lr=0;if(D.kind==='series')D.sf=D.season-1}}
+    else if(k==='ArrowUp')D.a=Math.max(0,D.a-1);
+    else if(k==='Enter'){const a=D.acts[D.a];
+      if(a.id==='resume'||a.id==='play'){const it=D.kind==='series'?D.cur:D.it;play(it,a.id==='resume'?`Resume · from ${hms(it.pos)}`:D.kind==='disc'?'Main feature':'Play');return}
+      if(a.id==='start'){D.it.pos=0;play(D.it,'Play from the start');return}
+      if(a.id==='audio'||a.id==='subs'){openDrop(a.id);return}
+      if(a.id==='chapters'){D.zone='low';D.lr=0;D.col.chapters=0;focusDetail();return}
+      if(a.id==='extras'){D.zone='low';D.lr=1;D.col.extras=0;focusDetail();return}
+      if(a.id==='discmenu'){msg("Would hand the remote to the disc's own menu; Back twice leaves it.");return}
+      if(a.id==='watched'){if(D.kind==='film'){D.it.watched=!D.it.watched;toast(D.it.watched?'Marked as watched':'Marked as unwatched','dtoast')}
+        else{const se=SER[D.series];if(se.watched){se.watched=false;toast('Marked as unwatched','dtoast')}else if(D.confirm){clearTimeout(cfT);D.confirm=false;se.watched=true;toast(`${nEps(D.series)} episodes marked as watched`,'dtoast')}else{D.confirm=true;clearTimeout(cfT);cfT=setTimeout(()=>{D.confirm=false;renderActs();focusDetail()},3000)}}}
+      if(a.id==='fav'){const o=D.kind==='series'?SER[D.series]:D.it;o.fav=!o.fav}
+      renderActs()}
+    else return;
+    if(D.confirm&&D.acts[D.a].id!=='watched'){D.confirm=false;clearTimeout(cfT);renderActs()}}
+  else{const R=D.rows[D.lr];
+    if(R.id==='seasons'){const K=D.keys,n=K.length;
+      if(k==='ArrowUp'){D.zone='acts';D.pend=null;clearTimeout(dwellT)}
+      else if(k==='ArrowRight'||k==='ArrowLeft'){const nf=Math.max(0,Math.min(n-1,D.sf+(k==='ArrowRight'?1:-1)));if(nf===D.sf)return;D.sf=nf;const kk=K[nf];clearTimeout(dwellT);
+        if(kk.t==='s'&&kk.s!==D.season){D.pend=kk.s;
+          /* nothing loads while focus passes over season keys: the row follows only after focus rests 500 ms (the house preview rule) */
+          if(OPT.season==='rest')dwellT=setTimeout(()=>{if(S.det===D&&D.zone==='low'&&D.lr===0&&D.pend===kk.s){setSeason(D,kk.s,false);focusDetail()}},500)}
+        else D.pend=null}
+      else if(k==='ArrowDown'||k==='Enter'){const kk=K[D.sf];if(kk.t==='s')setSeason(D,kk.s,true);else{D.e=kk.r[0]-1;D.lr=1;D.pend=null}}
+      else return}
+    else{const n=R.items.length,c=R.id==='eps'?D.e:(D.col[R.id]||0);let nc=c;
+      if(k==='ArrowRight'){if(c===n-1){nudge([...$('dlow').querySelectorAll('.lr')][D.lr].querySelectorAll('.cd')[c]);msg(R.id==='eps'?'Last episode of this season: the row stops. Range and season keys are one press up.':'End of the row.');return}nc=c+1}
+      else if(k==='ArrowLeft')nc=Math.max(0,c-1);
+      else if(k==='ArrowUp'){if(D.lr===0)D.zone='acts';else{D.lr--;if(D.rows[D.lr].id==='seasons'){const ri=D.keys.findIndex(x=>x.t==='r'&&D.e+1>=x.r[0]&&D.e+1<=x.r[1]);D.sf=ri>=0?ri:D.season-1}}}
+      else if(k==='ArrowDown'){if(D.lr<D.rows.length-1)D.lr++;else return}
+      else if(k==='Enter'){
+        if(R.id==='eps'){const e=D.eps[D.e];if(e.pos>=e.dur)e.pos=0;play(e,e.pos?`Resume · from ${hms(e.pos)}`:'Play');return}
+        if(R.id==='more'){openDetail(R.items[c],D.it.t);return}
+        if(R.id==='cast'){msg(`Would open ${R.items[c].n}'s page (the person page isn't redrawn in this pass).`);return}
+        if(R.id==='chapters'){const it=D.it;it.pos=Math.round(c*it.dur/it.chs);play(it,`Chapter ${c+1}`);return}
+        if(R.id==='extras'){msg(`Would play "${R.items[c][0]}" in the same player.`);return}}
+      else return;
+      if(R.id==='eps')D.e=nc;else D.col[R.id]=nc}}
+  focusDetail()}
+
+/* ================= SETTINGS > APPEARANCE (per profile) ================= */
+const CATS=['Profile','Appearance','Home','Captions','Caption look','Audio','Audio output','Playback','Discs','Server','Requests','About'];
+const SROWS=[{id:'look',l:'Look',o:['Braun Hi-Fi','Unigrid','Olympia','New Wave',"Cel '88",'Cut Paper','Kinetic Grid','Swiss Poster','Video Store']},{id:'light',l:'Lighting',o:['Night','Day','Auto']},{id:'covers',l:'Covers',o:['Full colour','Toned']},{id:'motion',l:'Motion',o:['Full','Calm']},{id:'back',l:'Animate Back',o:['On','Off']},{id:'sounds',l:'Interface sounds',o:['Off','Subtle','Full']}];
+const SV={look:0,back:0,sounds:0};
+function sval(r){const p=PR();if(r.id==='light')return p.light==='day'?'Day':'Night';if(r.id==='covers')return p.covers==='full'?'Full colour':'Toned';if(r.id==='motion')return p.motion==='calm'?'Calm':'Full';return r.o[SV[r.id]]}
+function openSettings(){S.set.i=0;$('cats').innerHTML=CATS.map(c=>`<div class="cat ${c==='Appearance'?'sel':''}">${c}</div>`).join('');renderSettings();show('s-set')}
+function renderSettings(){const p=PR();
+  $('srows').innerHTML=`<div class="shead">Appearance <span>saved to ${p.n}'s profile</span></div>`+SROWS.map((r,i)=>`<div class="key ${i===S.set.i?'f':''}"><div class="in"><i class="w wl"></i><span>${r.l}</span><span class="sp"></span><span class="v">${sval(r)}</span></div></div>`).join('')+`<p class="snote">${S.set.i===0?'Other looks keep working; only Braun Hi-Fi is drawn in this mockup.':'OK changes it. It applies at once, to this profile only.'}</p>`;
+  $('st-foc').textContent=SROWS[S.set.i].l}
+function keySet(k){const r=SROWS[S.set.i],p=PR();
+  if(k==='ArrowDown')S.set.i=Math.min(SROWS.length-1,S.set.i+1);else if(k==='ArrowUp')S.set.i=Math.max(0,S.set.i-1);
+  else if(k==='Enter'){if(r.id==='light')p.light=p.light==='day'?'night':'day';else if(r.id==='covers')p.covers=p.covers==='full'?'toned':'full';else if(r.id==='motion')p.motion=p.motion==='calm'?'full':'calm';else if(r.id==='look'){msg('The look cycles through all nine; this mockup only draws Braun Hi-Fi.');SV.look=(SV.look+1)%r.o.length}else SV[r.id]=(SV[r.id]+1)%r.o.length;syncSegs();applyOpts()}
+  else if(k==='Escape'){S.home.zone='menu';S.home.mi=TABS.indexOf('Settings');show('s-home');renderHome(true);return}else return;renderSettings()}
+
+/* ================= TITLE CARD → PLAYER ================= */
+let tcTimers=[];
+function play(it,how){S.busy=true;const card=$('tcard'),slat=$('slat');tcTimers.forEach(clearTimeout);tcTimers=[];
+  const calm=PR().motion==='calm',full=S.plays===0&&!calm;S.plays++;
+  /* one launch rule with the TV launcher and NervOS: hold = max(load, floor); the full shutter (600 ms floor) on the first
+     Play of a session, the short form (300 ms floor) after that, Calm a 140 ms fade */
+  const ready=OPT.load*1000,floor=full?600:300;
+  card.style.setProperty('--tin',full?'460ms':'200ms');card.style.setProperty('--tout',full?'300ms':'200ms');card.style.setProperty('--tdel',full?'180ms':'0ms');
+  $('tc-eb').textContent=how;$('tc-t').textContent=it.type==='ep'?it.series:it.t;$('tc-s').textContent=it.type==='ep'?`S${it.s} E${it.e} · ${it.en}`:(it.type==='disc'?'Reading the disc':'');$('tc-b').classList.remove('on');
+  slat.style.setProperty('--p',0);card.classList.remove('out','in');card.classList.add('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('in')));
+  const t0=performance.now();S.tc={it,t0,ready,floor,full};
+  const tick=setInterval(()=>{const el=performance.now()-t0;slat.style.setProperty('--p',Math.min(1,ready?el/ready:1));
+    if(el>10000&&!$('tc-b').classList.contains('on')){$('tc-s').textContent='The server is slow to start this';$('tc-b').classList.add('on')}},60);
+  tcTimers.push(tick);
+  tcTimers.push(setTimeout(()=>{startPlayer(it);/* composed behind the opaque card first */},ready));
+  const shown=Math.max(ready,floor);
+  tcTimers.push(setTimeout(()=>{clearInterval(tick);slat.style.setProperty('--p',1);card.classList.add('out');card.classList.remove('in');
+    tcTimers.push(setTimeout(()=>{card.classList.remove('show','out');S.busy=false;S.tc=null},full?320:220));
+    const extra=Math.max(0,shown-ready),day=PR().light==='day',big=day&&OPT.tcd==='dark'?2:1;
+    $('st-tc').textContent=`${Math.round(shown)} ms · stream ready at ${Math.round(ready)} ms · ${extra?`added wait ${Math.round(extra)} ms`:'no added wait'} · ${calm?'Calm fade':full?'full form (first Play this session)':'short form'} · ${big} big luminance change${big>1?`s ${Math.round(shown+(full?460:200))} ms apart${shown+(full?460:200)<1000?' (over the 2-per-second floor)':''}`:day?' (Day card matches the page)':''}`},shown));
+  msg(`Play after ${S.presses} press${S.presses===1?'':'es'} from Home (budget 3).`)}
+function cancelCard(){tcTimers.forEach(t=>{clearTimeout(t);clearInterval(t)});const card=$('tcard');card.classList.add('out');card.classList.remove('in');setTimeout(()=>card.classList.remove('show','out'),300);S.busy=false;S.tc=null;$('st-tc').textContent='stopped with Back';if(S.scr==='s-pl'){S.pl=null;show('s-det')}msg('Loading stopped; back on the page with focus on the key you pressed.')}
+function chapCount(it){return it.type==='film'?12:it.type==='disc'?Math.min(it.chs,12):6}
+function startPlayer(it,o={}){const ch=chapCount(it);
+  S.pl={it,playing:true,zone:'band',ch,cf:0,st:0,li:0,list:null,hidden:false,state:o.state||'normal',pk:0,eps:0,pz:null,taken:false,skipSeen:false,skipGone:false};clearTimeout(takeT);
+  ['skip','nextp'].forEach(id=>$(id).classList.remove('on','f','taken'));
+  $('video').innerHTML=scene(keyOf(it));$('video').classList.remove('dim');
+  $('p-t').textContent=it.type==='ep'?`${it.series} · S${it.s} E${it.e}`:it.t;
+  $('trk').querySelectorAll('.nt,.seg').forEach(n=>n.remove());
+  $('trk').insertAdjacentHTML('afterbegin',Array.from({length:ch-1},(_,i)=>`<i class="nt" style="left:${(i+1)/ch*100}%"></i>`).join('')+(it.type==='ep'?`<i class="seg" style="left:${60/it.dur*100}%;width:${90/it.dur*100}%"></i>`:''));
+  $('chap-s').innerHTML=Array.from({length:ch},(_,i)=>cardHTML({type:'chap'},'w',{t:CHN[i]||`Chapter ${i+1}`,s:hms(i*it.dur/ch),artKey:keyOf(it)+'ch'+i,extra:`<span class="num">${i+1}</span>`})).join('');
+  const keys=[['subs','Subtitles'],['audio','Audio'],['speed','Speed'],['pic','Picture'],['info','Info'],['start','Play from the start']];
+  if(it.type==='disc')keys.push(['disc','Disc menu']);keys.push(['exit','Exit']);S.pl.keys=keys;
+  $('pstrip').innerHTML=keys.map(([id,l])=>`<div class="skk" data-id="${id}"><div class="in">${l}${LISTS[id]?`<span class="v" data-lv="${id}"></span>`:''}</div><i class="w wb"></i></div>`).join('');
+  $('chap').classList.remove('on');$('plist').classList.remove('on');$('pband').className='pband';$('s-pl').classList.remove('bandhidden');
+  show('s-pl');renderPlayer()}
+function chapOf(){const P=S.pl;return Math.min(P.ch-1,Math.floor(P.it.pos/P.it.dur*P.ch))}
+const inIntro=()=>S.pl.it.type==='ep'&&S.pl.it.pos>=60&&S.pl.it.pos<150;
+/* Prompts. Pass 3 rule: OK presses what is lit. On the timeline OK pauses. Skip intro takes the light for 8 s when it first
+   appears (drawn: lifted, lit window, "OK" printed, a draining slot), then hands focus back; ↑ reaches it again. Next episode
+   never takes focus: it starts by itself, OK pauses and holds the countdown, ↑ then OK starts it now. */
+function promptsNow(){const P=S.pl,it=P.it,blocked=['still','err'].includes(P.state);
+  const skip=!blocked&&!P.skipGone&&(P.state==='skip'||(P.state==='normal'&&inIntro()));
+  const next=!blocked&&(P.state==='next'||(it.type==='ep'&&it.dur-it.pos<=40&&P.state!=='dismissed'));
+  return {skip,next}}
+let takeT;
+function renderPlayer(){const P=S.pl,it=P.it,f=it.pos/it.dur,c=chapOf(),mode=OPT.prompt;let pr=promptsNow();
+  if(pr.skip&&!P.skipSeen){P.skipSeen=true;if(mode==='take'&&P.zone==='band'){P.pz='skip';P.taken=true;clearTimeout(takeT);takeT=setTimeout(()=>{if(S.pl===P&&P.taken){P.taken=false;if(P.pz==='skip')P.pz=null;renderPlayer()}},8000)}}
+  if(!inIntro()&&P.state!=='skip'){P.skipSeen=false;P.skipGone=false}
+  if(!pr.skip&&P.pz==='skip'){P.pz=null;P.taken=false}
+  if(!pr.next&&P.pz==='next')P.pz=null;
+  $('s-pl').classList.toggle('lifted',P.zone==='strip'||P.zone==='list');$('s-pl').classList.toggle('chapopen',P.zone==='chap');
+  const buf=P.state==='buffer';$('bar').classList.toggle('buffer',buf);
+  $('p-st').innerHTML=buf?`<i class="ind slot on" style="--c:var(--warn)"></i>Loading<span class="minislat" id="ms"><i></i></span>`:`<i class="ind slot ${P.playing?'on':''}"></i>${P.playing?'Playing':'Paused'}`;
+  const pName=pr.skip?'Skip intro':pr.next?'Next episode':null;let bandH;
+  if(mode==='p2')bandH=pr.next?'<span><kbd>OK</kbd>Next episode</span><span><kbd>Back</kbd>Stay for the credits</span>':pr.skip?'<span><kbd>OK</kbd>Skip intro</span><span><kbd>↑</kbd>Chapters</span>':'<span><kbd>↑</kbd>Chapters</span><span><kbd>↓</kbd>Settings</span>';
+  else if(P.pz)bandH=`<span><kbd>OK</kbd>${pName}</span><span><kbd>↓</kbd>Timeline</span>`;
+  else if(pName)bandH=`<span><kbd>OK</kbd>${P.playing?'Pause':'Play'}</span><span><kbd>↑</kbd>${pName}</span>`;
+  else bandH='<span><kbd>↑</kbd>Chapters</span><span><kbd>↓</kbd>Settings</span>';
+  $('p-hints').innerHTML=({band:bandH,chap:'<span><kbd>OK</kbd>Jump</span><span><kbd>↓</kbd>Close</span>',strip:'<span><kbd>OK</kbd>Open</span><span><kbd>↑</kbd>Close</span>',list:'<span><kbd>OK</kbd>Choose</span><span><kbd>Back</kbd>Close</span>'})[P.zone]||'';
+  $('p-ch').textContent=`Chapter ${c+1} of ${P.ch} · ${CHN[c]||''}`;$('p-ch').classList.toggle('away',P.zone==='chap');
+  $('p-end').innerHTML=`<span>Ends at</span> ${clock(NOW+(it.dur-it.pos)/60)}`;
+  $('p-lit').style.width=f*100+'%';$('p-cap').style.left=f*100+'%';
+  const pt=$('p-pt');pt.textContent=hms(it.pos);pt.style.left=`clamp(${Q(60)},${f*100}%,calc(100% - ${Q(60)}))`;
+  const tot=$('p-tot');tot.textContent=hms(it.dur);tot.style.opacity=f>.86?0:1;
+  $('pstrip').querySelectorAll('[data-lv]').forEach(v=>{const id=v.dataset.lv;v.textContent=(P.zone==='list'&&P.list===id)?'':LISTS[id].o[LISTS[id].v]});
+  $('chap-h').textContent=`Chapters · ${P.cf+1} of ${P.ch}`;
+  [...$('chap-s').children].forEach((cd,i)=>cd.classList.toggle('f',P.zone==='chap'&&P.cf===i));$('chap-s').style.transform=`translateX(-${Q(Math.min(Math.max(0,P.cf-2),Math.max(0,P.ch-5))*328)})`;
+  [...$('pstrip').children].forEach((k,i)=>k.classList.toggle('f',(P.zone==='strip'||P.zone==='list')&&P.st===i));
+  const sk=$('skip'),nx=$('nextp');
+  sk.classList.toggle('on',pr.skip);nx.classList.toggle('on',pr.next);
+  sk.classList.toggle('f',mode==='p2'?pr.skip:P.pz==='skip');sk.classList.toggle('taken',P.pz==='skip'&&!!P.taken);
+  nx.classList.toggle('f',mode==='p2'?pr.next:P.pz==='next');
+  $('skip-k').textContent=mode==='p2'||P.pz==='skip'?'OK':'↑';$('next-k').textContent=mode==='p2'||P.pz==='next'?'OK':'↑';
+  const note=P.pz==='skip'&&P.taken;$('skip-note').innerHTML=note?'<kbd>↓</kbd>keeps OK on the timeline':'';$('skip-note').style.display=note?'':'none';
+  if(pr.next){const n=nextEp(it);$('n-art').innerHTML=art(keyOf(n),'w');$('n-t').textContent=`S${n.s} E${n.e} · ${n.en}`;$('n-s').textContent=P.playing||mode==='p2'?`Starts in ${Math.max(1,Math.round(it.dur-it.pos-30))} s`:'Paused · it waits for you'}
+  $('still').classList.toggle('on',P.state==='still');$('err').classList.toggle('on',P.state==='err');
+  $('video').classList.toggle('dim',P.state==='still'||P.state==='err');
+  if(P.state==='still'){$('still-t').textContent=`Still watching ${it.series||it.t}?`;$('still-s').textContent='Paused after three episodes in a row with no buttons pressed.';$('still-k').innerHTML=[['Keep watching',true],['Stop for now',false]].map(([l,pri],i)=>`<div class="key ${pri?'pri':''} ${P.pk===i?'f':''}"><div class="in"><i class="w wl"></i><span>${l}</span></div></div>`).join('')}
+  if(P.state==='err'){$('err-t').textContent=`The server stopped sending this ${it.type==='ep'?'episode':'film'}.`;$('err-s').textContent=`It stopped at ${hms(it.pos)}. The server may be busy; your place is saved.`;$('err-k').innerHTML=[['Try again',true],['Back to the page',false]].map(([l,pri],i)=>`<div class="key ${pri?'pri':''} ${P.pk===i?'f':''}"><div class="in"><i class="w wl"></i><span>${l}</span></div></div>`).join('')}
+  $('st-foc').textContent=P.state==='still'||P.state==='err'?['Keep watching','Stop for now','Try again','Back to the page'][P.pk+(P.state==='err'?2:0)]:P.pz?`${pName} (OK presses it${P.taken?'; hands focus back in 8 s':''})`:P.hidden?'Video (band hidden)':({band:pName&&mode!=='p2'?'Timeline (OK pauses)':pName?`Timeline (OK presses ${pName})`:'Timeline',chap:`Chapter ${P.cf+1}`,strip:P.keys[P.st][1],list:P.list?LISTS[P.list].o[P.li]:''})[P.zone]}
+function nextEp(it){return ep(it.series||'Signal Street',it.s||2,(it.e||4)+1)}
+function renderList(){const P=S.pl,L=LISTS[P.list];const pl=$('plist');pl.innerHTML=`<span class="eb">${L.h}</span>`+L.o.map((o,i)=>`<div class="li ${i===P.li?'f':''}"><i class="w wl"></i><span>${o}</span><span class="sp"></span><i class="ind sq ${i===L.v?'on':''}"></i></div>`).join('');
+  const key=$('pstrip').children[P.st];pl.style.left=Q(Math.min(1824-440,96+key.offsetLeft/U()))}
+function exitPlayer(){const it=S.pl.it;S.pl=null;show('s-det');
+  if(S.det){if(S.det.kind==='series'&&it.type==='ep'){S.det.cur=it;S.det.season=it.s;S.det.zone='acts';S.det.a=0;buildDetail()}else{renderActs();focusDetail()}}
+  const hc=CONT.indexOf(it);if(hc>=0){const cd=$('rows').children[0].querySelectorAll('.cd')[hc];const g=cd.querySelector('.pg i');if(g)g.style.width=pct(it)+'%'}}
+function setBand(hidden){const P=S.pl;P.hidden=hidden;$('pband').classList.toggle('hide',hidden);$('s-pl').classList.toggle('bandhidden',hidden)}
+let bufT;
+function seekBuffer(){const P=S.pl;P.state='buffer';clearInterval(bufT);let p=0;bufT=setInterval(()=>{p+=.12;const m=$('ms');if(m)m.style.setProperty('--p',Math.min(1,p));if(p>=1){clearInterval(bufT);if(S.pl&&S.pl.state==='buffer'){S.pl.state='normal';renderPlayer()}}},120)}
+function bandKeys(k){const P=S.pl;
+  if(k==='ArrowLeft'||k==='ArrowRight'){P.it.pos=Math.max(0,Math.min(P.it.dur-1,P.it.pos+(k==='ArrowRight'?10:-10)));if(P.state==='skip'||P.state==='next')P.state='normal';return true}
+  if(k==='Enter'){P.playing=!P.playing;return true}
+  if(k==='ArrowUp'){P.zone='chap';P.cf=chapOf();$('chap').classList.add('on');return true}
+  if(k==='ArrowDown'||k==='m'){P.zone='strip';P.st=0;$('pband').classList.add('lift');return true}
+  if(k==='Escape'){setBand(true);return true}
+  return false}
+function keyPlayer(k){const P=S.pl,mode=OPT.prompt,pr=promptsNow();
+  if(P.state==='still'||P.state==='err'){
+    if(k==='ArrowDown')P.pk=1;else if(k==='ArrowUp')P.pk=0;
+    else if(k==='Enter'){if(P.pk===0){if(P.state==='still'){P.state='normal';P.playing=true}else{seekBuffer()}}else{exitPlayer();return}}
+    else if(k==='Escape'){exitPlayer();return}else return;renderPlayer();return}
+  const doSkip=()=>{P.it.pos=150;P.state='normal';P.pz=null;P.taken=false;toast('Intro skipped · Chapters (↑) still has it')};
+  const doNext=()=>{const n=nextEp(P.it);P.eps++;play(n,'Next episode')};
+  const drop=()=>{if(P.pz==='skip')P.skipGone=true;else P.state='dismissed';P.pz=null;P.taken=false};
+  if(P.hidden){
+    if(mode==='p2'){if(k==='Enter'&&pr.skip){doSkip();setBand(false);renderPlayer();return}setBand(false);if(k==='Escape'){exitPlayer();return}renderPlayer();return}
+    if(P.pz){if(k==='Enter'){if(P.pz==='next'){doNext();return}doSkip()}else if(k==='Escape')drop();else{P.pz=null;P.taken=false;setBand(false)}renderPlayer();return}
+    if(k==='ArrowUp'&&(pr.skip||pr.next)){P.pz=pr.skip?'skip':'next';renderPlayer();return}
+    if(k==='Enter')P.playing=!P.playing;
+    setBand(false);if(k==='Escape'){exitPlayer();return}renderPlayer();return}
+  if(P.zone==='band'){
+    if(mode==='p2'){
+      if(k==='Enter'&&pr.skip)doSkip();
+      else if(k==='Enter'&&pr.next){doNext();return}
+      else if(k==='Escape'&&pr.next)P.state='dismissed';
+      else if(!bandKeys(k))return}
+    else if(P.pz){
+      if(k==='Enter'){if(P.pz==='next'){doNext();return}doSkip()}
+      else if(k==='ArrowDown'){P.pz=null;P.taken=false}
+      else if(k==='Escape')drop();
+      else{P.pz=null;P.taken=false;if(!bandKeys(k))return}}
+    else{
+      if(k==='ArrowUp'&&(pr.skip||pr.next))P.pz=pr.skip?'skip':'next';
+      else if(k==='Escape'&&pr.next)P.state='dismissed';
+      else if(!bandKeys(k))return}}
+  else if(P.zone==='chap'){
+    if(k==='ArrowRight')P.cf=Math.min(P.ch-1,P.cf+1);else if(k==='ArrowLeft')P.cf=Math.max(0,P.cf-1);
+    else if(k==='Enter'){P.it.pos=Math.round(P.cf*P.it.dur/P.ch);P.zone='band';$('chap').classList.remove('on');toast(`Chapter ${P.cf+1} · ${CHN[P.cf]||''}`);seekBuffer()}
+    else if(k==='ArrowDown'||k==='Escape'){P.zone='band';$('chap').classList.remove('on')}else return}
+  else if(P.zone==='strip'){const n=P.keys.length;
+    if(k==='ArrowRight')P.st=Math.min(n-1,P.st+1);else if(k==='ArrowLeft')P.st=Math.max(0,P.st-1);
+    else if(k==='ArrowUp'||k==='Escape'||k==='m'){P.zone='band';$('pband').classList.remove('lift')}
+    else if(k==='Enter'){const id=P.keys[P.st][0];
+      if(LISTS[id]){P.list=id;P.li=LISTS[id].v;P.zone='list';renderPlayer();renderList();$('plist').classList.add('on');return}
+      else if(id==='info')toast(`${P.it.tech.join(' · ')} · Direct play`);
+      else if(id==='start'){P.it.pos=0;toast('Playing from the start')}
+      else if(id==='disc'){S.pl=null;show('s-det');return}
+      else if(id==='exit'){exitPlayer();return}}
+    else return}
+  else if(P.zone==='list'){const L=LISTS[P.list];
+    if(k==='ArrowDown')P.li=Math.min(L.o.length-1,P.li+1);else if(k==='ArrowUp')P.li=Math.max(0,P.li-1);
+    else if(k==='Enter'){L.v=P.li;toast(`${L.h}: ${L.o[P.li]}`);P.zone='strip';$('plist').classList.remove('on')}
+    else if(k==='Escape'){P.zone='strip';$('plist').classList.remove('on')}else return;
+    if(P.zone==='list')renderList()}
+  renderPlayer()}
+setInterval(()=>{const P=S.pl;if(P&&P.playing&&!S.busy&&P.state!=='still'&&P.state!=='err'&&P.state!=='buffer'&&S.scr==='s-pl'){P.it.pos=Math.min(P.it.dur,P.it.pos+1);
+  /* Next episode starts by itself when its countdown ends (paused = it waits) */
+  if(P.it.type==='ep'&&P.state!=='dismissed'&&OPT.prompt!=='p2'&&P.it.dur-P.it.pos<=30){P.eps++;play(nextEp(P.it),'Next episode');return}
+  renderPlayer()}},1000);
+
+/* ================= input ================= */
+function key(k){
+  if(k==='g'){msg("Guide belongs to the TV: Lobby's TV menu (inputs, picture, sound, sleep) opens over Jamfin. Jamfin's own menu is ≡ (M).");return}
+  if(S.tc){if(k==='Escape')cancelCard();return}
+  if(S.busy)return;S.presses++;
+  ({'s-prof':keyProf,'s-home':keyHome,'s-det':keyDetail,'s-set':keySet,'s-pl':keyPlayer})[S.scr](k);
+  if(S.scr==='s-home'&&S.home.zone==='rows'&&S.home.r===0&&S.home.c[0]===0)S.presses=0;
+  $('st-pr').textContent=S.presses}
+tvf.addEventListener('keydown',e=>{const m={Backspace:'Escape',M:'m',G:'g'};const k=m[e.key]||e.key;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter','Escape','m','g'].includes(k)){e.preventDefault();if(e.isTrusted)stopTour();key(k)}});
+document.querySelectorAll('.kb').forEach(b=>b.addEventListener('click',()=>{stopTour();tvf.focus({preventScroll:true});key(b.dataset.key)}));
+
+/* ================= page controls ================= */
+function syncSegs(){const p=PR();const v={prof:String(S.prof),light:p.light,covers:p.covers,motion:p.motion,server:OPT.server,load:String(OPT.load),prompt:OPT.prompt,season:OPT.season,win:OPT.win,tcd:OPT.tcd};
+  document.querySelectorAll('.seg[data-g]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v[g.dataset.g])))}
+function applyOpts(){const p=PR();stage.classList.toggle('day',p.light==='day');stage.classList.toggle('groove',OPT.win==='groove');stage.classList.toggle('lighttc',OPT.tcd==='light');stage.classList.toggle('toned',p.covers==='toned');stage.classList.toggle('calm',p.motion==='calm');
+  ['ph1','ph2','ph3'].forEach(id=>{$(id).classList.toggle('day',p.light==='day'&&id!=='ph3');$(id).classList.toggle('toned',p.covers==='toned')});
+  if(S.scr==='s-home')renderHome(true);if(S.scr==='s-set')renderSettings();buildPhones()}
+document.querySelectorAll('.seg[data-g]').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=g.dataset.g,v=b.dataset.v,p=PR();
+  if(k==='prof'){S.prof=+v;S.pf=+v;PROFILES.forEach((x,j)=>x.last=j===S.prof)}
+  else if(k==='light'||k==='covers'||k==='motion')p[k]=v;
+  else if(k==='server'){OPT.server=v;S.home.zone=v==='offline'?'off':'rows';if(v==='online')$('offnote').innerHTML=''}
+  else if(k==='load')OPT.load=+v;else OPT[k]=v;
+  syncSegs();applyOpts();if(S.scr==='s-prof')renderProfiles();if(S.scr==='s-pl'&&S.pl)renderPlayer();if(S.scr==='s-det'&&S.det)focusDetail()}));
+function jump(where){tcTimers.forEach(t=>{clearTimeout(t);clearInterval(t)});$('tcard').classList.remove('show','in','out');S.busy=false;S.tc=null;S.pl=null;$('drop').classList.remove('on');
+  if(where==='prof'){S.pf=S.prof;show('s-prof');renderProfiles()}
+  else if(where==='home'){S.home.zone=OPT.server==='offline'?'off':'rows';S.home.r=0;S.home.c=[0,0,0,0,0];show('s-home');renderHome(true)}
+  else if(where==='offline'){OPT.server='offline';syncSegs();S.home.zone='off';S.home.oi=0;show('s-home');renderHome(true)}
+  else if(where==='film')openDetail(CONT[0],'Home');
+  else if(where==='filmlow'){openDetail(CONT[0],'Home');S.det.zone='low';S.det.lr=0;S.det.col.more=1;focusDetail()}
+  else if(where==='series'){openDetail(CONT[1],'Home');S.det.zone='low';S.det.lr=1;focusDetail()}
+  else if(where==='long'){openDetail(CONT[1],'Home');const D=S.det;D.zone='low';setSeason(D,3,false);D.lr=0;D.sf=D.keys.length-1;focusDetail()}
+  else if(where==='disc')openDetail(DISCS[0],'Home');
+  else if(where==='set')openSettings();
+  else if(where==='player'){openDetail(CONT[0],'Home');startPlayer(CONT[0])}
+  S.presses=0;$('st-pr').textContent=0;tvf.focus({preventScroll:true})}
+document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>jump(b.dataset.jump)));
+document.querySelectorAll('[data-ps]').forEach(b=>b.addEventListener('click',()=>{const s=b.dataset.ps;jump('series');S.det.zone='acts';focusDetail();const it=CONT[1];
+  if(s==='skip'){it.pos=72;startPlayer(it)}else if(s==='next'){it.pos=it.dur-38;startPlayer(it,{state:'next'})}else if(s==='still'){startPlayer(it,{state:'still'});S.pl.playing=false}else if(s==='buffer'){startPlayer(it);seekBuffer()}else if(s==='err'){startPlayer(it,{state:'err'});S.pl.playing=false}
+  else return;renderPlayer();tvf.focus({preventScroll:true})}));
+
+
+/* ================= TOUR: steps through the key states by itself ================= */
+const TOUR=[
+ ['Profiles: focus opens on the last profile; its saved look is said once, under the row.',()=>{setProfile(0);jump('prof')}],
+ ['Home: the sign lives in the band, Stripes in the band\'s clear zone; Continue watching card 1 is focused.',()=>{jump('home')}],
+ ['Row end: the walnut mark after the last card, and a nudge on the extra press. Rows never wrap.',()=>{S.home.c[0]=CONT.length-1;renderHome(true);setTimeout(()=>key('ArrowRight'),900)}],
+ ['Film page: Resume is the one orange key, focused (it rises, black label, lit window).',()=>{jump('film')}],
+ ['Subtitles drops below its key; seven options show five at a time with "3 of 7". The key hides its value while open.',()=>{jump('film');S.det.a=3;openDrop('subs');S.det.pi=2;renderDrop()}],
+ ['Lower view, filled: a sign, More like this, then Cast below it. Nothing on the sign repeats the card.',()=>{jump('filmlow')}],
+ ['Seasons: passing over a season key loads nothing; the row dims, then follows after focus rests 500 ms (↓ opens it at once).',()=>{jump('series');const D=S.det;D.lr=0;D.sf=D.season-1;focusDetail();setTimeout(()=>key('ArrowRight'),500)}],
+ ['Long season: Season 3 has 22 episodes, so range keys join the row. 21–22 is focused.',()=>{jump('long')}],
+ ['↓ from 21–22 lands on episode 21, and the range key stays pressed in to say where you are.',()=>{jump('long');setTimeout(()=>key('ArrowDown'),400)}],
+ ['Ben (Day): unlit windows are hairline grooves; the focused card opens the full window.',()=>{setProfile(1);jump('home');S.home.c[0]=1;renderHome(true)}],
+ ['Ben plays: the Day title card takes the page\'s lightness, so only card → picture is a big change.',()=>{setProfile(1);jump('film');OPT.load=2.6;key('Enter');OPT.load=0.4}],
+ ['Skip intro appears and takes the light for 8 s (the slot drains). OK skips only while it is visibly focused.',()=>{setProfile(0);playerAt(62)}],
+ ['After 8 s focus returns to the timeline: OK pauses again; ↑ reaches the prompt.',()=>{playerAt(64);const P=S.pl;P.taken=false;P.pz=null;clearTimeout(takeT);renderPlayer()}],
+ ['Next episode never takes focus. OK paused the episode, and the countdown waits for you.',()=>{playerAt(S0().dur-37);setTimeout(()=>key('Enter'),700)}],
+ ['Still watching? A centred panel; the recovery key is focused and orange.',()=>{playerAt(900,{state:'still'});S.pl.playing=false;renderPlayer()}],
+ ['Offline Home: Try again, TV Home, a quiet retry every 30 s, and the last-synced row dimmed inside one dashed outline.',()=>{jump('offline')}]
+];
+const S0=()=>CONT[1];
+function playerAt(pos,o){jump('series');S.det.zone='acts';S.det.lr=0;focusDetail();const it=CONT[1];it.pos=pos;startPlayer(it,o);renderPlayer()}
+function setProfile(i){S.prof=i;S.pf=i;PROFILES.forEach((x,j)=>x.last=j===i);syncSegs();applyOpts()}
+let tourT=null,tourI=0;
+function stopTour(){if(tourT===null)return;clearTimeout(tourT);tourT=null;$('tour').textContent='Tour';$('tcap').textContent='Tour stopped. Press Tour to start again.';
+  OPT.server='online';OPT.load=0.4;syncSegs()}
+function tourStep(){if(tourI>=TOUR.length){stopTour();$('tcap').textContent='Tour finished. Everything is still interactive.';setProfile(0);OPT.server='online';syncSegs();jump('home');return}
+  const [cap,run]=TOUR[tourI];if(OPT.server==='offline'&&tourI<TOUR.length-1){OPT.server='online';syncSegs()}
+  run();$('tcap').innerHTML=`<b>${tourI+1} of ${TOUR.length}</b>${cap}`;tourI++;tourT=setTimeout(tourStep,tourI===11||tourI===14?3800:3200)}
+$('tour').addEventListener('click',()=>{if(tourT!==null){stopTour();return}tourI=0;$('tour').textContent='Stop tour';S.plays=0;tourStep()});
+$('tcap').textContent=`Steps through ${TOUR.length} states, about 3 seconds each. Any key on the TV stops it.`;
+
+/* ================= PHONES ================= */
+const ICON={home:'<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>',mov:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5v4M16 5v4"/>',shows:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M9 3l3 3 3-3"/>',search:'<circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/>',dl:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',back:'<path d="M15 5l-7 7 7 7"/>',chev:'<path d="M6 9l6 6 6-6"/>',close:'<path d="M6 6l12 12M18 6 6 18"/>',play:'<path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/>',pause:'<path d="M8 5v14M16 5v14" stroke-width="3"/>',r10:'<path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4"/>',f10:'<path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v4h-4"/>',done:'<path d="M5 12l5 5 9-10"/>'};
+const ic=k=>`<svg viewBox="0 0 24 24">${ICON[k]}</svg>`;
+const tabsHTML=sel=>`<nav class="ptabs" role="tablist">${[['home','Home'],['mov','Movies'],['shows','Shows'],['search','Search'],['dl','Downloads']].map(([k,l],i)=>`<button class="ptab" role="tab" aria-selected="${i===sel}"><i class="w"></i>${ic(k)}${l}</button>`).join('')}</nav>`;
+const PH={season:3,sheet:false,chip:false,dl:{3:true,5:true}};
+function buildPhones(){const p=PR(),off=OPT.server==='offline';
+  // Home
+  const items=off?CONT.filter((_,i)=>i===1||i===3):CONT.slice(0,4);
+  const big=items.map((it,i)=>{const t=it.type==='ep'?it.series:it.t,eb=it.type==='ep'?`S${it.s} E${it.e} · ${it.en}`:`Film · ${it.y}`;
+    return `<div class="pc big"><div class="pa">${art(keyOf(it),'w')}<div class="pg"><i style="width:${pct(it)}%"></i></div></div><div class="pcl"><span class="lab">${eb}</span><span class="t">${t}</span><span class="s">${words(it.dur)} · ends at ${ends(it)}</span><div class="pbtns"><button class="pbtn ${i===0?'pri':''}" data-res><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z"/></svg>Resume from ${hms(it.pos)}</button><button class="pbtn">Details</button></div></div></div>`}).join('');
+  const nx=NEXT.map(it=>`<div class="pc wd"><div class="pa">${art(keyOf(it),'w')}</div><div class="pcl"><span class="t">${it.series}</span><span class="s">S${it.s} E${it.e} · ${it.en}</span></div></div>`).join('');
+  const mv=MOV.map(it=>`<div class="pc po"><div class="pa">${art(keyOf(it),'p')}</div><div class="pcl"><span class="t">${it.t}</span><span class="s">${it.y}</span></div></div>`).join('');
+  $('ph1').innerHTML=`<div class="pv"><div class="sbar"><span>${clock(NOW).replace(' PM','')}</span><span>${off?'Wi-Fi · server offline':'5G · 82%'}</span></div>
+  <div class="phb"><div class="phh"><span class="ttl2">Home</span><button class="pchip" id="ph-chip" aria-haspopup="dialog">${avatar(p)}${p.n}</button></div>
+  ${off?`<div class="offb"><i class="ind" style="background:transparent;box-shadow:inset 0 0 0 2px var(--dim)"></i><span class="sp">Offline<small>Showing your 2 downloads · last seen 9:12 PM</small></span><button class="pbtn">Try again</button></div>`:''}
+  <section><div class="sech"><span class="lab">${off?'Downloaded · continue':'Continue watching'}</span><span class="pos" id="ph-pos">1 of ${items.length}</span></div><div class="hsc" id="ph-cont">${big}</div></section>
+  ${off?'':`<section><div class="sech"><span class="lab">Next up</span><span class="pos">${NEXT.length}</span></div><div class="hsc">${nx}</div></section><section><div class="sech"><span class="lab">Latest movies</span><span class="pos">${MOV.length}</span></div><div class="hsc">${mv}</div></section>`}</div>
+  ${tabsHTML(off?4:0)}
+  <div class="veil ${PH.chip?'on':''}" id="ph1-veil"></div>
+  <div class="sheet ${PH.chip?'on':''}" id="ph1-sheet" role="dialog" aria-label="${p.n}'s profile"><div class="shh"><b>${p.n}</b><button class="icb" id="ph1-close" aria-label="Close">${ic('close')}</button></div>
+    <div class="who">${avatar(p)}<span><b>${p.n}'s profile</b><small>${lookLine(p).replace('Braun Hi-Fi · ','')}</small></span></div>
+    ${[['Switch profile','Ada, Ben and Cleo are signed in on this phone'],['Discover','Trending, popular, and your requests'],['Settings','Appearance, playback, captions, server'],['Download quality','Original · 2 downloads, 3.1 GB']].map(([t,s2])=>`<button class="sopt"><span class="sp">${t}<small>${s2}</small></span><svg class="chv" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>`).join('')}
+  </div></div>`;
+  const sc=$('ph1').querySelector('#ph-cont');let tm;sc.addEventListener('scroll',()=>{clearTimeout(tm);tm=setTimeout(()=>{const i=Math.round(sc.scrollLeft/334);$('ph-pos').textContent=`${i+1} of ${items.length}`;sc.querySelectorAll('[data-res]').forEach((b,j)=>b.classList.toggle('pri',j===i))},120)});
+  const ch=v=>{PH.chip=v;$('ph1').classList.toggle('sheet-open',v);$('ph1-veil').classList.toggle('on',v);$('ph1-sheet').classList.toggle('on',v)};
+  $('ph-chip').onclick=()=>ch(true);$('ph1-close').onclick=()=>ch(false);$('ph1-veil').onclick=()=>ch(false);
+  buildPhoneShow();buildPhonePlayer();fitPhones()}
+function buildPhoneShow(){const p=PR(),se=SER['Signal Street'],cur=CONT[1];const eps=epsOf('Signal Street',PH.season,cur);
+  $('ph2').innerHTML=`<div class="pv"><div class="sbar"><span>${clock(NOW).replace(' PM','')}</span><span>5G · 82%</span></div>
+  <div class="phb" style="gap:16px"><div><div class="hero">${art(keyOf(cur),'w')}<button class="icb" aria-label="Back">${ic('back')}</button></div>
+  <div class="shd"><h3>Signal Street</h3><span class="fx">${se.y} · Rated ${se.age} · ${nEps('Signal Street')} episodes</span></div></div>
+  <button class="pbtn pri wide"><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z"/></svg>Resume S2 E4 from ${hms(cur.pos)}</button>
+  <div class="prow2"><button class="pbtn"><i class="ind"></i>Watched</button><button class="pbtn"><i class="ind on"></i>Favourite</button><button class="pbtn">${ic('dl').replace('<svg','<svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2"')}Season</button></div>
+  <div class="shd" style="padding-top:0"><p class="ovp">${se.ov}</p></div>
+  <div class="seasonbar"><button class="pbtn" id="ph-season">Season ${PH.season}${ic('chev').replace('<svg','<svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2"')}</button><span class="pos">${eps.length} episodes</span></div>
+  ${rangesOf(eps.length).length?`<div class="rch" aria-label="Jump to episodes">${rangesOf(eps.length).map(r=>`<button class="pbtn" data-jr="${r[0]}">${r[0]}–${r[1]}</button>`).join('')}</div>`:''}
+  <div class="eps">${eps.map(e=>{const w=e.pos>=e.dur,ip=e.pos>0&&!w,dl=PH.season===2&&PH.dl[e.e];return `<div class="ep ${ip?'cur':''}" data-pe="${e.e}"><div class="ept">${art(keyOf(e),'w')}${ip?`<div class="pg"><i style="width:${pct(e)}%"></i></div>`:''}</div><div style="min-width:0"><div class="t">${e.e} · ${e.en}</div><div class="s">${w?'Watched · ':''}${words(e.dur)}${dl?' · Downloaded':''}</div></div><button class="icb" aria-label="${dl?'Downloaded':'Download'}" style="background:transparent">${ic(dl?'done':'dl')}</button></div>`}).join('')}</div></div>
+  ${tabsHTML(2)}
+  <div class="veil ${PH.sheet?'on':''}" id="ph-veil"></div>
+  <div class="sheet ${PH.sheet?'on':''}" id="ph-sheet"><div class="shh"><b>Season</b><button class="icb" id="ph-close" aria-label="Close">${ic('close')}</button></div>${[1,2,3].map(s=>`<button class="sopt" data-s="${s}" aria-pressed="${s===PH.season}"><span>Season ${s}</span><span class="sp"></span><span class="pos">${s<2?'Watched':s===2?'3 of 8 watched':'22 episodes · not started'}</span></button>`).join('')}</div></div>`;
+  const open=v=>{PH.sheet=v;$('ph2').classList.toggle('sheet-open',v);$('ph-veil').classList.toggle('on',v);$('ph-sheet').classList.toggle('on',v)};
+  $('ph2').querySelectorAll('[data-jr]').forEach(b=>b.onclick=()=>{const t=$('ph2').querySelector(`[data-pe="${b.dataset.jr}"]`),sc=$('ph2').querySelector('.phb');sc.scrollTo({top:t.offsetTop-sc.offsetTop-70,behavior:'smooth'})});
+  $('ph-season').onclick=()=>open(true);$('ph-close').onclick=()=>open(false);$('ph-veil').onclick=()=>open(false);
+  $('ph2').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{PH.season=+b.dataset.s;PH.sheet=false;buildPhoneShow();fitPhones()})}
+const LP={zone:null,list:null,playing:true,skip:true};
+function buildPhonePlayer(){const it=CONT[1],f=(LP.skip?75:it.pos)/it.dur,ch=6;
+  $('ph3').innerHTML=`<div class="video">${scene(keyOf(it))}</div>
+  <div class="ptop ${LP.zone==='list'?'away':''}"><button class="icb" aria-label="Back">${ic('back')}</button><div style="flex:1"><div class="t">Signal Street</div><div class="s">S2 E4 · The Long Shift</div></div><button class="lk" id="lp-chap" aria-pressed="${LP.zone==='chap'}">Chapters</button><button class="lk" id="lp-set" aria-pressed="${LP.zone==='set'||LP.zone==='list'}">Settings</button></div>
+  <div class="mid" style="opacity:${LP.zone?0:1}"><button class="icb" aria-label="Back 10 seconds">${ic('r10')}</button><button class="icb big" id="lp-pp" aria-label="${LP.playing?'Pause':'Play'}">${ic(LP.playing?'pause':'play')}</button><button class="icb" aria-label="Forward 10 seconds">${ic('f10')}</button></div>
+  <button class="lskip ${LP.skip&&!LP.zone?'':'gone'}" id="lp-skip">Skip intro</button>
+  <div class="lpb ${LP.zone==='set'||LP.zone==='list'?'lift':''}" id="lpb">
+    <div class="lchap ${LP.zone==='chap'?'on':''}">${Array.from({length:ch},(_,i)=>`<button>${art(keyOf(it)+'ch'+i,'w')}<span>${i+1} · ${CHN[i]}</span></button>`).join('')}</div>
+    <div class="lpr"><i class="ind ${LP.playing?'on':''}" style="width:30px;height:12px"></i><b>${LP.playing?'Playing':'Paused'}</b><span>Chapter ${Math.floor(f*ch)+1} of ${ch}</span><span class="sp"></span><span>Ends at <b>${ends(it)}</b></span></div>
+    <div class="ltrk"><i class="lit" style="width:${f*100}%"></i>${Array.from({length:ch-1},(_,i)=>`<i class="nt" style="left:${(i+1)/ch*100}%"></i>`).join('')}<i class="cap" style="left:${f*100}%"></i></div>
+    <div class="lrc"><span class="ptm" style="left:clamp(30px,${f*100}%,calc(100% - 40px))">${hms(f*it.dur)}</span><span class="tot">${hms(it.dur)}</span></div>
+    <div class="lstrip">${['subs','audio','speed'].map(id=>`<button class="lk" data-l="${id}" aria-pressed="${LP.list===id}">${LISTS[id].h}${LP.list===id?'':`<b>${LISTS[id].o[LISTS[id].v]}</b>`}</button>`).join('')}<button class="lk">Quality<b>Auto</b></button><button class="lk" id="lp-close" style="margin-left:auto">Close</button>
+      <div class="llist ${LP.zone==='list'?'on':''}" id="lp-list">${LP.list?`<span class="lh">${LISTS[LP.list].h}</span>`+LISTS[LP.list].o.map((o,i)=>`<button class="sopt" data-o="${i}" aria-pressed="${i===LISTS[LP.list].v}"><span>${o}</span></button>`).join(''):''}</div></div>
+  </div>
+`;
+  $('lp-pp').onclick=()=>{LP.playing=!LP.playing;buildPhonePlayer()};
+  $('lp-skip').onclick=()=>{LP.skip=false;buildPhonePlayer()};
+  $('lp-chap').onclick=()=>{LP.zone=LP.zone==='chap'?null:'chap';buildPhonePlayer()};
+  $('lp-set').onclick=()=>{LP.zone=LP.zone==='set'||LP.zone==='list'?null:'set';LP.list=null;buildPhonePlayer()};
+  $('lp-close').onclick=()=>{LP.zone=null;LP.list=null;buildPhonePlayer()};
+  $('ph3').querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{LP.list=LP.list===b.dataset.l?null:b.dataset.l;LP.zone=LP.list?'list':'set';buildPhonePlayer();if(LP.list){const l=$('lp-list');l.style.left=Math.min(844-56-240,b.offsetLeft)+'px'}});
+  $('ph3').querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{LISTS[LP.list].v=+b.dataset.o;LP.list=null;LP.zone='set';buildPhonePlayer()})}
+function fitPhones(){[['phs1','ph1',390],['phs2','ph2',390],['phs3','ph3',844]].forEach(([s,p,w])=>{const e=$(s);if(e)$(p).style.transform=`scale(${e.clientWidth/w})`})}
+['phs1','phs2','phs3'].forEach(id=>new ResizeObserver(fitPhones).observe($(id)));
+new ResizeObserver(()=>{if(S.scr==='s-home')renderHome(true)}).observe(tvf);
+
+buildProfiles();buildHome();applyOpts();show('s-prof');renderProfiles();
+</script>
