@@ -81,3 +81,29 @@ Added after each pass. Full audits are in `notes/pass<N>-<app>.md`.
 - D28. A shape for "something on this day" (calendar strips): small slots, since squares mean "selected mode".
 - D29. Jobs show progress in place, on the button that started them.
 - D30. Uppercase labels are 13 px (settles 12 vs 13).
+
+### Pass 1 · NervOS
+- D31. A hold-to-confirm key fills on the edge opposite its focus window, and every hold needs a non-hold path (remotes that can't hold).
+- D32. Group carousels need an end rule: wrap or stop, and how the wrap point is shown.
+- D33. Decide whether a pop-up showing the current value may sit over the key that already names it (a "never twice" case).
+- D34. Systems and sources are drawn as their media or a neutral device glyph, never a brand mark.
+- D35. On a launcher, Guide opens one house menu for every kind of content.
+- D36. The load-length title-card hold (D14) applies to every launch, not just JamFin's Play.
+- D37. Plain words vs each app's own vocabulary on shared screens (the mockup proposes Retro / Steam / Streaming / Films over ARCHIVE / HANGAR / UPLINK / THEATER; Isaac decides).
+
+### Pass 1 · Home Assistant (Jam Theme + Jam Cards)
+- D38. §2 materials become the Jam Theme (Braun-based) token set, with separate lamp vs word colours for ok/warn/alert (`warn-ink`, `alert-ink`).
+- D39. Orange counting: one primary per card, at most one per popup/sheet; paddles count separately. Is there a screen-level cap?
+- D40. Faders carry their own number (on the cap while dragging; big faders may print it). No number beside a fader.
+- D41. "Never twice" scope: is a "panel" a card or a whole view?
+- D42. Alert outranks primary: when one tap fixes an alert (lock the door), that control is alert red, not orange.
+- D43. One popup sheet for every device: phone bottom sheet; kiosk inset, two columns, no scroll; page centred. Close top right, Esc and veil close. No orange Done when changes apply live.
+- D44. Kiosk no-scroll covers sheets and popups; kiosk sheets fill the screen.
+- D45. A light's colour lives in its slot window and fader; card tint retired (confirms B1/B3).
+- D46. Base-window selector on HA's top tabs (extends D12).
+- D47. Kiosk dock = black ribbed band, indicator window top-right of each block, action blocks outlined.
+- D48. HA built-ins get colours only (`primary-color` orange, `accent-color` ink); HA's own switches are the one place without rockers, or card-mod them.
+- D49. Name the appliance exception: appliance cards may be more object-like, with seven-segment.
+- D50. Decorative motifs may hold one indicator (the speaker grille's dot lights while playing).
+- D51. Type in HA: Jost + IBM Plex Mono replace Archivo at rollout, self-hosted; kiosk sizes clock 168/124, title 22, body 18, label 13.
+- D52. Offline lights still open a sheet ("Can't be reached since…", Retry).
