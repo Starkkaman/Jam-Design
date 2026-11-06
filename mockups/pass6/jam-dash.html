@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jam-Dash Round 6</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Jam-Dash round 6. Built from round 3 (Home, trouble cards, server panels, app detail, density ladder), with round 5's
+   connection idea redrawn as an everyday trace: point at, focus or tap an app and the apps it needs and the apps that use
+   it stay lit, the rest dim, thin lines join them, and a readout line says Needs / Used by and where each link came from.
+   No racks, cords, plates, tags or tape drawn as objects. Palette: Callsheet round 5's paper and navy, lightly.
+   Sample data only; host names "home-server" and "nas"; proxy hosts *.example.net. */
+:root{--bg:#e6e3dd;--fg:#1c2230;--muted:#575c68;--line:#cfc9bd;--chip:#f7f5f0;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --glide:cubic-bezier(.2,.8,.2,1);--settle:cubic-bezier(.16,1,.3,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d1119;--fg:#ece5d3;--muted:#a19c8d;--line:#273042;--chip:#151b27;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1119;--fg:#ece5d3;--muted:#a19c8d;--line:#273042;--chip:#151b27;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding-block:32px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:30px}
+@media (min-width:700px){.wrap{padding-left:28px;padding-right:28px}}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:500 clamp(28px,4vw,40px)/1.1 var(--f);margin:6px 0 10px;letter-spacing:-.01em}
+h2.ps{font:500 22px var(--f);margin:0}
+.wrap p{margin:0;max-width:78ch}
+.muted{color:var(--muted)}
+.ctrls{display:flex;gap:12px 22px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line)}
+@media (max-width:700px){.ctrls{position:static}}
+.ctrls>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line);flex-wrap:wrap}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 12px;border-radius:9px;cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+section.blk{display:grid;gap:14px}
+figure{margin:0;display:grid;gap:8px;min-width:0;width:100%;align-content:start}
+figcaption{font-size:14px;color:var(--muted)}
+figcaption b{color:var(--fg);font-weight:500}
+.frame{position:relative;width:100%;border-radius:16px;background:#0a0c10;padding:10px;box-shadow:0 18px 44px #0000004a}
+.screen{position:relative;overflow:hidden;border-radius:8px;outline:none}
+.screen:focus-visible{box-shadow:0 0 0 3px #ec7c22}
+.frame.phone{max-width:414px;border-radius:44px;padding:12px;justify-self:center}.frame.phone .screen{border-radius:34px}
+.d1280{max-width:1200px}
+.scaler{position:absolute;top:0;left:0;transform-origin:0 0}
+.devices{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
+@media (max-width:1150px){.devices{grid-template-columns:1fr}}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.notes{grid-template-columns:1fr}}
+.note{border-top:2px solid var(--fg);padding-top:10px;display:grid;gap:6px;font-size:15px;align-content:start}
+.note b{font-weight:600}
+.note svg{display:block;max-width:100%}
+.lst{margin:0;padding-left:20px;display:grid;gap:6px;max-width:92ch}
+
+/* ================= the app ================= */
+.jd{--ground:#ebe8e1;--card:#f8f6f1;--key:#ece8e0;--rule:#d8d2c5;--hair:#e7e2d7;--ink:#19202e;--ink2:#343b4a;--dim:#5b606d;
+  --band:#1b2230;--band-ink:#ece5d3;--band-dim:#a9a596;--track:#0e131c;--cream:#f3e6c8;--field:#efebe3;
+  --ok:#7bd651;--warn:#f2c14e;--warn-ink:#7a5300;--warn-line:#a87a12;--alert:#ff5a48;--alert-ink:#b3261b;--on-alert:#1c0804;
+  --orange:#ec7c22;--on-orange:#1a1206;--walnut:#6b4428;--win:#151413;--trace:#19202e;--shadow:0 1px 2px #19202e14;
+  position:relative;width:100%;height:100%;background:var(--ground);color:var(--ink);font:400 16px/1.45 var(--f);overflow:hidden;-webkit-font-smoothing:antialiased}
+.jd.night{--ground:#0c1018;--card:#151b27;--key:#1e2534;--rule:#2a3244;--hair:#1c2230;--ink:#ece5d3;--ink2:#d2cbb9;--dim:#9f9a8b;
+  --band:#070a10;--band-ink:#ece5d3;--band-dim:#9f9a8b;--track:#000;--field:#10141d;
+  --warn-ink:#f2c14e;--warn-line:#f2c14e;--alert-ink:#ff8a7a;--orange:#f08a2c;--win:#06080c;--trace:#e8dfc6;--shadow:none}
+.jd :where(button,input,select){font:inherit;color:inherit}
+.jd .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.lab{font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.trim{flex:none;height:4px;background:var(--walnut)}
+.hdr{flex:none;display:flex;align-items:stretch;gap:28px;padding:0 24px 0 32px;height:62px;border-bottom:1px solid var(--rule);background:var(--ground)}
+.wm{display:flex;align-items:center;font:600 20px var(--f);letter-spacing:.01em;white-space:nowrap}
+.nav{display:flex;gap:2px}
+.nav button{appearance:none;border:0;background:none;cursor:pointer;padding:0 12px;font:500 16px var(--f);color:var(--dim);position:relative}
+.nav button:hover{color:var(--ink)}
+.nav button[aria-current="page"]{color:var(--ink)}
+.nav button[aria-current="page"]::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--ink)}
+.hr{margin-left:auto;display:flex;gap:12px;align-items:center}
+.pick{display:flex;gap:2px;padding:3px;border-radius:10px;border:1px solid var(--rule)}
+.pick button{appearance:none;border:0;background:none;cursor:pointer;border-radius:7px;padding:0 12px;min-height:34px;font:500 15px var(--f);color:var(--dim)}
+.pick button[aria-pressed="true"]{background:var(--key);color:var(--ink);box-shadow:inset 0 1px 2px #00000022}
+.findb{appearance:none;border:1px solid var(--rule);background:none;cursor:pointer;display:flex;gap:10px;align-items:center;border-radius:10px;padding:0 10px 0 12px;height:40px;color:var(--dim);font:400 15px var(--f)}
+.kh{font:500 12px/1 var(--mono);border:1px solid currentColor;border-radius:3px;padding:2px 4px;opacity:.75}
+.body{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;position:relative}
+.body::-webkit-scrollbar{display:none}
+.jd svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* indicator windows: status only (round), never in menus */
+.led{position:relative;display:inline-block;flex:none;width:10px;height:10px;border-radius:50%;background:var(--win)}
+.led::after{content:"";position:absolute;inset:1.5px;border-radius:50%;background:var(--c,transparent)}
+.led.ok{--c:var(--ok)}.led.alert{--c:var(--alert)}.led.warn{--c:var(--warn)}
+.led.off{background:transparent;box-shadow:inset 0 0 0 1.5px var(--dim)}
+.led.gone{background:transparent;box-shadow:none;border:1.5px dashed var(--dim)}
+.night .led.off{box-shadow:inset 0 0 0 1.5px #5c6273}
+.wl{display:inline-flex;gap:3px;align-items:center;flex:none}
+.tri{font:600 12px/1 var(--f);color:var(--warn-ink)}
+.band .tri{color:var(--warn)}
+/* keys */
+.k{appearance:none;border:1.5px solid var(--ink);background:transparent;cursor:pointer;color:var(--ink);font:500 15px/1.1 var(--f);border-radius:6px;padding:0 14px;min-height:38px;display:inline-flex;gap:8px;align-items:center;justify-content:center;white-space:nowrap;transition:transform 120ms var(--settle)}
+.k:active{transform:translateY(1px)}
+.k.go{background:var(--orange);border-color:var(--orange);color:var(--on-orange)}
+.k.red{background:var(--alert);border-color:var(--alert);color:var(--on-alert)}
+.k.quiet{border-color:var(--rule)}
+.k[disabled]{opacity:.55;cursor:default}
+.ql{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);font:500 15px var(--f);padding:6px 0;min-height:36px;display:inline-flex;gap:6px;align-items:center;text-decoration:underline;text-decoration-color:var(--dim);text-underline-offset:5px;text-decoration-thickness:1px;white-space:nowrap}
+.ql:hover{text-decoration-color:var(--ink)}
+.jd :is(.mhit,.k,.ql,.nav button,.pick button,.hit,.okey,.findb,.chipn,.pkey,.tab,.tl2,.mnode,.seldr):focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);min-width:0}
+
+/* ===== Home ===== */
+.hm{position:relative;max-width:1440px;margin:0 auto;padding:16px 32px 24px;display:grid;gap:12px}
+.hero{display:grid;gap:4px}
+.hero h2{font:500 32px/1.1 var(--f);margin:0;letter-spacing:-.01em}
+.hero .sub{display:flex;flex-wrap:wrap;gap:0 14px;align-items:center;font:400 14px var(--mono);color:var(--dim)}
+.hero .sub .ql{font:500 15px var(--f);min-height:30px;padding:2px 0}
+.trouble{display:grid;grid-template-columns:repeat(var(--tn,2),minmax(0,1fr));gap:14px}
+.tc{display:grid;gap:2px;align-content:start;padding:12px 18px 12px}
+.tc .top{display:flex;align-items:center;gap:8px}
+.tc .ttl{font:500 20px/1.25 var(--f)}
+.tc .why{font-size:15px;color:var(--dim);line-height:1.4}
+.tc .acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:8px}
+.tc[data-k="alert"]{border-color:var(--alert);box-shadow:inset 0 0 0 1px var(--alert)}
+.tc[data-k="warn"]{border-color:var(--warn-line)}
+.tc[data-k="offline"]{background:transparent;border:1.5px dashed var(--dim)}
+.look{display:flex;flex-wrap:wrap;gap:6px 26px;align-items:center;padding:0 2px}
+.look .it{display:inline-flex;gap:10px;align-items:center;font-size:16px}
+.look .it .sm{color:var(--dim);font-size:15px}
+.srvs{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:26px;align-items:start}
+.srvs.rows{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+.srvs.one{grid-template-columns:minmax(0,1fr)}
+.sv{display:grid;gap:12px;align-content:start;min-width:0;container-type:inline-size}
+@container (min-width:640px){.sv>.band{grid-template-columns:auto minmax(0,1fr);column-gap:34px;align-items:center}.sv>.band .id{display:grid;gap:0}.sv>.band .shares{grid-column:1/-1}}
+/* server panel: a flat navy instrument band, no ribs */
+.band{background:var(--band);color:var(--band-ink);border-radius:12px;padding:12px 18px 14px;display:grid;gap:10px;position:relative}
+.night .band{box-shadow:0 0 0 1px var(--rule)}
+.band .id{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.band .nm{font:500 20px/1.2 var(--f);display:flex;gap:10px;align-items:center}
+.band .os{font:400 14px var(--mono);color:var(--band-dim)}
+.band .lab{color:var(--band-dim)}
+.band.offline{background:transparent;color:var(--ink);border:1.5px dashed var(--dim);box-shadow:none}
+.band.offline .os,.band.offline .lab{color:var(--dim)}
+.meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.mt{display:grid;gap:5px;min-width:0}
+.mt .hd{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.mt .hd .lab{display:flex;gap:6px;align-items:center;white-space:nowrap}
+.mt .rd{font:500 14px var(--mono);white-space:nowrap}
+.tr{height:6px;border-radius:3px;background:var(--track);position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px #ffffff14}
+.tr i{position:absolute;inset:1px;border-radius:2px;background:var(--cream);transform-origin:left;transform:scaleX(var(--v))}
+.tr.warn i{background:var(--warn)}
+.shares{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;border-top:1px solid #ffffff1f;padding-top:10px}
+.band.offline .shares{border-top-color:var(--rule)}
+.chipn{appearance:none;cursor:pointer;background:none;color:inherit;border:1px solid #ffffff38;border-radius:999px;padding:0 11px;min-height:28px;font:400 14px var(--mono);display:inline-flex;align-items:center;gap:6px;position:relative}
+.band.offline .chipn{border:1px dashed var(--dim);color:var(--dim)}
+.sh{display:flex;align-items:baseline;gap:10px;padding:0 2px}
+.sh b{font:500 16px var(--f)}.sh span{font-size:15px;color:var(--dim)}
+.tgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:8px}
+.tl{position:relative;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:8px 8px 7px 12px;display:grid;grid-template-columns:28px minmax(0,1fr);gap:3px 10px;align-content:start;min-width:0;box-shadow:var(--shadow);transition:opacity 160ms var(--glide),border-color 160ms}
+.tl .hit{position:absolute;inset:0;border-radius:12px;appearance:none;border:0;background:none;cursor:pointer;z-index:1}
+.gl{width:28px;height:28px;border-radius:8px;background:var(--key);color:var(--ink2);display:grid;place-items:center;flex:none}
+.gl svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tl .n{font:500 16px/1.2 var(--f);align-self:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding-right:4px}
+.tl .s{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-size:15px;color:var(--dim);line-height:1.25;min-width:0;min-height:28px;margin-bottom:-1px}
+.tl .s>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.okey{position:relative;z-index:2;margin-left:auto;flex:none;appearance:none;border:1px solid var(--rule);background:none;cursor:pointer;width:30px;height:30px;border-radius:8px;color:var(--ink);display:grid;place-items:center}
+.okey:hover{background:var(--key)}
+.okey svg.i{width:16px;height:16px}
+.tl[data-st="alert"]{border-color:var(--alert);box-shadow:inset 0 0 0 1px var(--alert)}
+.tl[data-st="alert"] .s{color:var(--alert-ink)}
+.tl[data-st="warn"] .s,.tl[data-st="wait"] .s{color:var(--warn-ink)}
+.tl[data-st="offline"]{background:transparent;border:1.5px dashed var(--dim);box-shadow:none}
+.tl[data-st="offline"] .gl{background:transparent;box-shadow:inset 0 0 0 1px var(--dim);color:var(--dim)}
+.tl.wide{grid-column:span 2;grid-template-columns:28px minmax(0,.8fr) minmax(0,1.3fr)}
+.tl.wide .s{grid-column:1/3}
+.tl.wide .lv{grid-column:3;grid-row:1/3;align-self:center;display:grid;gap:4px;padding-right:42px}
+.tl.wide .s .okey{position:absolute;top:9px;right:9px}
+.lv .big{font:500 20px/1.1 var(--mono)}
+.lv .sm{font-size:14px;color:var(--dim)}
+.pb{height:6px;border-radius:3px;background:var(--win);position:relative;overflow:hidden}
+.pb i{position:absolute;inset:1px auto 1px 1px;width:calc(var(--v) - 2px);border-radius:2px;background:var(--cream)}
+.stl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:0 2px}
+.stl .lab{margin-right:4px}
+.chip{appearance:none;cursor:pointer;background:none;color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:0 12px;min-height:32px;font:400 15px var(--f);display:inline-flex;align-items:center;gap:7px;transition:opacity 160ms var(--glide)}
+.rgrid{display:grid;grid-template-columns:repeat(var(--rc,3),minmax(0,1fr));gap:0 16px;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:2px 12px}
+.rw{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto 30px;gap:8px;align-items:center;min-height:37px;border-bottom:1px solid var(--hair);min-width:0;transition:opacity 160ms var(--glide)}
+.rw .hit{position:absolute;inset:0;appearance:none;border:0;background:none;cursor:pointer;z-index:1}
+.rw .n{font:500 15px/1.2 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rw .s{display:flex;gap:7px;align-items:center;font-size:14px;color:var(--dim);white-space:nowrap}
+.rw .okey{width:30px;height:30px;margin:0}
+.rw[data-st="alert"] .s{color:var(--alert-ink)}.rw[data-st="alert"] .n{color:var(--alert-ink)}
+.rw[data-st="warn"] .s,.rw[data-st="wait"] .s{color:var(--warn-ink)}
+.rw[data-st="offline"] .n,.rw[data-st="offline"] .s{color:var(--dim)}
+/* ===== the trace (connections) ===== */
+.hm.tracing [data-node]:not(.band):not(.rel):not(.foc){opacity:.28}
+.hm.tracing .band [data-node]:not(.rel):not(.foc){opacity:.4}
+.hm.tracing .tc,.hm.tracing .look,.hm.tracing .hero{opacity:.55;transition:opacity 160ms}
+.foc.tl,.foc.rw,.foc.chip{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.rel.tl,.rel.chip{border-color:var(--ink2)}
+.rw.foc{background:var(--key)}
+.rel.chipn,.foc.chipn{border-color:var(--band-ink)}
+.band.foc{box-shadow:0 0 0 2px var(--ink)}
+svg.trace,svg.dots{position:absolute;left:0;top:0;pointer-events:none;z-index:0;overflow:visible}
+svg.dots{z-index:4}
+.hm>:not(svg):not(.tags),.cmap>.col{position:relative;z-index:1}
+.ln{fill:none;stroke:var(--trace);stroke-width:1.5;stroke-linecap:round;opacity:.9}
+.ln.yo{stroke-dasharray:6 5}
+.ln.bk{stroke:var(--warn-line);stroke-dasharray:2 5;stroke-width:2}
+.ln.fade{animation:lnin 220ms var(--glide) both}
+.ln.bk.fade{animation:lnin2 220ms var(--glide) both}
+@keyframes lnin{from{opacity:0}to{opacity:.9}}
+@keyframes lnin2{from{opacity:0}to{opacity:1}}
+.dot{fill:var(--card);stroke:var(--trace);stroke-width:1.5}
+.dot.bk{stroke:var(--warn-line)}
+.tags{position:absolute;left:0;top:0;pointer-events:none;z-index:5}
+.tag{position:absolute;font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:var(--ground);border-radius:3px;padding:2px 5px;white-space:nowrap}
+.tag.bk{color:var(--warn-ink)}
+/* the readout line (desktop) */
+.readout{flex:none;height:50px;border-top:1px solid var(--rule);background:var(--card);display:flex;align-items:center;gap:18px;padding:0 32px;font-size:15px;color:var(--ink2);overflow:hidden}
+.readout .rk{font:500 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;flex:none}
+.readout .rt{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3}
+.readout i,.rsheet i{font:500 13px var(--mono);font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-right:6px}
+.readout em,.rsheet em{font:400 14px var(--mono);font-style:normal;color:var(--dim)}
+.readout em.bk,.rsheet em.bk{color:var(--warn-ink)}
+.readout .sep{color:var(--rule);margin:0 8px}
+.legend{display:flex;gap:16px;align-items:center;flex:none;font:400 13px var(--mono);color:var(--dim)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend svg{width:26px;height:8px}
+/* ===== Detail ===== */
+.dt{max-width:1360px;margin:0 auto;padding:18px 32px 32px;display:grid;gap:16px}
+.crumb{display:flex;gap:10px;align-items:center;color:var(--dim);font-size:15px}
+.dhead{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 18px;align-items:center;padding:20px 24px}
+.dhead .gl{width:52px;height:52px;border-radius:12px;grid-row:span 2}
+.dhead .gl svg{width:26px;height:26px}
+.dhead h2{font:500 32px/1.1 var(--f);margin:0;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.dhead .chip{cursor:default;font:400 14px var(--mono);min-height:28px}
+.stline{display:flex;gap:10px;align-items:center;font-size:17px;flex-wrap:wrap}
+.dhead .why{grid-column:1/-1;font:400 18px/1.45 var(--f);margin-top:8px;max-width:60em;color:var(--ink2)}
+.dhead .acts{grid-column:1/-1;display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.dhead[data-st="alert"]{border-color:var(--alert);box-shadow:inset 0 0 0 1px var(--alert)}
+.dhead[data-st="wait"]{border-color:var(--warn-line)}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+.dcol{display:grid;gap:16px;min-width:0}
+.pad{padding:16px 20px}
+.ch{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.ch .sm{font-size:14px;color:var(--dim)}
+/* connection map */
+.cmap{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr) minmax(0,1fr);gap:0 64px;align-items:center;padding:10px 0 6px}
+.cmap .col{display:grid;gap:10px;align-content:center}
+.cmap .col>.lab{margin-bottom:-2px}
+.cmap .empty{font-size:15px;color:var(--dim);padding:8px 0}
+.mnode{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 9px;align-items:center;background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:8px 12px;text-align:left;min-width:0}
+.mhit{position:absolute;inset:0;appearance:none;border:0;background:none;cursor:pointer;border-radius:10px}
+.mnode .rm{position:relative;z-index:2}
+.mnode b{font:500 16px/1.2 var(--f);min-width:0;overflow-wrap:anywhere}
+.mnode .src{grid-column:2/-1;font:400 13px var(--mono);color:var(--dim);overflow-wrap:anywhere}
+.mnode .src.bk{color:var(--warn-ink)}
+.mnode.yo{border-style:dashed}
+.mnode.bk{border:1.5px dashed var(--warn-line)}
+.mnode.center{border:1.5px solid var(--ink);padding:14px 16px;justify-items:start}
+.mnode.center b{font-size:19px}
+.mnode .rm{grid-column:3;grid-row:1;font-size:14px;min-height:28px;padding:0}
+.cmap svg.trace .ln{opacity:.85}
+.ask{display:grid;gap:6px;border-top:1px solid var(--hair);margin-top:12px;padding-top:12px}
+.ask .q{font:500 16px var(--f)}
+.ask .sm{font-size:15px;color:var(--dim)}
+.ask .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.addc{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--hair);margin-top:12px;padding-top:12px}
+.seldr{appearance:none;background:var(--field);border:1px solid var(--rule);border-radius:6px;min-height:38px;padding:0 12px;font:400 15px var(--f);color:var(--ink)}
+.pkey{appearance:none;cursor:pointer;background:none;border:1px solid var(--rule);border-radius:6px;min-height:38px;padding:0 12px;font:500 15px var(--f);color:var(--dim)}
+.pkey[aria-pressed="true"]{background:var(--key);color:var(--ink);box-shadow:inset 0 1px 2px #00000026}
+.fine{font-size:14px;color:var(--dim);margin-top:10px}
+.logbox{background:var(--field);border:1px solid var(--hair);border-radius:8px;padding:10px 14px;font:400 14px/1.7 var(--mono);color:var(--ink2);overflow:hidden}
+.logbox div{white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.logbox .t{color:var(--dim)}
+.logbox .bad{color:var(--alert-ink)}
+.logbox .bad::before{content:"▲ "}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 16px;margin:0}
+.kv>*{padding:9px 0;border-top:1px solid var(--hair);min-width:0;margin:0}
+.kv>:nth-child(1),.kv>:nth-child(2){border-top:0}
+.kv dt{color:var(--dim);font-size:15px}
+.kv dd{font-size:15px;overflow-wrap:anywhere}
+.kv dd.mono{font-size:14px}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.res .v{font:500 22px/1.1 var(--mono)}
+.stub{max-width:820px;margin:0 auto;padding:64px 36px;display:grid;gap:12px;justify-items:start}
+.stub h2{font:500 30px var(--f);margin:0}
+.stub p{color:var(--dim);margin:0}
+.toast{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);background:var(--ink);color:var(--ground);border-radius:10px;padding:10px 16px;font-size:15px;z-index:9;white-space:nowrap;animation:tin 220ms var(--settle) both}
+@keyframes tin{from{opacity:0;transform:translate(-50%,8px)}}
+
+/* ===== Phone ===== */
+.phn .hdr{height:56px;padding:0 6px 0 18px;gap:6px}
+.phn .wm{font-size:19px;margin-right:auto}
+.ib{appearance:none;border:0;background:none;cursor:pointer;color:var(--ink);width:44px;height:44px;border-radius:10px;display:grid;place-items:center}
+.ib svg.i{width:22px;height:22px}
+.phn .hm{padding:14px 16px 24px;gap:12px}
+.phn .hm.tracing{padding-bottom:260px}
+.phn .hero h2{font-size:27px}
+.phn .hero .sub{font-size:13px}
+.ppick{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;border-radius:9px;background:#ffffff14}
+.band.offline .ppick{background:var(--key)}
+.ppick button{appearance:none;border:0;background:none;cursor:pointer;color:var(--band-dim);border-radius:7px;min-height:44px;font:500 16px var(--f);display:flex;gap:8px;align-items:center;justify-content:center}
+.band.offline .ppick button{color:var(--dim)}
+.ppick button[aria-pressed="true"]{background:var(--band-ink);color:var(--band)}
+.band.offline .ppick button[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
+.phn .meters{gap:12px}
+.phn .mt .rd{font-size:13px}
+.ptc{display:grid;gap:4px;padding:14px 16px}
+.ptc .top{display:flex;align-items:center;gap:8px}
+.phn .dhead .chip{min-height:28px}
+.ptc .acts{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.ptc .ttl{font:500 19px/1.25 var(--f)}
+.ptc .why{font-size:15px;color:var(--dim)}
+.ptc[data-k="alert"]{border-color:var(--alert);box-shadow:inset 0 0 0 1px var(--alert)}
+.ptc[data-k="warn"]{border-color:var(--warn-line)}
+.ptc[data-k="offline"]{background:transparent;border:1.5px dashed var(--dim)}
+.phn .k{min-height:44px;font-size:16px}
+.phn .ql,.phn .hero .sub .ql{min-height:44px;min-width:44px}
+.prow{appearance:none;cursor:pointer;background:var(--card);border:1px solid var(--rule);border-radius:12px;color:var(--ink);display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px 6px 14px;min-height:56px;text-align:left;width:100%;font:inherit}
+.prow .t1{font:500 16px/1.25 var(--f)}
+.prow .t0{font-size:14px;color:var(--dim);display:block}
+.pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pt{position:relative;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:9px 48px 9px 12px;min-height:62px;display:grid;align-content:center;gap:3px;min-width:0;transition:opacity 160ms var(--glide)}
+.pt .hit{position:absolute;inset:0;appearance:none;border:0;background:none;cursor:pointer;border-radius:12px;z-index:1}
+.pt .n{font:500 16px/1.2 var(--f);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pt .s{display:flex;gap:7px;align-items:center;font-size:14px;color:var(--dim);white-space:nowrap;overflow:hidden}
+.pt .s span{overflow:hidden;text-overflow:ellipsis}
+.pt .okey{position:absolute;top:50%;right:2px;margin-top:-22px;width:44px;height:44px;border:0}
+.pt .okey::before{content:"";position:absolute;inset:7px;border-radius:8px;border:1px solid var(--rule)}
+.pt[data-st="alert"]{border-color:var(--alert);box-shadow:inset 0 0 0 1px var(--alert)}
+.pt[data-st="alert"] .s{color:var(--alert-ink)}
+.pt[data-st="warn"] .s,.pt[data-st="wait"] .s{color:var(--warn-ink)}
+.pt[data-st="offline"]{background:transparent;border:1.5px dashed var(--dim)}
+.pt.foc{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.phn .chip{min-height:44px}
+.phn .chipn{min-height:36px}
+.rsheet{position:absolute;left:10px;right:10px;bottom:86px;z-index:8;background:var(--card);border:1px solid var(--ink2);border-radius:14px;padding:12px 14px 12px;box-shadow:0 10px 30px #0000003a;display:grid;gap:6px;font-size:15px;color:var(--ink2);animation:tin2 220ms var(--settle) both}
+@keyframes tin2{from{opacity:0;transform:translateY(10px)}}
+.rsheet .hd{display:flex;align-items:center;gap:8px}
+.rsheet .hd b{font:500 18px var(--f);color:var(--ink);margin-right:auto}
+.rsheet .acts{display:flex;gap:10px;align-items:center;margin-top:2px}
+.ptabs{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--ground);border-top:1px solid var(--rule);padding:4px 4px 20px}
+.tab{appearance:none;border:0;background:none;cursor:pointer;color:var(--dim);display:grid;justify-items:center;gap:3px;padding:8px 0 4px;min-height:56px;font:500 13px var(--f);position:relative}
+.tab svg.i{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--ink)}
+.tab[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;background:var(--ink)}
+.phn .dt{padding:12px 16px 28px;gap:14px}
+.phn .dhead{padding:16px;gap:4px 14px}
+.phn .dhead .gl{width:42px;height:42px}
+.phn .dhead h2{font-size:26px;gap:8px}
+.phn .stline{font-size:15px}
+.phn .dhead .why{font-size:16px}
+.phn .dgrid{grid-template-columns:1fr}
+.phn .cmap{grid-template-columns:1fr;gap:26px;padding:4px 0}
+.phn .cmap .col.c{justify-items:stretch}
+.phn .res .v{font-size:19px}
+.phn .logbox div{white-space:pre-wrap}
+.phn .logbox{font-size:13px}
+.phn .toast{bottom:96px;white-space:normal;max-width:340px;text-align:center}
+.calm .jd *,.calm .jd *::after,.calm .jd *::before{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){.jd *,.jd *::after,.jd *::before{animation:none!important;transition-duration:1ms!important}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Jam Design · Round 6 · Jam-Dash</span>
+    <h1>Jam-Dash, round 6: round 3's calm, with connections you can see</h1>
+    <p class="muted">Jam-Dash runs Docker apps on two servers, "home-server" and "nas". This round starts again from round 3's layout (Isaac's favourite) and drops round 4 and 5's rack, cords and plates. It keeps one idea from round 5: <b>point at an app</b> (or Tab to it, or tap it on the phone) and the apps it needs and the apps that use it stay lit, everything else dims, and thin lines join them. A readout line at the bottom says what each link is and where Jam-Dash found it. All apps, numbers, addresses and log lines are made-up sample data.</p>
+  </header>
+
+  <div class="ctrls">
+    <div><span class="eyebrow">Lighting</span><div class="seg" role="group" aria-label="Day or night" id="c-light"><button data-v="day">Day</button><button data-v="night">Night</button></div></div>
+    <div><span class="eyebrow">Situation</span><div class="seg" role="group" aria-label="Situation" id="c-sit"><button data-v="trouble">Trouble</button><button data-v="calm">All good</button><button data-v="offline">nas offline</button><button data-v="busy">Busy day · 40 apps</button></div></div>
+    <div><span class="eyebrow">Desktop</span><div class="seg" role="group" aria-label="Desktop size" id="c-dw"><button data-v="1440">1440</button><button data-v="1280">1280</button></div></div>
+    <div><span class="eyebrow">Density</span><div class="seg" role="group" aria-label="Home density" id="c-dens"><button data-v="auto">Auto</button><button data-v="rows">Rows</button></div></div>
+    <div><span class="eyebrow">Motion</span><div class="seg" role="group" aria-label="Motion" id="c-motion"><button data-v="full">Full</button><button data-v="calm">Calm</button></div></div>
+  </div>
+
+  <section class="blk">
+    <h2 class="ps">1 · Home</h2>
+    <p class="muted"><b>Point at any app</b> (try Sonarr, Proxy Manager, or one of nas's shares in its panel). On the phone, <b>tap</b> an app once to see its links and again to open it. In <b>nas offline</b>, press <b>Show what waits</b> on the nas card: the links that are broken right now are drawn dashed amber and stay up until you close them. Click a tile to open its detail; Esc goes back.</p>
+    <div class="devices">
+      <figure><div class="frame"><div class="screen" tabindex="0" aria-label="Jam-Dash desktop mockup"><div class="scaler" data-mount data-kind="desk" data-route="home"></div></div></div><figcaption><span data-cap></span></figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="home" data-w="390" data-h="844"></div></div></div><figcaption><span data-cap></span></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="ps">2 · How the links work</h2>
+    <div class="notes">
+      <div class="note"><b>Drawn only when you ask</b><span class="muted">Point, focus or tap draws them. At rest Home shows no lines at all, so "all good" still looks like nothing. Unrelated apps dim to about a third; the hero and the trouble cards dim a little; the server panels stay readable. Lines fade in once (220 ms; none in Calm) and go when you leave.</span></div>
+      <div class="note"><b>Three line forms</b>
+        <svg viewBox="0 0 300 78" role="img" aria-label="Line forms: solid found, dashed yours, amber dotted broken"><g font-family="IBM Plex Mono" font-size="13" fill="currentColor"><path d="M4 12h70" stroke="currentColor" stroke-width="1.5"/><text x="88" y="16">found in real data</text><path d="M4 39h70" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5"/><text x="88" y="43">yours (you drew it)</text><path d="M4 66h70" stroke="#c79a2a" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/><text x="88" y="70">broken right now</text></g></svg>
+        <span class="muted">Found = a Docker mount of a nas share, a compose <span class="mono">depends_on</span>, or a host in Proxy Manager (only once it's connected in Settings). A guess (two apps on one Docker network) is asked on the app's page, never drawn.</span></div>
+      <div class="note"><b>At scale</b><span class="muted">Each line ends on a small ring at the tile edge, and each linked tile gets a word: <span class="mono">NEEDED</span> or <span class="mono">USES IT</span>. Past 8 links the words drop and the readout counts. In <b>Rows</b> (the last density step) there are no lines: the highlight and the readout carry it. Links to stopped apps end on their chips; links to folded apps are only named in the readout.</span></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="ps">3 · App detail</h2>
+    <p class="muted">This follows Situation: <b>Crafty</b> in Trouble and Busy day, <b>Jellyfin</b> waiting on nas when nas is offline, and <b>Sonarr</b> when all is good. Each app's page has a <b>Connections</b> map: what it needs on the left, what uses it on the right, with the source under every name. Sonarr's map also shows a guess Jam-Dash asks about, and <b>Add a connection</b>, which draws one as yours (dashed).</p>
+    <div class="devices">
+      <figure><div class="frame"><div class="screen" tabindex="0" aria-label="App detail desktop mockup"><div class="scaler" data-mount data-kind="desk" data-route="detail" data-follow="1"></div></div></div><figcaption><span data-cap></span></figcaption></figure>
+      <figure><div class="frame phone"><div class="screen"><div class="scaler" data-mount data-kind="phone" data-route="detail" data-follow="1" data-w="390" data-h="844"></div></div></div><figcaption><span data-cap></span></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="blk">
+    <h2 class="ps">4 · The density ladder on a busy day</h2>
+    <p class="muted">This frame always shows the busy day (40 apps, 3 alerts) at 1280 × 800, whatever Situation says. The ladder is round 3's, cut from five steps to three: <b>1 Tiles</b> with live previews · <b>2 Compact</b> (previews become plain tiles, stopped apps fold into a count) · <b>3 Rows</b> (one 37 px line per app, no link lines). Auto takes the first step that fits; if none fits, Home scrolls, but only below the server panels.</p>
+    <figure class="d1280"><div class="frame"><div class="screen" tabindex="0" aria-label="Busy day 1280 mockup"><div class="scaler" data-mount data-kind="desk" data-route="home" data-sit="busy" data-w="1280" data-h="800"></div></div></div><figcaption><span data-cap></span></figcaption></figure>
+  </section>
+
+  <section class="blk">
+    <h2 class="ps">5 · Not redrawn this round</h2>
+    <p class="muted">Store, Files, Shares, Full log, Edit setup, History and first run keep round 3's design (<span class="mono">mockups/pass3/jam-dash.html</span>), minus the night band ribs. Round 5's "Draw a cord" sheet and rear panel are replaced by the map's <b>Add a connection</b> row. Those tabs open a short placeholder here.</p>
+  </section>
+</div>
+
+<script>
+const H='home-server',N='nas';
+const S={light:matchMedia('(prefers-color-scheme: dark)').matches?'night':'day',sit:'trouble',dw:1440,dens:'auto',motion:'full',
+  fixed:{},busy:{},tries:0,user:[],removed:{},answered:{}};
+const mounts=[];
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const P=d=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ic={ext:P('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
+  back:P('<path d="M15 6l-6 6 6 6"/>'),find:P('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'),close:P('<path d="M6 6l12 12M18 6L6 18"/>'),
+  home:P('<path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>'),
+  apps:P('<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>'),
+  store:P('<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>'),files:P('<path d="M4 6a1 1 0 0 1 1-1h5l2 2h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>'),
+  more:P('<circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/>')};
+const G={play:'<path d="M8 6l10 6-10 6z"/>',dl:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',music:'<path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/>',
+  game:'<path d="M7 9h10a4 4 0 0 1 4 4v1a3 3 0 0 1-5.4 1.8L15 15H9l-.6.8A3 3 0 0 1 3 14v-1a4 4 0 0 1 4-4z"/><path d="M8 11v3M6.5 12.5h3"/>',
+  code:'<path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/>',shield:'<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>',box:'<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/>',
+  photo:'<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l5-5 4 4 3-3 4 4"/>',globe:'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>',
+  search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',film:'<rect x="4" y="5" width="16" height="14" rx="1"/><path d="M8 5v14M16 5v14"/>',tv:'<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M9 20h6"/>',
+  update:'<path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/>',git:'<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 8v8M18 10c0 4-6 3-11 7"/>',
+  cloud:'<path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 11.5 3.3 3.3 0 0 0 7 18z"/>',sync:'<path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.5M20 12a8 8 0 0 1-13.7 5.7L4 15.5M20 4v4.5h-4.5M4 20v-4.5h4.5"/>',
+  archive:'<rect x="4" y="4" width="16" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/>',gauge:'<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/>',
+  book:'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/>',chat:'<path d="M5 5h14v10H10l-4 4v-4H5z"/>',doc:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l2 2"/>',block:'<circle cx="12" cy="12" r="8"/><path d="M6.5 6.5l11 11"/>',money:'<path d="M12 4v16M16 8c-1-2-8-2-8 1.5S16 12 16 15s-7 3.5-8 1"/>',pulse:'<path d="M3 12h4l2-5 4 10 2-5h6"/>'};
+const gl=k=>`<span class="gl"><svg viewBox="0 0 24 24" aria-hidden="true">${G[k]||G.box}</svg></span>`;
+const idOf=n=>n.toLowerCase().replace(/[^a-z]/g,'');
+
+/* ---------- data ---------- */
+const SHARES=['media','photos','downloads','music'];
+function build(sit){
+  const A=[];const add=o=>A.push(Object.assign({st:'on',since:'',cpu:'',mem:'',port:null,g:'box',img:'',dir:''},o));
+  add({id:'sabnzbd',name:'SABnzbd',srv:H,since:'6 d',cpu:'11%',mem:'413 MB',port:8080,g:'dl',live:'sab',img:'lscr.io/linuxserver/sabnzbd:4.3',dir:'/srv/sabnzbd'});
+  add({id:'music',name:'Music Assistant',srv:H,since:'3 d',cpu:'1.1%',mem:'376 MB',port:8095,g:'music',live:'music',img:'ghcr.io/music-assistant/server:2.3',dir:'/srv/music-assistant'});
+  add({id:'crafty',name:'Crafty',srv:H,since:'4 d',cpu:'29%',mem:'2.1 GB',port:8000,g:'game',img:'registry.gitlab.com/crafty-controller/crafty-4:4.4',dir:'/srv/crafty'});
+  add({id:'codeserver',name:'Code Server',srv:H,since:'2 h',cpu:'0.4%',mem:'610 MB',port:8443,g:'code',img:'lscr.io/linuxserver/code-server:4.93',dir:'/srv/code-server'});
+  add({id:'crowdsec',name:'CrowdSec',srv:H,since:'12 d',cpu:'0.8%',mem:'123 MB',port:8081,g:'shield',img:'crowdsecurity/crowdsec:1.6',dir:'/srv/crowdsec'});
+  add({id:'homebox',name:'Home Box',srv:H,since:'8 d',cpu:'0.1%',mem:'61 MB',port:3100,g:'box',img:'ghcr.io/sysadminsmedia/homebox:0.15',dir:'/srv/homebox'});
+  add({id:'immich',name:'Immich',srv:H,since:'2 d',cpu:'4.0%',mem:'1.6 GB',port:2283,g:'photo',img:'ghcr.io/immich-app/immich-server:1.119',dir:'/srv/immich'});
+  add({id:'jellyfin',name:'Jellyfin',srv:H,since:'9 d',cpu:'6.3%',mem:'1.3 GB',port:8096,g:'play',img:'jellyfin/jellyfin:10.10',dir:'/srv/jellyfin'});
+  add({id:'npm',name:'Proxy Manager',full:'Nginx Proxy Manager',srv:H,since:'12 d',cpu:'0.4%',mem:'163 MB',port:81,g:'globe',img:'jc21/nginx-proxy-manager:2.12',dir:'/srv/npm'});
+  add({id:'prowlarr',name:'Prowlarr',srv:H,since:'4 d',cpu:'0.2%',mem:'146 MB',port:9696,g:'search',img:'lscr.io/linuxserver/prowlarr:1.25',dir:'/srv/prowlarr'});
+  add({id:'radarr',name:'Radarr',srv:H,since:'9 d',cpu:'0.3%',mem:'186 MB',port:7878,g:'film',img:'lscr.io/linuxserver/radarr:5.14',dir:'/srv/radarr'});
+  add({id:'sonarr',name:'Sonarr',srv:H,since:'9 d',cpu:'0.4%',mem:'213 MB',port:8989,g:'tv',img:'lscr.io/linuxserver/sonarr:4.0.10',dir:'/srv/sonarr',upd:'4.0.11'});
+  add({id:'terraria',name:'Terraria',srv:H,since:'1 d',cpu:'2.8%',mem:'623 MB',port:7777,g:'game',img:'ryshe/terraria:1.4',dir:'/srv/terraria'});
+  add({id:'watchtower',name:'watchtower',srv:H,since:'12 d',cpu:'0.0%',mem:'18 MB',g:'update',img:'containrrr/watchtower:1.7',dir:'—'});
+  [['Audiobookshelf','book'],['Bazarr','doc'],['Calibre-Web','book'],['Kavita','book'],['Lidarr','music'],['Ollama','chat'],['Overseerr','search'],['Paperless-ngx','doc'],['Readarr','book'],['RomM','game'],['Tautulli','gauge'],['Uptime Kuma','pulse'],['Whisper','chat'],['Bookstack','book']]
+    .forEach(([n,g])=>add({id:idOf(n),name:n,srv:H,st:'off',since:'Oct 20',g,img:idOf(n)+':latest',dir:'/srv/'+idOf(n)}));
+  [['Jam-Dash','0.2%','46 MB','18 d',8484,'gauge'],['Gitea','0.7%','243 MB','18 d',3000,'git'],['Gitea Runner','0.4%','90 MB','18 d',null,'git'],['Nextcloud','1.9%','512 MB','6 d',8081,'cloud'],['Syncthing','0.6%','88 MB','41 d',8384,'sync'],['Kopia','3.1%','301 MB','41 d',51515,'archive']]
+    .forEach(([n,c,m,s,p,g])=>add({id:idOf(n),name:n,srv:N,cpu:c,mem:m,since:s,port:p,g,img:idOf(n)+':latest',dir:'/mnt/apps/'+idOf(n)}));
+  add({id:'duplicati',name:'Duplicati',srv:N,st:'off',since:'Sep 2',g:'archive'});
+  const SV={[H]:{id:H,os:'Debian 12 · Docker 27',up:'up 12 days',cpu:12,mem:28,memr:'9.5 GB',disk:61,diskn:'Disk',st:'on'},
+            [N]:{id:N,os:'TrueNAS SCALE · Docker',up:'up 41 days',cpu:4,mem:30,memr:'4.8 GB',disk:92,diskn:'Pool',st:'on'}};
+  const g=id=>A.find(a=>a.id===id);
+  const set=(id,o)=>{const a=g(id);if(a&&!S.fixed[id])Object.assign(a,o)};
+  const immich=()=>set('immich',{st:'warn',word:'Partly up',ttl:'Immich is partly running',why:'3 of its 4 parts run. The background worker stopped at 01:12, so new photos wait to be sorted.',fix:'Start the worker',at:'01:12'});
+  if(sit==='trouble'||sit==='busy'){
+    set('crafty',{st:'alert',word:'Unhealthy',ttl:'Crafty stopped responding',why:'Stopped responding at 01:49. It failed its health check 3 times in a row.',fix:'Restart Crafty',at:'01:49'});
+    set('codeserver',{st:'alert',word:'Crashed',ttl:'Code Server crashed',why:'It quit at 01:31 with exit code 137: it ran out of memory.',fix:'Start Code Server',at:'01:31',cpu:'',mem:''});
+    immich();
+  } else {SV[N].disk=71}
+  if(sit==='busy'){
+    A.filter(a=>a.st==='off'&&a.srv===H).forEach((a,i)=>{a.st='on';a.since=(3+i%9)+' d';a.cpu=(0.2+(i*0.37)%3).toFixed(1)+'%';a.mem=(60+i*41%700)+' MB';a.port=3000+i*11});
+    [['Vaultwarden','key'],['Pi-hole','block'],['Navidrome','music'],['PhotoPrism','photo'],['Stirling PDF','doc'],['Actual Budget','money'],['Grafana','gauge'],['Mealie','book']]
+      .forEach(([n,gg],i)=>add({id:idOf(n),name:n,srv:N,since:(4+i)+' d',cpu:(0.3+i*0.2).toFixed(1)+'%',mem:(80+i*37)+' MB',port:5000+i,g:gg,img:idOf(n)+':latest',dir:'/mnt/apps/'+idOf(n)}));
+    set('ollama',{st:'alert',word:'Crashed',ttl:'Ollama crashed',why:'It quit at 01:51 with exit code 139 while loading a model.',fix:'Start Ollama',at:'01:51',cpu:'',mem:''});
+    SV[H].cpu=46;SV[H].mem=71;SV[H].memr='22.7 GB';
+  }
+  if(sit==='offline'){
+    SV[N].st='offline';
+    A.filter(a=>a.srv===N).forEach(a=>{a.prev=a.st;a.st='offline';a.word='Not answering'});
+  }
+  for(const id in S.busy){const a=g(id);if(a){a.busy=S.busy[id]}}
+  const links=allLinks(A);
+  if(sit==='offline'){
+    const waits=new Set(links.filter(l=>l.b.startsWith('share:')).map(l=>l.a));
+    A.filter(a=>waits.has(a.id)&&a.st==='on').forEach(a=>{a.st='wait';a.word='Waiting on nas'});
+  }
+  return {A,SV,g,links};
+}
+/* links: a needs b. Every one has a source. */
+const L=(a,b,src,note)=>({a,b,src,note});
+const BASE=[
+  L('sonarr','prowlarr','compose','depends_on'),L('sonarr','sabnzbd','yours','drawn 12 Oct'),L('sonarr','share:media','mount','/mnt/nas/media'),L('sonarr','share:downloads','mount','/mnt/nas/downloads'),
+  L('radarr','prowlarr','yours','drawn 12 Oct'),L('radarr','sabnzbd','compose','depends_on'),L('radarr','share:media','mount','/mnt/nas/media'),
+  L('sabnzbd','share:downloads','mount','/mnt/nas/downloads'),L('jellyfin','share:media','mount','/mnt/nas/media'),L('immich','share:photos','mount','/mnt/nas/photos'),
+  L('music','share:music','mount','/mnt/nas/music'),L('gitearunner','gitea','compose','depends_on'),
+  L('bazarr','sonarr','compose','depends_on'),L('bazarr','radarr','compose','depends_on'),L('lidarr','prowlarr','compose','depends_on'),L('lidarr','share:music','mount','/mnt/nas/music'),
+  L('readarr','prowlarr','compose','depends_on'),L('audiobookshelf','share:media','mount','/mnt/nas/media'),L('overseerr','sonarr','yours','drawn 3 Nov'),L('overseerr','radarr','yours','drawn 3 Nov'),
+  ...[['jellyfin','films'],['immich','photos'],['codeserver','code'],['homebox','box'],['crafty','map'],['nextcloud','cloud'],['gitea','git'],
+      ['audiobookshelf','listen'],['calibreweb','read'],['kavita','comics'],['overseerr','ask'],['paperlessngx','paper'],['uptimekuma','status'],['vaultwarden','vault'],['mealie','food'],['navidrome','tunes'],['grafana','graphs']]
+    .map(([a,h])=>L(a,'npm','proxy',h+'.example.net'))];
+const SUG={a:'sonarr',b:'jellyfin',q:'Does Sonarr tell Jellyfin to rescan?',why:'Both sit on the Docker network "media". Jam-Dash only draws what it can read, so it asks.'};
+function allLinks(A){
+  const has=id=>id.startsWith('share:')||A.some(a=>a.id===id);
+  return BASE.concat(S.user).filter(l=>has(l.a)&&has(l.b)&&!S.removed[l.a+'>'+l.b]);
+}
+const SRCW={mount:'mount',compose:'compose file',proxy:'Proxy Manager host',yours:'yours'};
+
+/* ---------- helpers ---------- */
+let D=null;
+const nm=(id,d=D)=>id.startsWith('share:')?'nas › '+id.slice(6):id.startsWith('srv:')?id.slice(4):(d.g(id)||{name:id}).name;
+const srvOf=(id,d=D)=>id.startsWith('share:')?N:id.startsWith('srv:')?id.slice(4):(d.g(id)||{}).srv;
+const and=a=>a.length>1?a.slice(0,-1).join(', ')+' and '+a[a.length-1]:(a[0]||'');
+function downNode(id,d=D){ if(id.startsWith('share:')) return d.SV[N].st==='offline'; const a=d.g(id); return a&&(a.st==='offline'||a.st==='alert'); }
+const broken=(l,d=D)=>downNode(l.b,d)||(downNode(l.a,d)&&srvOf(l.a,d)!==srvOf(l.b,d));
+function stv(a){
+  if(a.busy) return {led:'<i class="led off"></i>',w:a.busy};
+  if(a.st==='alert') return {led:'<i class="led alert"></i>',w:a.word};
+  if(a.st==='warn'||a.st==='wait') return {led:'<span class="wl"><i class="led warn"></i><b class="tri" aria-hidden="true">▲</b></span>',w:a.word};
+  if(a.st==='offline') return {led:'<i class="led gone"></i>',w:'Not answering'};
+  if(a.st==='off') return {led:'<i class="led off"></i>',w:'Stopped'};
+  return {led:'<i class="led ok"></i>',w:'Running'};
+}
+function items(d){
+  const al=d.A.filter(a=>a.st==='alert'&&!a.busy).sort((x,y)=>y.at.localeCompare(x.at)).map(a=>({k:'alert',id:a.id,lab:`Alert · ${a.srv} · ${a.at}`,ttl:a.ttl,why:a.why,fix:a.fix}));
+  const T=[...al];
+  if(d.SV[N].st==='offline'){
+    const w=d.A.filter(a=>a.st==='wait').map(a=>a.name);
+    T.push({k:'offline',id:'srv:nas',lab:'Offline · nas · 01:12',ttl:'nas stopped answering',why:S.tries?`Still no answer at 01:5${2+S.tries}. Check that nas has power and its network cable, then try again.`:`${and(w)} use folders on nas, so they wait. They pick up again when nas is back.`,fix:'Try again'});
+  }
+  const W=d.A.filter(a=>a.st==='warn'&&!a.busy).map(a=>({k:'warn',id:a.id,lab:`Warn · ${a.srv} · ${a.at}`,ttl:a.ttl,why:a.why,fix:a.fix,short:a.ttl,sm:'the worker stopped at 01:12'}));
+  if(d.SV[N].disk>90&&d.SV[N].st!=='offline'&&!S.fixed.disk) W.push({k:'warn',id:'disk',lab:'Warn · nas · 00:40',ttl:"nas's apps pool is almost full",why:'92% used, 310 GB left. Kopia\'s snapshots grew the most this week.',fix:'See disks',short:"nas's apps pool is almost full",sm:'310 GB left'});
+  return {T,W};
+}
+
+/* ---------- render: shells ---------- */
+const NAV=[['home','Home'],['apps','Apps'],['store','Store'],['files','Files'],['system','System'],['settings','Settings']];
+function shell(F,inner){
+  const nav=NAV.map(([r,t])=>`<button data-act="nav" data-r="${r}" ${(F.route===r||(r==='home'&&F.route==='detail'))?'aria-current="page"':''}>${t}</button>`).join('');
+  if(F.kind==='phone'){
+    const tabs=[['home','Home',ic.home],['apps','Apps',ic.apps],['store','Store',ic.store],['files','Files',ic.files],['more','More',ic.more]]
+      .map(([r,t,i])=>`<button class="tab" data-act="nav" data-r="${r}" ${(F.route===r||(r==='home'&&F.route==='detail'))?'aria-current="page"':''}>${i}${t}</button>`).join('');
+    return `<div class="app phn"><div class="trim"></div><div class="hdr"><span class="wm">Jam-Dash</span><button class="ib" aria-label="Find">${ic.find}</button></div><div class="body">${inner}</div>${F.route==='home'?'<div data-rs></div>':''}<nav class="ptabs">${tabs}</nav></div>`;
+  }
+  const pick=`<div class="pick" role="group" aria-label="Servers">${[['both','Both'],[H,H],[N,N]].map(([v,t])=>`<button data-act="view" data-v="${v}" aria-pressed="${F.view===v}">${t}</button>`).join('')}</div>`;
+  return `<div class="app"><div class="trim"></div><div class="hdr"><span class="wm">Jam-Dash</span><nav class="nav">${nav}</nav><div class="hr">${pick}<button class="findb">${ic.find}Find<span class="kh">⌘K</span></button></div></div><div class="body">${inner}</div>${F.route==='home'?'<div class="readout" data-ro aria-live="polite"></div>':''}</div>`;
+}
+function meters(sv,mode){
+  if(sv.st==='offline') return `<div class="os">Not answering since 01:12 · last seen ${sv.up}</div>`;
+  const m=(lab,v,rd,w)=>`<div class="mt${w?' warn':''}"><div class="hd"><span class="lab">${w?'<span class="wl"><i class="led warn"></i><b class="tri" aria-hidden="true">▲</b></span>':''}${lab}</span><span class="rd">${rd}</span></div><div class="tr${w?' warn':''}"><i style="--v:${v/100}"></i></div></div>`;
+  return `<div class="meters">${m('CPU',sv.cpu,sv.cpu+'%')}${m('Memory',sv.mem,sv.mem+'%')}${m(sv.diskn,sv.disk,sv.disk+'%',sv.disk>90)}</div>`;
+}
+function band(sv,d,mode,extra=''){
+  const off=sv.st==='offline';
+  const shares=sv.id===N?`<div class="shares"><span class="lab">Shared</span>${SHARES.map(s=>`<button class="chipn" data-node="share:${s}" data-act="nodekey" aria-label="nas share ${s}">${s}</button>`).join('')}</div>`:'';
+  return `<div class="band${off?' offline':''}" data-node="srv:${sv.id}">${extra}${mode==='p'?'':`<div class="id"><span class="nm">${off?'<i class="led gone"></i>':'<i class="led ok"></i>'}${sv.id}</span><span class="os">${off?'offline':sv.up+' · '+sv.os}</span></div>`}${meters(sv,mode)}${shares}</div>`;
+}
+const okey=a=>`<button class="okey" data-act="ext" data-id="${a.id}" aria-label="Open ${esc(a.name)} in a new tab">${ic.ext}</button>`;
+function tile(a,step){
+  const s=stv(a); const tail=a.st==='on'&&!a.busy&&a.since?` · ${a.since}`:'';
+  const wide=step===0&&a.live&&a.st==='on';
+  let lv='';
+  if(wide&&a.live==='sab') lv=`<div class="lv"><span class="big">42 MB/s</span><div class="pb" style="--v:68%"><i></i></div><span class="sm">about 10 min left · 3 in queue</span></div>`;
+  if(wide&&a.live==='music') lv=`<div class="lv"><b style="font:500 17px var(--f)">Saturn</b><span class="sm">The Olympians · Living room</span></div>`;
+  return `<div class="tl${wide?' wide':''}" data-node="${a.id}" data-st="${a.st}"><button class="hit" data-act="open" data-id="${a.id}" aria-label="${esc(a.name)}: ${esc(s.w)}"></button>${gl(a.g)}<span class="n">${esc(a.name)}</span>${lv}<div class="s">${s.led}<span>${esc(s.w)}${tail}</span>${a.st!=='offline'&&a.st!=='off'?okey(a):''}</div></div>`;
+}
+function row(a){const s=stv(a);return `<div class="rw" data-node="${a.id}" data-st="${a.st}"><button class="hit" data-act="open" data-id="${a.id}" aria-label="${esc(a.name)}: ${esc(s.w)}"></button><span class="n">${esc(a.name)}</span><span class="s">${s.led}${esc(a.st==='on'?'Up':s.w)}</span>${a.st!=='offline'?okey(a):'<span></span>'}</div>`}
+
+/* ---------- Home (desktop) ---------- */
+function hero(d,mode){
+  const {T,W}=items(d);
+  const al=T.filter(t=>t.k==='alert').length, run=d.A.filter(a=>a.st==='on').length;
+  const words=['','One app needs','Two apps need','Three apps need','Four apps need'];
+  let h=al?`${words[al]||al+' apps need'} you.`:d.SV[N].st==='offline'?"nas isn't answering.":W.length?'Everything runs. One thing to look at.':"Everything's running.";
+  if(!al&&d.SV[N].st!=='offline'&&W.length>1) h=`Everything runs. ${W.length} things to look at.`;
+  const sub=d.SV[N].st==='offline'?`home-server fine · ${d.A.filter(a=>a.st==='wait').length} apps wait on nas · checked 01:52`:`${run} running fine on 2 servers${W.length?` · ${W.length} to look at`:''} · checked 01:52`;
+  return `<div class="hero"><h2>${h}</h2><div class="sub"><span>${sub}</span><button class="ql" data-act="stub" data-v="History">History</button></div></div>`;
+}
+function loud(T,W){ // one loud thing: the newest alert's red key; else offline Try again (orange); else first warn (orange)
+  if(T.some(t=>t.k==='alert')) return {id:T.find(t=>t.k==='alert').id,cls:'red'};
+  if(T.length) return {id:T[0].id,cls:'go'};
+  if(W.length) return {id:W[0].id,cls:'go'};
+  return {};
+}
+function card(t,L,mode){
+  const isL=L.id===t.id; const cls=isL?L.cls:'';
+  const led=t.k==='alert'?'<i class="led alert"></i>':t.k==='offline'?'<i class="led gone"></i>':'<span class="wl"><i class="led warn"></i><b class="tri" aria-hidden="true">▲</b></span>';
+  const a=D.g(t.id); const busy=a&&a.busy;
+  const key=t.fix==='See disks'?`<button class="k ${cls}" data-act="stub" data-v="System">${t.fix}</button>`:
+    `<button class="k ${cls}" data-act="fix" data-id="${t.id}" ${busy||S.trying&&t.k==='offline'?'disabled':''}>${busy||((S.trying&&t.k==='offline')?'Trying…':t.fix)}</button>`;
+  const more=t.k==='offline'?`<button class="ql" data-act="pin" data-v="srv:nas">Show what waits</button>`:(a?`<button class="ql" data-act="open" data-id="${t.id}">Why?</button>`:'');
+  return `<div class="${mode==='p'?'ptc':'tc'} card" data-k="${t.k}"><div class="top">${led}<span class="lab">${t.lab}</span></div><div class="ttl">${esc(t.ttl)}</div><div class="why">${esc(t.why)}</div><div class="acts">${key}${more}</div></div>`;
+}
+function homeDesk(F,d,step){
+  const {T,W}=items(d); const Lo=loud(T,W);
+  let cards=T.slice(0,3), look=W;
+  if(!T.length&&W.length){cards=[W[0]];look=W.slice(1)}
+  const more=T.length>3?`<span class="lab">${T.length-3} more</span>`:'';
+  let h=hero(d,'d');
+  if(cards.length) h+=`<div class="trouble" style="--tn:${Math.max(2,cards.length)}">${cards.map(t=>card(t,Lo,'d')).join('')}${more}</div>`;
+  if(look.length) h+=`<div class="look"><span class="lab">To look at</span>${look.map(w=>`<span class="it"><span class="wl"><i class="led warn"></i><b class="tri" aria-hidden="true">▲</b></span>${esc(w.short)}<span class="sm">· ${esc(w.sm)}</span>${w.fix==='See disks'?`<button class="ql" data-act="stub" data-v="System">See disks</button>`:`<button class="ql" data-act="fix" data-id="${w.id}">${w.fix}</button>`}</span>`).join('')}</div>`;
+  const view=F.view||'both';
+  const srvList=view==='both'?[H,N]:[view];
+  const rows=step>=2;
+  const col=s=>{
+    const sv=d.SV[s]; const on=d.A.filter(a=>a.srv===s&&a.st!=='off'); const off=d.A.filter(a=>a.srv===s&&a.st==='off');
+    const order=x=>({alert:0,wait:1,warn:1,offline:2,on:3}[x.st]??3);
+    on.sort((x,y)=>order(x)-order(y)||(x.live?-1:0)-(y.live?-1:0)||x.name.localeCompare(y.name));
+    const cols=view==='both'?(s===H?4:2):6, rc=view==='both'?(s===H?3:2):5;
+    let o=`<div class="sv">${band(sv,d,'d')}`;
+    o+=rows?`<div class="rgrid" style="--rc:${rc}">${on.map(row).join('')}</div>`:`<div class="tgrid" style="--cols:${cols}">${on.map(a=>tile(a,step)).join('')}</div>`;
+    if(off.length) o+=step>=1?`<div class="stl"><span class="lab">${off.length} stopped</span>${off.slice(0,0).join('')}<button class="ql" data-act="stub" data-v="Apps">Show them</button></div>`:
+      `<div class="stl"><span class="lab">${off.length} stopped</span>${off.slice(0,s===H?6:4).map(a=>`<button class="chip" data-node="${a.id}" data-act="open" data-id="${a.id}"><i class="led off"></i>${esc(a.name)}</button>`).join('')}${off.length>(s===H?6:4)?`<button class="ql" data-act="stub" data-v="Apps">All ${off.length}</button>`:''}</div>`;
+    return o+'</div>';
+  };
+  h+=`<div class="srvs${srvList.length===1?' one':rows?' rows':''}">${srvList.map(col).join('')}</div>`;
+  return `<div class="hm" data-step="${step}">${h}<svg class="trace" aria-hidden="true"></svg><svg class="dots" aria-hidden="true"></svg><div class="tags" aria-hidden="true"></div></div>`;
+}
+/* ---------- Home (phone) ---------- */
+function homePhone(F,d){
+  const {T,W}=items(d); const Lo=loud(T,W);
+  const s=F.srv||H, sv=d.SV[s];
+  let h=hero(d,'p');
+  const pick=`<div class="ppick" role="group" aria-label="Show server">${[H,N].map(v=>`<button data-act="psrv" data-v="${v}" aria-pressed="${s===v}">${d.SV[v].st==='offline'?'<i class="led gone"></i>':''}${v}</button>`).join('')}</div>`;
+  h+=band(sv,d,'p',pick);
+  let first=T[0]||(W[0]&&!T.length?W[0]:null), rest=T.slice(1), look=T.length?W:W.slice(1);
+  if(first) h+=card(first,Lo,'p');
+  rest.forEach(t=>{const lab=t.k==='alert'?'<i class="led alert"></i>':'<i class="led gone"></i>';h+=`<button class="prow" data-act="open" data-id="${t.id}">${lab}<span><span class="t1">${esc(t.ttl)}</span><span class="t0">${t.lab.split(' · ').slice(1).join(' · ')}</span></span>${ic.back.replace('M15 6l-6 6 6 6','M9 6l6 6-6 6')}</button>`});
+  if(look.length) h+=`<button class="prow" data-act="look"><span class="wl"><i class="led warn"></i><b class="tri" aria-hidden="true">▲</b></span><span><span class="t1">To look at · ${look.length}</span><span class="t0">${esc(look.map(w=>w.id==='disk'?"nas's pool":nm(w.id)).join(', '))}</span></span>${F.look?'':ic.back.replace('M15 6l-6 6 6 6','M6 9l6 6 6-6')}</button>${F.look?look.map(w=>card(w,{},'p')).join(''):''}`;
+  const on=d.A.filter(a=>a.srv===s&&a.st!=='off'), off=d.A.filter(a=>a.srv===s&&a.st==='off');
+  const order=x=>({alert:0,wait:1,warn:1,offline:2,on:3}[x.st]??3);
+  on.sort((x,y)=>order(x)-order(y)||x.name.localeCompare(y.name));
+  h+=`<div class="sh" style="margin-top:4px"><b>${s}</b><span>${sv.st==='offline'?on.length+' apps not answering':on.length+' running'}</span></div>`;
+  h+=`<div class="pgrid">${on.map(a=>{const v=stv(a);return `<div class="pt" data-node="${a.id}" data-st="${a.st}"><button class="hit" data-act="open" data-id="${a.id}" aria-label="${esc(a.name)}: ${esc(v.w)}"></button><span class="n">${esc(a.name)}</span><span class="s">${v.led}<span>${esc(a.st==='wait'?'Waiting':v.w)}</span></span>${a.st!=='offline'?okey(a):''}</div>`}).join('')}</div>`;
+  if(off.length) h+=`<div class="stl"><span class="lab">${off.length} stopped</span><button class="ql" data-act="stub" data-v="Apps">Show them</button></div>`;
+  return `<div class="hm">${h}<svg class="trace" aria-hidden="true"></svg><svg class="dots" aria-hidden="true"></svg><div class="tags" aria-hidden="true"></div></div>`;
+}
+
+/* ---------- Detail ---------- */
+const LOGS={crafty:[['01:48:45',"[Server] Can't keep up! Running 82 ticks behind"],['01:49:10','healthcheck: GET /api/v2 timed out (10 s)',1],['01:49:35',"[Server] Can't keep up! Running 82 ticks behind"],['01:50:00','healthcheck: unhealthy',1],['01:50:25','healthcheck: GET /api/v2 timed out (10 s)',1],['01:51:15',"[Server] Saving chunks for level 'riverside'"]],
+  jellyfin:[['01:11:58','[INF] Library scan finished: Films (1,204 items)'],['01:12:31','[WRN] /media/films: Host is down'],['01:12:31','[ERR] Could not read /media/films/… (I/O error)',1],['01:13:02','[INF] Playback stopped: Living room TV'],['01:14:31','[WRN] /media/shows: Host is down']],
+  sonarr:[['01:40:12','[Info] RssSyncService: RSS Sync Completed. 0 reports grabbed'],['01:45:00','[Info] Prowlarr: indexers synced (6)'],['01:52:10','[Info] RssSyncService: Starting RSS Sync'],['01:52:11','[Info] DownloadedEpisodesImportService: 0 to import']]};
+function detail(F,d){
+  const a=d.g(F.app)||d.g('sonarr'); const s=stv(a); const p=F.kind==='phone';
+  const {T,W}=items(d); const Lo=loud(T,W);
+  let acts='';
+  if(a.st==='alert') acts+=`<button class="k ${Lo.id===a.id?'red':''}" data-act="fix" data-id="${a.id}" ${a.busy?'disabled':''}>${a.busy||a.fix}</button>`;
+  else if(a.st==='wait') acts+=`<button class="k go" data-act="fix" data-id="srv:nas" ${S.trying?'disabled':''}>${S.trying?'Trying…':'Try nas again'}</button>`;
+  else if(a.st==='warn') acts+=`<button class="k go" data-act="fix" data-id="${a.id}">${a.fix}</button>`;
+  else if(a.upd&&!S.fixed['upd:'+a.id]) acts+=`<button class="k go" data-act="upd" data-id="${a.id}">${a.busy?a.busy:'Update to '+a.upd}</button>`;
+  if(a.st!=='offline'&&a.st!=='off') acts+=`<button class="k quiet" data-act="ext" data-id="${a.id}">Open ${ic.ext}</button>`;
+  acts+=`<button class="ql" data-act="stub" data-v="Full log">Full log</button><button class="ql" data-act="stub" data-v="Edit setup">Edit setup</button>${a.st==='off'?'':'<button class="ql" data-act="stub" data-v="Stop">Stop…</button>'}`;
+  const why=a.st==='wait'?`It's running, but the folders it reads from nas are away while nas doesn't answer (since 01:12). Playback of anything on nas fails until then.`:a.why;
+  const head=`<div class="dhead card" data-st="${a.st}">${gl(a.g)}<h2>${esc(a.name)}<span class="chip">${a.srv}</span></h2><div class="stline">${s.led}<span class="${a.st==='alert'?'alert-w':''}" style="${a.st==='alert'?'color:var(--alert-ink)':a.st==='wait'||a.st==='warn'?'color:var(--warn-ink)':''}">${esc(s.w)}${a.st==='on'?' for '+a.since.replace(' d',' days').replace(' h',' hours'):''}</span>${a.full?`<span class="mono" style="color:var(--dim);font-size:14px">${a.full}</span>`:''}</div>${why?`<div class="why">${esc(why)}</div>`:''}<div class="acts">${acts}</div></div>`;
+  const log=(LOGS[a.id]||[['01:50:02',`[${a.name}] GET /api/status 200 (12 ms)`],['01:51:40',`[${a.name}] GET /api/health 200 (8 ms)`]]);
+  const logc=`<div class="card pad"><div class="ch"><span class="lab">Last lines</span><button class="ql" data-act="stub" data-v="Full log">Full log</button></div><div class="logbox">${log.map(([t,x,b])=>`<div class="${b?'bad':''}"><span class="t">${t}</span>  ${esc(x)}</div>`).join('')}</div></div>`;
+  const facts=`<div class="card pad"><span class="lab">Facts</span><dl class="kv" style="margin-top:6px"><dt>Address</dt><dd class="mono">${a.port?a.srv+':'+a.port:'none (no web page)'}</dd><dt>Image</dt><dd class="mono">${esc(a.img)}</dd><dt>Data folder</dt><dd class="mono">${esc(a.dir)}</dd><dt>Restarts</dt><dd>${a.st==='alert'?'3 tries, then waits for you':'Unless stopped'}</dd></dl></div>`;
+  const res=a.cpu?`<div class="card pad"><span class="lab">Now</span><div class="res" style="margin-top:8px"><div><div class="v">${a.cpu}</div><span class="lab">CPU</span></div><div><div class="v">${a.mem}</div><span class="lab">Memory</span></div><div><div class="v">${a.since}</div><span class="lab">Up</span></div></div></div>`:'';
+  const inner=`<div class="dt"><div class="crumb"><button class="ql" data-act="home">${ic.back}Home</button><span>/</span><span>${a.srv}</span><span>/</span><span style="color:var(--ink)">${esc(a.name)}</span></div>${head}<div class="dgrid"><div class="dcol">${cmap(a,d,p)}${logc}</div><div class="dcol">${res}${facts}</div></div></div>`;
+  return inner;
+}
+function cmap(a,d,p){
+  const needs=d.links.filter(l=>l.a===a.id), by=d.links.filter(l=>l.b===a.id);
+  const node=(l,other,side)=>{const bk=broken(l,d); const yo=l.src==='yours';
+    const o=other.startsWith('share:')?null:d.g(other); const led=other.startsWith('share:')?(d.SV[N].st==='offline'?'<i class="led gone"></i>':'<i class="led ok"></i>'):stv(o).led;
+    const src=`${SRCW[l.src]}${l.src==='yours'?' · '+l.note+' · Jam-Dash can\'t check it':' · '+l.note}${bk?(other.startsWith('share:')||srvOf(other,d)===N&&d.SV[N].st==='offline'?" · nas isn't answering":' · '+stv(o).w.toLowerCase()):''}`;
+    const rm=yo?`<button class="ql rm" data-act="rmlink" data-k="${l.a}>${l.b}">Remove</button>`:'';
+    return `<div class="mnode${yo?' yo':''}${bk?' bk':''}" data-mnode="${other}" data-src="${l.src}" data-bk="${bk?1:0}"><button class="mhit" data-act="${other.startsWith('share:')?'nodekey':'open'}" data-id="${other}" aria-label="${esc(nm(other,d))}"></button>${led}<b>${esc(nm(other,d))}</b>${rm}<span class="src${bk?' bk':''}">${esc(src)}</span></div>`;};
+  const MAX=p?5:7;
+  const list=(L,side,emptyTxt)=>{if(!L.length) return `<div class="empty">${emptyTxt}</div>`;
+    const sh=L.slice(0,MAX).map(l=>node(l,side==='n'?l.b:l.a,side)).join('');
+    const rest=L.length>MAX?`<div class="empty">and ${L.length-MAX} more: ${esc(and(L.slice(MAX).map(l=>nm(side==='n'?l.b:l.a,d))))}</div>`:''; return sh+rest;};
+  const sug=a.id===SUG.a&&!S.answered.sug&&d.g(SUG.b)?`<div class="ask"><span class="lab">Asked, not drawn</span><span class="q">${SUG.q}</span><span class="sm">${SUG.why}</span><div class="row"><button class="k" data-act="sug" data-v="yes">Yes, draw it</button><button class="ql" data-act="sug" data-v="no">No</button></div></div>`:'';
+  const opts=d.A.filter(x=>x.id!==a.id).map(x=>`<option value="${x.id}">${esc(x.name)} (${x.srv})</option>`).concat(SHARES.map(s=>`<option value="share:${s}">nas › ${s}</option>`)).join('');
+  const add=`<div class="addc"><span class="lab">Add a connection</span><span>${esc(a.name)}</span><button class="pkey" data-act="dir" data-v="needs" aria-pressed="${(S.dir||'needs')==='needs'}">needs</button><button class="pkey" data-act="dir" data-v="by" aria-pressed="${S.dir==='by'}">is used by</button><select class="seldr" data-sel aria-label="Other app">${opts}</select><button class="k" data-act="addlink" data-id="${a.id}">Add</button></div>`;
+  const center=`<div class="mnode center" data-mnode="${a.id}">${stv(a).led}<b>${esc(a.name)}</b><span class="src">${a.srv}</span></div>`;
+  return `<div class="card pad"><div class="ch"><span class="lab">Connections</span><span class="sm">Found in Docker mounts, compose files and Proxy Manager (connected Oct 2). Dashed ones you drew.</span></div>
+    <div class="cmap" data-cmap><div class="col n"><span class="lab">Needs</span>${list(needs,'n',`Nothing found that ${esc(a.name)} needs.`)}</div><div class="col c">${center}</div><div class="col b"><span class="lab">Used by</span>${list(by,'b',`Nothing found uses ${esc(a.name)}.`)}</div><svg class="trace" aria-hidden="true"></svg><svg class="dots" aria-hidden="true"></svg></div>${sug}${add}</div>`;
+}
+function stub(F){const t=NAV.concat([['more','More']]).find(x=>x[0]===F.route)?.[1]||F.route;return `<div class="stub"><span class="lab">Not redrawn in round 6</span><h2>${t}</h2><p>Round 3's ${t} stands (see mockups/pass3). The one change it would take from this round: in lists of apps, pointing at a row lights the apps it's linked to, the same way Home does.</p><button class="k" data-act="home">Back to Home</button></div>`}
+
+/* ---------- render ---------- */
+function frameSit(F){return F.sit||S.sit}
+function render(F){
+  D=build(frameSit(F));
+  if(F.follow&&F.route==='detail'&&!F.manual) F.app=frameSit(F)==='offline'?'jellyfin':(frameSit(F)==='calm'?'sonarr':'crafty');
+  const root=F.el; root.className='scaler';
+  let inner;
+  if(F.route==='home') inner=null;
+  else if(F.route==='detail') inner=detail(F,D);
+  else inner=stub(F);
+  const draw=html=>{root.innerHTML=`<div class="jd ${S.light}">${shell(F,html)}</div>`};
+  if(F.route==='home'){
+    if(F.kind==='phone'){draw(homePhone(F,D));F.step=null}
+    else{
+      const force=S.dens==='rows'?2:null; let step=force??0;
+      draw(homeDesk(F,D,step));
+      if(force==null){ const many=D.A.filter(a=>a.st!=='off').length>24; for(step=0;step<=2;step++){ if(step===2&&!many){step=1;draw(homeDesk(F,D,1));break} draw(homeDesk(F,D,step)); if(fits(root)) break; } if(step>2){step=2;draw(homeDesk(F,D,2))} }
+      F.step=step; F.fit=fits(root);
+    }
+  } else draw(inner);
+  if(F.toast) root.querySelector('.app').insertAdjacentHTML('beforeend',`<div class="toast" role="status">${F.toast}</div>`);
+  if(F.route==='home') trace(F);
+  if(F.route==='detail') drawMap(F);
+  if(F.route==='detail'&&F.kind==='desk') {const sel=root.querySelector('[data-sel]'); if(sel&&F.selv) sel.value=F.selv;}
+  caption(F);
+}
+function fits(root){const b=root.querySelector('.body');return b.scrollHeight<=b.clientHeight+1}
+function caption(F){
+  const cap=F.fig&&F.fig.querySelector('[data-cap]'); if(!cap) return;
+  const sitN={trouble:'Trouble',calm:'All good',offline:'nas offline',busy:'Busy day'}[frameSit(F)];
+  if(F.kind==='phone'){cap.innerHTML=`<b>Phone 390 × 844</b> · ${sitN} · ${F.route==='home'?'tap an app to see its links':nm(F.app)}`;return}
+  const size=`<b>Desktop ${F.w} × ${F.h}</b>`;
+  if(F.route!=='home'){cap.innerHTML=`${size} · ${sitN} · ${nm(F.app)}`;return}
+  const b=F.el.querySelector('.body'); const k=b.getBoundingClientRect().height/b.offsetHeight||1;
+  const bands=$$('.band',F.el); const lastBand=Math.max(...bands.map(x=>(x.getBoundingClientRect().bottom-b.getBoundingClientRect().top)/k));
+  cap.innerHTML=`${size} · ${sitN} · density step ${F.step+1} of 3 (${['Tiles','Compact','Rows'][F.step]}${S.dens==='rows'?', chosen':''}) · ${F.fit?'fits':'scrolls '+Math.round(b.scrollHeight-b.clientHeight)+' px below'} · server panels on the first screen: ${lastBand<=b.clientHeight?'yes':'no'}`;
+}
+function renderAll(){fit();mounts.forEach(render)}
+
+/* ---------- the trace ---------- */
+function relOf(id,d){
+  if(id.startsWith('srv:')){const s=id.slice(4);return d.links.filter(l=>(srvOf(l.a,d)===s)!==(srvOf(l.b,d)===s))}
+  return d.links.filter(l=>l.a===id||l.b===id);
+}
+function rectIn(el,box,k){const r=el.getBoundingClientRect();return {l:(r.left-box.left)/k,t:(r.top-box.top)/k,r:(r.right-box.left)/k,b:(r.bottom-box.top)/k,w:r.width/k,h:r.height/k,get cx(){return this.l+this.w/2},get cy(){return this.t+this.h/2}}}
+function anchor(r,o,m){
+  const dx=o.cx-r.cx, dy=o.cy-r.cy;
+  if(m==='h'||(m!=='v'&&Math.abs(dx)*r.h>Math.abs(dy)*r.w)) return {x:dx>0?r.r:r.l,y:r.cy,vx:Math.sign(dx),vy:0};
+  return {x:r.cx,y:dy>0?r.b:r.t,vx:0,vy:Math.sign(dy)};
+}
+function pathBetween(r1,r2,m1,m2){
+  const p=anchor(r1,r2,m1), q=anchor(r2,r1,m2??m1); const dist=Math.hypot(q.x-p.x,q.y-p.y); const c=Math.min(110,Math.max(24,dist*.42));
+  return {d:`M${p.x.toFixed(1)} ${p.y.toFixed(1)} C${(p.x+p.vx*c).toFixed(1)} ${(p.y+p.vy*c).toFixed(1)} ${(q.x+q.vx*c).toFixed(1)} ${(q.y+q.vy*c).toFixed(1)} ${q.x.toFixed(1)} ${q.y.toFixed(1)}`,p,q};
+}
+function trace(F){
+  const root=F.el, hm=root.querySelector('.hm'); if(!hm) return;
+  D=build(frameSit(F)); const d=D;
+  const id=F.hov||F.sel||F.pin||null;
+  const svg=hm.querySelector('svg.trace'), svd=hm.querySelector('svg.dots'), tags=hm.querySelector('.tags');
+  $$('.foc,.rel',hm).forEach(e=>e.classList.remove('foc','rel'));
+  svg.innerHTML='';svd.innerHTML='';tags.innerHTML='';
+  hm.classList.toggle('tracing',!!id);
+  const ro=root.querySelector('[data-ro]'), rs=root.querySelector('[data-rs]');
+  if(!id){ if(ro) ro.innerHTML=idle(d); if(rs) rs.innerHTML=''; return; }
+  const R=relOf(id,d);
+  const k=hm.getBoundingClientRect().width/hm.offsetWidth||1, box=hm.getBoundingClientRect();
+  [svg,svd].forEach(x=>{x.setAttribute('width',hm.offsetWidth);x.setAttribute('height',hm.offsetHeight)});
+  const elOf=n=>hm.querySelector(`[data-node="${CSS.escape(n)}"]`);
+  const fe=elOf(id); if(fe) fe.classList.add('foc');
+  const rows=hm.dataset.step==='2';
+  const anim=S.motion==='full'?' fade':'';
+  let out='', dots='';
+  const tagged=[];
+  const seen=new Set();
+  R.forEach(l=>{
+    let ea=elOf(l.a), eb=elOf(l.b);
+    [ea,eb].forEach(e=>e&&e!==fe&&e.classList.add('rel'));
+    if(id.startsWith('srv:')&&fe){ if(srvOf(l.a,d)===id.slice(4)) ea=fe; if(srvOf(l.b,d)===id.slice(4)) eb=fe; }
+    if(!ea||!eb||rows) return;
+    if(ea===eb||(ea.closest('.band')&&eb.closest('.band'))) return;
+    if(id.startsWith('srv:')){const da=d.g(l.a),db=d.g(l.b); if((da&&da.st==='off')||(db&&db.st==='off')) return;}
+    const key=[...[ea,eb].map(e=>e.dataset.node)].join('|'); if(seen.has(key)) return; seen.add(key);
+    const bk=broken(l,d), cls=bk?'bk':l.src==='yours'?'yo':'';
+    const md=e=>e.classList.contains('chipn')?'v':e.classList.contains('band')?'h':undefined;
+    const pth=pathBetween(rectIn(ea,box,k),rectIn(eb,box,k),md(ea),md(eb));
+    out+=`<path class="ln ${cls}${anim}" d="${pth.d}"/>`;
+    dots+=`<circle class="dot ${bk?'bk':''}" cx="${pth.p.x}" cy="${pth.p.y}" r="3.2"/><circle class="dot ${bk?'bk':''}" cx="${pth.q.x}" cy="${pth.q.y}" r="3.2"/>`;
+    if(!id.startsWith('srv:')){ const other=l.a===id?eb:ea; tagged.push({el:other,w:l.a===id?'Needed':'Uses it',bk}); }
+  });
+  svg.innerHTML=out;svd.innerHTML=dots;
+  if(tagged.length&&tagged.length<=8&&!rows){
+    tags.innerHTML=tagged.filter(t=>t.el.classList.contains('tl')||t.el.classList.contains('pt')).map(t=>{const r=rectIn(t.el,box,k);return `<span class="tag${t.bk?' bk':''}" style="left:${r.l+10}px;top:${r.t-9}px">${t.bk?'Broken · ':''}${t.w}</span>`}).join('');
+  }
+  if(ro) ro.innerHTML=readout(id,R,d,false);
+  if(rs){ rs.innerHTML=F.sel&&!F.hov?`<div class="rsheet" role="region" aria-label="Links">${readout(id,R,d,true)}</div>`:'';
+    const sh=rs.querySelector('.rsheet'), body=root.querySelector('.body');
+    if(sh&&fe&&body){ const kk=body.getBoundingClientRect().height/body.offsetHeight||1; const over=(fe.getBoundingClientRect().bottom-sh.getBoundingClientRect().top)/kk+12; const top=(fe.getBoundingClientRect().top-body.getBoundingClientRect().top)/kk; if(over>0) body.scrollTop+=over; else if(top<0) body.scrollTop+=top-12; } }
+}
+function idle(d){
+  const waits=d.A.filter(a=>a.st==='wait');
+  const lg=`<span class="legend" aria-hidden="true"><span><svg viewBox="0 0 26 8"><path d="M1 4h24" stroke="currentColor" stroke-width="1.5"/></svg>found</span><span><svg viewBox="0 0 26 8"><path d="M1 4h24" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5"/></svg>yours</span><span><svg viewBox="0 0 26 8"><path d="M1 4h24" stroke="var(--warn-line)" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/></svg>broken</span></span>`;
+  if(waits.length) return `<span class="rk">Links</span><span class="rt">${waits.length} apps on home-server wait on nas: ${esc(and(waits.map(a=>a.name)))}. Point at nas, or press Show what waits.</span>${lg}`;
+  return `<span class="rk">Links</span><span class="rt">Point at an app to see what it needs and what uses it. Jam-Dash reads them from Docker mounts, compose files and Proxy Manager.</span>${lg}`;
+}
+function readout(id,R,d,phone){
+  const name=nm(id,d);
+  const item=(l,other)=>{const bk=broken(l,d);const oa=d.g(other);return `${esc(nm(other,d))} <em class="${bk?'bk':''}">${SRCW[l.src]}${oa&&oa.st==='off'?', stopped':''}${bk?(srvOf(other,d)===N&&d.SV[N].st==='offline'?", nas isn't answering":', '+(d.g(other)?stv(d.g(other)).w.toLowerCase():'down')):''}</em>`};
+  const grp=(L,f)=>{ if(L.length>6){const srcs=[...new Set(L.map(l=>SRCW[l.src]))];return `${L.length} apps <em>${srcs.join(', ')}</em>: ${esc(and(L.slice(0,5).map(l=>nm(f(l),d)).concat(L.length>5?[`${L.length-5} more`]:[])))}`} return L.length?L.map(l=>item(l,f(l))).join(phone?', ':'<span class="sep">·</span>'):'nothing found'; };
+  let body;
+  if(id.startsWith('srv:')){
+    const s=id.slice(4); const live=l=>!['a','b'].some(x=>{const o=d.g(l[x]);return o&&o.st==='off'});
+    const stopped=[...new Set(R.filter(l=>!live(l)).map(l=>nm(srvOf(l.a,d)===s?l.b:l.a,d)))];
+    const inn=R.filter(live).filter(l=>srvOf(l.b,d)===s), out=R.filter(live).filter(l=>srvOf(l.a,d)===s);
+    const off=d.SV[s].st==='offline';
+    body=`${inn.length?`<i>Used from ${s===N?H:N}</i>${esc(and([...new Set(inn.map(l=>nm(l.a,d)))]))} <em class="${off?'bk':''}">${[...new Set(inn.map(l=>SRCW[l.src]))].join(', ')}${off?', broken while nas is away':''}</em>`:''}${inn.length&&out.length?(phone?'<br>':'<span class="sep">·</span>'):''}${out.length?`${esc(and([...new Set(out.map(l=>nm(l.a,d)))]))} ${out.length>1?'are':'is'} reached through ${esc(and([...new Set(out.map(l=>nm(l.b,d)))]))} <em class="${off?'bk':''}">${[...new Set(out.map(l=>SRCW[l.src]))].join(', ')}</em>`:''}${stopped.length?` <em>(${stopped.length} stopped not counted)</em>`:''}`;
+  } else {
+    const needs=R.filter(l=>l.a===id), by=R.filter(l=>l.b===id);
+    body=`<i>Needs</i>${grp(needs,l=>l.b)}${phone?'<br>':'<span class="sep">·</span>'}<i>Used by</i>${grp(by,l=>l.a)}`;
+  }
+  if(phone){
+    const isApp=!id.startsWith('share:')&&!id.startsWith('srv:');
+    return `<div class="hd"><b>${esc(name)}</b><button class="ib" data-act="unsel" aria-label="Close">${ic.close}</button></div><div>${body}</div>${isApp?`<div class="acts"><button class="k" data-act="godetail" data-id="${id}">${esc(name)}'s page</button></div>`:''}`;
+  }
+  const pinned=!!(arguments[0]&&false);
+  return `<span class="rk">${esc(name)}</span><span class="rt">${body}</span>${id.startsWith('srv:')?`<button class="ql" data-act="unpin">Close</button>`:''}`;
+}
+function drawMap(F){
+  const m=F.el.querySelector('[data-cmap]'); if(!m) return;
+  const svg=m.querySelector('svg.trace'), svd=m.querySelector('svg.dots'); const k=m.getBoundingClientRect().width/m.offsetWidth||1, box=m.getBoundingClientRect();
+  [svg,svd].forEach(x=>{x.setAttribute('width',m.offsetWidth);x.setAttribute('height',m.offsetHeight)});
+  const c=m.querySelector('.mnode.center'); if(!c) return; const rc=rectIn(c,box,k);
+  let out='',dots='';
+  $$('.mnode:not(.center)',m).forEach(n=>{const bk=n.dataset.bk==='1', yo=n.dataset.src==='yours';
+    const mm=F.kind==='phone'?'v':'h'; const pth=pathBetween(rectIn(n,box,k),rc,mm); out+=`<path class="ln ${bk?'bk':yo?'yo':''}" d="${pth.d}"/>`;
+    dots+=`<circle class="dot ${bk?'bk':''}" cx="${pth.p.x}" cy="${pth.p.y}" r="3.2"/><circle class="dot ${bk?'bk':''}" cx="${pth.q.x}" cy="${pth.q.y}" r="3.2"/>`;});
+  svg.innerHTML=out;svd.innerHTML=dots;
+}
+
+/* ---------- events ---------- */
+function setHov(F,id){ if(F.hov===id) return; F.hov=id; trace(F); }
+function bind(F){
+  const el=F.el, scr=el.closest('.screen');
+  let t=null;
+  el.addEventListener('mouseover',e=>{ if(F.kind==='phone'||F.route!=='home') return; const n=e.target.closest('[data-node]'); clearTimeout(t); if(n) setHov(F,n.dataset.node); else t=setTimeout(()=>setHov(F,null),70); });
+  el.addEventListener('mouseleave',()=>{clearTimeout(t);setHov(F,null)});
+  el.addEventListener('focusin',e=>{ if(F.route!=='home') return; const n=e.target.closest('[data-node]'); if(n&&F.kind!=='phone') setHov(F,n.dataset.node); });
+  el.addEventListener('focusout',e=>{ if(F.route!=='home'||F.kind==='phone') return; if(!e.relatedTarget||!el.contains(e.relatedTarget)||!e.relatedTarget.closest('[data-node]')) setHov(F,null); });
+  el.addEventListener('change',e=>{ if(e.target.matches('[data-sel]')) F.selv=e.target.value; });
+  el.addEventListener('click',e=>{
+    const b=e.target.closest('[data-act]'); if(!b) return; const act=b.dataset.act, id=b.dataset.id;
+    switch(act){
+      case 'nav': F.route=b.dataset.r==='home'?'home':b.dataset.r; F.hov=F.sel=null; F.manual=true; return render(F);
+      case 'home': F.route='home'; F.hov=F.sel=null; return render(F);
+      case 'view': F.view=b.dataset.v; F.hov=null; return render(F);
+      case 'psrv': F.srv=b.dataset.v; F.sel=null; return render(F);
+      case 'look': F.look=!F.look; return render(F);
+      case 'open':
+        if(F.kind==='phone'&&F.route==='home'&&!b.classList.contains('prow')&&!b.classList.contains('ql')){ if(F.sel!==id){F.sel=id;return trace(F)} }
+        F.route='detail'; F.app=id; F.manual=true; F.hov=F.sel=null; return render(F);
+      case 'godetail': F.route='detail'; F.app=id; F.manual=true; F.sel=null; return render(F);
+      case 'unsel': F.sel=null; return trace(F);
+      case 'nodekey': if(F.route==='home'){ if(F.kind==='phone'){F.sel=b.dataset.node||id;return trace(F)} return; } return toastF(F,'Shares open in Files (round 3).');
+      case 'pin': F.pin=b.dataset.v; return trace(F);
+      case 'unpin': F.pin=null; F.hov=null; return trace(F);
+      case 'ext': return toastF(F,`Opens ${nm(id)} in a new tab`);
+      case 'stub': return toastF(F,`${b.dataset.v} isn't redrawn this round`);
+      case 'fix': return fix(id);
+      case 'upd': S.busy[id]='Updating…'; renderAll(); return setTimeout(()=>{delete S.busy[id];S.fixed['upd:'+id]=true;renderAll()},1400);
+      case 'sug': S.answered.sug=true; if(b.dataset.v==='yes') S.user.push(L(SUG.a,SUG.b,'yours','drawn today')); return renderAll();
+      case 'dir': S.dir=b.dataset.v; return render(F);
+      case 'addlink': { const sel=el.querySelector('[data-sel]'); const o=sel.value; const l=S.dir==='by'?L(o,id,'yours','drawn today'):L(id,o,'yours','drawn today');
+        if(!S.user.some(x=>x.a===l.a&&x.b===l.b)&&!BASE.some(x=>x.a===l.a&&x.b===l.b)) S.user.push(l); delete S.removed[l.a+'>'+l.b]; return renderAll(); }
+      case 'rmlink': S.removed[b.dataset.k]=true; S.user=S.user.filter(x=>x.a+'>'+x.b!==b.dataset.k); return renderAll();
+    }
+  });
+  if(scr) scr.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(F.pin||F.sel){F.pin=F.sel=null;return trace(F)} if(F.route!=='home'){F.route='home';render(F)} } });
+}
+function toastF(F,msg){F.toast=msg;render(F);clearTimeout(F.tt);F.tt=setTimeout(()=>{F.toast=null;const t=F.el.querySelector('.toast');if(t)t.remove()},2200)}
+function fix(id){
+  if(id==='srv:nas'){ S.trying=true; renderAll(); return setTimeout(()=>{S.trying=false;S.tries++;renderAll()},1300); }
+  const a=build(S.sit).g(id);
+  S.busy[id]=a&&a.st==='alert'&&a.fix.startsWith('Start')?'Starting…':a&&a.fix==='Start the worker'?'Starting…':'Restarting…';
+  renderAll(); setTimeout(()=>{delete S.busy[id];S.fixed[id]=true;renderAll()},1400);
+}
+
+/* ---------- page controls & scaling ---------- */
+function seg(id,key,cb){const g=$('#'+id);const sync=()=>$$('button',g).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(S[key]))));
+  g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S[key]=key==='dw'?+b.dataset.v:b.dataset.v;sync();cb&&cb();renderAll()});sync()}
+seg('c-light','light',()=>document.documentElement.dataset.theme=S.light==='night'?'dark':'light');
+seg('c-sit','sit',()=>{S.fixed={};S.busy={};S.tries=0;mounts.forEach(F=>{F.pin=F.hov=F.sel=null;if(!F.fixedRoute){F.route=F.r0;F.manual=false}})});
+seg('c-dw','dw');seg('c-dens','dens');
+seg('c-motion','motion',()=>document.body.classList.toggle('calm',S.motion==='calm'));
+$$('[data-mount]').forEach(el=>{const F={el,kind:el.dataset.kind,route:el.dataset.route,r0:el.dataset.route,sit:el.dataset.sit,follow:!!el.dataset.follow,
+  fw:+el.dataset.w||0,fh:+el.dataset.h||0,fig:el.closest('figure'),view:'both',srv:H,app:'sonarr'};mounts.push(F);bind(F)});
+function fit(){
+  mounts.forEach(F=>{
+    F.w=F.fw||(F.kind==='phone'?390:S.dw); F.h=F.fh||(F.kind==='phone'?844:(S.dw===1440?900:800));
+    const scr=F.el.parentElement; const k=scr.clientWidth/F.w;
+    F.el.style.width=F.w+'px';F.el.style.height=F.h+'px';F.el.style.transform=`scale(${k})`;scr.style.height=(F.h*k)+'px';
+  });
+}
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{fit();mounts.forEach(F=>{if(F.route==='home')trace(F);if(F.route==='detail')drawMap(F);caption(F)})},120)});
+fit();renderAll();
+document.fonts&&document.fonts.ready.then(()=>{renderAll()});
+</script>
+</body>
+</html>
