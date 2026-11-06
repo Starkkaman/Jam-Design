@@ -4,6 +4,30 @@
 > `notes/pass6-jamfin.md`. **Plan only:** nothing in Jamfin has changed. Code facts are from Jamfin `mobile` at
 > `bbf00df` (TV 0.3.3). Sizes: the TV UI is 960×540 dp, so 1 dp = 2 px at 1080p.
 
+## Build status (2026-11-06): built as **Repertory**, Jamfin TV 0.4.0
+
+The plan below was built as Jamfin's ninth look, **Repertory** (`Design.Repertory`; no look removed or changed; the user's
+look stays Unigrid). It shipped in the pre-release **Jamfin TV 0.4.0 (Repertory)**, tag `tv-0.4.0-7ca7dca`, from Jamfin
+`mobile` at `7ca7dca`. Notes and screenshots: Jamfin `CLAUDE.md` "Looks > Repertory", `docs/screens/repertory`.
+
+| Plan step | Status |
+|---|---|
+| 1-2 Look, palettes, fonts, focus ring + lift, profile colour | Built. Night + Day, ten profile colours as the accent, orange only for the one action; contrast tests pass. |
+| 3-4 Home, programme pages | Built. The title field is a **set** of three flats seeded per title (not tones from the art). |
+| 5 Player band, chapters, strip | Built; BACK twice on a paused film and its setting kept. |
+| 6 Shutter on Play + slatted bar | Built as the curtain; the slats follow the real load and it never holds the first frame. |
+| 7 Title fields Home -> programme -> shutter | The glide is built (forward only; Back = the planes reversed). **Not built: the Title shapes setting** (Bold / Quiet / Off). |
+| 8-9 Settings switches, states, launch | Built (steel switches 38 x 22 dp, 180 ms, no bounce; Calm instant). |
+| 10 Grids / Organise, Search, Discover / requests, disc house menu | Built; the grid keeps its A-Z strip. The house menu is Repertory's; other disc screens stay Cut Paper. |
+| 11 Sound set | Built (synthesised; no spec existed). |
+| 12 Phone | **Not started.** The phone uses the token look; the TV's `RepertoryPlayer` is in the shared `:player` module. |
+| 13 The default | Isaac's call; unchanged. |
+
+Measured on the TV in the release app with Isaac's library (late frames, first pass / again; Unigrid in the same session):
+film open 6.4 % / 3.9 % (Unigrid 8.2 / 4.9); home rows 2.6 % / 2.4 % (Unigrid 4.7 / 2.7); Back 7.8 % / 5.9 % (Unigrid 7.9 / 6.9).
+Film open's first pass has p90 31 ms: frames arrive every vsync but one frame late (buffer stuffing from the shared screen-change
+engine, the same in Unigrid), so it is at the ~6 % target but over the 25 ms p90.
+
 ## 1. What changes
 
 | Where | TV | Phone |
