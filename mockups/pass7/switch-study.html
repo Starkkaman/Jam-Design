@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Channel Reveal Switch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Switch study, pass 7. The small "channel reveal" switch as a shared component: Jam Home first, then a quiet accent in
+   Callsheet, JamFin, Jam-Dash and Lobby. Sample data only. Nothing here changes any app. */
+
+/* ================= page chrome (same as the round 6/7 mockups) ================= */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;--settle:cubic-bezier(.16,1,.3,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f);overflow-x:hidden}
+.wrap{max-width:1320px;margin:0 auto;padding:28px 16px 80px;display:grid;gap:40px}
+@media (min-width:700px){.wrap{padding-inline:28px}}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,38px)/1.1 var(--f);margin:6px 0 8px}
+h2{font:600 24px/1.2 var(--f);margin:0}
+h3{font:600 17px/1.3 var(--f);margin:0}
+p{margin:0;max-width:76ch}
+.muted{color:var(--muted)}
+code{font:500 13px var(--mono)}
+q{font-style:italic}
+.sticky{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+@media (max-width:600px){.sticky{position:static}}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line);flex-wrap:wrap}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:7px 13px;border-radius:9px;cursor:pointer;min-height:36px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111}}
+.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+section{display:grid;gap:16px;min-width:0;scroll-margin-top:70px}
+.sec-h{display:grid;gap:4px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:820px){.g2{grid-template-columns:1fr}}
+.box{border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
+.tblw{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 8px 6px}
+td{padding:7px 8px;border-top:1px solid var(--line);vertical-align:top}
+.chip2{display:inline-block;width:26px;height:14px;border-radius:4px;vertical-align:middle;background:var(--c);box-shadow:inset 0 0 0 1px #0000002a;margin-right:6px}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:6px;font-size:15px}
+figure{margin:0;display:grid;gap:8px;min-width:0;align-content:start}
+figcaption{font-size:13.5px;color:var(--muted)}
+
+/* ================= surfaces: one lighting = one set of tokens ================= */
+/* House defaults (Jam Home / Callsheet paper and navy). Each app frame below overrides ground, card, rules and the accent. */
+.surf{--g:#efebe2;--card:#f9f7f2;--ink:#19202e;--ink2:#343b4a;--dim:#5b606d;--rule:#d6cfbf;--hair:#e7e1d4;
+  --swoff:#1c2331;--swth:#fbf9f4;--swline:transparent;--ad:#6780b4;--an:#5971a4;--acc:var(--ad);--fo:#19202e;--onfo:#f3e6c8;
+  background:var(--g);color:var(--ink);font-family:var(--f);border-radius:16px;position:relative;min-width:0;-webkit-font-smoothing:antialiased}
+.surf.nt{--g:#10141d;--card:#161c28;--ink:#ece5d3;--ink2:#d2cbb9;--dim:#a29d8f;--rule:#2a3244;--hair:#1c2230;
+  --swoff:#05070b;--swth:#ece5d3;--swline:#2a3244;--acc:var(--an);--fo:#f3e6c8;--onfo:#10141d}
+.lab{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+/* ================= THE COMPONENT ================= */
+/* Channel: a dark recess. Reveal: the accent, clipped from the left and opened to the full channel as the thumb slides.
+   Thumb: a flat disc. On/off travel = transform; reveal = clip-path; 180 ms on the house settle curve. Calm = no transition. */
+.sw{appearance:none;border:0;padding:0;margin:0;cursor:pointer;position:relative;flex:none;
+  --w:46px;--h:28px;--p:3px;--swd:180ms;width:var(--w);height:var(--h);border-radius:999px;background:var(--swoff);box-shadow:inset 0 0 0 1px var(--swline)}
+.sw::before{content:"";position:absolute;inset:-8px -6px}
+.sw .rv{position:absolute;inset:0;border-radius:inherit;background:var(--acc);clip-path:inset(0 100% 0 0 round 999px);transition:clip-path var(--swd) var(--settle)}
+.sw[aria-checked="true"] .rv{clip-path:inset(0 0 0 0 round 999px)}
+.sw .th{position:absolute;top:var(--p);left:var(--p);width:calc(var(--h) - 2*var(--p));height:calc(var(--h) - 2*var(--p));border-radius:50%;background:var(--swth);transition:transform var(--swd) var(--settle)}
+.sw[aria-checked="true"] .th{transform:translateX(calc(var(--w) - var(--h)))}
+.sw:active .th,.sw.is-pressed .th{transform:scale(.86)}
+.sw[aria-checked="true"]:active .th,.sw[aria-checked="true"].is-pressed .th{transform:translateX(calc(var(--w) - var(--h))) scale(.86)}
+.sw:focus-visible,.sw.is-focus{outline:2px solid var(--ink);outline-offset:3px}
+.sw:disabled{cursor:default;background:transparent;box-shadow:inset 0 0 0 1.5px var(--rule)}
+.sw:disabled .rv{display:none}.sw:disabled .th{background:var(--rule)}
+.sw[data-un]{cursor:default;background:transparent;box-shadow:none;outline:1.5px dashed var(--dim);outline-offset:-1.5px}
+.sw[data-un] .rv,.sw[data-un] .th{display:none}
+.sw[data-un]::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:2px;margin:-1px 0 0 -6px;background:var(--dim);border-radius:1px}
+/* sizes */
+.sw.desk{--w:36px;--h:22px;--p:3px}
+.sw.kio{--w:66px;--h:40px;--p:4px}
+.sw.tvs{--w:76px;--h:44px;--p:5px}
+.sw.xl{--w:184px;--h:112px;--p:12px}
+.calm .sw .rv,.calm .sw .th{transition:none}
+@media (prefers-reduced-motion:reduce){.sw .rv,.sw .th{transition:none}}
+
+/* ================= anatomy, states, motion, sizes ================= */
+.anat{padding:22px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:center}
+@media (max-width:760px){.anat{grid-template-columns:1fr}}
+.anat .pair{display:grid;gap:22px;justify-items:center}
+.anat .pair span{font:500 12px var(--mono);letter-spacing:.14em;color:var(--dim)}
+.parts{display:grid;gap:10px;font-size:15px}
+.parts div{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start}
+.parts b{font:600 14px var(--mono);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1.5px solid currentColor}
+.mk{position:absolute;font:600 13px var(--mono);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--g);color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
+.stgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;padding:14px 16px}
+.stgrid>div{display:grid;gap:12px;justify-items:center;align-content:start;padding:14px 4px;text-align:center}
+.stgrid .t{font:500 14px var(--f);color:var(--ink);min-height:20px}
+.stgrid .n{font-size:13px;color:var(--dim);line-height:1.3}
+@media (max-width:900px){.stgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:480px){.stgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tvf{border-radius:8px;padding:6px 10px;background:var(--fo);display:inline-flex}
+.tvf .sw{--swline:var(--onfo);box-shadow:inset 0 0 0 2px var(--onfo)}
+.strip{display:flex;gap:18px;flex-wrap:wrap;padding:16px;align-items:end}
+.strip figure{justify-items:center}
+.strip figcaption{font:500 12px var(--mono);color:var(--dim)}
+.sizes{display:flex;flex-wrap:wrap;gap:26px;padding:18px;align-items:end}
+.sizes figure{justify-items:start}
+.sizes .hit{position:relative;display:inline-grid;place-items:center;outline:1px dashed var(--dim);outline-offset:0;border-radius:6px}
+.sizes figcaption{color:var(--dim);font-size:13px}
+.sizes figcaption b{color:var(--ink);font-weight:500}
+.livewrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap;padding:18px}
+.livewrap .k{font:500 15px var(--f);border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:12px;min-height:44px;padding:8px 16px;cursor:pointer}
+
+/* ================= app frames ================= */
+.apps{display:grid;gap:30px}
+.app{display:grid;gap:12px}
+.app .pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+@media (max-width:900px){.app .pair{grid-template-columns:1fr}}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 14px;min-height:58px}
+.row+.row{border-top:1px solid var(--hair)}
+.row .nm{display:block;font:500 16px/1.25 var(--f)}
+.row .sm{display:block;font-size:13px;color:var(--dim);margin-top:2px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;min-width:0}
+/* Callsheet: paper / navy, Jost, mono labels; rounded cards */
+.cs{padding:18px 16px 20px;display:grid;gap:14px;max-width:420px;width:100%;justify-self:center}
+.surf.cs{--g:#ece7dd;--card:#f7f4ee;--rule:#d6cfbf;--hair:#e0d9cb}
+.surf.cs.nt{--g:#10141d;--card:#161c28;--rule:#2a3244;--hair:#232b3a}
+.cs .dline{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.cs .h{font:500 28px/1.1 var(--f);margin-top:2px}
+.cs .card{padding:12px 4px 4px}
+.cs .card>.lab{padding:0 14px}
+.cs .kd{font:500 15px var(--f);border:1px solid var(--rule);background:var(--g);color:var(--ink);border-radius:12px;min-height:44px;padding:8px 14px;cursor:pointer;margin:6px 14px 10px}
+/* Jam-Dash: desktop, quieter grounds */
+.jd{padding:18px 20px 22px;display:grid;gap:14px}
+.surf.jd{--g:#ebe8e1;--card:#f8f6f1;--rule:#d8d2c5;--hair:#e7e2d7;--ad:#71819c;--an:#64738d}
+.surf.jd.nt{--g:#0c1018;--card:#151b27;--rule:#2a3244;--hair:#1c2230}
+.jd .crumb{font:500 13px var(--mono);color:var(--dim);display:flex;gap:8px}
+.jd .crumb b{color:var(--ink);font-weight:500}
+.jd h4{margin:0;font:500 24px/1.1 var(--f)}
+.jd .row{min-height:48px;padding:8px 14px}
+.jd .row .nm{font-size:15px}
+.jd .ql{font:500 14px var(--f);color:var(--ink);background:none;border:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
+/* TV frames: 1920 x 1080 design px, scaled to fit */
+.tvbox{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:10px;box-shadow:0 0 0 8px #07090d}
+.tvbox:focus-visible{box-shadow:0 0 0 8px #07090d,0 0 0 11px #f08a2c;outline:none}
+.tv{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;border-radius:0}
+.tv .lab{font-size:22px}
+/* JamFin TV: navy night, warm paper day; ring focus */
+.surf.jf{--g:#10141d;--card:#161c28;--sf2:#1f2636;--rule:#2a3244;--ad:#ac6b97;--an:#9d5d88;--fo:#ece5d3}
+.surf.jf.day{--g:#ebe7de;--card:#e0dbcf;--sf2:#d5cfc1;--rule:#c9c1b0;--ink:#19202e;--ink2:#343b4a;--dim:#565b67;--fo:#19202e;--swoff:#1c2331;--swth:#fbf9f4;--swline:transparent;--acc:var(--ad)}
+.jf .nav{position:absolute;left:96px;right:96px;top:54px;display:flex;gap:44px;font:400 28px var(--f);color:var(--dim)}
+.jf .nav b{color:var(--ink);font-weight:500}
+.jf .cats{position:absolute;left:96px;top:190px;width:330px;display:grid;gap:10px}
+.jf .cats .eb{font:500 22px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.jf .ct{font:400 30px var(--f);color:var(--ink2);padding:12px 22px;border-radius:12px}
+.jf .ct.chosen{background:var(--sf2);color:var(--ink)}
+.jf .main{position:absolute;left:520px;right:120px;top:180px}
+.jf .main h3{font:500 64px/1 var(--f);margin:0 0 34px;color:var(--ink)}
+.jf .sr2{display:flex;align-items:center;justify-content:space-between;min-height:116px;border-bottom:2px solid var(--rule);gap:30px}
+.jf .sr2 .lbl{font:400 30px var(--f)}
+.jf .sr2 .nt2{font:400 22px var(--f);color:var(--dim);margin-top:4px}
+.jf .chs{display:flex;gap:10px}
+.jf .key{font:400 24px var(--f);padding:12px 26px;border-radius:12px;border:2px solid var(--rule);color:var(--ink2)}
+.jf .key.chosen{background:var(--sf2);border-color:var(--sf2);color:var(--ink)}
+.jf [data-fx].f{box-shadow:0 0 0 6px var(--g),0 0 0 11px var(--fo);border-radius:999px}
+.jf .key[data-fx].f{border-radius:12px}
+/* Lobby TV: night sheet, cream focus row; day: navy focus row */
+.surf.lb{--g:#10141d;--card:#1a2130;--rule:#2a3244;--hair:#1f2636;--ink:#ece5d3;--ink2:#d2cbb9;--dim:#a29d8e;--ad:#43899a;--an:#337b8c;--fo:#f3e6c8;--onfo:#10141d}
+.surf.lb.day{--g:#cdc8bd;--card:#dbd6cb;--rule:#aea798;--hair:#c3bdb1;--ink:#19202e;--ink2:#2f3747;--dim:#464c59;--fo:#19202e;--onfo:#f3e6c8;--swoff:#1c2331;--swth:#fbf9f4;--swline:transparent;--acc:var(--ad)}
+.lb .top{position:absolute;left:96px;right:96px;top:54px;display:flex;align-items:center;font:500 26px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.lb .top .clk{margin-left:auto;font:400 30px var(--f);letter-spacing:0;text-transform:none;color:var(--ink)}
+.lb .hd{position:absolute;left:96px;top:180px;display:flex;align-items:baseline;gap:28px}
+.lb .hd h3{font:500 64px/1 var(--f);margin:0;color:var(--ink)}
+.lb .hd span{font:400 26px var(--f);color:var(--dim)}
+.lb .rows{position:absolute;left:96px;top:300px;width:960px;display:grid;gap:4px}
+.lb .srow{display:flex;align-items:center;height:72px;padding:0 26px;border-radius:12px;font:400 28px/1 var(--f);color:var(--ink);gap:20px}
+.lb .srow .v{margin-left:auto;font:400 26px/1 var(--f);color:var(--dim)}
+.lb .srow .v::after{content:"  ›";white-space:pre}
+.lb .srow .sw{margin-left:auto}
+.lb .srow.f{background:var(--fo);color:var(--onfo);transform:translateX(6px)}
+.lb .srow.f .v{color:var(--onfo)}
+.lb .srow.f .sw{box-shadow:inset 0 0 0 2px var(--onfo)}
+.calm .lb .srow.f{transform:none}
+.lb .desc{position:absolute;left:1152px;top:314px;width:640px;font:400 28px/1.45 var(--f);color:var(--ink2)}
+.lb .desc b{display:block;font:500 22px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:18px}
+.lb .hint,.jf .hint{position:absolute;left:96px;bottom:54px;font:400 24px var(--f);color:var(--dim);display:flex;gap:40px}
+
+/* ================= don't ================= */
+.dont{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.dont .box h3{display:flex;gap:8px;align-items:baseline}
+.dont .eg{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px;border-radius:12px}
+.pad{appearance:none;border-radius:10px;border:1.5px solid var(--ink);background:var(--card);width:58px;height:84px;display:grid;grid-template-rows:1fr 1fr;padding:0;overflow:hidden;cursor:default;--lc:#f4ca8a}
+.pad i{display:grid;place-items:center;font:600 12px/1 var(--mono);letter-spacing:.14em;font-style:normal;color:var(--dim)}
+.pad i.t{background:var(--ink);color:var(--lc);box-shadow:inset 0 -5px 0 var(--lc)}
+.surf.nt .pad{border-color:var(--lc)}.surf.nt .pad i.t{background:var(--lc);color:#19202e;box-shadow:none}
+.kb{font:500 15px var(--f);border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:12px;min-height:44px;padding:8px 14px}
+.kb.red{background:#ff5a48;border-color:#ff5a48;color:#1c0804}
+</style>
+</head>
+<body>
+<div class="sticky">
+  <div class="ctl"><span class="eyebrow">Motion</span><div class="seg" id="motSeg"><button aria-pressed="true" data-mot="full">Full</button><button aria-pressed="false" data-mot="calm">Calm</button></div></div>
+  <div class="ctl"><span class="eyebrow">Page</span><div class="seg" id="themeSeg"><button aria-pressed="true" data-th="auto">Auto</button><button aria-pressed="false" data-th="light">Light</button><button aria-pressed="false" data-th="dark">Dark</button></div></div>
+</div>
+<main class="wrap">
+<header>
+  <span class="eyebrow">Jam design · Round 7 · Switch study</span>
+  <h1>The channel-reveal switch</h1>
+  <p>Isaac, after round 6: <q>the others could be smaller switches that have an accent color in the channel that is reveled when it's on. Could be an interesting subtle accent in other designs as well.</q> This page draws that switch once, as a shared part: what it's made of, its states, sizes and motion, how it sits in Callsheet, JamFin, Jam-Dash and Lobby in each app's own colours, and where it shouldn't be used. Every switch on the page works. <b>Nothing here changes any app.</b></p>
+</header>
+
+<section id="anatomy">
+  <div class="sec-h"><span class="eyebrow">1 · Anatomy</span><h2>A channel, a reveal and a thumb</h2><p class="muted">Drawn at four times phone size, Day on the left and Night on the right. Tap either to watch the reveal.</p></div>
+  <div class="g2" id="anat"></div>
+</section>
+
+<section id="states">
+  <div class="sec-h"><span class="eyebrow">2 · States</span><h2>Off, on, pressed, disabled, unavailable, and two kinds of focus</h2><p class="muted">Phone size (46 × 28). The TV focus is shown on a Lobby row at the same scale. "Pressed" is the thumb shrinking in place while a finger is down.</p></div>
+  <div class="g2" id="states-g"></div>
+</section>
+
+<section id="motion">
+  <div class="sec-h"><span class="eyebrow">3 · Motion</span><h2>The reveal is the signature: the colour follows the thumb</h2><p class="muted">The thumb moves with <code>transform</code>; the accent opens with <code>clip-path</code> from the left edge, so it seems to come out from behind the thumb. 180 ms on the house settle curve <code>cubic-bezier(.16,1,.3,1)</code>. Nothing fades, glows or bounces. With Calm (or the system's reduced motion) the switch changes at once.</p></div>
+  <div class="g2">
+    <div class="surf box" style="padding:0"><div class="strip" id="strip"></div><p class="muted" style="padding:0 16px 14px;font-size:14px">Frames at 0, 25, 50, 75 and 100 % of the way, Day.</p></div>
+    <div class="surf nt box" style="padding:0"><div class="livewrap"><button class="sw kio" role="switch" aria-checked="false" aria-label="Try it" data-live></button><button class="k" data-loop>Run on and off ×3</button><span class="lab" id="motLab">Full · 180 ms</span></div><p style="padding:0 18px 16px;font-size:14px;color:var(--dim)">Kiosk size, Night. Set Motion to Calm at the top and run it again.</p></div>
+  </div>
+</section>
+
+<section id="sizes">
+  <div class="sec-h"><span class="eyebrow">4 · Sizes</span><h2>Phone, kiosk, desktop, TV</h2><p class="muted">Drawn at 1:1 in CSS px (TV in 1080p px). The dashed box is the hit area: the switch is small, the target isn't. Proportions stay the same: width = 1.65 × height, thumb = height − 2 × gap.</p></div>
+  <div class="g2" id="sizes-g"></div>
+  <div class="box tblw" id="spec"></div>
+</section>
+
+<section id="apps">
+  <div class="sec-h"><span class="eyebrow">5 · In the other apps</span><h2>The same switch as a quiet accent, in each app's own colours</h2><p class="muted">Same channel, same thumb, same motion. Only the revealed colour changes, and each comes from that app's palette, fitted to the same lightness so contrast holds. The switch replaces only things that are already plainly on/off (a checkbox that applies at once, or an On/Off choice). Choices with three or more options stay as keys.</p></div>
+  <div class="apps" id="apps-g"></div>
+</section>
+
+<section id="dont">
+  <div class="sec-h"><span class="eyebrow">6 · Where not to use it</span><h2>Three places the switch is the wrong part</h2></div>
+  <div class="dont" id="dont-g"></div>
+</section>
+
+<section id="contrast">
+  <div class="sec-h"><span class="eyebrow">7 · Contrast, measured</span><h2>Every accent against its off channel and its thumb</h2><p class="muted">Worked out in the page from the token values (WCAG relative luminance). The floor is 3:1 for both pairs, in both lightings.</p></div>
+  <div class="box tblw" id="cr"></div>
+</section>
+</main>
+
+<script>
+/* ---------- tokens ---------- */
+const T={off:{day:'#1c2331',night:'#05070b'},thumb:{day:'#fbf9f4',night:'#ece5d3'}};
+const APPACC=[['Jam Home','House blue · from Callsheet\'s navy ink','#6780b4','#5971a4'],['Callsheet','Callsheet blue (the same: Jam Home borrows it)','#6780b4','#5971a4'],
+ ['JamFin','Plum · from the title shapes','#ac6b97','#9d5d88'],['Jam-Dash','Steel · from its key-line grey','#71819c','#64738d'],['Lobby','Teal · from its deep teal art tones','#43899a','#337b8c'],
+ ['Jam Home rule B','Climate teal','#43899a','#337b8c'],['Jam Home rule B','Automations violet','#8f72c0','#8063b1']];
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const sw=(on,label,cls='',o={})=>`<button class="sw ${cls}${o.st?' '+o.st:''}" role="switch" aria-checked="${!!on}" aria-label="${esc(label)}"${o.dis?' disabled':''}${o.un?' data-un="1" aria-disabled="true"':''}${o.tab===false?' tabindex="-1"':''}${o.fx?' data-fx':''}><i class="rv"></i><i class="th"></i></button>`;
+const inner='<i class="rv"></i><i class="th"></i>';
+document.querySelectorAll('[data-live]').forEach(b=>b.innerHTML=inner);
+
+/* ---------- 1 anatomy ---------- */
+function anat(nt){return `<div class="surf${nt?' nt':''} box anat"><div class="pair">
+  <div style="position:relative">${sw(false,'Anatomy, off','xl')}<span class="mk" style="left:-12px;top:-12px">1</span><span class="mk" style="left:38px;top:42px">3</span></div><span>OFF</span>
+  <div style="position:relative">${sw(true,'Anatomy, on','xl')}<span class="mk" style="left:-12px;top:-12px">1</span><span class="mk" style="left:24px;top:42px">2</span><span class="mk" style="right:42px;top:42px">3</span></div><span>ON</span></div>
+  <div class="parts"><span class="lab">${nt?'Night':'Day'}</span>
+   <div><b>1</b><span><b style="all:unset;font-weight:600">Channel.</b> A dark recess, the same in every app: <code>${nt?T.off.night:T.off.day}</code>${nt?' with a 1 px hairline so it reads on the navy card':''}. Off, that's all there is: no word, no colour, no outline.</span></div>
+   <div><b>2</b><span><b style="all:unset;font-weight:600">Reveal.</b> The accent, flat, filling the channel. It sits under the thumb's path and is clipped away when off. On, it's the whole channel. It's a colour, not a light: no glow, no gradient.</span></div>
+   <div><b>3</b><span><b style="all:unset;font-weight:600">Thumb.</b> A flat disc in the app's paper/cream (<code>${nt?T.thumb.night:T.thumb.day}</code>), inset by the gap. Left = off, right = on, in every app and language.</span></div>
+  </div></div>`}
+document.getElementById('anat').innerHTML=anat(false)+anat(true);
+
+/* ---------- 2 states ---------- */
+function states(nt){const cell=(t,b,n)=>`<div><span class="t">${t}</span>${b}<span class="n">${n}</span></div>`;
+  return `<div class="surf${nt?' nt':''} box" style="padding:0"><span class="lab" style="padding:14px 16px 0">${nt?'Night':'Day'}</span><div class="stgrid">
+   ${cell('Off',sw(false,'Off example'),'Plain dark channel')}
+   ${cell('On',sw(true,'On example'),'Accent revealed, thumb right')}
+   ${cell('Pressed',sw(true,'Pressed example','',{st:'is-pressed'}),'Thumb shrinks to 86 %')}
+   ${cell('Disabled',sw(true,'Disabled example','',{dis:true}),'Hollow channel, grey thumb; says why nearby')}
+   ${cell('Unavailable',sw(false,'Unavailable example','',{un:true}),'Dashed, no thumb; the row says "Offline"')}
+   ${cell('Focus · keys',sw(false,'Keyboard focus example','',{st:'is-focus'}),'2 px ink ring, 3 px out')}
+   ${cell('Focus · TV',`<span class="tvf">${sw(true,'TV focus example','',{tab:false})}</span>`,'The whole row takes the focus colour; the channel gets a 2 px rim in the row\'s ink')}
+  </div></div>`}
+document.getElementById('states-g').innerHTML=states(false)+states(true);
+
+/* ---------- 3 motion strip ---------- */
+document.getElementById('strip').innerHTML=[0,.25,.5,.75,1].map(t=>`<figure><span class="sw kio" aria-hidden="true" style="pointer-events:none"><i class="rv" style="clip-path:inset(0 ${(1-t)*100}% 0 0 round 999px);transition:none"></i><i class="th" style="transform:translateX(${t*26}px);transition:none"></i></span><figcaption>${Math.round(t*100)} %</figcaption></figure>`).join('');
+
+/* ---------- 4 sizes ---------- */
+const SZ=[['Phone','',46,28,3,'62 × 44 hit','Jam Home phone, Callsheet phone'],['Kiosk','kio',66,40,4,'78 × 56 hit','iPad and Echo Show sheets'],['Desktop','desk',36,22,3,'48 × 38 hit (pointer)','Jam-Dash, Callsheet desk'],['TV · 1080p','tvs',76,44,5,'the whole row is the target','JamFin, Lobby: focus is on the row']];
+function sizes(nt){return `<div class="surf${nt?' nt':''} box" style="padding:0"><span class="lab" style="padding:14px 18px 0">${nt?'Night':'Day'}</span><div class="sizes">${SZ.map(([n,c,w,h,p,hit,where])=>`<figure><span class="hit" style="padding:${c==='tvs'?'0':c==='kio'?'8px 6px':c==='desk'?'8px 6px':'8px 8px'}">${sw(true,n+' size',c)}</span><figcaption><b>${n}</b> · ${w} × ${h}, thumb ${h-2*p}<br>${hit}</figcaption></figure>`).join('')}</div></div>`}
+document.getElementById('sizes-g').innerHTML=sizes(false)+sizes(true);
+document.getElementById('spec').innerHTML=`<table><tr><th>Size</th><th>Channel</th><th>Thumb</th><th>Gap</th><th>Travel</th><th>Hit area</th><th>Used in</th></tr>${SZ.map(([n,c,w,h,p,hit,where])=>`<tr><td>${n}</td><td>${w} × ${h}</td><td>${h-2*p}</td><td>${p}</td><td>${w-h}</td><td>${hit}</td><td>${where}</td></tr>`).join('')}</table>
+ <p class="muted" style="font-size:14px">Radius is always full (a pill). The label sits to the left, the switch at the row's end. Kiosk and TV rows are tall enough that the row, not the switch, sets the target.</p>`;
+
+/* ---------- 5 apps ---------- */
+function csSetup(nt){const R=(n,s,on,dis)=>`<div class="row"><span><span class="nm">${n}</span>${s?`<span class="sm">${s}</span>`:''}</span>${sw(on,n,'',{dis})}</div>`;
+  return `<div class="surf cs${nt?' nt':''}"><div><div class="dline">Last refreshed 06:30</div><div class="h">Setup</div></div>
+   <div class="card"><div class="lab">Tell me when it's ready</div>${R("Sam's phone",'A push at each call time',true)}${R('Kitchen tablet','',false)}</div>
+   <div class="card"><div class="lab">Ask</div>${R('Ask on this device','Uses the local index; nothing leaves this box',true)}</div>
+   <div class="card"><div class="lab">Lighting</div><div class="row"><span><span class="nm">Auto · Day · Night</span><span class="sm">Three choices: stays a segmented key, not a switch</span></span><span></span></div></div>
+   <div class="card"><div class="lab">Advanced</div><div class="row"><span><span class="nm">Start over</span><span class="sm">Removes the local index and profile</span></span><span></span></div><button class="kd">Start over…</button></div></div>`}
+function jdApp(nt){const R=(n,s,on)=>`<div class="row"><span><span class="nm">${n}</span>${s?`<span class="sm">${s}</span>`:''}</span>${sw(on,n,'desk')}</div>`;
+  return `<div class="surf jd${nt?' nt':''}"><div class="crumb"><span>Home</span><span>/</span><span>nas</span><span>/</span><b>Jellyfin</b></div><h4>Jellyfin · app settings</h4>
+   <div class="card"><div class="lab" style="padding:12px 14px 2px">Behaviour</div>${R('Restart if it stops','Three tries, then it waits for you',true)}${R('Update by itself','Overnight, when nobody is watching',false)}${R('Show on Home','A tile on the Jam-Dash home page',true)}${R("Tell me when it's unhealthy",'A push to your phone',true)}</div>
+   <div class="row" style="padding:4px 2px"><span class="sm">Stop, Restart and Update are actions that take time, so they stay keys on the app page.</span><button class="ql">Stop…</button></div></div>`}
+function jfTV(day){return `<div class="surf tv jf${day?' day':' nt'}" data-tv><div class="nav"><span>Search</span><span>Home</span><span>Films</span><span>Shows</span><b>Settings</b></div>
+   <div class="cats"><span class="eb">Settings</span><div class="ct chosen">Appearance</div><div class="ct">Playback</div><div class="ct">Captions</div><div class="ct">Audio</div><div class="ct">About</div></div>
+   <div class="main"><h3>Appearance</h3>
+    <div class="sr2"><div><div class="lbl">Title shapes</div><div class="nt2">The colour shapes behind titles</div></div><div class="chs"><span class="key chosen" data-fx>Bold</span><span class="key" data-fx>Quiet</span><span class="key" data-fx>Off</span></div></div>
+    <div class="sr2"><div><div class="lbl">Motion</div><div class="nt2">Calm turns moves into short fades</div></div><div class="chs"><span class="key chosen" data-fx>Full</span><span class="key" data-fx>Calm</span></div></div>
+    <div class="sr2"><div><div class="lbl">Animate Back</div><div class="nt2">Off makes Back a cut</div></div>${sw(true,'Animate Back','tvs',{fx:1,tab:false})}</div>
+    <div class="sr2"><div><div class="lbl">Toned covers</div><div class="nt2">Cards on Home and in the library, a little quieter</div></div>${sw(false,'Toned covers','tvs',{fx:1,tab:false})}</div></div>
+   <div class="hint"><span>↑ ↓ ← → move</span><span>OK toggles</span></div></div>`}
+const LBROWS=[['Picture mode','Theater night','How the picture looks. Theater night is darker and warmer, for the evening.'],['Sound mode','Standard','How the sound is tuned. Late night keeps loud parts down.'],['Sound out','Stereo','Where the sound plays.'],['Home layout','Shelf','Shelf puts everything on one page. Panel shows one group at a time.'],['Front door on Home',true,'A line of text that says whether the front door is locked. The TV never unlocks it.'],['Show empty inputs',false,'Show HDMI ports with nothing plugged in.'],['Sleep timer','Off','Turn the TV off after a while.']];
+function lbTV(day){return `<div class="surf tv lb${day?' day':' nt'}" data-tv><div class="top"><span>Bungalo</span><span class="clk">8:24 PM</span></div>
+   <div class="hd"><h3>Settings</h3><span>for this TV</span></div>
+   <div class="rows">${LBROWS.map(([t,v],i)=>`<div class="srow${i===4?' f':''}" data-fx data-i="${i}">${t}${typeof v==='boolean'?sw(v,t,'tvs',{tab:false}):`<span class="v">${v}</span>`}</div>`).join('')}</div>
+   <div class="desc"><b>Front door on Home</b>${LBROWS[4][2]}</div>
+   <div class="hint"><span>↑ ↓ move</span><span>OK toggles or opens</span><span>Back closes</span></div></div>`}
+const APPS=[
+ ['Callsheet · Setup','Phone, 390 wide. Accent: Callsheet blue, the navy ink\'s hue lifted (the one Jam Home borrows).',
+  'Today these are checkboxes that apply at once ("Tell me when it\'s ready", "Ask on this device", and a person\'s "Always counts"). They become switches. Lighting (three choices) and Start over (destructive) don\'t.',()=>csSetup(false)+csSetup(true)],
+ ['JamFin · Settings › Appearance (TV)','1920 × 1080, scaled. Accent: plum, from the title shapes. Click a frame, then use the arrow keys and Enter.',
+  'Only the On/Off rows become switches (Animate Back; "Covers: Full colour / Toned" read as Toned covers on/off). Lighting, Title shapes and Motion keep their choice keys. D-pad focus is JamFin\'s ring, drawn round the switch.',()=>`<div class="tvbox" tabindex="0" data-scale>${jfTV(false)}</div><div class="tvbox" tabindex="0" data-scale>${jfTV(true)}</div>`],
+ ['Jam-Dash · app settings','Desktop. Accent: steel, from its key-line grey, kept low because Jam-Dash\'s ok green, amber and red carry service status.',
+  'A new Behaviour card on an app\'s page for the settings that already exist as facts ("Restarts: unless stopped") or that Isaac toggles by hand. Stop and Restart stay keys.',()=>jdApp(false)+jdApp(true)],
+ ['Lobby · Settings (TV)','1920 × 1080, scaled. Accent: teal, from Lobby\'s deep teal art tones. Click a frame, then ↑ ↓ and Enter.',
+  'Two of Lobby\'s rows are already two-way choices: "Front door on Home: Shown / Not shown" and "Empty inputs: Hidden / Shown". They become switches. Rows with more choices still open the chooser (›). On the focused row the switch gets a 2 px rim in the row\'s ink, so the dark channel never melts into the focus colour.',()=>`<div class="tvbox" tabindex="0" data-scale>${lbTV(false)}</div><div class="tvbox" tabindex="0" data-scale>${lbTV(true)}</div>`]];
+document.getElementById('apps-g').innerHTML=APPS.map(([t,s,d,f])=>`<div class="app"><div class="sec-h"><h3>${t}</h3><p class="muted" style="font-size:14.5px">${s}</p><p style="font-size:14.5px">${d}</p></div><div class="pair">${f()}</div></div>`).join('');
+
+/* ---------- 6 don't ---------- */
+document.getElementById('dont-g').innerHTML=`
+ <div class="box"><h3>Lights keep the paddle</h3><p style="font-size:15px">Isaac: <q>It makes sense for lights to have a switch like that.</q> A light has a level and a colour, and it's what people reach for most, from across the room. The ON/OFF paddle (on = a solid block in the lamp's colour) stays, with its fader.</p>
+  <div class="eg surf"><button class="pad" aria-label="Lamp on (example)"><i class="t">ON</i><i>OFF</i></button><span style="font-size:14px">Light: paddle</span>${sw(true,'Tree plug','',{})}<span style="font-size:14px">Plug: switch</span></div></div>
+ <div class="box"><h3>Nothing destructive</h3><p style="font-size:15px">A switch flips back as easily as it flipped, so it suggests there's no cost. Start over, Remove an account, Delete a download, Forget a device: a key that opens a confirm, never a switch, even if the setting is technically on/off.</p>
+  <div class="eg surf"><button class="kb">Start over…</button><button class="kb">Remove account…</button></div></div>
+ <div class="box"><h3>Nothing that isn't instant</h3><p style="font-size:15px">The switch claims the new state the moment it moves. If the change takes seconds or can fail (lock the door, turn the TV on, start a service, wake the PC, link Signal), use a key that says what's happening ("Locking…", "Starting…") and then the result. Choices with three or more options aren't switches either.</p>
+  <div class="eg surf"><button class="kb">Lock</button><button class="kb">Wake</button><button class="kb">Restart</button></div></div>`;
+
+/* ---------- 7 contrast ---------- */
+const lin=v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);
+const Y=h=>{const [r,g,b]=[1,3,5].map(i=>lin(parseInt(h.substr(i,2),16)/255));return .2126*r+.7152*g+.0722*b};
+const CR=(a,b)=>{const x=Y(a),y=Y(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+const f=(v)=>`<span style="${v<3?'color:#d0342c;font-weight:600':''}">${v.toFixed(2)}</span>`;
+document.getElementById('cr').innerHTML=`<table><tr><th>App · accent</th><th>Day</th><th>on vs off</th><th>thumb vs on</th><th>Night</th><th>on vs off</th><th>thumb vs on</th></tr>
+ <tr><td>Off channel vs thumb</td><td><i class="chip2" style="--c:${T.off.day}"></i>${T.off.day}</td><td colspan="2">thumb vs off ${f(CR(T.off.day,T.thumb.day))}</td><td><i class="chip2" style="--c:${T.off.night}"></i>${T.off.night}</td><td colspan="2">thumb vs off ${f(CR(T.off.night,T.thumb.night))}</td></tr>
+ ${APPACC.map(([a,n,d,nn])=>`<tr><td>${a}<br><span class="muted" style="font-size:13px">${n}</span></td><td><i class="chip2" style="--c:${d}"></i>${d}</td><td>${f(CR(d,T.off.day))}</td><td>${f(CR(d,T.thumb.day))}</td><td><i class="chip2" style="--c:${nn}"></i>${nn}</td><td>${f(CR(nn,T.off.night))}</td><td>${f(CR(nn,T.thumb.night))}</td></tr>`).join('')}</table>
+ <p class="muted" style="font-size:14px">Why one lightness: with a near-black channel and a pale thumb, the accent has to sit in a narrow band (day relative luminance 0.15–0.28, night 0.11–0.23) to keep 3:1 from both. So every app's accent is the same lightness and differs only in hue. That's also why the switch looks the same "weight" across the family.</p>`;
+
+/* ---------- behaviour ---------- */
+let CALM=false;
+function fit(){document.querySelectorAll('[data-scale]').forEach(b=>{const s=b.clientWidth/1920;b.firstElementChild.style.transform=`scale(${s})`})}
+new ResizeObserver(fit).observe(document.body);fit();
+document.addEventListener('click',e=>{const t=e.target;
+  const th=t.closest('[data-th]');if(th){const v=th.dataset.th;if(v==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=v;document.querySelectorAll('#themeSeg button').forEach(x=>x.setAttribute('aria-pressed',x===th));return}
+  const mo=t.closest('[data-mot]');if(mo){CALM=mo.dataset.mot==='calm';document.documentElement.classList.toggle('calm',CALM);document.getElementById('motLab').textContent=CALM?'Calm · instant':'Full · 180 ms';document.querySelectorAll('#motSeg button').forEach(x=>x.setAttribute('aria-pressed',x===mo));return}
+  const lp=t.closest('[data-loop]');if(lp){const s=document.querySelector('[data-live]');let n=0;const go=()=>{s.setAttribute('aria-checked',s.getAttribute('aria-checked')!=='true');if(++n<6)setTimeout(go,520)};go();return}
+  const row=t.closest('.lb .srow');if(row){const tv=row.closest('[data-tv]');setFocus(tv,[...tv.querySelectorAll('[data-fx]')].indexOf(row));const s=row.querySelector('.sw');if(s)toggle(s);return}
+  const s=t.closest('.sw');if(s&&!s.disabled&&!s.dataset.un&&!s.closest('.strip')&&!s.classList.contains('is-pressed')){const tv=s.closest('[data-tv]');if(tv)setFocus(tv,[...tv.querySelectorAll('[data-fx]')].indexOf(s));toggle(s)}});
+function toggle(s){s.setAttribute('aria-checked',s.getAttribute('aria-checked')!=='true')}
+/* TV: D-pad focus inside a frame */
+function setFocus(tv,i){const L=[...tv.querySelectorAll('[data-fx]')];if(i<0||i>=L.length)return;L.forEach((x,j)=>x.classList.toggle('f',j===i));tv.dataset.fi=i;
+  const d=tv.querySelector('.desc');if(d){const r=LBROWS[+L[i].dataset.i];d.innerHTML=`<b>${r[0]}</b>${r[2]}`}}
+document.querySelectorAll('[data-tv]').forEach(tv=>{const L=[...tv.querySelectorAll('[data-fx]')];const start=tv.classList.contains('jf')?L.findIndex(x=>x.classList.contains('sw')):4;setFocus(tv,start)});
+document.addEventListener('keydown',e=>{const box=e.target.closest&&e.target.closest('[data-scale]');if(!box)return;const tv=box.querySelector('[data-tv]');const L=[...tv.querySelectorAll('[data-fx]')];let i=+tv.dataset.fi||0;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const cur=L[i];const rowOf=x=>x.closest('.sr2,.srow');const rows=[...new Set(L.map(rowOf))];let ri=rows.indexOf(rowOf(cur))+(e.key==='ArrowDown'?1:-1);if(ri<0||ri>=rows.length)return;const tgt=L.find(x=>rowOf(x)===rows[ri]&&(x.classList.contains('chosen')||x.classList.contains('sw')||x.classList.contains('srow')))||L.find(x=>rowOf(x)===rows[ri]);setFocus(tv,L.indexOf(tgt))}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const cur=L[i];const n=L[i+(e.key==='ArrowRight'?1:-1)];if(n&&n.closest('.sr2,.srow')===cur.closest('.sr2,.srow'))setFocus(tv,L.indexOf(n))}
+  else if(e.key==='Enter'||e.key===' '){e.preventDefault();const cur=L[i];const s=cur.classList.contains('sw')?cur:cur.querySelector('.sw');if(s)toggle(s);else if(cur.classList.contains('key')){cur.parentElement.querySelectorAll('.key').forEach(k=>k.classList.toggle('chosen',k===cur))}}});
+</script>
+</body>
+</html>

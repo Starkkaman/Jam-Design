@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jam Home Round 7</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Jam Home, pass 7. Round 6 with only the switches changed: lights keep the ON/OFF paddle (on = a solid block),
+   everything else that is plainly on/off is a small channel-reveal switch. Callsheet round 5's palette and type.
+   Sample data only. Nothing here changes Home Assistant. */
+
+/* ================= page chrome ================= */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#5d605f;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --settle:cubic-bezier(.16,1,.3,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111213;--fg:#e9e7e2;--muted:#a1a39f;--line:#2d2f30;--chip:#1e2021;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f);overflow-x:hidden}
+.wrap{max-width:1480px;margin:0 auto;padding:28px 16px 80px;display:grid;gap:34px}
+@media (min-width:700px){.wrap{padding-inline:28px}}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(26px,4vw,38px)/1.1 var(--f);margin:6px 0 8px}
+h2{font:600 24px/1.2 var(--f);margin:0}
+p{margin:0;max-width:78ch}
+.muted{color:var(--muted)}
+code{font:500 13px var(--mono)}
+.sticky{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+@media (max-width:600px){.sticky{position:static}}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line);flex-wrap:wrap}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:7px 13px;border-radius:9px;cursor:pointer;min-height:36px}
+.seg button[aria-pressed="true"]{background:#1d1c1a;color:#f2efe9}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:#e9e7e2;color:#111}}
+.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+section{display:grid;gap:16px;scroll-margin-top:70px;min-width:0}
+.sec-h{display:grid;gap:4px}
+.reads{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.rd{border-top:2px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:14.5px;align-content:start}
+.rd q{font-style:italic}
+.rd b{font-weight:600;font-size:15.5px}
+figure{margin:0;display:grid;gap:8px;min-width:0;align-content:start}
+figcaption{font-size:13.5px;color:var(--muted)}
+.grid-ph{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start;max-width:820px}
+@media (max-width:640px){.grid-ph{grid-template-columns:1fr}}
+.grid-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start}
+@media (max-width:980px){.grid-k{grid-template-columns:1fr}}
+.dev{background:#0d0d0c;padding:10px;border-radius:22px;box-shadow:0 18px 44px #00000040;min-width:0}
+.dev.phone{border-radius:44px;max-width:380px;width:100%;justify-self:center}
+.vp{position:relative;overflow:hidden;border-radius:12px;width:100%}
+.dev.phone .vp{border-radius:34px}
+.scr{position:absolute;top:0;left:0;transform-origin:0 0}
+.under{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13.5px;color:var(--muted)}
+.under button{font:500 13px var(--f);border:1px solid var(--line);background:var(--chip);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer;min-height:34px}
+.lib{display:grid;gap:22px}
+.li{display:grid;grid-template-columns:240px minmax(0,390px) minmax(0,390px);gap:18px;align-items:start;border-top:1px solid var(--line);padding-top:16px}
+@media (max-width:1100px){.li{grid-template-columns:1fr 1fr}.li .ltxt{grid-column:1/-1}}
+@media (max-width:700px){.li{grid-template-columns:1fr}}
+.ltxt{display:grid;gap:6px;font-size:14.5px;align-content:start}
+.ltxt .tag{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.libf{border-radius:18px;overflow:hidden;min-width:0}
+.pops{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,390px));gap:20px;align-items:start}
+.tok{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.tbox{border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:10px;align-content:start;min-width:0}
+.tblw{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px 6px}
+td{padding:6px;border-top:1px solid var(--line);vertical-align:top}
+.sw2{display:inline-block;width:28px;height:16px;border-radius:4px;vertical-align:middle;background:var(--c);box-shadow:inset 0 0 0 1px #0000002a;margin-right:6px}
+#modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:#00000080;padding:12px}
+#modal.open{display:grid}
+#modal>div{width:min(400px,100%);max-height:92vh;overflow:auto;border-radius:22px}
+
+/* ================= Jam Theme, round 6: Callsheet's paper and navy ================= */
+.jh{--gd:#efebe2;--pl:#f9f7f2;--key:#f1ece2;--key2:#e3dbcb;--ln:#d6cfbf;--hair:#e7e1d4;
+  --ink:#19202e;--ink2:#343b4a;--dim:#5b606d;--walnut:#6b4428;--cream:#f3e6c8;
+  --orange:#ec7c22;--odeep:#b55a12;--ok:#7bd651;--okg:#3c8a28;--warn:#f2c14e;--wink:#7a5300;--alert:#ff5a48;--alink:#b3261b;
+  --win:#19202e;--wn:#e3dccd;--wrim:#19202e55;--groove:#ebe5d8;--cap:#ffffff;--seg:#19202e;--segg:#2b3344;--dot:#cbc2ae;
+  --swoff:#1c2331;--swth:#fbf9f4;--swline:transparent;
+  position:relative;background:var(--gd);color:var(--ink);font-family:var(--f);overflow:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+.jh.nt{--gd:#10141d;--pl:#161c28;--key:#1d2433;--key2:#0a0e15;--ln:#2a3244;--hair:#1c2230;
+  --ink:#ece5d3;--ink2:#d2cbb9;--dim:#a29d8f;--orange:#f08a2c;--odeep:#9a4c10;--okg:#7bd651;--wink:#f2c14e;--alink:#ff8a7a;
+  --win:#06080c;--wn:#06080c;--wrim:#5c6273;--groove:#0a0e15;--cap:#c9c2b0;--seg:#06080c;--segg:#171c27;--dot:#2c3446;
+  --swoff:#05070b;--swth:#ece5d3;--swline:#2a3244}
+.jh button{font-family:inherit;color:inherit}
+.jh button:focus-visible,.jh [role=slider]:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.lab{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.dim{color:var(--dim)}.mono{font-family:var(--mono)}
+.note{font-size:14px;color:var(--dim)}
+/* indicator windows: kept only where they carry status (door, window, remote inputs, a playing grille dot) */
+.ind{position:relative;display:inline-block;flex:none;background:var(--wn);box-shadow:inset 0 0 0 1px var(--wrim);vertical-align:middle}
+.ind.on{background:var(--win)}
+.ind::after{content:"";position:absolute;inset:1.5px;border-radius:inherit;background:var(--c,var(--cream));opacity:0}
+.ind.on::after{opacity:1}
+.led{width:10px;height:10px;border-radius:50%}.sq{width:10px;height:10px;border-radius:2px}
+/* keys: flat, a hairline, pressed = deeper paper + ink edge */
+.k{appearance:none;border:1px solid var(--ln);cursor:pointer;border-radius:12px;background:var(--key);min-height:44px;padding:8px 14px;font:500 15px/1.15 var(--f);display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform 80ms}
+.k:active{transform:translateY(1px)}
+.k[aria-pressed="true"]{background:var(--key2);border-color:var(--ink)}
+.k.or{background:var(--orange);border-color:var(--orange);color:#1a1206}
+.k.red{background:var(--alert);border-color:var(--alert);color:#1c0804}
+.k svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.k svg.f{fill:currentColor;stroke:none}
+.k.ic{width:44px;padding:0}.k.wide{width:100%}.k.big{min-height:52px}
+.card{background:var(--pl);border:1px solid var(--ln);border-radius:16px;min-width:0;position:relative}
+/* the name row of every card: symbol, name, state word, › */
+.pn{appearance:none;border:0;background:none;padding:0;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;text-align:left;min-height:44px;width:100%}
+.pn.static{cursor:default}
+.pn .nm{font:500 17px/1.15 var(--f);display:block}
+.pn .wd{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);display:block;margin-top:4px}
+.pn .chev{font:400 20px/1 var(--f);color:var(--dim);padding-top:1px}
+[data-st="off"] .pn .nm{color:var(--dim)}
+/* round 5 symbols: a lamp's shade is its window and takes the lamp's colour */
+.lg{width:30px;height:30px;flex:none}
+.lg .o{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.lg .s{fill:var(--wn);stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round;transition:fill 300ms var(--settle)}
+.lg.on .s{fill:var(--lc)}
+.og{width:30px;height:30px;flex:none;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+[data-st="off"] .og{stroke:var(--dim)}
+.pwg{fill:none;stroke:var(--dim);stroke-width:2.2;stroke-linecap:round;transition:stroke 300ms}
+.pwg.on{stroke:var(--okg)}
+/* ====== the ON/OFF paddle, lights only. Round 7: on = the ON half is a solid block (ink carrying the lamp's colour by day,
+   the lamp's own colour by night); off = the whole paddle is flat paper with OFF in ink. No ink edges, no "pressed" half. ====== */
+.lc{padding:12px;display:grid;grid-template-rows:auto 1fr;gap:10px}
+.pb{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:10px;min-height:104px}
+.pb.solo{grid-template-columns:1fr}
+.pad{appearance:none;cursor:pointer;border-radius:12px;background:var(--pl);border:1.5px solid var(--ln);position:relative;padding:0;overflow:hidden;min-height:96px;display:grid;grid-template-rows:1fr 1fr}
+.pad i{display:grid;place-items:center;font:600 12px/1 var(--mono);letter-spacing:.16em;color:var(--dim);font-style:normal;transition:background 160ms var(--settle),color 160ms}
+.pad i+i{border-top:1px solid var(--ln)}
+/* set on the paddle itself so --lc (the lamp's colour, inline) resolves here */
+.pad,.mini{--padon:var(--ink);--padink:var(--lc,var(--cream))}
+.nt .pad,.nt .mini{--padon:var(--lc,var(--cream));--padink:#19202e}
+.pad[aria-pressed="true"]{border-color:var(--padon)}
+.pad[aria-pressed="true"] i.t{background:var(--padon);color:var(--padink);font-weight:600}
+.pad[aria-pressed="true"] i.t+i{border-top-color:var(--padon)}
+.pad[aria-pressed="false"] i.b{color:var(--ink)}
+.jh:not(.nt) .pad[aria-pressed="true"] i.t{box-shadow:inset 0 -5px 0 var(--lc,var(--cream))}
+.jh.kio:not(.nt) .pad[aria-pressed="true"] i.t{box-shadow:inset 0 -8px 0 var(--lc,var(--cream))}
+.calm .pad i{transition:none}
+.pad:disabled{cursor:default;border-style:dashed;background:transparent}
+.pad:disabled i{color:transparent;border-color:transparent}
+.kio .pad i{font-size:16px}
+/* faders: a flat track, fill = the lamp's own colour (or cream), a flat cap; the number shows on the cap while dragging */
+.vf{position:relative;border-radius:10px;background:var(--groove);border:1px solid var(--ln);cursor:ns-resize;touch-action:none;min-height:96px}
+.vf .fl{position:absolute;left:3px;right:3px;bottom:3px;height:calc((100% - 6px) * var(--vn));border-radius:7px;background:var(--lc,var(--cream));opacity:0;transition:opacity 200ms}
+.vf.lit .fl{opacity:1}
+.vf .cp{position:absolute;left:-1px;right:-1px;height:18px;bottom:calc((100% - 18px) * var(--vn));border-radius:6px;background:var(--cap);border:1.5px solid var(--ink);display:grid;place-items:center}
+.vf .cp b{font:600 12px var(--mono);color:#19202e;opacity:0}
+.vf[data-drag] .cp b,.kio .vf .cp b{opacity:1}
+.kio .vf .cp{height:30px;bottom:calc((100% - 30px) * var(--vn))}.kio .vf .cp b{font-size:16px}
+.vf.dis{cursor:default;background:transparent;border:1.5px dashed var(--ln)}
+.vf.dis .cp,.vf.dis .fl{display:none}
+.hf{position:relative;height:48px;border-radius:12px;background:var(--groove);border:1px solid var(--ln);cursor:ew-resize;touch-action:none}
+.hf .fl{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px) * var(--vn));border-radius:9px;background:var(--lc,var(--cream))}
+.hf .cp{position:absolute;top:-1px;bottom:-1px;width:46px;left:calc((100% - 46px) * var(--vn));border-radius:10px;background:var(--cap);border:1.5px solid var(--ink);display:grid;place-items:center}
+.hf .cp b{font:600 14px var(--mono);color:#19202e}
+.hf.quiet .cp b{opacity:0}.hf.quiet[data-drag] .cp b{opacity:1}
+.hf.big{height:60px}.hf.big .cp{width:62px}.hf.big .cp b{font-size:17px}
+.hf.sm{height:44px}.hf.sm .cp{width:44px}
+.vrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}
+.lc[data-st="offline"],.sc[data-st="offline"]{background:transparent;border:1.5px dashed var(--dim)}
+[data-st="offline"] .pn .wd{color:var(--alink)}
+.ofx{display:grid;gap:10px;align-content:start;justify-items:start}
+/* ====== the small switch (round 7): a dark recess channel; on, the thumb slides and the channel reveals the accent.
+   Flat, no glow. Reveal = clip-path, thumb = transform, 180 ms; Calm and reduced motion = instant. ====== */
+.sw{appearance:none;border:0;padding:0;cursor:pointer;position:relative;flex:none;--w:46px;--h:28px;--p:3px;width:var(--w);height:var(--h);border-radius:999px;background:var(--swoff);box-shadow:inset 0 0 0 1px var(--swline);--acc:var(--ad);--swd:180ms}
+.nt .sw{--acc:var(--an)}
+.sw::before{content:"";position:absolute;inset:-8px -6px}
+.sw .rv{position:absolute;inset:0;border-radius:inherit;background:var(--acc);clip-path:inset(0 100% 0 0 round 999px);transition:clip-path var(--swd) var(--settle)}
+.sw[aria-checked="true"] .rv{clip-path:inset(0 0 0 0 round 999px)}
+.sw .th{position:absolute;top:var(--p);left:var(--p);width:calc(var(--h) - 2*var(--p));height:calc(var(--h) - 2*var(--p));border-radius:50%;background:var(--swth);transition:transform var(--swd) var(--settle)}
+.sw[aria-checked="true"] .th{transform:translateX(calc(var(--w) - var(--h)))}
+.sw:active .th{transform:scale(.86)}
+.sw[aria-checked="true"]:active .th{transform:translateX(calc(var(--w) - var(--h))) scale(.86)}
+.jh .sw:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.sw:disabled{cursor:default;background:transparent;box-shadow:inset 0 0 0 1.5px var(--ln)}
+.sw:disabled .rv{display:none}.sw:disabled .th{background:var(--ln)}
+.sw[data-un]{cursor:default;background:transparent;box-shadow:none;outline:1.5px dashed var(--dim);outline-offset:-1.5px}
+.sw[data-un] .rv,.sw[data-un] .th{display:none}
+.sw[data-un]::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:2px;margin:-1px 0 0 -6px;background:var(--dim);border-radius:1px}
+.sw.k{--w:66px;--h:40px;--p:4px}
+.calm .sw .rv,.calm .sw .th{transition:none}
+@media (prefers-reduced-motion:reduce){.sw .rv,.sw .th{transition:none}}
+.swrow{display:flex;justify-content:space-between;align-items:center;gap:10px;align-self:end;min-height:44px}
+.sc{grid-template-rows:auto 1fr}
+.cmpg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:1000px){.cmpg{grid-template-columns:1fr}}
+.cmpc{border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:10px;align-content:start;min-width:0}
+.cmpc.rec{border:2px solid var(--fg)}
+.cmpc .pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:420px){.cmpc .pair{grid-template-columns:1fr}}
+.cmpc .sw2{width:22px;height:14px}
+/* ====== Air purifier: still a tiny appliance, now in the house paper ====== */
+.appl{padding:12px 14px 14px;display:grid;gap:12px}
+.grille{height:16px;border-radius:4px;background:radial-gradient(circle,var(--dot) 1.9px,transparent 2.4px) 0 0/9px 8px}
+.appl .face{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+.appl .u{font:500 12px var(--mono);letter-spacing:.12em;color:var(--dim)}
+.aname{font:500 17px var(--f);display:block}
+.asub{font-size:14px;color:var(--dim);display:block}
+.seg7{display:inline-block;background:var(--seg);border-radius:6px;padding:6px 8px}
+.seg7 svg{display:block;height:24px;width:auto}
+.seg7 .sg{fill:var(--segg)}.seg7 .sg.on{fill:var(--cream)}
+.pwr{appearance:none;cursor:pointer;width:46px;height:46px;border-radius:50%;background:var(--pl);border:1.5px solid var(--ln);display:grid;place-items:center;flex:none;padding:0}
+.pwr svg{width:18px;height:18px;fill:none;stroke:var(--dim);stroke-width:2.4;stroke-linecap:round;transition:stroke 300ms}
+.pwr[aria-pressed="true"] svg{stroke:var(--okg)}
+.akeys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.akeys.k3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.akeys .k{font:500 14px var(--mono);padding:8px 4px}
+.akeys .lab{grid-column:1/-1}
+/* scenes */
+.scn{display:flex;gap:8px;flex-wrap:wrap}
+.scn .k{border-radius:999px;padding:8px 16px}
+.ph .scn{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.ph .scn .k{border-radius:12px;padding:6px 4px;font-size:14px;text-align:center;line-height:1.1}
+/* house strip (phone) */
+.hs{padding:14px 16px;display:grid;gap:12px}
+.hs .tp{display:flex;justify-content:space-between;gap:12px;align-items:flex-end}
+.hs .big{font:300 40px/1 var(--f);letter-spacing:-.01em}
+.hs .big small{font-size:18px;color:var(--dim);margin-left:2px}
+.hs .rt{text-align:right}
+.hs .rt .big{font-size:30px}
+.hs .dr{display:flex;gap:10px;align-items:center;border-top:1px solid var(--hair);padding-top:12px;min-height:44px}
+.hs .dr .w{flex:1;min-width:0;font:500 15px var(--f)}
+.hs .dr .w span{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-left:6px}
+.ppl{display:flex;gap:14px;flex-wrap:wrap;font-size:14px}
+.ppl span{display:inline-flex;gap:6px;align-items:center}
+.ptag{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:4px;background:var(--c);color:#fff;font:600 12px var(--mono)}
+.ppl .away{color:var(--dim)}
+.ppl .away .ptag{background:transparent;color:var(--dim);box-shadow:inset 0 0 0 1.5px var(--dim)}
+/* media */
+.mc{padding:14px;display:grid;gap:12px}
+.mtitle{font:500 21px/1.2 var(--f);display:block}
+.msub{font:500 13px var(--mono);letter-spacing:.06em;color:var(--dim);display:block;margin-top:3px}
+.prog{height:3px;border-radius:2px;background:var(--hair);position:relative;overflow:hidden}
+.prog i{position:absolute;inset:0 auto 0 0;background:var(--ink)}
+.k3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.k2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.gr{width:64px;height:64px;border-radius:12px;background:var(--key);border:1px solid var(--ln);display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px;place-items:center;flex:none}
+.gr i{width:7px;height:7px;border-radius:50%;background:var(--dot)}
+.gr i.on{background:var(--cream);box-shadow:0 0 0 1.5px var(--win)}
+.np{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}
+.pcrow{padding:10px 12px 10px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+/* phone */
+.ph{width:390px;height:844px}
+.pscroll{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:54px 14px 30px;display:grid;gap:14px;align-content:start}
+.pscroll::-webkit-scrollbar{display:none}
+.ptop{display:flex;justify-content:space-between;align-items:center;min-height:32px}
+.ptop .wm{font:600 18px var(--f)}
+.ptop .t{font:500 13px var(--mono);letter-spacing:.12em;color:var(--dim)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--ln);margin:0 -14px;padding:0 10px;overflow-x:auto;scrollbar-width:none}
+.tabs button{appearance:none;border:0;background:none;cursor:pointer;padding:12px 10px;font:500 15px var(--f);color:var(--dim);min-height:44px;position:relative;white-space:nowrap}
+.tabs button[aria-current="page"]{color:var(--ink)}
+.tabs button[aria-current="page"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;background:var(--ink)}
+.rh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:4px}
+.rh .rt{font:500 26px/1.1 var(--f)}
+.rh .rc{font:500 13px var(--mono);letter-spacing:.06em;color:var(--dim)}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.gh{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--ln);padding-top:10px;margin-top:4px}
+/* layers */
+.layer{position:absolute;inset:0;z-index:20}
+.veil{position:absolute;inset:0;background:#0a0d1499;animation:fade 180ms ease-out}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;background:var(--gd);border-radius:22px 22px 0 0;padding:16px 16px 26px;display:grid;gap:16px;animation:rise 220ms var(--settle);scrollbar-width:none;align-content:start;border-top:1px solid var(--ln)}
+.sheet::-webkit-scrollbar{display:none}
+.panel{background:var(--gd);border-radius:22px;padding:16px 16px 22px;display:grid;gap:16px;align-content:start;border:1px solid var(--ln)}
+.shh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.shh .tt{font:500 24px/1.15 var(--f);display:block;margin-top:2px}
+.shh .r{display:flex;gap:8px;align-items:center}
+@keyframes rise{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet,.veil,.pop,.full{animation:none!important}}
+.blk{display:grid;gap:8px}
+.wh{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.wh .k{flex-direction:column;gap:6px;padding:0 0 8px;min-height:72px;font-size:13.5px;overflow:hidden;justify-content:flex-start}
+.wh .k .cc{display:block;width:100%;height:20px;background:var(--c);border-bottom:1px solid var(--ln)}
+.wh .k small{font:400 12px var(--mono);color:var(--dim)}
+.hue{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));height:44px;border-radius:12px;overflow:hidden;border:1px solid var(--ln)}
+.hue button{appearance:none;border:0;cursor:pointer;background:var(--c);position:relative;padding:0}
+.hue button[aria-pressed="true"]::after{content:"";position:absolute;left:50%;bottom:6px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#19202e;box-shadow:0 0 0 2px #fff}
+.yc{display:flex;gap:8px;flex-wrap:wrap}
+.swin{width:30px;height:16px;border-radius:4px;background:var(--c);border:1px solid var(--ln);display:block}
+.mem{display:grid;grid-template-columns:minmax(0,92px) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:15px}
+.mini{appearance:none;cursor:pointer;width:52px;height:48px;border-radius:9px;background:var(--pl);border:1.5px solid var(--ln);display:grid;grid-template-rows:1fr 1fr;padding:0;overflow:hidden}
+.mini i{display:grid;place-items:center;font:600 12px/1 var(--mono);letter-spacing:.1em;color:var(--dim);font-style:normal}.mini i+i{border-top:1px solid var(--ln)}
+.mini[aria-pressed="false"] i:last-child{color:var(--ink)}
+.mini[aria-pressed="true"]{border-color:var(--padon)}
+.mini[aria-pressed="true"] i:first-child{background:var(--padon);color:var(--padink)}
+.lst{display:grid}
+.lr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 12px;min-height:60px}
+.lr+.lr{border-top:1px solid var(--hair)}
+.lr .nm{font:500 16px var(--f);display:block}
+.lr .wd{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);display:block;margin-top:2px}
+/* TV source tiles (kept): the colour is a printed band, the one on screen presses in and says so */
+.src{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.srt{appearance:none;cursor:pointer;border-radius:12px;background:var(--pl);border:1px solid var(--ln);min-height:78px;padding:0 10px 9px;display:grid;align-content:space-between;justify-items:start;text-align:left;overflow:hidden}
+.srt .tab{height:6px;width:calc(100% + 20px);margin:0 -10px;background:var(--c)}
+.srt .nm{font:500 15px/1.15 var(--f)}
+.srt .on{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.srt[aria-pressed="true"]{background:var(--key2);border-color:var(--ink)}
+.srt[aria-pressed="true"] .on{color:var(--ink)}
+/* remote (kept exactly from round 5) */
+.remote{position:relative;width:264px;margin:10px auto 4px;border-radius:46px 46px 66px 66px;padding:34px 18px 24px;display:grid;gap:14px;background:linear-gradient(180deg,#ece9e3,#d3cfc8);box-shadow:inset 0 3px 2px #ffffffb3,inset 0 -6px 10px #00000026,0 14px 26px #00000040;color:#2a2926}
+.nt .remote{background:linear-gradient(180deg,#43413d,#2d2b28);box-shadow:inset 0 3px 2px #ffffff1f,inset 0 -6px 10px #00000080,0 14px 26px #000000a0;color:#e4dfd5}
+.remote .ind{--wn:#dcd7cd;--win:#151413;--wrim:#0000003d}
+.nt .remote .ind{--wn:#151413;--win:#151413}
+.irlens{position:absolute;top:-5px;left:50%;width:44px;height:12px;margin-left:-22px;border-radius:8px 8px 4px 4px;background:#3a0d0a;box-shadow:inset 0 2px 2px #000,0 1px 0 #ffffff40;overflow:hidden}
+.irlens::after{content:"";position:absolute;inset:2px 3px;border-radius:5px 5px 2px 2px;background:#ff3b2e;opacity:0;transition:opacity 220ms ease-out}
+.irlens.tx::after{opacity:1;transition:none}
+.engr{font:600 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:#00000094}
+.nt .engr{color:#ffffff8a}
+.rg{display:flex;justify-content:space-between;align-items:center}
+.rkey{appearance:none;border:0;cursor:pointer;border-radius:12px;background:#33322f;color:#ece8df !important;box-shadow:inset 0 1px 0 #ffffff1f,0 2px 0 #000000a0;display:grid;place-items:center;gap:2px;min-height:48px;padding:6px 4px;font:600 12px var(--mono) !important;letter-spacing:.06em;text-transform:uppercase;transition:transform 80ms}
+.nt .rkey{background:#55534e}
+.rkey:active{transform:translateY(2px)}
+.rkey svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rkey svg.f{fill:currentColor;stroke:none}
+.rkey.round{width:46px;height:46px;border-radius:50%;padding:0;min-height:0}
+.rkey.round svg{stroke:#8f8b82;transition:stroke 300ms}
+.rkey.round[data-on="true"] svg{stroke:var(--ok)}
+.rkey[aria-pressed="true"]{transform:translateY(2px);box-shadow:inset 0 1px 3px #000}
+.rk4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.rk3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rk3.inp .rkey{justify-items:start;padding:8px 9px 7px;text-transform:none;letter-spacing:0;font:500 13px var(--f) !important}
+.dpad{position:relative;width:184px;height:184px;margin:0 auto;border-radius:50%;background:#33322f;box-shadow:inset 0 1px 0 #ffffff1f,0 3px 0 #000000a0}
+.nt .dpad{background:#55534e}
+.dz{appearance:none;border:0;cursor:pointer;position:absolute;width:56px;height:56px;background:transparent;display:grid;place-items:center;color:#ece8df !important;border-radius:50%}
+.dz svg{width:16px;height:16px;fill:currentColor}
+.dz.u{top:0;left:64px}.dz.d{bottom:0;left:64px}.dz.l{left:0;top:64px}.dz.r{right:0;top:64px}
+.dz:active{background:#00000040}
+.okk{appearance:none;border:0;cursor:pointer;position:absolute;left:52px;top:52px;width:80px;height:80px;border-radius:50%;background:var(--orange);color:#1d1c1a !important;font:600 16px var(--f);letter-spacing:.12em;box-shadow:0 0 0 6px #00000040,0 3px 0 var(--odeep)}
+.seam{height:0;border-top:1px solid #0000002e;border-bottom:1px solid #ffffff80;margin:2px -18px}
+.nt .seam{border-top-color:#00000080;border-bottom-color:#ffffff1f}
+
+/* ================= kiosks: a clock, three keys, the door ================= */
+.kio{font-size:18px}
+.ipad{width:1024px;height:768px}.echo{width:961px;height:601px}
+.kio::before{content:"";position:absolute;left:44px;right:44px;top:0;height:3px;background:var(--walnut);z-index:1}
+.echo::before{left:34px;right:34px}
+.kh{position:absolute;inset:0;padding:40px 44px 40px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:20px}
+.echo .kh{padding:28px 34px 30px;gap:12px}
+.ktop{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.kplace{font:500 18px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);padding-top:10px}
+.kdoor{appearance:none;border:0;background:none;cursor:pointer;display:flex;gap:14px;align-items:center;text-align:right;padding:4px 0;min-height:56px}
+.kdoor .t{display:grid;justify-items:end}
+.kdoor .nm{font:500 22px var(--f)}
+.kdoor .wd{font:500 18px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.kdoor .ind.led{width:18px;height:18px}
+.kdoor .ind.led::after{inset:2.5px}
+.klock{display:flex;gap:16px;align-items:center}
+.klock .k{min-height:60px;padding:8px 26px;font-size:22px;border-radius:14px}
+.klock .k svg{width:22px;height:22px}
+.clk{align-self:end;display:grid;gap:10px}
+.clk .t{font:300 200px/.8 var(--f);letter-spacing:-.03em;display:flex;align-items:flex-start;gap:10px;font-variant-numeric:tabular-nums}
+.clk .t small{font:400 28px var(--mono);letter-spacing:.1em;color:var(--dim);margin-top:8px}
+.clk .d{font:400 30px/1.2 var(--f);margin-top:16px}
+.clk .f{font:400 22px var(--f);color:var(--dim)}
+.echo .clk .t{font-size:150px}.echo .clk .d{font-size:26px;margin-top:10px}.echo .clk{gap:6px}
+.dock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;height:150px}
+.echo .dock{height:122px;gap:14px}
+.kt{position:relative;background:var(--pl);border:1px solid var(--ln);border-radius:18px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:0 18px 0 0;min-width:0}
+.kt .open{appearance:none;border:0;background:none;cursor:pointer;height:100%;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:0 0 0 22px;text-align:left;min-width:0}
+.kt .open .lg,.kt .open .og{width:42px;height:42px}
+.kt .nm{font:500 26px/1.1 var(--f);display:block}
+.kt .wd{font:400 18px/1.25 var(--f);color:var(--dim);display:block;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kt .k{min-height:60px;padding:8px 18px;font-size:20px;border-radius:14px}
+.kt .k svg{width:20px;height:20px}
+.echo .kt .nm{font-size:24px}
+/* kiosk sheets: full, inset, never scroll */
+.full{position:absolute;inset:0;background:var(--gd);padding:24px 28px 26px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:16px;animation:fade 160ms ease-out}
+.echo .full{padding:18px 22px 20px;gap:12px}
+.fhd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.fhd .tt{font:500 30px/1.1 var(--f);display:block;margin-top:2px}
+.fhd .r{display:flex;gap:10px;align-items:center}
+.kio .lab{font-size:15px}
+.kio .k{font-size:18px;min-height:52px}
+.fbody{min-height:0;display:grid}
+.pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:760px;max-height:calc(100% - 40px);overflow:hidden;background:var(--gd);border:1px solid var(--ln);border-radius:22px;padding:22px 24px 24px;display:grid;gap:16px;animation:fade 160ms ease-out}
+.echo .pop{width:720px;padding:18px 20px 20px;gap:12px}
+.kp2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.kp2>div{display:grid;gap:16px;align-content:start}
+.kio .pn .nm{font-size:22px}.kio .pn .wd{font-size:15px}
+.kio .pn .lg,.kio .pn .og{width:40px;height:40px}
+.kls{display:grid;gap:14px;grid-template-rows:auto minmax(0,1fr) auto}
+.kcards{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:14px;min-height:0}
+.kcards .lc,.kcards .sc{grid-template-rows:auto minmax(0,1fr)}
+.kcards .pb{grid-template-columns:minmax(0,1fr) 72px;min-height:0;height:100%}
+.kcards .pb.solo{grid-template-columns:1fr}
+.kcards .pad,.kcards .vf{min-height:0}
+.kio .ofx .note{font-size:16px}
+.kbot{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;align-items:stretch}
+.kio .appl .k,.kio .akeys .k{font-size:17px}
+.kio .asub{font-size:16px}.kio .aname{font-size:21px}
+.kio .scn .k{min-height:52px;padding:8px 22px}
+.kalloff{display:grid;gap:10px;align-content:center;padding:16px}
+.kmed{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;min-height:0}
+.kmed>.card{padding:18px;display:grid;gap:14px;align-content:start}
+.kio .mtitle{font-size:30px}.kio .msub{font-size:16px}
+.kio .srt{min-height:88px}.kio .srt .nm{font-size:18px}.kio .srt .on{font-size:15px}
+.kio .src{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kio .lr .nm{font-size:20px}.kio .lr .wd{font-size:15px}.kio .lr{min-height:72px}
+.kio .note{font-size:16px}
+.kio .gr{width:96px;height:96px;padding:16px;gap:8px}.kio .gr i{width:10px;height:10px}
+.kio .wh .k{font-size:16px;min-height:80px}.kio .wh .k small{font-size:15px}
+.kio .mem{font-size:17px}
+.kio .hf .cp b{font-size:16px}
+.kio .appl .u{font-size:15px}.kio .mini{width:64px;height:60px}.kio .mini i{font-size:15px}
+.kremote{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:start}
+.kremote .side{display:grid;gap:14px;align-content:start}
+</style>
+</head>
+<body>
+<div class="sticky">
+  <div class="ctl"><span class="eyebrow">Front door</span><div class="seg" id="doorSeg"><button aria-pressed="true" data-door="locked">Locked</button><button aria-pressed="false" data-door="unlocked">Unlocked</button></div></div>
+  <div class="ctl"><span class="eyebrow">Switch accent</span><div class="seg" id="accSeg"><button aria-pressed="true" data-acc="house">A · House</button><button aria-pressed="false" data-acc="kind">B · By kind</button><button aria-pressed="false" data-acc="own">C · Own colour</button></div></div>
+  <div class="ctl"><span class="eyebrow">Motion</span><div class="seg" id="motSeg"><button aria-pressed="true" data-mot="full">Full</button><button aria-pressed="false" data-mot="calm">Calm</button></div></div>
+  <div class="ctl"><span class="eyebrow">Page</span><div class="seg" id="themeSeg"><button aria-pressed="true" data-th="auto">Auto</button><button aria-pressed="false" data-th="light">Light</button><button aria-pressed="false" data-th="dark">Dark</button></div></div>
+</div>
+<main class="wrap">
+<header>
+  <span class="eyebrow">Jam design · Round 7 · Home Assistant (Jam Theme + Jam Cards)</span>
+  <h1>Jam Home, round 7: which switch is on</h1>
+  <p>Round 6 with the switches changed and nothing else. Isaac found it hard to tell whether a switch was on, and the same paddle was on everything. Now <b>lights keep the ON/OFF paddle</b>, and on is a solid block (ink carrying the lamp's colour by day, the lamp's own colour by night); off is flat. <b>Everything else that is plainly on or off</b> (the Tree, the fan/blanket, the purifier and dehumidifier power, speaker grouping, automations) is a <b>small switch</b>: a dark channel that reveals an accent colour as the thumb slides across. The kiosks, remote, media cards, popups and purifier are otherwise round 6's. Everything is sample data (Tue 2:30 pm for Day, 9:40 pm for Night). <b>Nothing here changes Home Assistant.</b></p>
+</header>
+
+<section id="read">
+  <div class="sec-h"><span class="eyebrow">0 · Isaac's notes</span><h2>What he said, and what changed</h2><p class="muted">The first note is new (after round 6). The rest are his notes after round 5, which round 6 answered and round 7 keeps.</p></div>
+  <div class="reads">
+    <div class="rd" style="border-top-color:var(--fg)"><b>Round 7 · Switches</b><q>The only real issues I have are in Home Assistant it's confusing if a switch is on or off, and the same switch is everywhere. It makes sense for lights to have a switch like that, but the others could be smaller switches that have an accent color in the channel that is reveled when it's on.</q><span>Lights: the paddle stays and on is now a solid block, off is flat. Everything else: a small switch, dark when off, with an accent revealed in the channel when on. Accent options are compared in section 2.</span></div>
+    <div class="rd"><b>Toggles and symbols</b><q>I like the new toggles, but I liked it better with the symbols from version 5.</q><span>The ON/OFF paddle stays, drawn flat (no plate, no shadow). The lamp symbols with a shade that takes the lamp's colour, the Tree and fan symbols and the power symbol come back on every card name.</span></div>
+    <div class="rd"><b>Less realism, Callsheet's palette</b><q>Lets back off on the realism and incorporate the color palette from Callsheet a little bit more.</q><span>Callsheet's paper (<code>#f6f3ec</code>-family) and navy ink by day, and its dark navy (<code>#10141d</code>) by night. Jost and Plex Mono with Callsheet's spaced mono labels. Hairline cards, no bevels or plates.</span></div>
+    <div class="rd"><b>Air purifier</b><q>It looks a little different from everything else and I think we need to make some sleight changes.</q><span>It's still a tiny appliance with a grille, a seven-segment readout and a round power key. Its body is now a normal card, the grille is printed and the speed keys are house keys. The gradient, bevel and key lights are gone.</span></div>
+    <div class="rd"><b>No sideboard, no keys</b><q>I don't like the sideboard at all. It's requires too much imagination to know what to do.</q> <q>Don't like the keys.</q><span>The TV, speaker and PC are plain cards again: what's on, transport, volume and Remote/Source. Who's home is printed names with a colour tag, not a key rail.</span></div>
+    <div class="rd"><b>Remote</b><q>I really like the remote</q><span>Unchanged, down to the red IR window at the top. It still opens from every TV card and sheet.</span></div>
+    <div class="rd"><b>No layout views</b><q>Don't need or use layout views in look 5</q><span>The plan, Draw the house, the day arc, the room-tab windows and the night face are gone. Rooms are text tabs on the phone and a heading on the kiosk.</span></div>
+    <div class="rd"><b>Minimal kiosk</b><q>The kiosk looks way too busy in look 5. Should be very minimalistic.</q><span>A clock, the date and weather, the front door and three keys. That's the shape of Jam Braun's kiosk, which he uses daily. Everything else is one tap away in a sheet that doesn't scroll.</span></div>
+  </div>
+</section>
+
+<section id="tokens">
+  <div class="sec-h"><span class="eyebrow">1 · Jam Theme</span><h2>Callsheet's paper and navy, applied to the house</h2><p class="muted">The values are Callsheet round 5's, with one step added for cards (a card sits a shade lighter than its ground by day and lighter navy at night). Orange, red, cream and walnut are the house constants.</p></div>
+  <div class="tok" id="tok"></div>
+</section>
+
+<section id="accent">
+  <div class="sec-h"><span class="eyebrow">2a · Switch accent</span><h2>Which colour the channel reveals: three rules</h2><p class="muted">The same six switches under each rule, all on but the last, Day and Night. The page uses <b>A · House</b> everywhere; the "Switch accent" control at the top applies B or C to the whole page instead. Every accent is fitted to the same lightness so the channel keeps ≥ 3:1 against both the off channel and the thumb. None may be the control orange, or read as warn, alert or ok.</p></div>
+  <div class="cmpg" id="cmp-g"></div>
+</section>
+
+<section id="cards">
+  <div class="sec-h"><span class="eyebrow">2b · Jam Cards</span><h2>The cards, Day and Night</h2><p class="muted">Live. Tap a card's name (›) to open its popup. Each card is drawn as if alone on its screen, so a Pause is orange only where that card would earn it.</p></div>
+  <div class="lib" id="lib"></div>
+</section>
+
+<section id="phones">
+  <div class="sec-h"><span class="eyebrow">3 · Phone · 390 × 844</span><h2>Living room, Day and Night</h2><p class="muted">Tap the room tabs; the phone scrolls like the real dashboard. Day is 2:30 pm with Amber out and the kitchen radio on. Night is 9:40 pm with a film on the TV. The count under each phone is the orange on the visible screen.</p></div>
+  <div class="grid-ph" id="phones-g"></div>
+</section>
+
+<section id="kiosks">
+  <div class="sec-h"><span class="eyebrow">4 · Kiosks</span><h2>Living-room iPad 1024 × 768 and kitchen Echo Show 961 × 601</h2><p class="muted">A clock, the door and three keys. Tap a key to open its sheet (Lights, TV or Music). Sheets cover the screen, never scroll and close with one key. The Echo's third key is All off, as it is today.</p></div>
+  <div class="grid-k" id="kiosk-g"></div>
+</section>
+
+<section id="pops">
+  <div class="sec-h"><span class="eyebrow">5 · Popups</span><h2>Every light and media card opens one</h2><p class="muted">At phone size, live. White presets show their colour, and a colour pick recolours the lamp's shade and its fader. Source is a tile grid, speakers group or split from the Speaker popup, and the remote is round 5's.</p>
+  <div class="ctl" style="margin-top:6px"><span class="eyebrow">Show in</span><div class="seg" id="popSeg"><button aria-pressed="false" data-ph="day">Day</button><button aria-pressed="true" data-ph="night">Night</button></div></div></div>
+  <div class="pops" id="pops-g"></div>
+</section>
+
+<section id="lang">
+  <div class="sec-h"><span class="eyebrow">6 · Language and rollout</span><h2>What ties it to the other apps, and what a rollout would change</h2></div>
+  <div class="tok">
+    <div class="tbox"><b>Shared with the family</b><ul style="margin:0;padding-left:18px;display:grid;gap:4px;font-size:14.5px">
+      <li>Callsheet's paper/navy grounds, Jost for words, Plex Mono for labels and numbers</li>
+      <li>On / Off / Offline under every name; offline is a dashed card</li>
+      <li>One orange or none per screen: Lock (warn) &gt; Pause &gt; nothing</li>
+      <li>Red only for the door after dark or with nobody home, as a solid red key</li>
+      <li>Chosen keys press in (deeper paper + ink edge); nothing lights up to say "chosen"</li>
+      <li>The small channel-reveal switch for plain on/off (each app reveals its own accent; see the switch study)</li>
+      <li>Lights only where they're status: the door's round window, the purifier readout, lit power symbols, a playing grille's dot</li>
+    </ul></div>
+    <div class="tbox"><b>Jam Home's own</b><ul style="margin:0;padding-left:18px;display:grid;gap:4px;font-size:14.5px">
+      <li>The ON/OFF paddle, for lights only: on is a solid ON block in the lamp's colour</li>
+      <li>The house accent in the switch channel: Callsheet blue, the navy ink's hue lifted</li>
+      <li>Lamp symbols whose shade is the lamp's colour</li>
+      <li>The air purifier as a tiny appliance (the only seven-segment)</li>
+      <li>The remote (soft plastic, red IR at the top)</li>
+      <li>Source tiles with a printed colour band</li>
+    </ul></div>
+    <div class="tbox"><b>Rollout (Jam Home's turn, with Isaac's OK)</b><ul style="margin:0;padding-left:18px;display:grid;gap:4px;font-size:14.5px">
+      <li>Theme only: grounds, cards, hairlines, type (jam-theme tokens)</li>
+      <li>Card change: jam-light renders the paddle and the symbol; jam-tile and the popups render the small switch</li>
+      <li>Card change: jam-fan purifier restyle (no new card)</li>
+      <li>Kiosk: jam-kiosk's dock already has the shape; restyle only</li>
+      <li>No new cards. The plan, sideboard, key rail and Goodnight sheet from rounds 4–5 are dropped.</li>
+    </ul></div>
+  </div>
+</section>
+</main>
+<div id="modal" data-a="mclose"><div data-fr="modal"></div></div>
+
+<script>
+/* ======================= colour (kept from round 5) ======================= */
+const WH={cozy:['Cozy','2200 K','#f4ca8a'],warm:['Warm','2700 K','#f4d8a4'],neutral:['Neutral','3500 K','#f2e4c6'],clean:['Clean','4000 K','#efebe1'],daylight:['Daylight','5000 K','#dbe6f9']};
+const HUES=['#ff7a6b','#ff9a5a','#ffc95a','#e6dc5a','#9bdc5a','#5ad68a','#5ad6c8','#5ab8ff','#6a8cff','#9b7bff','#d17bff','#ff7ab0'];
+const ORANGES=['#ec7c22','#f08a2c'],GUARD=.15;
+function lin(h){return [1,3,5].map(i=>parseInt(h.substr(i,2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4))}
+function oklab(h){const [r,g,b]=lin(h);const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b),m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b),q=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
+  return [.2104542553*l+.793617785*m-.0040720468*q,1.9779984951*l-2.428592205*m+.4505937099*q,.0259040371*l+.7827717662*m-.808675766*q]}
+function okd(x,y){const A=oklab(x),B=oklab(y);return Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2])}
+const toOrange=c=>Math.min(...ORANGES.map(o=>okd(c,o)));
+function mixHex(a,b,t){const A=[1,3,5].map(i=>parseInt(a.substr(i,2),16)),B=[1,3,5].map(i=>parseInt(b.substr(i,2),16));return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+const GC={};
+function guard(c){if(GC[c])return GC[c];let x=c;for(let t=0;t<=1.0001;t+=.05){x=mixHex(c,'#f3e6c8',t);if(toOrange(x)>=GUARD)break}return GC[c]=x}
+const dc=L=>WH[L.c]?WH[L.c][2]:guard(L.c);
+
+/* ======================= switch accent (round 7) ======================= */
+/* Off channel #1c2331 (day) / #05070b (night); thumb #fbf9f4 / #ece5d3. An accent keeps >= 3:1 against both only in a narrow
+   lightness band, so every accent is the same lightness: day Y = 0.217, night Y = 0.167. */
+function fromLch(L,C,H){const a=C*Math.cos(H*Math.PI/180),b=C*Math.sin(H*Math.PI/180);const l=(L+.3963377774*a+.2158037573*b)**3,m=(L-.1055613458*a-.0638541728*b)**3,s=(L-.0894841775*a-1.291485548*b)**3;
+  const un=v=>v<=.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-.055;
+  return '#'+[4.0767416621*l-3.3077115913*m+.2309699292*s,-1.2684380046*l+2.6097574011*m-.3413193965*s,-.0041960863*l-.7034186147*m+1.707614701*s].map(v=>Math.round(Math.max(0,Math.min(1,un(v)))*255).toString(16).padStart(2,'0')).join('')}
+const relY=h=>{const [r,g,b]=lin(h);return .2126*r+.7152*g+.0722*b};
+function fitY(hex,ty){const [L,a,b]=oklab(hex);const C=Math.min(.12,Math.hypot(a,b)),H=Math.atan2(b,a)*180/Math.PI;let lo=0,hi=1;for(let i=0;i<32;i++){const m=(lo+hi)/2;relY(fromLch(m,C,H))<ty?lo=m:hi=m}return fromLch((lo+hi)/2,C,H)}
+const ACC={house:['#6780b4','#5971a4'],plug:['#6780b4','#5971a4'],climate:['#43899a','#337b8c'],auto:['#8f72c0','#8063b1'],set:['#71819c','#64738d']};
+const ACCN={house:'House blue',plug:'Power / plugs',climate:'Air and climate',auto:'Automations',set:'Settings'};
+let ACCRULE='house',CURRULE='house',CALM=false,CURF=null;
+/* demo switches in the library and compare panel keep their own state per frame */
+const DEMO=(i,def)=>{const d=CURF.demo=CURF.demo||{};return i in d?d[i]:(d[i]=def)};
+function accFor(kind,own){if(CURRULE==='kind')return ACC[kind]||ACC.house;if(CURRULE==='own'&&own)return [fitY(own,.217),fitY(own,.167)];return ACC.house}
+/* the small switch: role=switch, aria-checked, channel + reveal + thumb */
+const sw=(act,arg,on,label,kind,own,o={})=>{const [d,n]=accFor(kind,own);return `<button class="sw${o.k?' k':''}" role="switch" aria-checked="${!!on}" data-a="${act}" data-arg="${arg}"${o.v!=null?` data-v="${o.v}"`:''}${o.i!=null?` data-i="${o.i}"`:''} data-kind="${kind}" style="--ad:${d};--an:${n}" aria-label="${esc(label)}"${o.dis?' disabled':''}${o.un?' data-un="1" aria-disabled="true"':''}><i class="rv"></i><i class="th"></i></button>`};
+
+/* ======================= symbols (round 5's) ======================= */
+const IC={pwr:'<svg viewBox="0 0 16 16"><path d="M8 2v6M4.5 4.5a5 5 0 1 0 7 0"/></svg>',
+ prev:'<svg class="f" viewBox="0 0 16 16"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg>',play:'<svg class="f" viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>',pause:'<svg class="f" viewBox="0 0 16 16"><path d="M3 2h3.5v12H3zM9.5 2H13v12H9.5z"/></svg>',next:'<svg class="f" viewBox="0 0 16 16"><path d="M11 2h2v12h-2zM2 2v12l8-6z"/></svg>',
+ rew:'<svg class="f" viewBox="0 0 16 16"><path d="M8 3v10L1 8zM15 3v10L8 8z"/></svg>',ff:'<svg class="f" viewBox="0 0 16 16"><path d="M8 3v10l7-5zM1 3v10l7-5z"/></svg>',
+ home:'<svg viewBox="0 0 16 16"><path d="M2 8l6-5 6 5M4 7v6h8V7"/></svg>',spk:'<svg viewBox="0 0 16 16"><rect x="3" y="1.5" width="10" height="13" rx="2"/><circle cx="8" cy="9.5" r="2.5"/><path d="M8 4.5h.01"/></svg>',
+ remote:'<svg viewBox="0 0 16 16"><rect x="5" y="1.5" width="6" height="13" rx="2"/><path d="M8 4.5h.01M8 8h.01"/></svg>',grid:'<svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>',
+ minus:'<svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg>',plus:'<svg viewBox="0 0 16 16"><path d="M3 8h10M8 3v10"/></svg>',mute:'<svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2zM11 6l4 4M15 6l-4 4"/></svg>',
+ back:'<svg viewBox="0 0 16 16"><path d="M6 4L2 8l4 4M2 8h9a3 3 0 0 1 0 6"/></svg>',menu:'<svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h10M3 12h10"/></svg>',set:'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></svg>',
+ moon:'<svg viewBox="0 0 16 16"><path d="M13 10.5A6 6 0 0 1 5.5 3a6 6 0 1 0 7.5 7.5z"/></svg>',
+ lock:'<svg viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>',
+ kb:'<svg viewBox="0 0 16 16"><rect x="1.5" y="4" width="13" height="8" rx="1.5"/><path d="M4 7h.01M6.5 7h.01M9 7h.01M11.5 7h.01M5 9.5h6"/></svg>',
+ up:'<svg viewBox="0 0 16 16"><path d="M8 3l6 8H2z"/></svg>',down:'<svg viewBox="0 0 16 16"><path d="M8 13L2 5h12z"/></svg>',left:'<svg viewBox="0 0 16 16"><path d="M3 8l8-6v12z"/></svg>',right:'<svg viewBox="0 0 16 16"><path d="M13 8L5 2v12z"/></svg>'};
+const OG={tree:'<path d="M15 4l7 9h-4l5 7H7l5-7H8z"/><path d="M15 20v6"/>',fan:'<circle cx="15" cy="13" r="2"/><path d="M15 11c0-4 1.5-6.5 4-6.5s2.5 4-4 6.5zM17 13c4 0 6.5 1.5 6.5 4s-4 2.5-6.5-4zM15 15c0 4-1.5 6.5-4 6.5s-2.5-4 4-6.5zM13 13c-4 0-6.5-1.5-6.5-4s4-2.5 6.5 4z"/><path d="M15 21v5M11 26h8"/>',
+ tv:'<rect x="3" y="6" width="24" height="15" rx="2"/><path d="M11 25h8M15 21v4"/>',spk:'<rect x="8" y="3" width="14" height="24" rx="3"/><circle cx="15" cy="17" r="4.5"/><path d="M15 8h.01"/>',
+ pc:'<rect x="4" y="5" width="22" height="14" rx="2"/><path d="M10 25h10M15 19v6"/>',air:'<rect x="7" y="3" width="16" height="24" rx="3"/><path d="M11 8h8M11 11h8M11 14h8"/><circle cx="15" cy="21" r="2.5"/>',
+ off:'<path d="M15 4v9"/><path d="M9.3 8.2a9 9 0 1 0 11.4 0"/>'};
+const LGL={floor:'<path class="s" d="M10 4h10l3 9H7z"/><path class="o" d="M15 13v13M10 26h10"/>',
+ table:'<path class="s" d="M9 6h12l3 9H6z"/><path class="o" d="M13 15h4v7h-4zM9 25h12"/>',
+ strip:'<rect class="s" x="3" y="12" width="24" height="7" rx="3.5"/><path class="o" d="M7 22v3M23 22v3"/>',
+ pendant:'<path class="o" d="M15 2v8"/><path class="s" d="M6 20a9 9 0 0 1 18 0z"/><path class="o" d="M12 23h6"/>',
+ bulb:'<path class="s" d="M15 4a7 7 0 0 1 4 12.7V19h-8v-2.3A7 7 0 0 1 15 4z"/><path class="o" d="M11.5 22h7M12.5 25h5"/>',
+ string:'<path class="o" d="M2 8c6 6 20 6 26 0"/><circle class="s" cx="7" cy="14" r="3"/><circle class="s" cx="15" cy="16" r="3"/><circle class="s" cx="23" cy="14" r="3"/>',
+ lantern:'<path class="o" d="M4 6h6v18H4zM10 10h3"/><rect class="s" x="13" y="7" width="11" height="15" rx="2"/><path class="o" d="M18.5 4v3"/>'};
+const lglyph=(L,on)=>`<svg class="lg${on?' on':''}" viewBox="0 0 30 30" style="--lc:${dc(L)}" aria-hidden="true">${LGL[L.g]}</svg>`;
+const og=(k)=>`<svg class="og" viewBox="0 0 30 30" aria-hidden="true">${OG[k]}</svg>`;
+const pwrGlyph=(on,s=16)=>`<svg class="pwg${on?' on':''}" width="${s}" height="${s}" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v6M4.5 4.5a5 5 0 1 0 7 0"/></svg>`;
+
+/* ======================= house model ======================= */
+const PEOPLE=[['isaac','Isaac','#3f6fb5'],['amber','Amber','#2a7a74'],['marissa','Marissa','#b8476f']];
+const ROOMS={living:{n:'Living room',s:'Living',lights:['lr','kl','tvl'],sw:['tree'],t:'73.6°',h:'62%'},
+ kitchen:{n:'Kitchen',s:'Kitchen',lights:['kla','stv','cp'],sw:[]},
+ master:{n:'Master bedroom',s:'Master',lights:['dr','is','as','ce'],sw:['fan'],t:'79°',h:'49%'},
+ marissa:{n:"Marissa's room",s:'Marissa',lights:['mc','md','mf','mb','mk'],sw:[]}};
+const SRC=[['nervos','Nerv//OS','Input','#2f8a83'],['switch','Switch','Input','#b5476a'],['youtube','YouTube','App','#7a5a9a'],['jamfin','Jamfin','App','#c49a3a'],['dropout','Dropout','App','#d07fa6'],['corridor','Corridor Digital','App','#4a7be0'],['home','Home screen','App','#8d8981']];
+function mkHouse(n){return {night:n,time:n?'9:40':'2:30',ap:'PM',date:'Tuesday · October 27',in:{t:67,h:63},
+ out:n?{t:55,w:'clear',x:'low 49°'}:{t:64,w:'cloudy',x:'high 70°'},
+ door:'locked',home:{isaac:true,amber:n,marissa:true},
+ L:{lr:{n:'Living room',room:'living',kind:'Group',g:'floor',on:true,b:n?40:75,c:'cozy',mem:[['Table lamp',n?40:75,true],['Floor lamp',n?35:60,true]]},
+  kl:{n:'Kitchen lamp',room:'living',g:'table',on:!n,b:50,c:'warm'},
+  tvl:{n:'TV light',room:'living',kind:'WLED',g:'strip',on:true,b:n?22:14,c:'#7fb6ff'},
+  kla:{n:'Lamp',room:'kitchen',g:'table',on:true,b:n?60:50,c:'warm'},
+  stv:{n:'Stove lights',room:'kitchen',kind:'Group',g:'pendant',ofl:true,since:'9:12 am',b:0,c:'clean'},
+  cp:{n:'Car port',room:'kitchen',g:'lantern',on:n,b:100,c:'clean'},
+  dr:{n:'Dresser',room:'master',g:'table',on:false,b:40,c:'warm'},
+  is:{n:"Isaac's side",room:'master',g:'table',on:n,b:30,c:'cozy'},
+  as:{n:"Amber's side",room:'master',g:'table',ofl:true,since:'yesterday',b:0,c:'cozy'},
+  ce:{n:'Ceiling',room:'master',g:'pendant',ofl:true,since:'Monday',b:0,c:'clean'},
+  mc:{n:'Ceiling',room:'marissa',g:'pendant',on:false,b:80,c:'clean'},
+  md:{n:'Desk lamp',room:'marissa',g:'table',on:n,b:70,c:'neutral'},
+  mf:{n:'Fairy lights',room:'marissa',g:'string',on:n,b:50,c:'#ff7ab0'},
+  mb:{n:'Bedside',room:'marissa',g:'bulb',on:false,b:30,c:'cozy'},
+  mk:{n:'Closet',room:'marissa',g:'bulb',on:false,b:100,c:'clean'}},
+ S:{tree:{n:'Tree',room:'living',g:'tree',on:true,own:'#3f7a4f'},fan:{n:'Fan / blanket',room:'master',g:'fan',on:n}},auto:{lr:{sun:true,out:false},kl:{sun:false,out:true},tvl:{sun:true,out:true}},
+ scene:'normal',pur:{on:true,pm:'004',sp:n?25:50},deh:{on:true,rh:'58',to:50},
+ tv:{on:true,st:n?'playing':'idle',src:n?'jamfin':'nervos',title:n?'The Long Summer':'',ends:n?'ends 11:02':'',pos:n?.62:0,vol:30},
+ spk:{st:'idle',title:'Saturn',by:'The Olympians',vol:40},
+ ksp:{st:n?'idle':'playing',title:'Saturn',by:'The Olympians',vol:25},
+ grp:{kitchen:false,master:false,phoster:false},grpOpen:false,
+ pc:{st:n?'asleep':'idle'},offIn:{},yours:['#ff7ab0','#5ab8ff'],tries:{}}}
+let HS={day:mkHouse(false),night:mkHouse(true)};
+
+/* ======================= helpers ======================= */
+const ind=(shape,on,c,cls='')=>`<i class="ind ${shape}${on?' on':''} ${cls}"${c?` style="--c:${c}"`:''}></i>`;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const lit=L=>!L.ofl&&L.on;
+const unlocked=H=>H.door==='unlocked';
+/* unlocked door: warn by day while someone is home, alert after dark or with nobody home (round 5, conflict 12) */
+const doorSev=H=>H.night||!Object.values(H.home).some(Boolean)?'alert':'warn';
+const playingIn=(H,room)=>room==='living'?(H.tv.on&&H.tv.st==='playing'?'tv':H.spk.st==='playing'?'spk':null):room==='kitchen'?(H.ksp.st==='playing'?'ksp':null):null;
+/* the one orange per screen: alert (red key, no orange) > warn (Lock) > what's playing here (Pause) > nothing */
+function primary(H,room){if(unlocked(H))return doorSev(H)==='warn'?'lock':'none';const p=playingIn(H,room);return p?'pause:'+p:'none'}
+const lockKey=(H,cls='')=>`<button class="k ${doorSev(H)==='alert'?'red':'or'} ${cls}" data-a="lock">${IC.lock}Lock</button>`;
+function doorWord(H){if(!unlocked(H))return {led:ind('led',true,'var(--ok)'),w:'Locked',c:''};const w=doorSev(H)==='warn';
+  return {led:ind('led',true,w?'var(--warn)':'var(--alert)'),w:(w?'▲ ':'')+'Unlocked',c:`color:var(${w?'--wink':'--alink'})`}}
+const roomLightsOn=(H,r)=>ROOMS[r].lights.filter(i=>lit(H.L[i])).length;
+
+/* seven-segment: the purifier and dehumidifier only */
+const SEGS={0:'abcdef',1:'bc',2:'abged',3:'abgcd',4:'fgbc',5:'afgcd',6:'afgedc',7:'abc',8:'abcdefg',9:'abcdfg','-':'g',' ':''};
+function hs(x,y,L,t){return`${x},${y} ${x+t/2},${y-t/2} ${x+L-t/2},${y-t/2} ${x+L},${y} ${x+L-t/2},${y+t/2} ${x+t/2},${y+t/2}`}
+function vs(x,y,L,t){return`${x},${y} ${x+t/2},${y+t/2} ${x+t/2},${y+L-t/2} ${x},${y+L} ${x-t/2},${y+L-t/2} ${x-t/2},${y+t/2}`}
+function seg7(str){const dw=12,dh=22,g=4,t=2.8,q=.7;let x=2,out='';[...str].forEach(ch=>{const P={a:hs(x+q,2+t/2,dw-2*q,t),g:hs(x+q,2+dh/2,dw-2*q,t),d:hs(x+q,2+dh-t/2,dw-2*q,t),f:vs(x+t/2,2+q,dh/2-2*q,t),b:vs(x+dw-t/2,2+q,dh/2-2*q,t),e:vs(x+t/2,2+dh/2+q,dh/2-2*q,t),c:vs(x+dw-t/2,2+dh/2+q,dh/2-2*q,t)};for(const k in P)out+=`<polygon class="sg${(SEGS[ch]||'').includes(k)?' on':''}" points="${P[k]}"/>`;x+=dw+g});return `<span class="seg7" role="img" aria-label="${str.trim()||'blank'}"><svg viewBox="0 0 ${x} 26"><g transform="skewX(-6)">${out}</g></svg></span>`}
+const art=i=>{const A=[['#3a4f7a','#d9a63a'],['#7a2e2a','#e4dccc'],['#2f5f4a','#d6c27a']][i%3];return `background:linear-gradient(135deg,${A[0]} 0 58%,${A[1]} 58% 64%,${A[0]} 64%)`};
+
+/* ======================= cards ======================= */
+const lword=L=>L.ofl?'Offline':(L.on?'On':'Off')+(L.kind?' · '+L.kind:'');
+const paddle=(act,arg,on,label,c)=>`<button class="pad" data-a="${act}" data-arg="${arg}" aria-pressed="${on}" style="--lc:${c||'var(--cream)'}" aria-label="${esc(label)} ${on?'on, press to turn off':'off, press to turn on'}"><i class="t">ON</i><i class="b">OFF</i></button>`;
+function lightCard(H,id,k){const L=H.L[id],on=lit(L),C=dc(L);
+  const name=`<button class="pn" data-a="pop" data-t="${L.ofl?'offline':'light'}" data-arg="${id}" aria-label="${esc(L.n)}: ${L.ofl?'offline, details':'open light controls'}">${lglyph(L,on)}<span><span class="nm">${esc(L.n)}</span><span class="wd">${lword(L)}</span></span><span class="chev" aria-hidden="true">›</span></button>`;
+  if(L.ofl)return `<div class="card lc" data-st="offline">${name}<div class="ofx"><span class="note">Can't be reached since ${L.since}.</span></div></div>`;
+  const v=on?L.b:0;
+  const fader=`<div class="vf${on?' lit':''}" role="slider" tabindex="0" aria-label="${esc(L.n)} brightness" aria-valuenow="${v}" data-sl="lb" data-arg="${id}" data-or="v" style="--vn:${v/100};--lc:${C}"><i class="fl"></i><i class="cp"><b>${v||''}</b></i></div>`;
+  return `<div class="card lc" data-st="${on?'on':'off'}">${name}<div class="pb">${paddle('lt',id,on,L.n,C)}${fader}</div></div>`}
+function switchCard(H,id,k){const S=H.S[id];
+  return `<div class="card lc sc" data-st="${S.on?'on':'off'}"><div class="pn static">${og(S.g)}<span><span class="nm">${esc(S.n)}</span><span class="wd">${S.on?'On':'Off'} · plug</span></span><span></span></div><div class="swrow"><span class="lab">Power</span>${sw('sw',id,S.on,S.n+' power','plug',S.own,{k})}</div></div>`}
+function purifier(H){const P=H.pur;return `<div class="card appl" data-st="${P.on?'on':'off'}"><div class="grille" aria-hidden="true"></div>
+  <div class="face"><div style="display:grid;gap:4px;justify-items:start">${seg7(P.on?P.pm:'   ')}<span class="u">PM2.5</span></div><div><span class="aname">Air purifier</span><span class="asub">${P.on?'Running · air good':'Off'}</span></div>${sw('pur','',P.on,'Air purifier power','climate',null,{k:H._k})}</div>
+  <div class="akeys" role="group" aria-label="Fan speed">${[25,50,75,100].map(s=>`<button class="k" aria-pressed="${P.on&&P.sp===s}" data-a="pursp" data-arg="${s}">${s} %</button>`).join('')}</div></div>`}
+function dehum(H){const D=H.deh;return `<div class="card appl" data-st="${D.on?'on':'off'}"><div class="grille" aria-hidden="true"></div>
+  <div class="face"><div style="display:grid;gap:4px;justify-items:start">${seg7(D.on?D.rh:'  ')}<span class="u">RH %</span></div><div><span class="aname">Dehumidifier</span><span class="asub">${D.on?'Drying to '+D.to+' %':'Off'}</span></div>${sw('deh','',D.on,'Dehumidifier power','climate',null,{k:H._k})}</div>
+  <div class="akeys k3" role="group" aria-label="Target">${[45,50,55].map(s=>`<button class="k" aria-pressed="${D.on&&D.to===s}" data-a="dehto" data-arg="${s}">${s} %</button>`).join('')}</div></div>`}
+function scenes(H){const S=[['normal','Normal'],['movie','Movie time'],['vibes','Vibes'],['spooky','Spooky vibes']];
+  return `<div class="scn" role="group" aria-label="Scenes">${S.map(([id,n])=>`<button class="k" aria-pressed="${H.scene===id}" data-a="scene" data-arg="${id}">${n}</button>`).join('')}</div>`}
+function houseStrip(H){const d=doorWord(H),pri=primary(H,'x');
+  const ppl=PEOPLE.map(([id,n,c])=>`<span class="${H.home[id]?'':'away'}"><i class="ptag" style="--c:${c}">${n[0]}</i>${n}${H.home[id]?'':' · out'}</span>`).join('');
+  return `<div class="card hs"><div class="tp"><div><span class="lab">Inside</span><div class="big">${H.in.t}°<small>${H.in.h} %</small></div></div><div class="rt"><span class="lab">Outside</span><div class="big">${H.out.t}° <span style="font-size:18px">${H.out.w}</span></div></div></div>
+  <div class="dr">${d.led}<span class="w">Front door<span style="${d.c}">${d.w}</span></span>${unlocked(H)?lockKey(H):''}</div>
+  <div class="ppl">${ppl}</div></div>`}
+function tvCard(H,room){const T=H.tv,p=T.on&&T.st==='playing',pri=primary(H,room);
+  const head=`<button class="pn" data-a="pop" data-t="tv" aria-label="TV: open controls">${og('tv')}<span><span class="nm">TV</span><span class="wd">${T.on?(p?'Playing':'On · idle'):'Off'} · Phoster</span></span><span class="chev" aria-hidden="true">›</span></button>`;
+  if(!T.on)return `<div class="card mc" data-st="off">${head}<button class="k wide" data-a="tvpw">${IC.pwr}Turn on</button><div class="k2"><button class="k" data-a="pop" data-t="remote">${IC.remote}Remote</button><button class="k" data-a="pop" data-t="tv">${IC.grid}Source</button></div></div>`;
+  const what=p?`<div><span class="mtitle">${esc(T.title)}</span><span class="msub">Jamfin · ${T.ends}</span></div><div class="prog" aria-hidden="true"><i style="width:${T.pos*100}%"></i></div>`
+    :`<div><span class="mtitle">${esc(SRC.find(s=>s[0]===T.src)[1])}</span><span class="msub">Nothing playing</span></div>`;
+  return `<div class="card mc" data-st="on">${head}${what}
+   <div class="k3"><button class="k" data-a="noop" aria-label="Rewind">${IC.rew}</button><button class="k${pri==='pause:tv'?' or':''}" data-a="tvplay">${p?IC.pause:IC.play}${p?'Pause':'Play'}</button><button class="k" data-a="noop" aria-label="Forward">${IC.ff}</button></div>
+   <div class="vrow"><span class="lab">Vol</span><div class="hf quiet" role="slider" tabindex="0" aria-label="Stereo volume" aria-valuenow="${T.vol}" data-sl="tvvol" data-or="h" style="--vn:${T.vol/100}"><i class="fl"></i><i class="cp"><b>${T.vol}</b></i></div></div>
+   <div class="k2"><button class="k" data-a="pop" data-t="remote">${IC.remote}Remote</button><button class="k" data-a="pop" data-t="tv">${IC.grid}Source</button></div></div>`}
+function grille(n,cols,on){return Array.from({length:n},(_,i)=>`<i class="${on&&i===cols+1?'on':''}"></i>`).join('')}
+function speakerCard(H,which,room){const kit=which==='kitchen',S=kit?H.ksp:H.spk,p=S.st==='playing',pri=primary(H,room);
+  return `<div class="card mc" data-st="${p?'on':'off'}"><button class="pn" data-a="pop" data-t="speaker" data-arg="${which}" aria-label="${kit?'Kitchen':'Living room'} speaker: open">${og('spk')}<span><span class="nm">${kit?'Kitchen speaker':'Living room speaker'}</span><span class="wd">${p?'Playing':'Idle · last played'}</span></span><span class="chev" aria-hidden="true">›</span></button>
+   <div class="np"><span class="gr" aria-hidden="true">${grille(16,4,p)}</span><span><span class="mtitle">${esc(S.title)}</span><span class="msub">${esc(S.by)}</span></span></div>
+   <div class="k3"><button class="k" data-a="noop" aria-label="Previous">${IC.prev}</button><button class="k${pri==='pause:'+(kit?'ksp':'spk')?' or':''}" data-a="${kit?'kspplay':'spkplay'}">${p?IC.pause:IC.play}${p?'Pause':'Play'}</button><button class="k" data-a="noop" aria-label="Next">${IC.next}</button></div>
+   <div class="vrow"><span class="lab">Vol</span><div class="hf quiet" role="slider" tabindex="0" aria-label="Volume" aria-valuenow="${S.vol}" data-sl="${kit?'kvol':'svol'}" data-or="h" style="--vn:${S.vol/100}"><i class="fl"></i><i class="cp"><b>${S.vol}</b></i></div></div></div>`}
+function pcRow(H){const P=H.pc,aw=P.st!=='asleep';
+  return `<div class="card pcrow" data-st="${aw?'on':'off'}"><button class="pn" data-a="pop" data-t="pc" aria-label="PC: open">${og('pc')}<span><span class="nm">NerveOS PC</span><span class="wd">${aw?'Awake · idle':'Asleep'}</span></span><span class="chev" aria-hidden="true">›</span></button><button class="k" data-a="pcsleep">${IC.moon}${aw?'Sleep':'Wake'}</button></div>`}
+
+/* ======================= popups ======================= */
+function popLight(H,id,k){const L=H.L[id],on=lit(L),C=dc(L),sel=L.c;
+  const head={eyebrow:(L.kind?L.kind+' · ':'')+ROOMS[L.room].n,title:L.n,right:`<button class="pwr" aria-pressed="${on}" data-a="lt" data-arg="${id}" aria-label="${esc(L.n)} power">${IC.pwr}</button>`};
+  const bright=`<div class="blk"><span class="lab">Brightness</span><div class="hf big" role="slider" tabindex="0" aria-label="Brightness" aria-valuenow="${on?L.b:0}" data-sl="lb" data-arg="${id}" data-or="h" style="--vn:${on?L.b/100:0};--lc:${C}"><i class="fl" style="${on?'':'opacity:0'}"></i><i class="cp"><b>${on?L.b:'Off'}</b></i></div></div>`;
+  const whites=`<div class="blk"><span class="lab">White</span><div class="wh">${Object.entries(WH).map(([key,[n,kk,c]])=>`<button class="k" aria-pressed="${sel===key}" data-a="white" data-arg="${id}" data-v="${key}"><i class="cc" style="--c:${c}"></i>${n}<small>${kk}</small></button>`).join('')}</div></div>`;
+  const hue=`<div class="blk"><span class="lab">Colour</span><div class="hue">${HUES.map(h=>`<button style="--c:${guard(h)}" aria-pressed="${sel===h}" aria-label="Colour ${h}" data-a="white" data-arg="${id}" data-v="${h}"></button>`).join('')}</div></div>`;
+  const yours=`<div class="blk"><span class="lab">Your colours</span><div class="yc">${H.yours.map(h=>`<button class="k" aria-pressed="${sel===h}" data-a="white" data-arg="${id}" data-v="${h}" aria-label="Your colour ${h}"><i class="swin" style="--c:${guard(h)}"></i></button>`).join('')}<button class="k" data-a="addcol" data-arg="${id}">${IC.plus}Save this</button></div></div>`;
+  const mem=L.mem?`<div class="blk"><span class="lab">In this group</span>${L.mem.map(([n,b,o],i)=>`<div class="mem"><span>${n}</span><div class="hf sm quiet" role="slider" tabindex="0" aria-label="${n} brightness" aria-valuenow="${b}" data-sl="mem" data-arg="${id}" data-i="${i}" data-or="h" style="--vn:${o&&on?b/100:0};--lc:${C}"><i class="fl"></i><i class="cp"><b>${b}</b></i></div><button class="mini" aria-pressed="${o&&on}" style="--lc:${C}" data-a="mem" data-arg="${id}" data-i="${i}" aria-label="${n} ${o&&on?'on':'off'}"><i>ON</i><i>OFF</i></button></div>`).join('')}</div>`:'';
+  const A=H.auto[id]||{sun:false,out:false};
+  const autos=`<div class="blk"><span class="lab">Automations</span><div class="card lst"><div class="lr"><span><span class="nm">On at sunset</span><span class="wd">${A.sun?'Next: 6:12 pm':'Not running'}</span></span>${sw('auto',id,A.sun,L.n+': on at sunset','auto',C,{v:'sun'})}</div><div class="lr"><span><span class="nm">Off when everyone's out</span><span class="wd">${A.out?'Running':'Not running'}</span></span>${sw('auto',id,A.out,L.n+': off when everyone is out','auto',C,{v:'out'})}</div></div></div>`;
+  const off=`<div class="blk"><span class="lab">Turn off in</span><div class="k3">${[[15,'15 min'],[30,'30 min'],[60,'1 h']].map(([m,t])=>`<button class="k" aria-pressed="${H.offIn[id]===m}" data-a="offin" data-arg="${id}" data-v="${m}">${t}</button>`).join('')}</div>${H.offIn[id]?`<span class="note">Turns off at ${offAt(H,H.offIn[id])}.</span>`:''}</div>`;
+  if(k)return {...head,body:`<div class="kp2"><div>${bright}${whites}${off}</div><div>${hue}${yours}${mem}</div></div>`};
+  return {...head,body:bright+whites+hue+yours+mem+off+autos}}
+function offAt(H,m){let [h,mm]=H.time.split(':').map(Number);mm+=m;h+=Math.floor(mm/60);mm%=60;return `${h>12?h-12:h}:${String(mm).padStart(2,'0')} pm`}
+function popOffline(H,id){const L=H.L[id],t=H.tries[id];
+  return {eyebrow:ROOMS[L.room].n,title:L.n,body:`<div class="card" style="padding:16px;display:grid;gap:12px;justify-items:start;border-style:dashed;background:transparent">${lglyph(L,false)}<span class="mtitle">Offline</span><span class="note" style="font-size:15px">Can't be reached since ${L.since}. Check that its wall switch is on, then try again.</span>${t?`<span class="note">${t}</span>`:''}<button class="k or big" data-a="retry" data-arg="${id}">Try again</button></div>`}}
+function tvSummary(H,big){const T=H.tv,p=T.on&&T.st==='playing';
+  return `<div class="card mc"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><span><span class="lab">${T.on?(p?'Playing':'On · idle'):'Off'}</span><span class="mtitle"${big?' style="font-size:28px"':''}>${T.on?(p?esc(T.title):SRC.find(s=>s[0]===T.src)[1]):'TV is off'}</span>${p?`<span class="msub">Jamfin · ${T.ends}</span>`:''}</span>${pwrGlyph(T.on,20)}</div>${p?`<div class="prog" aria-hidden="true"><i style="width:${T.pos*100}%"></i></div>`:''}</div>`}
+function popTV(H,k){const T=H.tv,p=T.on&&T.st==='playing';
+  const tr=T.on?`<div class="k3"><button class="k" data-a="noop" aria-label="Rewind">${IC.rew}</button><button class="k or" data-a="tvplay">${p?IC.pause:IC.play}${p?'Pause':'Play'}</button><button class="k" data-a="noop" aria-label="Forward">${IC.ff}</button></div>`:`<button class="k or big wide" data-a="tvpw">${IC.pwr}Turn on</button>`;
+  const vol=`<div class="blk"><span class="lab">Stereo volume</span><div class="hf" role="slider" tabindex="0" aria-label="Stereo volume" aria-valuenow="${T.vol}" data-sl="tvvol" data-or="h" style="--vn:${T.vol/100}"><i class="fl"></i><i class="cp"><b>${T.vol}</b></i></div></div>`;
+  const keys=`<div class="k2"><button class="k" data-a="pop" data-t="remote">${IC.remote}Remote</button><button class="k" data-a="tvpw">${IC.pwr}${T.on?'Turn off':'Turn on'}</button></div>`;
+  const src=`<div class="blk"><span class="lab">Source</span><div class="src">${SRC.map(([id,n,kind,c])=>`<button class="srt" style="--c:${c}" aria-pressed="${T.on&&T.src===id}" data-a="src" data-v="${id}"><i class="tab"></i><span class="nm">${n}</span><span class="on">${T.on&&T.src===id?'On now':kind}</span></button>`).join('')}</div></div>`;
+  return {eyebrow:'Living room · Phoster',title:'TV',body:tvSummary(H)+tr+vol+keys+src}}
+function remoteBody(H){return `<div class="remote" data-remote>
+  <i class="irlens" data-ir aria-hidden="true"></i>
+  <div class="rg"><span class="engr">TV</span><button class="rkey round" data-k data-a="tvpw" data-on="${H.tv.on}" aria-label="TV power">${IC.pwr}</button></div>
+  <div class="dpad"><button class="dz u" data-k aria-label="Up">${IC.up}</button><button class="dz d" data-k aria-label="Down">${IC.down}</button><button class="dz l" data-k aria-label="Left">${IC.left}</button><button class="dz r" data-k aria-label="Right">${IC.right}</button><button class="okk" data-k>OK</button></div>
+  <div class="rk4"><button class="rkey" data-k>${IC.back}Back</button><button class="rkey" data-k>${IC.home}Home</button><button class="rkey" data-k>${IC.menu}Menu</button><button class="rkey" data-k>${IC.set}Setup</button></div>
+  <div class="rk3"><button class="rkey" data-k aria-label="Rewind">${IC.rew}</button><button class="rkey" data-k aria-label="Play or pause">${IC.play}</button><button class="rkey" data-k aria-label="Forward">${IC.ff}</button></div>
+  <div class="seam"></div>
+  <div class="rg"><span class="engr">Stereo</span><button class="rkey round" data-k data-on="true" aria-label="Stereo power">${IC.pwr}</button></div>
+  <div class="rk3"><button class="rkey" data-k aria-label="Volume down">${IC.minus}</button><button class="rkey" data-k>${IC.mute}Mute</button><button class="rkey" data-k aria-label="Volume up">${IC.plus}</button></div>
+  <div class="rk3 inp">${['TV','Turntable','Music sync'].map((t,i)=>`<button class="rkey" data-k aria-pressed="${i===0}">${ind('sq',i===0)}${t}</button>`).join('')}</div>
+  </div>`}
+function popRemote(H){return {eyebrow:'TV · Phoster',title:'Remote',right:`<button class="k" data-a="noop">${IC.kb}Keyboard</button>`,body:remoteBody(H)}}
+const SPK=[['living','Living room'],['kitchen','Kitchen'],['master','Master'],['phoster','Phoster (TV)']];
+function grpList(H,me){const G=H.grp;return `<div class="card lst">${SPK.map(([key,n])=>{const mine=key===me,on=mine||(key==='living'?G[me]:G[key]);
+  return `<div class="lr"><span><span class="nm">${n}</span><span class="wd">${mine?'This speaker':on?'Grouped':'Separate'}</span></span>${mine?'<span></span>':sw('grpset','',on,n+': play together',  'set',null,{v:key==='living'?me:key,k:H._k})}</div>`}).join('')}</div>`}
+function grpText(H){const g=Object.entries(H.grp).filter(([,v])=>v).map(([k])=>({kitchen:'Kitchen',master:'Master',phoster:'Phoster'})[k]);return g.length?'Playing together with '+g.join(', ')+'.':'Playing on its own.'}
+function popSpeaker(H,arg){const kit=arg==='kitchen',S=kit?H.ksp:H.spk,p=S.st==='playing',me=kit?'kitchen':'living';
+  const np=`<div class="np"><span class="gr" aria-hidden="true">${grille(16,4,p)}</span><span><span class="lab">${p?'Playing':'Idle · last played'}</span><span class="mtitle">${esc(S.title)}</span><span class="msub">${esc(S.by)}</span></span></div>`;
+  const tr=`<div class="k3"><button class="k" data-a="noop" aria-label="Previous">${IC.prev}</button><button class="k or" data-a="${kit?'kspplay':'spkplay'}">${p?IC.pause:IC.play}${p?'Pause':'Play'}</button><button class="k" data-a="noop" aria-label="Next">${IC.next}</button></div>`;
+  const vol=`<div class="blk"><span class="lab">Volume</span><div class="hf" role="slider" tabindex="0" aria-label="Volume" aria-valuenow="${S.vol}" data-sl="${kit?'kvol':'svol'}" data-or="h" style="--vn:${S.vol/100}"><i class="fl"></i><i class="cp"><b>${S.vol}</b></i></div></div>`;
+  const grp=`<div class="blk"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="lab">Speakers</span><button class="k" data-a="grp" aria-expanded="${H.grpOpen}">${IC.spk}${H.grpOpen?'Done':'Group or split'}</button></div>${H.grpOpen?grpList(H,me):`<span class="note">${grpText(H)}</span>`}</div>`;
+  return {eyebrow:'Speaker',title:kit?'Kitchen':'Living room',body:np+tr+vol+grp}}
+function popPC(H){const P=H.pc,aw=P.st!=='asleep';
+  const body=`<div class="card mc"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><span><span class="lab">NerveOS · PC</span><span class="mtitle">${aw?'Idle':'Asleep'}</span><span class="msub">${aw?'Awake · volume 79':'Wakes on any key'}</span></span>${pwrGlyph(aw,20)}</div>
+   <div class="k3"><button class="k" data-a="pcsleep">${IC.moon}${aw?'Sleep':'Wake'}</button><button class="k" data-a="noop">Quit game</button><button class="k" data-a="noop">${IC.mute}Mute</button></div></div>`;
+  const pad=`<div class="blk"><span class="lab">Controller</span><div class="k3"><span></span><button class="k" data-a="noop" aria-label="Up">${IC.up}</button><span></span><button class="k" data-a="noop" aria-label="Left">${IC.left}</button><button class="k" data-a="noop">A</button><button class="k" data-a="noop" aria-label="Right">${IC.right}</button><button class="k" data-a="noop">B</button><button class="k" data-a="noop" aria-label="Down">${IC.down}</button><button class="k" data-a="noop" aria-label="Menu">${IC.menu}</button></div></div>`;
+  return {eyebrow:'Living room',title:'PC',body:body+pad}}
+function popAllOff(H,room){const ids=room?ROOMS[room].lights:Object.keys(H.L);const on=ids.map(i=>H.L[i]).filter(lit);
+  return {eyebrow:room?ROOMS[room].n:'The house',title:'All lights off?',body:`<div class="card" style="padding:16px;display:grid;gap:14px"><span style="font-size:17px">${on.length?`${on.length} light${on.length>1?'s are':' is'} on: ${on.map(L=>L.n).join(', ')}.`:'All lights are already off.'}</span><span class="note">Plugs, the purifier and the speakers stay as they are.</span><div class="k2"><button class="k big" data-a="close">Cancel</button><button class="k big" data-a="alloff" data-arg="${room||''}">Turn them off</button></div></div>`}}
+
+/* kiosk sheets */
+function kLights(H,room,kind){const R=ROOMS[room];const cards=R.lights.map(i=>lightCard(H,i,true)).concat(R.sw.map(i=>switchCard(H,i,true)));
+  const on=roomLightsOn(H,room);
+  if(room==='living')return {eyebrow:`${R.t} · ${R.h}`,title:R.n,full:true,body:`<div class="kls">${scenes(H)}<div class="kcards">${cards.join('')}</div><div class="kbot">${purifier(H)}<div class="card kalloff"><span class="lab">${on} of ${R.lights.length} lights on</span><button class="k big wide" data-a="pop" data-t="alloff" data-arg="${room}">All lights off…</button></div></div></div>`};
+  return {eyebrow:'Lights',title:R.n,full:true,body:`<div class="kls" style="grid-template-rows:minmax(0,1fr)"><div class="kcards">${cards.join('')}</div></div>`}}
+function kTV(H){const T=H.tv,p=T.on&&T.st==='playing',pri=p?'pause:tv':'none'; /* a sheet is its own screen: the door's Lock isn't on it, so Pause may be the orange */
+  const left=`<div class="card">${tvSummary(H,true).replace('class="card mc"','class="mc" style="padding:0"')}
+   ${T.on?`<div class="k3"><button class="k" data-a="noop" aria-label="Rewind">${IC.rew}</button><button class="k${pri==='pause:tv'?' or':''}" data-a="tvplay">${p?IC.pause:IC.play}${p?'Pause':'Play'}</button><button class="k" data-a="noop" aria-label="Forward">${IC.ff}</button></div>`:`<button class="k wide" data-a="tvpw">${IC.pwr}Turn on</button>`}
+   <div class="blk"><span class="lab">Stereo volume</span><div class="hf big" role="slider" tabindex="0" aria-label="Stereo volume" aria-valuenow="${T.vol}" data-sl="tvvol" data-or="h" style="--vn:${T.vol/100}"><i class="fl"></i><i class="cp"><b>${T.vol}</b></i></div></div>
+   <div class="k2"><button class="k" data-a="pop" data-t="remote">${IC.remote}Remote</button><button class="k" data-a="tvpw">${IC.pwr}${T.on?'Turn off':'Turn on'}</button></div>
+   <div style="border-top:1px solid var(--hair);padding-top:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center"><span><span class="lab">NerveOS PC</span><span style="display:block;font-size:20px">${H.pc.st==='asleep'?'Asleep':'Awake · idle'}</span></span><button class="k" data-a="pcsleep">${IC.moon}${H.pc.st==='asleep'?'Wake':'Sleep'}</button></div></div>`;
+  const right=`<div class="card"><span class="lab">Source</span><div class="src">${SRC.map(([id,n,kind,c])=>`<button class="srt" style="--c:${c}" aria-pressed="${T.on&&T.src===id}" data-a="src" data-v="${id}"><i class="tab"></i><span class="nm">${n}</span><span class="on">${T.on&&T.src===id?'On now':kind}</span></button>`).join('')}</div></div>`;
+  return {eyebrow:'Living room · Phoster',title:'TV',full:true,body:`<div class="kmed">${left}${right}</div>`}}
+function kMusic(H,which,room){const kit=which==='kitchen',S=kit?H.ksp:H.spk,p=S.st==='playing',pri=p?'pause:'+(kit?'ksp':'spk'):'none',me=kit?'kitchen':'living';
+  const left=`<div class="card"><div class="np"><span class="gr" aria-hidden="true">${grille(16,4,p)}</span><span><span class="lab">${p?'Playing':'Idle · last played'}</span><span class="mtitle">${esc(S.title)}</span><span class="msub">${esc(S.by)}</span></span></div>
+   <div class="k3"><button class="k" data-a="noop" aria-label="Previous">${IC.prev}</button><button class="k${pri==='pause:'+(kit?'ksp':'spk')?' or':''}" data-a="${kit?'kspplay':'spkplay'}">${p?IC.pause:IC.play}${p?'Pause':'Play'}</button><button class="k" data-a="noop" aria-label="Next">${IC.next}</button></div>
+   <div class="blk"><span class="lab">Volume</span><div class="hf big" role="slider" tabindex="0" aria-label="Volume" aria-valuenow="${S.vol}" data-sl="${kit?'kvol':'svol'}" data-or="h" style="--vn:${S.vol/100}"><i class="fl"></i><i class="cp"><b>${S.vol}</b></i></div></div></div>`;
+  const right=`<div class="card"><span class="lab">Speakers · group or split</span>${grpList(H,me).replace('class="card lst"','class="lst"')}<span class="note">${grpText(H)}</span></div>`;
+  return {eyebrow:'Music',title:kit?'Kitchen speaker':'Living room speaker',full:true,body:`<div class="kmed">${left}${right}</div>`}}
+
+const POPS={light:(H,a,k)=>popLight(H,a,k),offline:(H,a)=>popOffline(H,a),tv:H=>popTV(H),remote:H=>popRemote(H),speaker:(H,a)=>popSpeaker(H,a),pc:H=>popPC(H),alloff:(H,a)=>popAllOff(H,a),
+  klights:(H,a,k)=>kLights(H,a,k),ktv:H=>kTV(H),kmusic:(H,a)=>kMusic(H,a,a==='kitchen'?'kitchen':'living')};
+
+/* ======================= screens ======================= */
+function phoneRoom(H,r){const R=ROOMS[r];let s=`<div class="rh"><span class="rt">${R.n}</span>${R.t?`<span class="rc">${R.t} · ${R.h}</span>`:''}</div>`;
+  if(r==='living')s+=scenes(H);
+  const cards=R.lights.map(i=>lightCard(H,i)).concat(R.sw.map(i=>switchCard(H,i)));
+  s+=`<div class="g2">${cards.join('')}</div>`;
+  if(r==='living')s+=purifier(H)+`<div class="gh"><span class="lab">Watch and listen</span></div>`+tvCard(H,'living')+speakerCard(H,'living','living')+pcRow(H);
+  if(r==='kitchen')s+=`<div class="gh"><span class="lab">Listen</span></div>`+speakerCard(H,'kitchen','kitchen');
+  if(r==='master')s+=dehum(H);
+  return s}
+function phoneScreen(H,F){const r=F.view.room;
+  const tabs=`<nav class="tabs" aria-label="Rooms">${Object.keys(ROOMS).map(k=>`<button data-a="tab" data-arg="${k}"${k===r?' aria-current="page"':''}>${ROOMS[k].s}</button>`).join('')}</nav>`;
+  return `<div class="jh ph${H.night?' nt':''}"><div class="pscroll"><div class="ptop"><span class="wm">Jam Home</span><span class="t">${H.time} ${H.ap}</span></div>${houseStrip(H)}${tabs}${phoneRoom(H,r)}</div>${layers(H,F)}</div>`}
+function kioskHome(H,F){const ip=F.kind==='ipad',room=ip?'living':'kitchen',pri=primary(H,room),d=doorWord(H),u=unlocked(H);
+  const door=u?`<div class="klock"><span class="kdoor" style="cursor:default"><span class="t"><span class="nm">Front door</span><span class="wd" style="${d.c}">${d.w}</span></span>${d.led}</span>${lockKey(H)}</div>`
+    :`<button class="kdoor" data-a="noop" aria-label="Front door locked"><span class="t"><span class="nm">Front door</span><span class="wd">Locked</span></span>${d.led}</button>`;
+  const n=roomLightsOn(H,room),anyL=ROOMS[room].lights.map(i=>H.L[i]).find(lit)||H.L[ROOMS[room].lights[0]];
+  const lights=`<div class="kt"><button class="open" data-a="pop" data-t="klights" data-arg="${room}">${lglyph(anyL,n>0)}<span><span class="nm">Lights</span><span class="wd">${n?n+' on':'All off'}</span></span></button></div>`;
+  const music=(which)=>{const S=which==='kitchen'?H.ksp:H.spk,p=S.st==='playing',key=which==='kitchen'?'ksp':'spk';
+    return `<div class="kt"><button class="open" data-a="pop" data-t="kmusic" data-arg="${which}">${og('spk')}<span><span class="nm">Music</span><span class="wd">${p?'Playing · '+esc(S.title):'Idle'}</span></span></button>${p?`<button class="k${pri==='pause:'+key?' or':''}" data-a="${key}play" aria-label="Pause music">${IC.pause}</button>`:''}</div>`};
+  let dock;
+  if(ip){const T=H.tv,p=T.on&&T.st==='playing';
+    const tv=`<div class="kt"><button class="open" data-a="pop" data-t="ktv">${og('tv')}<span><span class="nm">TV</span><span class="wd">${T.on?(p?esc(T.title):'On · '+SRC.find(s=>s[0]===T.src)[1]):'Off'}</span></span></button>${p?`<button class="k${pri==='pause:tv'?' or':''}" data-a="tvplay" aria-label="Pause the TV">${IC.pause}</button>`:''}</div>`;
+    dock=lights+tv+music('living')}
+  else dock=lights+music('kitchen')+`<div class="kt"><button class="open" data-a="pop" data-t="alloff">${og('off')}<span><span class="nm">All off</span><span class="wd">Every light</span></span></button></div>`;
+  return `<div class="kh"><div class="ktop"><span class="kplace">${ip?'Living room':'Kitchen'}</span>${door}</div>
+   <div class="clk"><div class="t">${H.time}<small>${H.ap}</small></div><div class="d">${H.date}</div><div class="f">${H.in.t}° inside · ${H.out.t}° ${H.out.w} · ${H.out.x}</div></div>
+   <div class="dock">${dock}</div></div>`}
+function kioskScreen(H,F){return `<div class="jh kio ${F.kind}${H.night?' nt':''}">${kioskHome(H,F)}${layers(H,F)}</div>`}
+function layers(H,F){const kio=F.kind==='ipad'||F.kind==='echo';return F.view.stack.map((it,i)=>{const P=POPS[it.t](H,it.arg,kio?F.kind:false);
+  if(kio){if(it.t==='remote')return `<div class="layer" style="z-index:${20+i}"><div class="veil" data-a="close"></div><div class="pop" role="dialog" aria-label="Remote" style="width:600px"><div class="kremote"><div class="side"><span class="lab">${P.eyebrow}</span><span class="fhd"><span class="tt">Remote</span></span>${P.right}<button class="k" data-a="close">Close ×</button><span class="note">The IR window at the top flashes red on each press.</span></div>${P.body}</div></div></div>`;
+    const full=P.full;return `<div class="layer" style="z-index:${20+i}">${full?'':'<div class="veil" data-a="close"></div>'}<div class="${full?'full':'pop'}" role="dialog" aria-label="${esc(P.title)}"><div class="fhd"><span><span class="lab">${P.eyebrow}</span><span class="tt">${esc(P.title)}</span></span><span class="r">${P.right||''}<button class="k" data-a="close">Close ×</button></span></div><div class="fbody">${P.body}</div></div></div>`}
+  return `<div class="layer" style="z-index:${20+i}"><div class="veil" data-a="close"></div><div class="sheet" role="dialog" aria-label="${esc(P.title)}">${sheetHead(P)}${P.body}</div></div>`}).join('')}
+const sheetHead=P=>`<div class="shh"><span><span class="lab">${P.eyebrow}</span><span class="tt">${esc(P.title)}</span></span><span class="r">${P.right||''}<button class="k" data-a="close">Close ×</button></span></div>`;
+
+/* ======================= frames ======================= */
+const FR={};
+function addFrame(id,o){FR[id]={id,view:{room:'living',stack:[]},...o};return id}
+const LIB=[
+ ['Light card','jam-light · light.*','Lights keep the ON/OFF paddle. Round 7: on, the ON half is a solid block (ink with the lamp\'s colour in the legend by day, the lamp\'s own colour with an ink legend by night) and the paddle\'s rim takes the same colour. Off, the whole paddle is flat card with OFF in ink and ON dim; nothing looks pressed. The fader, the lamp symbol and the offline card are round 6\'s.',H=>`<div class="g2">${lightCard(H,'lr')}${lightCard(H,'tvl')}${lightCard(H,'kl')}${lightCard(H,'stv')}</div>`],
+ ['Switched device','jam-tile · switch.*','Not a light, so no paddle: a small switch at the foot of the card. Off is a plain dark channel; on, the thumb slides right and the channel reveals the house accent behind it.',H=>`<div class="g2">${switchCard(H,'tree')}${switchCard(H,'fan')}</div>`],
+ ['Small switch · states','shared component','Off, on, disabled (a hollow channel and a grey thumb) and unavailable (dashed, no thumb, a dash). Pressing shrinks the thumb in place. Keyboard focus is a 2 px ink ring. The full spec, with sizes and the other apps, is in the switch study.',H=>swStates(H)],
+ ['Automations','automation.* · in the light popup','A row per automation, with the small switch. The accent is the house blue (rule A); rule B uses violet for automations; rule C uses the lamp\'s own colour, fitted.',H=>`<div class="card lst"><div class="lr"><span><span class="nm">Living room on at sunset</span><span class="wd">Next: 6:12 pm</span></span>${sw('auto','lr',H.auto.lr.sun,'Living room on at sunset','auto',dc(H.L.lr),{v:'sun'})}</div><div class="lr"><span><span class="nm">Kitchen lamp off when everyone's out</span><span class="wd">Running</span></span>${sw('auto','kl',H.auto.kl.out,"Kitchen lamp off when everyone's out",'auto',dc(H.L.kl),{v:'out'})}</div></div>`],
+ ['Air purifier','jam-fan · fan.*','Still a tiny appliance: a grille, a seven-segment readout and a round power key whose symbol lights green. What changed: a normal card body (no gradient or bevel), a printed grille, a navy readout window, and house keys for speed (chosen = pressed, no lights).',H=>purifier(H)],
+ ['Scenes','scene.*','Pill keys. The chosen one presses in.',H=>scenes(H)],
+ ['House strip','jam-house','Inside and outside, the front door (a round window + word) and who\'s home as printed names. Unlocked by day: amber ▲ and an orange Lock. After dark: red, and the solid red key.',H=>houseStrip(H)],
+ ['TV','jam-tv','A plain media card: what\'s on, a thin progress line, transport, volume, Remote and Source. Pause is orange only on the screen where it\'s the one thing to do.',H=>tvCard(H,'living')],
+ ['Speaker','jam-speaker','Jam Braun\'s grille as the speaker\'s face. Its one dot lights while it plays. Tap the name for Group or split.',H=>speakerCard(H,'kitchen','kitchen')],
+ ['PC','jam-media · NerveOS','One row: state and Sleep/Wake. Everything else is in its popup.',H=>pcRow(H)]];
+function libFrame(H,i){return `<div class="jh${H.night?' nt':''}" style="padding:14px;display:grid;gap:10px"><span class="lab">${H.night?'Night':'Day'}</span>${LIB[i][3](H)}</div>`}
+function swStates(H){const row=(t,w,b)=>`<div class="lr"><span><span class="nm">${t}</span><span class="wd">${w}</span></span>${b}</div>`;
+  return `<div class="card lst">${row('Off','Plain dark channel',sw('demo','0',DEMO(0,false),'Example switch A','plug'))}${row('On','The accent revealed',sw('demo','1',DEMO(1,true),'Example switch B','plug'))}${row('Disabled','Can\'t change now',sw('noop','',true,'Example disabled','plug',null,{dis:true}))}${row('Unavailable','Device offline',sw('noop','',false,'Example unavailable','plug',null,{un:true}))}</div>`}
+function cmpFrame(H,F){const r=F.rule;const rows=[['Tree','plug',H.S.tree.own,true,'Plug'],['Fan / blanket','climate',null,true,'Plug'],['Air purifier','climate',null,true,'Power'],['Living room on at sunset','auto',dc(H.L.lr),true,'Automation'],['TV light on at sunset','auto',dc(H.L.tvl),true,'Automation'],['Kitchen speaker','set',null,false,'Group · off']];
+  return `<div class="jh${H.night?' nt':''}" style="padding:12px;display:grid;gap:8px;border-radius:14px"><span class="lab">${H.night?'Night':'Day'}</span><div class="card lst">${rows.map(([n,k,o,on,w],i)=>`<div class="lr"><span><span class="nm">${n}</span><span class="wd">${w}</span></span>${sw('demo',i,DEMO(i,on),n,k,o)}</div>`).join('')}</div></div>`}
+const POPLIST=[['light','lr'],['tv'],['remote'],['speaker','living',true],['pc'],['offline','stv']];
+let POPH='night';
+function render(id){const F=FR[id],el=document.querySelector(`[data-fr="${id}"]`);if(!el)return;const H=HS[F.house];CURRULE=F.rule||ACCRULE;CURF=F;H._k=F.kind==='ipad'||F.kind==='echo';
+  const sc=el.querySelector('.pscroll,.sheet');const st=sc?sc.scrollTop:0;const sh=el.querySelector('.sheet');const st2=sh?sh.scrollTop:0;
+  let html='';
+  if(F.kind==='phone')html=phoneScreen(H,F);
+  else if(F.kind==='ipad'||F.kind==='echo')html=kioskScreen(H,F);
+  else if(F.kind==='lib')html=libFrame(H,F.i);
+  else if(F.kind==='cmp')html=cmpFrame(H,F);
+  else if(F.kind==='modal'){if(!F.view.stack.length){document.getElementById('modal').classList.remove('open');el.innerHTML='';return}
+    const it=F.view.stack[F.view.stack.length-1];const P=POPS[it.t](H,it.arg,false);html=`<div class="jh${H.night?' nt':''}"><div class="panel" role="dialog" aria-label="${esc(P.title)}">${sheetHead(P)}${P.body}</div></div>`;document.getElementById('modal').classList.add('open')}
+  else if(F.kind==='pop'){const H2=HS[POPH];const [t,a]=POPLIST[F.i];const P=POPS[t](H2,a,false);html=`<div class="jh${H2.night?' nt':''}" style="border-radius:22px"><div class="panel">${sheetHead({...P,right:P.right})}${P.body}</div></div>`}
+  el.innerHTML=html;
+  const sc2=el.querySelector('.pscroll');if(sc2)sc2.scrollTop=st;const sh2=el.querySelector('.sheet');if(sh2)sh2.scrollTop=st2;
+  updateCount(id)}
+function renderAll(){Object.keys(FR).forEach(render)}
+function updateCount(id){const c=document.querySelector(`[data-count="${id}"]`);if(!c)return;const el=document.querySelector(`[data-fr="${id}"] .jh`);if(!el)return;
+  const top=FR[id].view.stack.length?el.querySelector('.layer:last-of-type'):el;
+  const n=[...(top||el).querySelectorAll('.k.or,.okk')].filter(b=>{if(!FR[id].view.stack.length&&b.closest('.layer'))return false;if(FR[id].kind==='phone'&&!FR[id].view.stack.length){const s=el.querySelector('.pscroll').getBoundingClientRect(),r=b.getBoundingClientRect();return r.bottom>s.top&&r.top<s.bottom}return true}).length;
+  const red=[...(top||el).querySelectorAll('.k.red')].filter(b=>FR[id].view.stack.length||!b.closest('.layer')).length;
+  c.textContent=`orange on screen: ${n}${red?' · red key: '+red:''}`}
+
+/* ======================= build page ======================= */
+function devHTML(id,kind,w,h,cap){return `<figure><div class="dev${kind==='phone'?' phone':''}"><div class="vp" data-w="${w}" data-h="${h}"><div class="scr" data-fr="${id}" style="width:${w}px;height:${h}px"></div></div></div><figcaption>${cap} · <span data-count="${id}"></span></figcaption>
+  <div class="under"><button data-reset="${id}">Close all</button>${kind==='ipad'?`<button data-open="${id}" data-t="klights" data-arg="living">Lights sheet</button><button data-open="${id}" data-t="ktv">TV sheet</button><button data-open="${id}" data-t="kmusic" data-arg="living">Music sheet</button><button data-open="${id}" data-t="remote">Remote</button>`:kind==='echo'?`<button data-open="${id}" data-t="klights" data-arg="kitchen">Lights sheet</button><button data-open="${id}" data-t="kmusic" data-arg="kitchen">Music sheet</button>`:`<button data-open="${id}" data-t="light" data-arg="lr">Light popup</button><button data-open="${id}" data-t="tv">TV popup</button>`}</div></figure>`}
+function build(){
+  document.getElementById('tok').innerHTML=tokHTML();
+  document.getElementById('lib').innerHTML=LIB.map((L,i)=>{addFrame('libd'+i,{kind:'lib',house:'day',i});addFrame('libn'+i,{kind:'lib',house:'night',i});
+    return `<div class="li"><div class="ltxt"><span class="tag">${L[1]}</span><b>${L[0]}</b><span class="muted">${L[2]}</span></div><div class="libf" data-fr="libd${i}"></div><div class="libf" data-fr="libn${i}"></div></div>`}).join('');
+  const RULES=[['house','A · One house accent','Every switch reveals the same Callsheet blue (the navy ink\'s hue, lifted). One colour to learn; it never says anything except "on".',true],
+   ['kind','B · Colour by device kind','Power and plugs blue, air and climate teal, automations violet, settings steel. Says what kind of thing it is, but that\'s a legend to learn, and teal sits nearest the ok green.',false],
+   ['own','C · The device\'s own colour','A lamp\'s automation takes the lamp\'s colour, the Tree is pine, the rest fall back to blue. Warm lamps fit to a brown that sits near the orange, and the pine Tree reads as the ok green.',false]];
+  document.getElementById('cmp-g').innerHTML=RULES.map(([r,t,d,rec])=>{addFrame('cmpd-'+r,{kind:'cmp',house:'day',rule:r});addFrame('cmpn-'+r,{kind:'cmp',house:'night',rule:r});
+    return `<div class="cmpc${rec?' rec':''}"><b>${t}${rec?' · recommended, the default':''}</b><span class="muted" style="font-size:14px">${d}</span><div class="pair"><div data-fr="cmpd-${r}"></div><div data-fr="cmpn-${r}"></div></div></div>`}).join('');
+  addFrame('modal',{kind:'modal',house:'day'});
+  addFrame('phd',{kind:'phone',house:'day'});addFrame('phn',{kind:'phone',house:'night'});
+  document.getElementById('phones-g').innerHTML=devHTML('phd','phone',390,844,'Phone · Day · 2:30 pm')+devHTML('phn','phone',390,844,'Phone · Night · 9:40 pm');
+  ['ipd','ipn'].forEach((id,i)=>addFrame(id,{kind:'ipad',house:i?'night':'day'}));['ecd','ecn'].forEach((id,i)=>addFrame(id,{kind:'echo',house:i?'night':'day'}));
+  document.getElementById('kiosk-g').innerHTML=devHTML('ipd','ipad',1024,768,'iPad · Day')+devHTML('ipn','ipad',1024,768,'iPad · Night')+devHTML('ecd','echo',961,601,'Echo Show · Day')+devHTML('ecn','echo',961,601,'Echo Show · Night');
+  document.getElementById('pops-g').innerHTML=POPLIST.map((p,i)=>{addFrame('pop'+i,{kind:'pop',house:'night',i});return `<div data-fr="pop${i}"></div>`}).join('');
+  HS.day.grpOpen=false;HS.night.grpOpen=true;
+  renderAll();fit()}
+function tokHTML(){const row=(n,t,d,nt)=>`<tr><td>${n}<br><code class="muted">${t}</code></td><td><i class="sw2" style="--c:${d}"></i><code>${d}</code></td><td><i class="sw2" style="--c:${nt}"></i><code>${nt}</code></td></tr>`;
+  return `<div class="tbox"><b>Colours</b><div class="tblw"><table><tr><th>Role</th><th>Day</th><th>Night</th></tr>
+  ${row('Ground','--gd','#efebe2','#10141d')}${row('Card','--pl','#f9f7f2','#161c28')}${row('Pressed key','--key2','#e3dbcb','#0a0e15')}${row('Hairline','--ln','#d6cfbf','#2a3244')}${row('Ink','--ink','#19202e','#ece5d3')}${row('Dim','--dim','#5b606d','#a29d8f')}${row('Orange (one per screen)','--orange','#ec7c22','#f08a2c')}${row('Alert key','--alert','#ff5a48','#ff5a48')}${row('Lit power symbol','--okg','#3c8a28','#7bd651')}${row('Readout window','--seg','#19202e','#06080c')}${row('Cream (lit, fader)','--cream','#f3e6c8','#f3e6c8')}${row('Walnut (kiosk rule)','--walnut','#6b4428','#6b4428')}${row('Switch channel, off','--swoff','#1c2331','#05070b')}${row('Switch thumb','--swth','#fbf9f4','#ece5d3')}${row('Switch accent (house blue)','--acc','#6780b4','#5971a4')}</table></div>
+  <span class="muted" style="font-size:13px">Ground, ink, dim and hairline are Callsheet round 5's values. Card is one step lighter than its ground.</span></div>
+  <div class="tbox"><b>Type</b><div style="display:grid;gap:8px">
+   <div style="font:300 64px/1 var(--f)">2:30</div><code class="muted">Clock · Jost 300 · 200 iPad / 150 Echo</code>
+   <div style="font:500 26px var(--f)">Living room</div><code class="muted">Room · Jost 500 · 26 phone / 30 kiosk</code>
+   <div style="font:500 17px var(--f)">Kitchen lamp</div><code class="muted">Card name · Jost 500 · 17 / 22</code>
+   <div style="font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase">On · Group</div><code class="muted">State word · Plex Mono 500, tracked .12–.16em (Callsheet's label) · 12 / 15</code></div></div>
+  <div class="tbox"><b>What lights up, and what doesn't</b><ul style="margin:0;padding-left:18px;display:grid;gap:5px;font-size:14.5px">
+   <li><b>Lights:</b> a lamp's shade (its colour), the power symbol (green when on), the door's round window, the purifier's digits, a playing speaker's grille dot, the remote's IR window.</li>
+   <li><b>No lights:</b> scenes, speed keys, sources, tabs, kiosk keys. Chosen things press in instead.</li>
+   <li><b>Switch accent:</b> the small switch's channel shows a flat colour when on. It isn't a light: no glow, and it's never orange, amber, red or green.</li>
+   <li><b>No glow, metal, bevel or texture.</b> The remote's soft plastic is the one drawn object left, on purpose.</li></ul></div>`}
+
+/* scaling */
+function fit(){document.querySelectorAll('.vp').forEach(vp=>{const w=+vp.dataset.w,h=+vp.dataset.h,a=vp.clientWidth,s=Math.min(1,a/w);vp.style.height=(h*s)+'px';vp.firstElementChild.style.transform=`scale(${s})`})}
+new ResizeObserver(fit).observe(document.body);
+
+/* ======================= actions ======================= */
+const frameOf=el=>{const f=el.closest('[data-fr]');return f?FR[f.dataset.fr]:null};
+let irT;
+function act(a,b,F){const H=HS[F.kind==='pop'?POPH:F.house],arg=b.dataset.arg,v=b.dataset.v;
+  const push=(t,ar)=>{if(F.kind==='lib'){const M=FR.modal;M.house=F.house;M.view.stack=[{t,arg:ar}]}else if(F.kind==='pop'){const M=FR.modal;M.house=POPH;M.view.stack=[{t,arg:ar}]}else F.view.stack.push({t,arg:ar})};
+  switch(a){
+  case 'pop':push(b.dataset.t,arg);break;
+  case 'close':F.view.stack.pop();break;
+  case 'mclose':break;
+  case 'tab':F.view.room=arg;{const sc=document.querySelector(`[data-fr="${F.id}"] .pscroll`);if(sc)sc.scrollTop=0}break;
+  case 'lt':{const L=H.L[arg];L.on=!L.on;if(L.on&&!L.b)L.b=50;break}
+  case 'sw':H.S[arg].on=!H.S[arg].on;break;
+  case 'demo':F.demo[arg]=!F.demo[arg];break;
+  case 'auto':{H.auto[arg]=H.auto[arg]||{sun:false,out:false};H.auto[arg][v]=!H.auto[arg][v];break}
+  case 'scene':H.scene=arg;break;
+  case 'pur':H.pur.on=!H.pur.on;break;
+  case 'pursp':H.pur.on=true;H.pur.sp=+arg;H.pur.pm=['006','004','003','002'][[25,50,75,100].indexOf(+arg)];break;
+  case 'deh':H.deh.on=!H.deh.on;break;
+  case 'dehto':H.deh.on=true;H.deh.to=+arg;break;
+  case 'white':{const L=H.L[arg];L.c=v;L.on=true;if(!L.b)L.b=50;break}
+  case 'addcol':{const L=H.L[arg];const c=WH[L.c]?WH[L.c][2]:L.c;if(!H.yours.includes(c)&&H.yours.length<6)H.yours.push(c);break}
+  case 'offin':H.offIn[arg]=H.offIn[arg]===+v?0:+v;break;
+  case 'mem':{const L=H.L[arg],m=L.mem[+b.dataset.i];m[2]=!(m[2]&&L.on);if(m[2])L.on=true;break}
+  case 'tvpw':H.tv.on=!H.tv.on;if(!H.tv.on)H.tv.st='idle';break;
+  case 'tvplay':if(H.tv.st==='playing')H.tv.st='paused';else{H.tv.st='playing';if(!H.tv.title){H.tv.title='The Long Summer';H.tv.ends='ends 11:02';H.tv.pos=.1;H.tv.src='jamfin'}}break;
+  case 'spkplay':H.spk.st=H.spk.st==='playing'?'idle':'playing';break;
+  case 'kspplay':H.ksp.st=H.ksp.st==='playing'?'idle':'playing';break;
+  case 'src':H.tv.on=true;H.tv.src=v;if(v!=='jamfin'){H.tv.st='idle';H.tv.title='';H.tv.ends=''}break;
+  case 'grp':H.grpOpen=!H.grpOpen;break;
+  case 'grpset':H.grp[v]=!H.grp[v];break;
+  case 'pcsleep':H.pc.st=H.pc.st==='asleep'?'idle':'asleep';break;
+  case 'lock':HS.day.door=HS.night.door='locked';syncDoor();break;
+  case 'alloff':(arg?ROOMS[arg].lights:Object.keys(H.L)).forEach(i=>H.L[i].on=false);F.view.stack.pop();if(F.kind==='modal'&&!F.view.stack.length){}break;
+  case 'retry':H.tries[arg]=`Tried at ${H.time} pm: still no answer.`;break;
+  }
+  if(H.tv.st==='paused')H.tv.st=H.tv.title?'paused':'idle';
+  /* the switch moves first (in place) and the page catches up after the reveal, so the motion is seen */
+  if(DEFER){DEFER=false;clearTimeout(rT);rT=setTimeout(renderAll,200)}else renderAll()}
+let DEFER=false,rT;
+document.addEventListener('click',e=>{const t=e.target;
+  const k=t.closest('[data-k]');if(k){const ir=k.closest('[data-remote]')?.querySelector('[data-ir]');if(ir){ir.classList.add('tx');clearTimeout(irT);irT=setTimeout(()=>document.querySelectorAll('[data-ir].tx').forEach(n=>n.classList.remove('tx')),120)}}
+  if(t.id==='modal'){FR.modal.view.stack=[];render('modal');return}
+  const r=t.closest('[data-reset]');if(r){FR[r.dataset.reset].view.stack=[];render(r.dataset.reset);return}
+  const o=t.closest('[data-open]');if(o){const F=FR[o.dataset.open];F.view.stack=[{t:o.dataset.t,arg:o.dataset.arg}];render(F.id);return}
+  const d=t.closest('[data-door]');if(d){HS.day.door=HS.night.door=d.dataset.door;syncDoor();renderAll();return}
+  const th=t.closest('[data-th]');if(th){const v=th.dataset.th;if(v==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=v;document.querySelectorAll('#themeSeg button').forEach(x=>x.setAttribute('aria-pressed',x===th));return}
+  const ph=t.closest('[data-ph]');if(ph){POPH=ph.dataset.ph;document.querySelectorAll('#popSeg button').forEach(x=>x.setAttribute('aria-pressed',x===ph));renderAll();return}
+  const ac=t.closest('[data-acc]');if(ac){ACCRULE=ac.dataset.acc;document.querySelectorAll('#accSeg button').forEach(x=>x.setAttribute('aria-pressed',x===ac));renderAll();return}
+  const mo=t.closest('[data-mot]');if(mo){CALM=mo.dataset.mot==='calm';document.documentElement.classList.toggle('calm',CALM);document.querySelectorAll('#motSeg button').forEach(x=>x.setAttribute('aria-pressed',x===mo));return}
+  const b=t.closest('[data-a]');if(!b||b.dataset.a==='mclose')return;if(b.matches('[data-un],:disabled'))return;const F=frameOf(b);if(!F)return;
+  if(!CALM&&!matchMedia('(prefers-reduced-motion: reduce)').matches){if(b.classList.contains('sw')){b.setAttribute('aria-checked',b.getAttribute('aria-checked')!=='true');DEFER=true}
+    else if(b.matches('.pad,.mini')){b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');DEFER=true}}
+  act(b.dataset.a,b,F)});
+function syncDoor(){
+  document.querySelectorAll('#doorSeg button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.door===HS.day.door))}
+
+/* faders */
+let drag=null;
+function slVal(el,e){const r=el.getBoundingClientRect();const v=el.dataset.or==='v'?1-(e.clientY-r.top)/r.height:(e.clientX-r.left)/r.width;return Math.max(0,Math.min(100,Math.round(v*100)))}
+function slShow(el,v){el.style.setProperty('--vn',v/100);el.setAttribute('aria-valuenow',v);const b=el.querySelector('.cp b');if(b)b.textContent=v||'Off';const fl=el.querySelector('.fl');if(fl&&el.dataset.sl==='lb'){fl.style.opacity=v?1:0;el.classList.toggle('lit',v>0)}}
+function slSet(el,F,v){const H=HS[F.kind==='pop'?POPH:F.house],a=el.dataset.arg;
+  switch(el.dataset.sl){case 'lb':{const L=H.L[a];L.b=v||L.b;L.on=v>0;break}
+  case 'mem':{const L=H.L[a];L.mem[+el.dataset.i][1]=v;L.mem[+el.dataset.i][2]=v>0;if(v)L.on=true;break}
+  case 'tvvol':H.tv.vol=v;break;case 'svol':H.spk.vol=v;break;case 'kvol':H.ksp.vol=v;break}}
+document.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-sl]');if(!el||el.classList.contains('dis'))return;const F=frameOf(el);if(!F)return;e.preventDefault();el.setPointerCapture(e.pointerId);el.dataset.drag='1';drag={el,F,v:slVal(el,e)};slShow(el,drag.v)});
+document.addEventListener('pointermove',e=>{if(!drag)return;drag.v=slVal(drag.el,e);slShow(drag.el,drag.v)});
+document.addEventListener('pointerup',()=>{if(!drag)return;const {el,F,v}=drag;drag=null;delete el.dataset.drag;slSet(el,F,v);renderAll()});
+document.addEventListener('keydown',e=>{const el=e.target.closest&&e.target.closest('[data-sl]');if(!el||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const F=frameOf(el);const v=Math.max(0,Math.min(100,(+el.getAttribute('aria-valuenow')||0)+(e.key==='ArrowRight'||e.key==='ArrowUp'?5:-5)));slSet(el,F,v);const sel=`[data-sl="${el.dataset.sl}"][data-arg="${el.dataset.arg||''}"]`;renderAll();})
+build();
+</script>
+</body>
+</html>
