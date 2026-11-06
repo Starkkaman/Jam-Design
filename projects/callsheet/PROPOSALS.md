@@ -120,3 +120,14 @@ no foreign requests.
 4. **Ask's reading light.** Keep the one slot while Ask is reading, or text only? *Recommend keep* (pass 6 Q3).
 5. **Connectors and Reports in Setup** aren't drawn yet. OK to follow Setup's panel pattern and send screenshots
    first?
+
+## Isaac's answers (2026-11-06)
+
+1. Old looks: "I think I want to scrap most of the old looks. Just disable them for now but don't delete them. We'll
+   go over that later." → Plan: the new look becomes the default; Easy read stays selectable (accessibility); Bold,
+   Clean and the nine Jam looks are hidden from the picker (code and tokens kept; an owner on one falls back to the new
+   look with a one-time notice).
+2. Tab names: "No. Change Briefing to today but keep chat." → Briefing becomes Today; Chat stays Chat.
+3. Order: yes. Steps 1–2 now; Today is built with the Wheatley rundown.
+4. Ask's reading light: "sure" (kept).
+5. Connectors and Reports in Setup: "yes I want to see mockups first."
