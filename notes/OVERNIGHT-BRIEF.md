@@ -46,3 +46,12 @@ What this means for every round from pass 4 on:
 - **Invent.** Design at least two new elements that only make sense in this app, and draw them well. Use Isaac's influences (70s NASA, Rams/Braun, TNG/Voyager LCARS-era clarity, McQuarrie/Syd Mead, Bebop, Evangelion, Miyazaki/Satoshi Kon, mid-century modern, Atari 2600, Fallout) as raw material, interpreted with restraint: friendly for three people, not nerdy, no skeuomorphic excess (no brushed metal, glow, grain or paper).
 - **Break rules on purpose, and log it.** Notes need a "Rules I broke" table: rule (BIBLE section or CHANGES D-number), what you did instead, why the app needed it, and your verdict: **language-wide** (keep for all), **device family** (TV / kiosk / phone / desktop), **app-local**, or **drop**.
 - Add a "Language check" section: what in your design ties it to the family, and what someone moving from another app would recognise within a second.
+
+## Round 6 direction (Isaac's notes after round 5): calm instruments, less reality
+Read the last entry of `decisions.md` (Isaac's notes verbatim + how they're read). In short:
+- **Less realism.** No drawn real-world objects as UI (sideboards, racks with cables, furniture, cabinets, marquees as literal signs). Bespoke comes from layout, type, palette and a few signature shapes, not from objects.
+- **Calm of Braun Instrument + Flight Instrument** (`mockups/01-directions.html`, panels B and D): ordered, quiet surfaces, mono labels, one accent, generous space.
+- **Callsheet round 5's palette and type** are the house favourite (`mockups/pass5/callsheet.html`, especially the dark navy). Borrow from it.
+- **Almost no indicator lights in menus.** Keep a light only where it carries real status the person needs; never decorate keys or list rows with lights.
+- **Break dense information into calm groups** (Callsheet round 3's cards did this well).
+- Refinement level to match: Callsheet's Ask page.

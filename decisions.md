@@ -247,3 +247,25 @@ Profile, 26 WebP goldens (original art only), PROPOSALS P1-P6 against 0.3. Adopt
 - DIRECTION: the bible defines a shared **language** (grammar, vocabulary, behaviour), not a shared **template**. Each app gets its own layout, surfaces, card shapes and signature elements, chosen for its purpose. Identical cards/backgrounds across apps need a stated reason.
 - DIRECTION: rules get sorted into tiers (language-wide / device family / app-local / dropped) using the evidence from the passes: a rule an app had to break is a candidate to move down a tier.
 - Next: pass 4 for every app with this brief (bespoke design, new elements, a "rules I broke" table), plus a rules-tier audit of BIBLE.md + CHANGES.md.
+
+## Isaac's design notes after round 5 (2026-11-06)
+Verbatim:
+> CALLSHEET  I love the colors, font choice, and overall vibe of Callsheet round 5, but the cards of round 3 were less overwhelming. I think dense information benefits from being visually broken up and made to look calmer.
+> The Ask page should look like a proper chat I truly love how smart it looks in Round 6, and should like to see such refinement everywhere else.
+> JAMFIN I think round 5 looks the best, but I honestly don't really like any of ithem very much. The geometric shapes are interesting especially behind the titles. I miss the split shutter animation. The lights just look dumb and cheesy on the TV menu (honestly all menus) think we need to scrap almost all the lights. I like the theater direction, but let's be a little less literal. I just keep thinking about how good the color palette is in the dark version of call sheet version 6.
+> JAMDASH I think jam dash V3 is my favorite design, the skumorphism is just too cheesy to work every day. That being said, I do really like seeing how the different containers connect when I drag my mouse over one. Maybe there's an interesting way to do something in between?
+> NERVOS Idk I hate everything so of except what I already have. Let's not continue here until I can actually focus on what I want same goes for LOBBY. I hate how it looks, but I don't know what I want.
+> HOME ASSISTANT I like the new toggles, but I liked it better with the symbols from version 5. Lets back off on the realism and incorporate the color palette from Callsheet a little bit more. Including the air purifier. It looks a little different from everything else and I think we need to make some sleight changes. I don't like the sideboard at all. It's requires too much imagination to know what to do. I really like the remote Don't need or use layout views in look 5 Don't like the keys The kiosk looks way too busy in look 5. Should be very minimalistic.
+> Lobby/TV The design is very fun… but I don't think I like it. Once again I think too much reality is poking through. I don't need home assistant on there, except maybe the door being locked… that is kind of nice… I don't need audio settings up top. I think this is trying to be too many things and be too silly at the same time. Clean up the design.
+> Looking back at flight instrument and Braun instrument from the four directions render look very nice and make me feel like we need to bring their calmness back in.
+
+How I read it (Isaac's "round 6" / "version 6" = the newest round, round 5; the library page shows five rounds):
+- DIRECTION (all apps): back off realism and skeuomorphism. Bring back the calm of **Braun Instrument (B)** and **Flight Instrument (D)** from `mockups/01-directions.html`. Bespoke per app stays, but by layout, type and palette, not by drawing real-world objects.
+- DIRECTION: **Callsheet round 5's colours and type** (especially the dark navy palette) are the strongest; other apps (JamFin, Jam Home) borrow from that palette.
+- DIRECTION: **scrap almost all indicator lights in menus** (JamFin especially, "honestly all menus"). Lights only where they carry real status.
+- DIRECTION: dense information is broken into calm groups (Callsheet round 3's cards), not one continuous sheet.
+- Callsheet: R5 colours/type/vibe + R3's calmer grouping; Ask is a proper chat; refine everything to Ask's level.
+- JamFin: start from R5; keep the geometric shapes behind titles; bring back the split shutter; theatre idea less literal; Callsheet's dark palette; no menu lights.
+- Jam-Dash: start from R3 (favourite); no skeuomorphism; keep the hover-to-see-connections idea in a lighter form.
+- NervOS: PAUSED until Isaac knows what he wants. Lobby: Isaac also said pause, but gave concrete clean-up notes (no HA except maybe the door lock, no audio settings up top, less silly, fewer things); one clean-up round only.
+- Jam Home: keep R5 toggles with R5's symbols; less realism; Callsheet palette incl. the air purifier (slight changes so it fits); drop the sideboard, the floor-plan/layout views and the key rail; keep the remote; kiosk very minimal.
