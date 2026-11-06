@@ -289,3 +289,5 @@ Verbatim: "The only real issues I have are in Home Assistant it's confusing if a
   - purifier power: "Probably the switch, but I may change my mind";
   - Lobby and NervOS: "I'll work with each of them on what they should feel like."
 - The Goodnight question needed explaining; it's still open.
+- Goodnight explained (bedtime list of what's still on or open, Turn off / Leave on per row, one press, door locks). Isaac: "Yes absolutely I want that."
+- DECISION: Jam Home gets a Goodnight list as a plain list, with no floor plan. Spec from pass 5, look from rounds 6 and 7.

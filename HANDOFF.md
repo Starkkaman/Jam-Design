@@ -55,7 +55,7 @@ Full reasoning and the earlier rule-by-rule sort: `notes/RULES-TIERS.md`. Its la
 | **Callsheet** | `mockups/pass6/callsheet.html` | `notes/pass6-callsheet.md` | Loves round 5's colours, type and vibe; round 3's grouping was calmer; Ask must be a proper chat. Round 6 does all three. |
 | **JamFin** | `mockups/pass6/jamfin.html` | `notes/pass6-jamfin.md` | Geometric shapes behind titles; split shutter back; scrap the lights in menus; theatre feel, less literal; Callsheet's dark palette. |
 | **Jam-Dash** | `mockups/pass6/jam-dash.html` | `notes/pass6-jam-dash.md` | Round 3's design was his favourite; no skeuomorphism; keep the "see how containers connect on hover" trace. |
-| **Jam Home** (HA: Jam Theme + Jam Cards) | `mockups/pass7/home-assistant.html` (switches) on top of `mockups/pass6/home-assistant.html` | `notes/pass6-home-assistant.md`, `notes/pass7-switches.md` | "This design looks much better!" Switch colour by kind with override. **To fix in the real build:** the paddle's OFF state isn't clear enough now that ON is so strong; give OFF its own clear marking. Very minimal kiosks; keep the remote; no sideboard, plan views or key rail. |
+| **Jam Home** (HA: Jam Theme + Jam Cards) | `mockups/pass7/home-assistant.html` (switches) on top of `mockups/pass6/home-assistant.html` | `notes/pass6-home-assistant.md`, `notes/pass7-switches.md` | "This design looks much better!" Switch colour by kind with override. **To fix in the real build:** the paddle's OFF state isn't clear enough now that ON is so strong; give OFF its own clear marking. Very minimal kiosks; keep the remote; no sideboard, plan views or key rail. **Add the Goodnight list back** (see the answers below). |
 | **Lobby** (TV launcher) | `mockups/pass6/tv-launcher.html`, for reference only | `notes/pass6-tv-launcher.md` | **Not started.** Isaac doesn't know yet what he wants. Round 6 is only a clean-up: no Home Assistant except maybe the door-lock status, no audio settings up top, less silly. Don't restyle Lobby until he decides. |
 | **NervOS** | none | none | **Paused.** Isaac likes what NervOS already has. Don't restyle it until he says so. |
 
@@ -64,7 +64,20 @@ Full reasoning and the earlier rule-by-rule sort: `notes/RULES-TIERS.md`. Its la
 2. Air purifier power: **the small switch** for now ("I may change my mind").
 3. Lobby and NervOS: Isaac will work with each app's agent directly on how it should feel.
 
-Still open: whether Jam Home gets a Goodnight list back (see `decisions.md`).
+4. Goodnight in Jam Home: **yes, bring it back** ("Yes absolutely I want that"). As a plain list, with no floor plan:
+   - one sheet listing everything still on or open;
+   - each row has Turn off / Leave on keys;
+   - one Goodnight press does it all, and the door always locks;
+   - afterwards it shows "Goodnight · done 9:41".
+
+   Defaults:
+   - shared rooms and outside: off;
+   - bedrooms: left on;
+   - TV: left on while it's playing, otherwise off;
+   - purifier: night speed 25%;
+   - window: a reminder only.
+
+   On a kiosk it fits without scrolling. Goodnight is the screen's one orange, only when nothing is playing and only until it has run. Full spec: `notes/pass5-home-assistant.md` (the Goodnight row), restyled in the round 6/7 look.
 
 ## Where to find things
 - `decisions.md`: every decision, with Isaac's words.
