@@ -33,3 +33,6 @@ When we do get to rollout, it goes **one app or service at a time**, and nothing
 
 The **Hi-Fi** base look is being designed. It isn't final, and **no project should restyle its UI from this repo yet.**
 Current step: every project documents its existing UI in `projects/<name>/` so the bible can be checked against real screens.
+
+## Start here (2026-11-06)
+[`HANDOFF.md`](HANDOFF.md) is the agreed starting place for the global look and each app's draft. Agents: read it, then your app's row.

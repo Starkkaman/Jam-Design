@@ -1,5 +1,7 @@
 # Jam Design Bible — working draft 0.5
 
+> **2026-11-06: the starting place for rollout is [`HANDOFF.md`](HANDOFF.md).** Where it disagrees with this draft (materials, realism, lights, palette, switches), HANDOFF.md wins until this bible is rewritten.
+
 > **Status: draft. Nothing here is approved for shipping, and nothing existing is being replaced or deleted.** Rollout comes later, one app or service at a time; existing looks and themes stay until that app's turn. The base look is still being designed with Isaac. Source of every decision: [`decisions.md`](decisions.md). Visual reference: [`mockups/`](mockups/), latest first.
 
 ## 1. The brief

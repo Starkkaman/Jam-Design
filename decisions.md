@@ -276,3 +276,11 @@ Verbatim: "The only real issues I have are in Home Assistant it's confusing if a
 - DIRECTION: every other on/off (plugs, fan, Tree, blanket, purifier power, automations, settings) uses a **small switch whose channel reveals an accent colour when on** (the "channel reveal" switch). Off = plain recess.
 - CANDIDATE (language-wide): the channel-reveal switch as a subtle accent in the other apps' settings and toggles.
 - Isaac's other round 6 notes: no further issues raised for Callsheet, JamFin, Jam-Dash or Lobby.
+
+## Starting place agreed (Isaac, 2026-11-06)
+- Isaac on Jam Home round 7: "This design looks much better! I like the switch color by kind but with the ability to override with a different color if I want."
+- DECISION: switch accent = **colour by kind, with a per-device override**.
+- Isaac: "The paddle rocker design looks super clean, and it's more obvious when its on, but now the off state isn't as clear. I don't think we need to do another round of designing though. I'll probably just have Mr Manager fix it in the real home assistant design."
+- DECISION: no more design rounds for now. The paddle's OFF state is to be fixed in the real HA build.
+- Isaac: "Alright I think we have our starting place for this global look and design drafts that can be passed on to the other agents to incorperate."
+- DECISION: `HANDOFF.md` is the starting place. Callsheet, JamFin and Jam-Dash start from round 6; Jam Home from round 7 on round 6; Lobby isn't started (round 6 is reference only); NervOS is paused.
