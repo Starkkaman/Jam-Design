@@ -269,3 +269,10 @@ How I read it (Isaac's "round 6" / "version 6" = the newest round, round 5; the 
 - Jam-Dash: start from R3 (favourite); no skeuomorphism; keep the hover-to-see-connections idea in a lighter form.
 - NervOS: PAUSED until Isaac knows what he wants. Lobby: Isaac also said pause, but gave concrete clean-up notes (no HA except maybe the door lock, no audio settings up top, less silly, fewer things); one clean-up round only.
 - Jam Home: keep R5 toggles with R5's symbols; less realism; Callsheet palette incl. the air purifier (slight changes so it fits); drop the sideboard, the floor-plan/layout views and the key rail; keep the remote; kiosk very minimal.
+
+## Isaac on Jam Home round 6 switches (2026-11-06)
+Verbatim: "The only real issues I have are in Home Assistant it's confusing if a switch is on or off, and the same switch is everywhere. It makes sense for lights to have a switch like that, but the others could be smaller switches that have an accent color in the channel that is reveled when it's on. Could be an interesting subtle accent in other designs as well."
+- DIRECTION: the ON/OFF paddle stays for **lights only**, and must read on/off at a glance.
+- DIRECTION: every other on/off (plugs, fan, Tree, blanket, purifier power, automations, settings) uses a **small switch whose channel reveals an accent colour when on** (the "channel reveal" switch). Off = plain recess.
+- CANDIDATE (language-wide): the channel-reveal switch as a subtle accent in the other apps' settings and toggles.
+- Isaac's other round 6 notes: no further issues raised for Callsheet, JamFin, Jam-Dash or Lobby.
