@@ -2,6 +2,8 @@
 
 Everything is a proposal. Nothing in BIBLE.md, the tokens or any real app has changed.
 
+**Every version in one place:** https://claude.ai/artifact/U8RhAU69YzB7et7r7mmcfX
+
 ## Round 5: deeper bespoke designs, plus moving between apps
 Each app adopts the 15-item language from `notes/RULES-TIERS.md`, assumes the recommended fixes for the 12 open conflicts (marked "pending Isaac"), applies the hole rules, fixes its round 4 audit and carries its idea into every screen.
 
