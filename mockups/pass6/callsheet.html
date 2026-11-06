@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Callsheet Calm Groups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Callsheet round 6 (pass6). Base: round 5's palette and type, exactly (warm sheet by day, navy by night, Jost + Plex Mono,
+   walnut, one orange, red alert key). New: dense information broken into calm groups (round 3's cards, redrawn as quiet
+   instrument panels: hairline, soft corners, mono label, one idea each). Ask is a proper chat. Almost no indicator lights:
+   only alert, warn and "working" keep one. Sample data only (Sam, Co. A/B, example.com, 07700 900xxx). */
+:root{--bg:#e4e2dd;--fg:#1f2022;--muted:#585b5a;--line:#cfccc5;--chip:#fff;
+  --f:"Jost",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0b0e14;--fg:#e9e7e2;--muted:#a3a5a1;--line:#262c38;--chip:#151a24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b0e14;--fg:#e9e7e2;--muted:#a3a5a1;--line:#262c38;--chip:#151a24;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--fg);font:400 16px/1.5 var(--f)}
+.wrap{max-width:1500px;margin:0 auto;padding:32px 16px 64px;display:grid;gap:32px}
+@media (min-width:700px){.wrap{padding-inline:28px}}
+.eyebrow{font:500 13px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1.pt{font:600 clamp(28px,4vw,40px)/1.1 var(--f);margin:6px 0 10px}
+h2.ps{font:600 22px var(--f);margin:0}
+.wrap>header p,.wrap>section>p{margin:0;max-width:80ch}
+.muted{color:var(--muted)}
+ul.lst{margin:0;padding-left:20px;max-width:92ch;display:grid;gap:6px}
+.ctrls{display:flex;gap:12px 22px;flex-wrap:wrap;align-items:center}
+.ctrls>div{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--chip);border:1px solid var(--line);flex-wrap:wrap}
+.seg button{font:500 14px var(--f);border:0;background:transparent;color:var(--fg);padding:8px 13px;border-radius:9px;cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.flows{display:flex;gap:6px;flex-wrap:wrap}
+.flows button{font:500 14px var(--f);border:1px solid var(--line);background:var(--chip);color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer;min-height:40px;text-align:left}
+.flows button[aria-pressed="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.stepbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--chip)}
+.stepbar .num{display:flex;gap:6px;flex-wrap:wrap}
+.stepbar .num button{width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--fg);font:500 14px var(--mono);cursor:pointer}
+.stepbar .num button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.stepbar .sd{flex:1 1 280px;min-width:0}
+.stepbar .sd b{font-weight:600}
+.pbtn{font:500 14px var(--f);border:1px solid var(--line);background:transparent;color:var(--fg);padding:8px 14px;border-radius:9px;cursor:pointer;min-height:40px}
+.stage{display:grid;gap:22px;align-items:start}
+@media (min-width:1100px){.stage{grid-template-columns:minmax(0,1fr) 340px}}
+figure{margin:0;display:grid;gap:8px;min-width:0;align-content:start}
+figcaption{font-size:14px;color:var(--muted)}
+.frame{position:relative;width:100%;border-radius:14px;background:#07090d;padding:8px;box-shadow:0 18px 44px #0000003a}
+.frame.ph{border-radius:40px;padding:10px;max-width:400px;justify-self:center}
+.screen{position:relative;overflow:hidden;border-radius:7px;outline:none}
+.frame.ph .screen{border-radius:31px}
+.screen:focus-visible{box-shadow:0 0 0 3px #ec7c22}
+.scaler{position:absolute;top:0;left:0;transform-origin:0 0}
+.gal{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.gald{display:grid;gap:22px}
+@media (min-width:1100px){.gald{grid-template-columns:1fr 1fr}}
+.elist{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.elist div{border-top:2px solid var(--fg);padding-top:10px}
+.elist b{display:block;font-weight:600;margin-bottom:4px}
+
+/* ================= THE APP ================= */
+.app{--ground:#ece7dd;--card:#f7f4ee;--inset:#efeae0;--press:#e8e2d5;--bubble:#e6dfd0;
+  --ink:#19202e;--ink2:#343b4a;--dim:#5b606d;--rule:#d6cfbf;--hair:#e0d9cb;--kline:#8a8477;
+  --walnut:#6b4428;--orange:#ec7c22;--on-orange:#1a1206;--alert:#ff5a48;--on-alert:#1c0804;--alert-ink:#b3261b;
+  --warn:#f2c14e;--warn-ink:#7a5300;--warn-line:#a87a12;--lit:#f3e6c8;--win:#151413;--veil:#10141d59;--trk:.14em;
+  position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--ground);color:var(--ink);
+  font:400 16px/1.45 var(--f);-webkit-font-smoothing:antialiased}
+.app.night{--ground:#10141d;--card:#161c28;--inset:#1b2230;--press:#202838;--bubble:#232c3e;
+  --ink:#ece5d3;--ink2:#d2cbb9;--dim:#9f9a8b;--rule:#2a3244;--hair:#232b3a;--kline:#636e87;
+  --orange:#f08a2c;--alert-ink:#ff8a7a;--warn-line:#f2c14e;--warn-ink:#f2c14e;--win:#06080c;--veil:#000000a6}
+:where(.app) :where(button,input,textarea){font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit}
+.app .mono{font-family:var(--mono)}
+.app .dim{color:var(--dim)}
+.trim{height:4px;background:var(--walnut);flex:none}
+/* keys */
+.app .k{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:38px;padding:0 16px;border:1px solid var(--kline);
+  border-radius:10px;font:500 15px/1.15 var(--f);color:var(--ink);white-space:nowrap;transition:transform .15s cubic-bezier(.16,1,.3,1)}
+.app .k:active{transform:translateY(1px)}
+.app .k.go{background:var(--orange);border-color:var(--orange);color:var(--on-orange)}
+.app .k.red{background:var(--alert);border-color:var(--alert);color:var(--on-alert)}
+.app .k.dark{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.app .k.q{border-color:transparent;padding:0 8px;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px;text-decoration-color:var(--dim)}
+.app .k.q0{padding-left:0}
+.app .k[disabled]{opacity:.45;cursor:not-allowed}
+.kh{font:500 12px/1 var(--mono);border:1px solid currentColor;border-radius:4px;padding:2px 4px;opacity:.65}
+.phone .kh{display:none}
+.phone .k{min-height:44px;padding:0 16px;font-size:16px}
+.phone .k.q{padding:0 10px}
+.phone .k.q0{padding-left:0}
+.keys{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.veiled .pg .k.go{background:transparent;border-color:var(--kline);color:var(--ink)}
+/* the only lights left: alert, warn, working */
+.led{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;vertical-align:middle}
+.led.al{background:var(--alert);box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--alert)}
+.led.wn{background:var(--warn);box-shadow:0 0 0 1.5px var(--warn-line)}
+.slot{display:inline-block;width:18px;height:6px;border-radius:3px;background:var(--lit);box-shadow:0 0 0 2px var(--win);flex:none}
+.app.night .slot{box-shadow:0 0 0 1.5px #5c6273}
+/* masthead */
+.mast{height:64px;flex:none;display:flex;align-items:stretch;gap:40px;padding:0 48px;border-bottom:1px solid var(--hair)}
+.wm{display:flex;align-items:center;font:600 19px var(--f);letter-spacing:.01em}
+.nav{display:flex;gap:2px}
+.nav button,.tools .tl{position:relative;padding:0 12px;font:500 15px var(--f);color:var(--dim);display:flex;align-items:center;gap:8px}
+.nav button[aria-current="page"],.tools .tl[aria-current="page"]{color:var(--ink)}
+.nav button[aria-current="page"]::after,.tools .tl[aria-current="page"]::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;border-radius:2px;background:var(--ink)}
+.tools{margin-left:auto;display:flex;align-items:stretch;gap:2px}
+.pg{flex:1;overflow:auto;min-height:0}
+.desk .pg{padding:30px 48px 48px}
+.phone .pg{padding:14px 16px 28px}
+.pg.fill{overflow:hidden;display:flex;flex-direction:column}
+.inner{max-width:1344px;margin:0 auto}
+/* phone chrome */
+.ptop{height:54px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;border-bottom:1px solid var(--hair)}
+.ptop .wm{font-size:18px}
+.ptop .tools{align-items:center}
+.ib{width:44px;height:44px;display:grid;place-items:center;border-radius:10px}
+.ib svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.6}
+.ptop .tl{min-height:44px;padding:0 10px}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--hair);background:var(--ground);padding-bottom:14px}
+.tabbar button{position:relative;height:54px;font:500 13.5px var(--f);color:var(--dim);display:grid;place-items:center}
+.tabbar button[aria-current="page"]{color:var(--ink)}
+.tabbar button[aria-current="page"]::before{content:"";position:absolute;top:-1px;left:50%;width:28px;margin-left:-14px;height:2px;border-radius:2px;background:var(--ink)}
+/* type */
+.dline{display:flex;justify-content:space-between;align-items:center;gap:12px;font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);min-height:36px}
+.phone .dline{min-height:28px}
+.hl{font:500 44px/1.06 var(--f);letter-spacing:-.012em;margin:2px 0 0}
+.phone .hl{font-size:30px;margin:4px 0 8px}
+.h2{font:500 30px/1.1 var(--f);letter-spacing:-.008em;margin:0}
+.phone .h2{font-size:26px}
+.lede{font:400 20px/1.48 var(--f);color:var(--ink2);margin:0;max-width:36em}
+.phone .lede{font-size:17.5px}
+.fn{display:inline-block;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:transparent;box-shadow:inset 0 0 0 1px var(--kline);color:var(--ink2);font:500 12px/19px var(--mono);text-align:center;vertical-align:3px;margin-left:3px;position:relative}
+.src .fn{box-shadow:inset 0 0 0 1px var(--kline)}
+.phone button.fn::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px}
+.fnx{display:flex;gap:10px;align-items:center;margin-top:10px;padding:8px 8px 8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--hair);font:400 14px var(--mono);color:var(--dim)}
+.fnx .k{margin-left:auto}
+/* layout */
+.hero{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:end;margin-bottom:28px}
+.phone .hero{grid-template-columns:1fr;gap:0;margin-bottom:18px}
+.phead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.phone .phead{margin-bottom:16px}
+.g75{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:20px;align-items:start}
+.g57{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:20px;align-items:start}
+.g66{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.phone .g75,.phone .g57,.phone .g66{grid-template-columns:1fr;gap:12px}
+.col{display:grid;gap:20px;align-content:start;min-width:0}
+.phone .col{gap:12px}
+/* the group: one idea, a quiet surface */
+.card{background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:22px 26px 24px;min-width:0;position:relative}
+.phone .card{padding:18px 18px 20px;border-radius:14px}
+.card.dash{background:transparent;border:1.5px dashed var(--kline)}
+.card.cue-al{box-shadow:inset 3px 0 0 var(--alert)}
+.card.cue-wn{box-shadow:inset 3px 0 0 var(--warn-line)}
+.lab{display:flex;align-items:center;gap:10px;font:500 13px/1.2 var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);min-height:26px;margin-bottom:14px}
+.lab .r{margin-left:auto;letter-spacing:0;text-transform:none;font:500 15px var(--f);display:flex;gap:4px;align-items:center}
+.lab.al{color:var(--alert-ink)}
+.lab.wn{color:var(--warn-ink)}
+.lab .k.q{color:var(--ink)}
+.sub{font:400 14px/1.45 var(--f);color:var(--dim)}
+.tag{display:inline-flex;align-items:center;font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:5px 9px;border-radius:999px;background:var(--inset);color:var(--ink2);white-space:nowrap}
+.card .tag{background:var(--press)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.foot{margin-top:28px;font:400 13px/1.6 var(--mono);color:var(--dim);display:flex;gap:6px 16px;flex-wrap:wrap}
+.phone .foot{margin-top:18px}
+.mock{display:flex;gap:10px;align-items:center;margin-top:12px;padding:8px 12px;border:1.5px dashed var(--kline);border-radius:10px;font:400 14px var(--f);color:var(--dim)}
+.mock b{font:500 12px var(--mono);letter-spacing:.12em}
+/* next */
+.who{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.who b{font:500 22px/1.2 var(--f)}
+.phone .who b{font-size:20px}
+.who .age{margin-left:auto;font:500 13px var(--mono);color:var(--dim)}
+.ask{font:400 18px/1.45 var(--f);margin:8px 0 16px}
+.draft{background:var(--inset);border-radius:12px;padding:14px 16px;font:400 16px/1.55 var(--f);color:var(--ink2);margin-bottom:16px}
+.card .draft{background:var(--inset)}
+.app.night .card .draft{background:var(--ground)}
+.draft .dl{display:block;font:500 12px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+textarea.draft{display:block;width:100%;min-height:118px;resize:vertical;border:1px solid transparent;cursor:text}
+textarea.draft:focus{outline:none;border-color:var(--kline)}
+.then{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--hair)}
+.then .t{font:500 12px var(--mono);letter-spacing:var(--trk);color:var(--dim)}
+.then .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phone .then{grid-template-columns:minmax(0,1fr) auto}
+.phone .then .t{display:none}
+.copied{display:inline-flex;align-items:center;gap:6px;font:500 14px var(--mono);color:var(--dim);padding:0 6px}
+.say{font:400 19px/1.45 var(--f);margin:0 0 16px}
+.figs{display:flex;gap:40px;margin:6px 0 18px}
+.figs b{display:block;font:500 44px/1 var(--mono);letter-spacing:-.02em}
+.figs span{font:500 13px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim)}
+.wal{height:2px;background:var(--walnut);border-radius:2px;margin:0 0 14px;transform-origin:left;animation:draw .35s cubic-bezier(.16,1,.3,1)}
+@keyframes draw{from{transform:scaleX(0)}}
+/* list rows */
+.rl{display:grid}
+.rr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 16px;padding:12px 14px;margin:0 -14px;border-radius:10px;width:calc(100% + 28px);position:relative}
+.rr+.rr::before,.strk+.rr::before,.rr+.strk::before{content:"";position:absolute;left:14px;right:14px;top:0;height:1px;background:var(--hair)}
+.rr:hover{background:var(--inset)}
+.rr.sel{background:var(--press)}
+.rr.sel::before,.rr.sel+.rr::before{display:none}
+.rr .nm{font:500 16.5px/1.3 var(--f);min-width:0}
+.rr .nm .dim{font-weight:400}
+.rr .tx{grid-column:1;font:400 15px/1.4 var(--f);color:var(--ink2);min-width:0}
+.rr .ag{font:500 13px var(--mono);color:var(--dim);text-align:right}
+.phone .rr{grid-template-columns:minmax(0,1fr) auto}
+.rr .rs{grid-column:2;font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-align:right;align-self:start}
+.phone .rr .rs{grid-column:1/-1;text-align:left;margin-top:2px}
+.strk{display:flex;gap:10px;align-items:center;min-height:46px;padding:6px 0;position:relative}
+.strk .w{text-decoration:line-through;text-decoration-thickness:1.5px;color:var(--dim);flex:1;min-width:0;animation:fadein .25s}
+@keyframes fadein{from{opacity:0}}
+.morel{display:inline-flex;align-items:center;min-height:40px;margin-top:8px;font:500 15px var(--f);text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--dim)}
+/* day (timeline) */
+.tl{display:grid}
+.tr{display:grid;grid-template-columns:58px minmax(0,1fr);gap:16px;padding:9px 0;align-items:start}
+.phone .tr{grid-template-columns:50px minmax(0,1fr);gap:12px}
+.tr .tm{font:500 14px/1.6 var(--mono);color:var(--dim)}
+.tr .ev{min-width:0}
+.tr .ev b{font:500 16.5px/1.35 var(--f);display:block}
+.tr .ev .m{font:400 14px/1.4 var(--f);color:var(--dim)}
+.tr.past .ev b{color:var(--dim);font-weight:400}
+.tr.on .ev b::after{content:" · on now";font:500 13px var(--mono);letter-spacing:.06em;color:var(--dim)}
+button.tr{width:100%;text-align:left;border-radius:8px}
+.nowr{display:grid;grid-template-columns:58px minmax(0,1fr);gap:16px;align-items:center;padding:4px 0}
+.phone .nowr{grid-template-columns:50px minmax(0,1fr);gap:12px}
+.nowr .tm{font:500 14px var(--mono);color:var(--ink)}
+.nowr i{height:2px;background:var(--ink);border-radius:2px;position:relative}
+.nowr i::after{content:"NOW";position:absolute;right:0;top:-18px;font:500 12px var(--mono);letter-spacing:var(--trk);color:var(--dim);font-style:normal}
+.gapr{display:grid;grid-template-columns:58px minmax(0,1fr);gap:16px;padding:6px 0 8px}
+.phone .gapr{grid-template-columns:50px minmax(0,1fr);gap:12px}
+.gapr .g{border-left:1.5px dashed var(--kline);padding:2px 0 2px 14px;font:400 14px/1.45 var(--f);color:var(--dim)}
+.gapr .g .mono{font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.clb{border-left:2px solid var(--warn-line);padding:0 0 0 14px;display:grid;gap:8px}
+.clb .cl{display:flex;gap:8px;align-items:center;font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--warn-ink)}
+.endr{padding:10px 0 0 74px;font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.phone .endr{padding-left:62px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 16px;align-items:baseline}
+.kv .d{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.note+.note{margin-top:12px;padding-top:12px;border-top:1px solid var(--hair)}
+.note p{margin:0}
+.note .sub{margin-top:2px}
+/* sub-row (Ask · People · Know me) */
+.subrow{display:flex;gap:4px;margin:-6px 0 22px;border-bottom:1px solid var(--hair)}
+.phone .subrow{margin:-2px -16px 14px;padding:0 6px}
+.subrow button{position:relative;padding:8px 12px 12px;font:500 15px var(--f);color:var(--dim);min-height:44px}
+.subrow button[aria-current="page"]{color:var(--ink)}
+.subrow button[aria-current="page"]::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;border-radius:2px;background:var(--ink)}
+/* chat */
+.chat{flex:1;min-height:0;display:grid;grid-template-columns:272px minmax(0,1fr);gap:28px}
+.phone .chat{grid-template-columns:1fr;gap:0}
+.convs{align-self:start}
+.cv{display:grid;gap:2px;width:calc(100% + 24px);margin:0 -12px;padding:10px 12px;border-radius:10px;text-align:left}
+.cv:hover{background:var(--inset)}
+.cv.sel{background:var(--press)}
+.cv .d{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.cv .t{font:400 15.5px/1.35 var(--f)}
+.cvnote{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);font:400 13px/1.5 var(--mono);color:var(--dim)}
+.cmain{min-height:0;display:flex;flex-direction:column}
+.thread{flex:1;min-height:0;overflow:auto;padding:4px 4px 16px;display:flex;flex-direction:column}
+.thread>*{margin-top:auto}
+.phone .thread{margin:0 -16px;padding:4px 16px 12px}
+.tw{max-width:1000px;display:grid;gap:26px}
+.turn{display:grid;grid-template-columns:minmax(0,680px) 250px;gap:28px;align-items:start}
+.phone .turn{grid-template-columns:1fr;gap:0}
+.turn .meta{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 7px}
+.turn.u .meta{text-align:right}
+.turn.u .bub{justify-self:end;margin-left:auto;max-width:78%;width:fit-content;background:var(--bubble);border-radius:20px 20px 6px 20px;padding:11px 17px;font:400 17.5px/1.45 var(--f)}
+.turn.a .bub{background:var(--card);border:1px solid var(--hair);border-radius:6px 20px 20px 20px;padding:16px 20px 14px}
+.phone .turn.a .bub{padding:14px 16px 12px}
+.turn.a p{margin:0;font:400 18px/1.55 var(--f)}
+.phone .turn.a p{font-size:17px}
+.acts{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--hair);font:400 14px var(--f);color:var(--dim)}
+.acts .sp{margin-right:auto}
+.phone .acts .sp{flex-basis:100%;margin:0 0 2px}
+.phone .acts .k.q:first-of-type{padding-left:0}
+.srcs{display:grid;gap:10px;padding-top:26px}
+.src{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;font:400 13px/1.5 var(--mono);color:var(--dim)}
+.src .fn{margin:1px 0 0;vertical-align:0}
+.src b{display:block;font-weight:500;color:var(--ink2)}
+.src.hi{color:var(--ink)}
+.src.hi .fn{background:var(--ink);color:var(--card)}
+.phone .srcs{padding:12px 0 0;margin-top:12px;border-top:1px solid var(--hair)}
+.how{margin:10px 0 0;padding:12px 14px;border-radius:12px;background:var(--inset);display:grid;gap:6px;font:400 14px/1.45 var(--f);color:var(--ink2);counter-reset:h}
+.app.night .how{background:var(--ground)}
+.how div{display:grid;grid-template-columns:22px 1fr}
+.how div::before{counter-increment:h;content:counter(h);font:500 12px/1.9 var(--mono);color:var(--dim)}
+.rem{margin-top:12px;padding:14px 16px;border-radius:12px;border:1.5px dashed var(--kline)}
+.rem p{font-size:16.5px!important;margin:4px 0 12px!important}
+.rem .lb{font:500 12px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim)}
+.reading{display:flex;align-items:center;gap:12px;font:400 16px var(--f);color:var(--ink2)}
+.reading .k{margin-left:auto}
+.cempty{max-width:680px;padding:56px 0 0}
+.phone .cempty{padding:28px 0 0}
+.cempty .h2{margin-bottom:8px}
+.sugs{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.sug{min-height:40px;padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--hair);font:400 15px/1.3 var(--f);text-align:left}
+.phone .sug{min-height:44px}
+.composer{flex:none;max-width:680px;width:100%;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--kline);border-radius:18px;padding:8px 8px 8px 20px;margin-top:6px}
+.phone .composer{padding:6px 6px 6px 16px;border-radius:16px}
+.composer input{flex:1;min-width:0;min-height:44px;font:400 17px var(--f);cursor:text}
+.composer input:focus{outline:none}
+.composer input::placeholder{color:var(--dim)}
+.cfoot{max-width:680px;font:400 13px var(--mono);color:var(--dim);padding:8px 4px 0;display:flex;justify-content:space-between;gap:12px}
+.phone .cfoot{padding-top:6px}
+.earl{display:flex;justify-content:space-between;align-items:center;min-height:44px;font:400 15px var(--f);color:var(--dim);margin:-6px 0 6px}
+/* people */
+.match{display:grid;grid-template-columns:84px minmax(0,1fr) 34px minmax(0,1fr);gap:0;align-items:stretch}
+.phone .match{grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr)}
+.match>*{padding:9px 10px 9px 0;border-top:1px solid var(--hair);min-width:0;overflow-wrap:anywhere}
+.match .h{border-top:0;font:500 12px var(--mono);letter-spacing:var(--trk);text-transform:uppercase;color:var(--dim);padding-top:0}
+.match .f{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.match .g{font:500 16px var(--mono);text-align:center;color:var(--dim)}
+.match .g.eq{color:var(--ink)}
+.phone .match .f{display:none}
+.why{margin:14px 0 16px;font:400 17px/1.45 var(--f)}
+.leg{font:400 13px var(--mono);color:var(--dim);margin-top:8px}
+.dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:0 18px}
+.phone .dl{grid-template-columns:1fr}
+.dl>*{padding:12px 0;border-top:1px solid var(--hair)}
+.dl>:nth-child(-n+2){border-top:0;padding-top:0}
+.phone .dl>:nth-child(2){padding-top:0}
+.phone .dl .t{padding-bottom:2px}
+.phone .dl .t+*{border-top:0;padding-top:0}
+.dl .t{font:500 13px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+/* checkbox (flat, not a light) */
+.cb{display:inline-flex;gap:12px;align-items:flex-start;text-align:left;min-height:32px}
+.cb .bx{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--kline);flex:none;display:grid;place-items:center;margin-top:1px}
+.cb[aria-checked="true"] .bx{background:var(--ink);border-color:var(--ink)}
+.cb[aria-checked="true"] .bx::after{content:"";width:9px;height:5px;border-left:2px solid var(--card);border-bottom:2px solid var(--card);transform:translateY(-1px) rotate(-45deg)}
+.cb small{display:block;font:400 14px var(--f);color:var(--dim)}
+.phone .cb{min-height:44px}
+/* options (radio rows that press in) */
+.opts{display:grid;gap:6px}
+.opt{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border-radius:12px;border:1px solid var(--hair);text-align:left;width:100%}
+.opt .rd{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--kline);margin-top:2px}
+.opt[aria-checked="true"]{background:var(--press);border-color:transparent;box-shadow:inset 0 2px 0 #00000012}
+.opt[aria-checked="true"] .rd{border:5.5px solid var(--ink)}
+.opt small{display:block;font:400 14px var(--f);color:var(--dim);margin-top:2px}
+.opt[disabled]{opacity:.55;cursor:not-allowed}
+/* segmented (inside app) */
+.aseg{display:inline-flex;gap:3px;padding:3px;border-radius:12px;background:var(--inset)}
+.aseg button{min-height:36px;padding:0 14px;border-radius:9px;font:500 15px var(--f);color:var(--dim)}
+.aseg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--hair)}
+.phone .aseg button{min-height:42px}
+/* steps (know me) */
+.stp{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0}
+.stp+.stp{border-top:1px solid var(--hair)}
+.phone .stp{grid-template-columns:30px minmax(0,1fr);gap:12px}
+.phone .stp .keys{grid-column:2}
+.stp .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:500 13px var(--mono);background:var(--inset);color:var(--ink2)}
+.stp.done .n{background:transparent;border:1.5px solid var(--kline);color:var(--dim)}
+.stp b{font-weight:500;display:block}
+.fact{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,240px) auto;gap:6px 16px;align-items:baseline;padding:12px 0}
+.fact+.fact{border-top:1px solid var(--hair)}
+.phone .fact{grid-template-columns:26px minmax(0,1fr) auto}
+.phone .fact .s{grid-column:2}
+.fact .i{font:500 13px var(--mono);color:var(--dim)}
+.fact .s{font:400 13px/1.45 var(--mono);color:var(--dim)}
+.fact.gone .tx{text-decoration:line-through;color:var(--dim)}
+.chk{display:inline-flex;gap:6px;align-items:center;margin-left:8px;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--warn-ink);white-space:nowrap}
+.big{font:400 30px/1.3 var(--f);margin:6px 0 10px}
+.phone .big{font-size:24px}
+.prog{display:flex;gap:6px;margin-bottom:6px}
+.prog i{flex:1;height:4px;border-radius:2px;background:var(--hair)}
+.prog i.d{background:var(--dim)}
+.prog i.c{background:var(--ink)}
+.solo{max-width:700px;margin:0 auto}
+.inp{width:100%;min-height:46px;padding:10px 14px;border-radius:10px;border:1px solid var(--kline);background:var(--ground);font:400 16px var(--f);cursor:text}
+.inp:focus{outline:2px solid var(--ink);outline-offset:1px}
+/* projects */
+.pj{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:baseline;text-align:left;width:100%}
+.pj b{font:500 19px var(--f)}
+.pj .st{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;gap:6px;align-items:center}
+.pj .st.wn{color:var(--warn-ink)}
+.card.pick{cursor:pointer}
+.card.pick.sel{background:var(--press);border-color:transparent}
+.track{position:relative;height:96px;margin:6px 0 4px}
+.track .ln{position:absolute;left:0;right:0;top:44px;height:2px;background:var(--rule);border-radius:2px}
+.track .wk{position:absolute;top:66px;font:500 12px var(--mono);letter-spacing:.06em;color:var(--dim);transform:translateX(-50%);white-space:nowrap}
+.track .wt{position:absolute;top:39px;width:2px;height:12px;background:var(--rule);margin-left:-1px}
+.track .ms{position:absolute;top:38px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--card);border:2px solid var(--ink)}
+.track .ms.done{background:var(--ink)}
+.track .ms.old{border:2px dashed var(--kline);background:var(--card)}
+.track .ms.new{border-color:var(--warn-line);background:var(--warn)}
+.track .ml{position:absolute;top:8px;font:400 13px var(--f);color:var(--ink2);transform:translateX(-50%);white-space:nowrap}
+.track .arr{position:absolute;top:44px;height:2px;background:var(--warn-line)}
+.track .needle{position:absolute;top:28px;width:2px;height:34px;background:var(--ink);margin-left:-1px;border-radius:2px}
+.track .nl{position:absolute;top:8px;font:500 13px var(--f);color:var(--ink);transform:translateX(-4px)}
+/* setup */
+.idx .ix{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:2px 12px;align-items:baseline;width:calc(100% + 24px);margin:0 -12px;padding:12px;border-radius:10px;text-align:left}
+.idx .ix:hover{background:var(--inset)}
+.idx .ix[aria-current="page"]{background:var(--press)}
+.idx .ix .l{font:500 13px var(--mono);color:var(--dim)}
+.idx .ix b{font-weight:500;font-size:16.5px}
+.idx .ix .sub{grid-column:2}
+.idx .ix .ch{grid-row:1/3;grid-column:3;align-self:center;color:var(--dim)}
+.ct{display:grid;grid-template-columns:86px minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:12px 0}
+.ct+.ct{border-top:1px solid var(--hair)}
+.phone .ct{grid-template-columns:70px minmax(0,1fr) auto;gap:4px 10px}
+.ct .t{font:500 22px var(--mono);letter-spacing:-.01em}
+.phone .ct .t{font-size:19px}
+.ctedit{grid-column:1/-1;display:grid;gap:10px;padding:12px 14px;border-radius:12px;background:var(--inset);margin-top:6px}
+.app.night .ctedit{background:var(--ground)}
+.ctmsg{font:400 14px var(--mono);color:var(--dim)}
+.ctmsg.bad{color:var(--alert-ink)}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:12px 0}
+.srow+.srow{border-top:1px solid var(--hair)}
+.srow b{font-weight:500}
+.srow .st{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.srow.off{border:1.5px dashed var(--kline);border-radius:12px;padding:12px 14px;margin:6px 0}
+.srow.off+.srow{border-top:0}
+.drw{border-top:1px solid var(--hair)}
+.drw:first-child{border-top:0}
+.drw>button{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:48px;font:400 16px var(--f)}
+.drw>button span{font:500 18px var(--mono);color:var(--dim)}
+.drw .body{padding:0 0 16px;display:grid;gap:12px;color:var(--ink2)}
+/* overlays */
+.veil{position:absolute;inset:0;background:var(--veil);z-index:20;display:grid;place-items:center;padding:24px}
+.phone .veil{place-items:end stretch;padding:0}
+.sheet{width:min(560px,100%);background:var(--card);border-radius:18px;padding:24px 26px;box-shadow:0 24px 60px #0000003a;border:1px solid var(--hair)}
+.phone .sheet{width:100%;border-radius:22px 22px 0 0;padding:20px 18px 30px}
+.sheet h3{font:500 24px/1.2 var(--f);margin:0 0 6px}
+.fa{width:min(640px,100%);align-self:start;margin-top:70px;padding:0;overflow:hidden}
+.phone .fa{margin-top:0}
+.fa .in{display:flex;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--hair);font:400 18px var(--f)}
+.fa .in svg{width:20px;height:20px;stroke:var(--dim);fill:none;stroke-width:1.6;flex:none}
+.fa .grp{padding:12px 12px 6px}
+.fa .grp .lab{padding:0 8px;margin-bottom:4px}
+.fa .o{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;min-height:44px;padding:8px;border-radius:10px;text-align:left}
+.fa .o.sel{background:var(--press)}
+.fa .ft{padding:10px 20px 14px;font:400 13px var(--mono);color:var(--dim);border-top:1px solid var(--hair)}
+/* banner */
+.bar{flex:none;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:14px 48px 0;padding:12px 16px;border:1.5px dashed var(--kline);border-radius:14px}
+.phone .bar{margin:10px 16px 0;padding:12px}
+.bar p{margin:0;flex:1 1 260px;min-width:0}
+/* voice */
+.vo{flex:1;min-height:0;display:grid;grid-template-columns:330px minmax(0,1fr);}
+.phone .vo{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+.vrail{padding:28px 32px;border-right:1px solid var(--hair);overflow:auto}
+.vsec{margin-bottom:18px}
+.vsec .lab{margin-bottom:6px}
+.vl{display:block;width:100%;text-align:left;padding:6px 0 6px 14px;border-left:2px solid var(--hair);font:400 15px/1.35 var(--f);color:var(--dim);min-height:34px}
+.vl.past{color:var(--dim)}
+.vl.cur{border-left-color:var(--ink);color:var(--ink);font-weight:500}
+.vmain{display:flex;flex-direction:column;justify-content:center;padding:40px 72px;min-width:0}
+.phone .vmain{padding:16px 20px;justify-content:flex-start}
+.vprev{font:400 19px/1.45 var(--f);color:var(--dim);max-width:36em;margin:0 0 18px}
+.vcur{font:400 38px/1.25 var(--f);letter-spacing:-.01em;max-width:24em;margin:0}
+.phone .vcur{font-size:27px}
+.phone .vprev{font-size:16px}
+.vfill{height:2px;max-width:420px;background:var(--hair);border-radius:2px;margin-top:26px;overflow:hidden}
+.vfill i{display:block;height:100%;background:var(--ink);transform-origin:left;transform:scaleX(0)}
+.vfill i.run{animation:vfill 5s linear forwards}
+.vfill i.full{transform:none}
+.vfill i.part{transform:scaleX(.42)}
+@keyframes vfill{to{transform:scaleX(1)}}
+.heard{margin-top:16px;font:400 15px var(--f);color:var(--ink2)}
+.vbar{flex:none;display:flex;align-items:center;gap:12px;padding:18px 48px;border-top:1px solid var(--hair)}
+.phone .vbar{padding:14px 16px 22px;flex-wrap:wrap}
+.vbar .k{min-height:56px;min-width:104px;font-size:17px}
+.phone .vbar .k{min-width:0;flex:1}
+.vbar .say{margin:0 0 0 auto;font:400 13px var(--mono);color:var(--dim)}
+.phone .vbar .say{margin:0;flex-basis:100%;text-align:center}
+.vstrip{display:flex;gap:4px;padding:14px 20px 0}
+.vstrip i{flex:1;height:4px;border-radius:2px;background:var(--hair)}
+.vstrip i.past{background:var(--dim)}
+.vstrip i.cur{background:var(--ink)}
+.vhead{flex:none;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;border-bottom:1px solid var(--hair)}
+.phone .vhead{padding:0 8px 0 20px;height:54px}
+@media (prefers-reduced-motion: reduce){.app *{animation:none!important;transition:none!important}.vfill i.run{transform:scaleX(.5)}}
+.app :focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Jam design · round 6 (pass 6) · Callsheet</div>
+  <h1 class="pt">Callsheet, round 6: calm groups, a proper chat</h1>
+  <p class="muted">Round 5's colours, type and feel, unchanged: the warm sheet by day, the navy by night, Jost and Plex Mono, walnut, one orange. What changed is how the information sits. The long continuous sheet is broken into quiet groups, one idea each, the way round 3's cards were. Ask is now a real conversation with its sources kept tidy beside each answer. Every other screen is brought to the same level. All names, mail, numbers and events are made-up sample data.</p>
+</header>
+
+<section style="display:grid;gap:10px">
+  <h2 class="ps">What changed since round 5</h2>
+  <ul class="lst">
+    <li><b>Groups instead of one sheet.</b> Every screen is made of a few quiet panels on the sheet colour: a hairline edge, soft corners, a mono label, generous padding, one idea each. Today has five: First reply, Also waiting, Your day, Worth knowing, Coming up. Replies is grouped by why they wait.</li>
+    <li><b>Ask is a chat.</b> Your questions sit in bubbles on the right, Callsheet's answers on the left, the composer is docked at the bottom, and earlier conversations are a list. Round 5's smart parts stay: numbered sources beside each answer, "How I found it", "Read 1 calendar and 1 thread", Remember this?, and a plain answer about what isn't true yet.</li>
+    <li><b>Almost no lights.</b> The lit slot under the current place, the unlit windows on rows, the tick-box windows and the project windows are gone. A light now appears only for an alert, a clash and Ask while it reads. The current place is a short ink rule; on/off is a flat tick box.</li>
+    <li><b>Kept from round 5:</b> one orange per screen that moves on (Copy → Done), the red alert key, "Said once, live wins", Undo in place, neutral keys for judgements, call times, the match gutter, the slip track, Setup with no orange at rest, and Read it to me.</li>
+  </ul>
+</section>
+
+<section style="display:grid;gap:14px" id="flows">
+  <h2 class="ps">1 · The flows, playable</h2>
+  <p class="muted">Pick a flow and step through it. Both frames stay live: click rows and keys, type in Ask and in a call time. Desktop keys (click the desktop frame first): <b>C</b> copy, <b>D</b> done, <b>L</b> later, <b>X</b> not for me, <b>U</b> undo, <b>W</b> work through them, <b>R</b> read it to me, <b>/</b> find or ask, <b>1–5</b> places, <b>J/K</b> move, <b>Esc</b> back.</p>
+  <div class="ctrls">
+    <div><span class="eyebrow">Lighting</span><div class="seg" id="c-light"><button data-v="day" aria-pressed="true">Day</button><button data-v="night">Night</button></div></div>
+    <div><span class="eyebrow">Desktop</span><div class="seg" id="c-w"><button data-v="1440" aria-pressed="true">1440</button><button data-v="1280">1280</button></div></div>
+    <div><span class="eyebrow">Page</span><div class="seg" id="c-page"><button data-v="auto" aria-pressed="true">Auto</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div></div>
+  </div>
+  <div class="flows" id="flowbtns"></div>
+  <div class="stepbar"><div class="num" id="stepnums"></div><div class="sd" id="stepdesc"></div><button class="pbtn" id="sprev">← Back</button><button class="pbtn" id="snext">Next step →</button></div>
+  <div class="stage">
+    <figure><div class="frame" id="fd"></div><figcaption id="capd">Desktop 1440 × 900</figcaption></figure>
+    <figure><div class="frame ph" id="fp"></div><figcaption>Phone 390 × 844</figcaption></figure>
+  </div>
+</section>
+
+<section style="display:grid;gap:14px">
+  <h2 class="ps">2 · Day and night</h2>
+  <p class="muted">Every place at both lightings. Desktop frames are 1280 × 800, phones 390 × 844. Every frame is live.</p>
+  <div class="gald" id="gald"></div>
+  <div class="gal" id="galp"></div>
+</section>
+
+<section style="display:grid;gap:14px">
+  <h2 class="ps">3 · What's new or redrawn</h2>
+  <div class="elist">
+    <div><b>The quiet group</b>A panel one step lighter than the ground by day and one step lighter than the navy by night, with a hairline edge, 16 px corners, a mono label at the top left and at most one quiet link at the top right. No shadow, no fill colour for state. A cue that needs you adds a 3 px edge in its state colour (red alert, amber clash), never a filled panel.</div>
+    <div><b>First reply</b>Today's front door is one panel holding one person: who, why, what they want, the draft in an inset, and the one orange. An alert or a clash takes the same panel, and the reply waits on its Then line.</div>
+    <div><b>Grouped replies</b>Replies are grouped by why they wait (Due today, Asked you, Waiting a while), one panel each, so a list of seven reads as three short lists. The reply itself is two panels: what they want, then your draft.</div>
+    <div><b>The chat</b>Bubbles for you, panels for Callsheet. Each answer has its numbered sources beside it on desktop (hover a number to light its source) and folded under it on the phone. One quiet line under each answer: what it read, How I found it, Copy. The composer is docked; Ask turns orange only when there's a question in it.</div>
+    <div><b>Working, the one light in Ask</b>While Callsheet reads, its turn shows a lit slot and the source it's reading, with Stop. That's real status, so it keeps a light. Nothing loops: no dots, no spinner.</div>
+    <div><b>Flat tick boxes and option rows</b>Settings and choices use a flat tick box (ink fill when on) and option rows that press in. They're controls, not lights, so they don't use the indicator-window vocabulary.</div>
+  </div>
+</section>
+</div>
+
+<script>
+/* ---------- data (sample only) ---------- */
+const REPLIES=[
+ {id:1,who:'Priya N.',area:'Co. A',ask:'Needs the Q4 budget sign-off today.',why:['Always counts','Due today'],grp:'due',age:'07:40',
+  said:'“Could you sign off the Q4 budget by end of day? Finance closes the sheet tomorrow.”',
+  draft:'Hi Priya, signed off with one change: the contractor line moves to Q1. Thanks for chasing. Sam'},
+ {id:2,who:'School office',area:'Personal',ask:'Trip form for Friday, due tonight.',why:['Due today'],grp:'due',age:'Yesterday',
+  said:'“Please return the signed trip form by Thursday so we can confirm numbers.”',
+  draft:'Hello, Mia can go on Friday’s trip. The signed form comes in with her tomorrow morning. Thanks, Sam'},
+ {id:3,who:'Marco D.',area:'Co. B',ask:'Asks when the supplier contract ends.',why:['Asked you'],grp:'ask',age:'2 days',
+  said:'“When does the current supplier contract end, and is there a notice period?”',
+  draft:'Hi Marco, it ends on 31 March with 60 days’ notice, so we’d need to decide by 30 January. Sam'},
+ {id:4,who:'A. Reyes',area:'Personal · landlord',ask:'Which morning suits the boiler visit?',why:['Asked you'],grp:'ask',age:'3 days',
+  said:'“The engineer can come Tuesday or Wednesday morning. Which suits?”',
+  draft:'Hi, Wednesday morning works. Someone is in from 8. Thanks, Sam'},
+ {id:5,who:'Tom B.',area:'Personal',ask:'Dinner on Saturday?',why:['Asked you'],grp:'ask',age:'Yesterday',
+  said:'“Are you two free for dinner Saturday? Thinking 7.”',draft:'Saturday at 7 sounds great. What can we bring? Sam'},
+ {id:6,who:'Lena K.',area:'Co. A',ask:'Wants an intro to Ben at Northwind.',why:['Waiting'],grp:'wait',age:'5 days',
+  said:'“Would you mind introducing me to Ben? Happy to send a blurb.”',draft:'Hi Lena, happy to. Send me the blurb and I’ll write to Ben today. Sam'},
+ {id:7,who:'Northwind Store',area:'Personal',ask:'Asks you to review your last order.',why:['Waiting'],grp:'wait',age:'6 days',
+  said:'“How did we do? Leave a review of your recent order.”',draft:null}
+];
+const GROUPS=[['due','Due today'],['ask','Asked you'],['wait','Waiting a while']];
+const EVENTS=[
+ {id:'su',t:570,d:15,title:'Stand-up',meta:'Co. A · video'},
+ {id:'rr',t:660,d:60,title:'Roadmap review',meta:'Co. A · Room 3',clash:'sc'},
+ {id:'sc',t:660,d:30,title:'Supplier call',meta:'Co. B · phone',clash:'rr'},
+ {id:'lj',t:780,d:45,title:'Lunch with Jo',meta:'Personal · Café Rosa'},
+ {id:'dc',t:900,d:60,title:'Design crit',meta:'Co. B · moved from 14:00'},
+ {id:'sw',t:1110,d:30,title:'Pick up Mia from swimming',meta:'Personal'}
+];
+const NOTES=[
+ {id:'si',txt:'New sign-in to your Co. A Google account from a Mac in Leeds, 06:12.',alert:true},
+ {id:'mv',txt:'Design crit moved from 14:00 to 15:00.'},
+ {id:'ex',txt:'Co. A’s expenses tool is down until noon.'}
+];
+const ADV=[{d:'Fri 6',t:'Dentist · 08:40'},{d:'Mon 9',t:'Co. B board pack due'},{d:'Thu 12',t:'Flu jab · 10:00'},{d:'Sat 21',t:'Jo’s birthday'}];
+const INV=[{t:'Q1 planning offsite',m:'Co. A · Tue 18 Nov · from Priya N.'},{t:'Supplier call, new time',m:'Co. B · Fri 6 Nov 14:00 · from Marco D.'},{t:'Parents’ evening',m:'Personal · Wed 19 Nov 18:00'}];
+const POSS=[{t:'Boiler visit',m:'Tue or Wed morning · A. Reyes asked, not booked'},{t:'Dinner with Tom B.',m:'Sat 19:00 · asked, not answered'}];
+const SRC={1:'Calendars · Co. A and Co. B',2:'Gmail · Co. A and Personal',3:'All 8 calendars',4:'Google security mail · Co. A'};
+function summary(s){
+  if(s.time>=1020) return [{t:'The 17:00 check-in found nothing new',fn:2},{t:'The evening is clear apart from one pick-up',fn:1}];
+  const L=[{t:'Six things on the calendar, and two of them land at 11:00',fn:1,fact:'clash'},{t:'Two replies are due today; the rest can wait',fn:2},{t:'Clear after 16:00',fn:3}];
+  if(s.sit==='alert') L.unshift({t:'A new sign-in to your Co. A account at 06:12 needs a look',fn:4,fact:'signin'});
+  return L;
+}
+const VOICE=[
+ {s:0,g:'Six things; two at 11:00',t:'Good morning, Sam. Six things today, and two of them land at eleven, so you’ll need to pick one.'},
+ {s:0,g:'Clear after 16:00',t:'After four o’clock the day is clear, apart from swimming at half six.'},
+ {s:1,g:'Priya: budget sign-off',t:'First, Priya. She needs the Q4 budget sign-off today, and there’s a draft ready.'},
+ {s:1,g:'School office: trip form',t:'Then the school office: the trip form for Friday is due tonight.'},
+ {s:2,g:'Design crit moved',t:'Worth knowing: the design crit moved to three o’clock.'},
+ {s:3,g:'Dentist, board pack',t:'Coming up: the dentist tomorrow at 8:40, and Co. B’s board pack is due Monday.'},
+ {s:3,g:'The end',t:'That’s everything. Nothing was sent.'}
+];
+const SECS=['Your day','Who needs you','Worth knowing','Coming up'];
+const TABS=[['today','Today'],['replies','Replies'],['agenda','Agenda'],['ask','Ask'],['projects','Projects']];
+/* Ask */
+const TURNS=[
+ {t:'07:02',q:'What time is swimming?',
+  a:[['Mia’s swimming ends at 18:30 on Thursdays',1],[', and the pool asks for pick-up by 18:40',2],['.',0]],
+  read:'Read 1 calendar and 1 thread',
+  src:[['Calendar · Personal','“Swimming”, repeats Thursdays 17:45–18:30'],['Gmail · Personal','Leisure centre, 2 Sep: “please collect by 18:40”']],
+  how:['Searched 8 calendars for “swim”: one repeating event.','Searched mail near it for “pick-up”: one thread, 2 Sep.','Nothing newer changes either time.'],
+  rem:'Mia’s swimming pick-up is 18:40 on Thursdays.'},
+ {t:'07:05',q:'When is the boiler visit?',
+  a:[['Nothing is booked yet. A. Reyes offered Tuesday or Wednesday morning',1],[', and your draft says Wednesday',2],[', but it hasn’t been sent.',0]],
+  read:'Read 1 thread and 1 draft',reading:'Reading Gmail · Personal',
+  src:[['Gmail · Personal','A. Reyes, 3 Nov: “Tuesday or Wednesday morning”'],['Callsheet draft','In Replies · not sent']],
+  how:['Searched mail for “boiler”: one thread, from A. Reyes.','Checked calendars for a booking: none.','Found your draft in Replies; it hasn’t been sent.']}
+];
+const CONVS=[['Today','Swimming, the boiler visit','today'],['Yesterday','Supplier contract notice','y'],['Mon 2 Nov','Dentist time','m']];
+const SUGS=['What’s due this week?','When is the boiler visit?','What did Marco ask about the contract?','Who have I not answered in a week?'];
+/* People, Know me, Projects, Setup */
+const PAIRS=[
+ {a:{name:'Priya N.',mail:'priya@co-a.example',phone:'07700 900123',chat:'Slack · @priya'},b:{name:'Priya Nair',mail:'p.nair@mail.example',phone:'07700 900123',chat:'—'},
+  m:{name:'≈',mail:'≠',phone:'=',chat:'·'},why:'Same phone number, and the names agree.'},
+ {a:{name:'Marco D.',mail:'marco@co-b.example',phone:'—',chat:'Signal'},b:{name:'Marco Diaz',mail:'marco.d@mail.example',phone:'—',chat:'Signal'},
+  m:{name:'≈',mail:'≠',phone:'·',chat:'='},why:'The same Signal contact signs both mails.'},
+ {a:{name:'Tom B.',mail:'tom@home.example',phone:'07700 900456',chat:'—'},b:{name:'Tom Baker',mail:'tbaker@work.example',phone:'07700 900789',chat:'—'},
+  m:{name:'≈',mail:'≠',phone:'≠',chat:'·'},why:'Only the names are close. Probably two people.'}
+];
+const PEOPLE=[
+ {id:'pn',name:'Priya N.',w:'Co. A · mail, Slack',last:'Today 07:40',ac:true,wait:1,where:['priya@co-a.example','Slack · Co. A · @priya'],note:'Manager at Co. A.'},
+ {id:'so',name:'School office',w:'Personal · mail',last:'Yesterday',ac:true,wait:2,where:['office@school.example'],note:''},
+ {id:'md',name:'Marco D.',w:'Co. B · mail, Signal',last:'2 days ago',ac:false,wait:3,where:['marco@co-b.example','Signal'],note:''},
+ {id:'jo',name:'Jo',w:'Personal · Signal',last:'Today 07:02',ac:true,wait:0,where:['Signal'],note:''},
+ {id:'lk',name:'Lena K.',w:'Co. A · mail',last:'5 days ago',ac:false,wait:6,where:['lena@co-a.example'],note:''}
+];
+const FACTS=[
+ {t:'You sign emails “Sam”.',s:'Gmail · sent mail, 1,240 messages'},
+ {t:'Priya N. is your manager at Co. A.',s:'Gmail · Co. A, 312 threads',chk:1},
+ {t:'You prefer meetings after 09:30.',s:'Calendars · 8, the last 90 days',chk:1},
+ {t:'You keep Friday afternoons free.',s:'Calendars · 8, the last 90 days'},
+ {t:'Your replies are short: most are under 40 words.',s:'Gmail · sent mail, 1,240 messages'},
+ {t:'Co. B is a board role that meets monthly.',s:'Calendar · Co. B; Gmail · Co. B'}
+];
+const QS=[{q:'When should a reply count as late?',o:['After a day','After two days','Only when they say it’s urgent']}];
+const PROJ=[
+ {id:'qb',name:'Q4 budget',m:'Co. A · sign-off due today',st:'On track'},
+ {id:'kr',name:'Kitchen refit',m:'Personal · fitting moved a week',st:'Slipped',w:1},
+ {id:'ss',name:'Supplier switch',m:'Co. B · waiting on Marco D.',st:'Waiting'}
+];
+const TASKS=[['t1','Choose worktop'],['t2','Pay deposit'],['t3','Clear the kitchen by 20 Nov'],['t4','Book electrician for 24 Nov']];
+const CALLT=[{t:'06:30',n:'Morning brief',w:'Careful',d:'Every day'},{t:'12:30',n:'Midday check-in',w:'Careful',d:'Weekdays'},{t:'17:00',n:'Evening check-in',w:'Careful',d:'Weekdays'}];
+const SETS=[['conn','A','Connections','4 Google accounts · Slack · notes'],['day','B','Your day','Call times 06:30 · 12:30 · 17:00'],['ai','C','AI','Claude writes · sorting on'],['adv','D','Advanced','10 rare settings, each in a drawer']];
+const DRAWERS=[['key','Google sign-in key'],['model','Model server'],['pre','Presets'],['eng','Chat engine'],['alerts','Alerts'],['wi','Writing instructions'],['mem','Memory file'],['eval','Writer check'],['sig','Signal import'],['start','Start over']];
+
+/* ---------- helpers ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const dur=m=>m<60?m+' min':(Math.floor(m/60)+' h'+(m%60?' '+(m%60):''));
+const kh=k=>`<span class="kh">${k}</span>`;
+const SEARCH='<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>';
+function evs(s){return EVENTS}
+function openR(s){return REPLIES.filter(r=>!s.done.has(r.id)&&!s.later.has(r.id)&&!s.nf.has(r.id))}
+function rep(id){return REPLIES.find(r=>r.id===id)}
+function nowS(s){return fmt(s.time)}
+function cue(s){
+  if(s.sit==='alert'&&!s.alertSeen) return 'alert';
+  const c=evs(s).find(e=>e.clash);
+  if(c&&s.time>=c.t-60&&s.time<c.t&&!s.clashAck) return 'clash';
+  return openR(s).length?'reply':'wrap';
+}
+function liveFacts(s){const f=new Set(),c=cue(s);if(c==='clash')f.add('clash');if(s.sit==='alert')f.add('signin');return f}
+function base(dev){return{dev,theme:'day',time:394,sit:'normal',view:'today',done:new Set(),copied:new Set(),later:new Set(),nf:new Set(),
+  alertSeen:false,clashAck:false,sel:1,detail:false,more:false,nfOpen:null,nfScope:'one',find:false,mock:null,retry:0,last:null,fnOpen:0,checked:null,
+  conv:'today',q:'',asked:0,how:new Set(),hi:null,rem:0,pair:0,person:null,km:'home',kmq:false,kmAns:null,kmi:0,forgot:new Set(),proj:null,tasks:new Set(['t1','t2']),
+  sp:dev==='desk'?'day':'home',ce:null,ctv:'',tg:{phone:true,tablet:false,light:'auto',writer:'claude',sort:'group',chat:true},gOff:false,drw:null,confirm:false,
+  voice:0,playing:true,heard:null,oat:0,sideOpen:false}}
+
+/* ---------- pieces ---------- */
+function undoK(){return `<button class="k q" data-act="undo">Undo ${kh('U')}</button>`}
+function keyCopy(s,r,orange,quiet){
+  if(!r.draft) return '';
+  if(s.copied.has(r.id)) return `<span class="copied">Copied ${esc(s.copiedAt||nowS(s))}</span>${s.last&&s.last.k==='copy'&&s.last.id===r.id?undoK():''}`;
+  return `<button class="k ${orange?'go':''}${quiet?' q q0':''}" data-act="copy:${r.id}">Copy draft ${kh('C')}</button>`;
+}
+function struck(s,only){
+  const L=s.last; if(!L||!['done','later','nf'].includes(L.k)) return '';
+  const r=rep(L.id); if(only&&r.grp!==only) return '';
+  const w={done:`done ${L.at}`,later:'later: back at 12:30',nf:'moved out of Replies'}[L.k];
+  return `<div class="strk"><span class="w">${esc(r.who)} · ${w}</span>${undoK()}</div>`;
+}
+function fnB(s,n){return s.dev==='phone'?`<button class="fn" data-act="fn:${n}" aria-label="Source ${n}">${n}</button>`:`<span class="fn" title="${esc(SRC[n])}">${n}</span>`}
+function lede(s){
+  const live=liveFacts(s);
+  const L=summary(s).filter(x=>!x.fact||!live.has(x.fact));
+  const html=L.map(x=>esc(x.t)+fnB(s,x.fn)).join('. ')+'.';
+  const fx=s.fnOpen?`<div class="fnx"><span>${s.fnOpen} · ${esc(SRC[s.fnOpen])}</span><button class="k q" data-act="fn:0">Close</button></div>`:'';
+  return `<p class="lede">${html}</p>${fx}`;
+}
+function fnOf(s,f){const x=summary(s).find(y=>y.fact===f);return x?fnB(s,x.fn):''}
+function mockNote(s){return s.mock?`<div class="mock"><b>MOCKUP</b>${esc(s.mock)}</div>`:''}
+
+/* ---------- Today ---------- */
+function thenLine(s){
+  const r=openR(s)[0]; if(!r) return '';
+  return `<div class="then"><span class="t">THEN</span><span class="n"><b style="font-weight:500">${esc(r.who)}</b> <span class="dim">· ${esc(r.ask)}</span></span><span>${keyCopy(s,r,false,true)}</span></div>`;
+}
+function nextCard(s){
+  const c=cue(s), desk=s.dev==='desk', off=s.sit==='offline';
+  if(c==='alert') return `<section class="card cue-al"><div class="lab al"><span class="led al"></span>Alert · 06:12${fnOf(s,'signin')}</div>
+    <p class="say">A new sign-in to your Co. A Google account, from a Mac in Leeds. Was it you?</p>
+    <div class="keys"><button class="k red" data-act="alertcheck">Check the sign-in ${kh('↵')}</button><button class="k q" data-act="alertseen">It was me</button></div>${mockNote(s)}${thenLine(s)}</section>`;
+  if(c==='clash'){const e=evs(s).find(x=>x.clash);const mins=e.t-s.time;
+    return `<section class="card cue-wn"><div class="lab wn"><span class="led wn"></span>▲ Clash · 11:00 · in ${mins} min${fnOf(s,'clash')}</div>
+    <p class="say">The roadmap review and the supplier call both start at 11:00. Pick one.</p>
+    <div class="keys"><button class="k go" data-act="tab:agenda">See the clash ${kh('↵')}</button><button class="k q" data-act="gotit">Got it</button></div>${thenLine(s)}</section>`;}
+  if(c==='wrap'){const a=s.done.size, l=s.later.size+s.nf.size;
+    return `<section class="card"><div class="lab">All answered · ${nowS(s)}</div>
+    <div class="figs"><div><b>${a}</b><span>Answered</span></div><div><b>${l}</b><span>For tomorrow</span></div></div>
+    <div class="wal"></div><p class="say" style="margin:0">Nothing was sent. The drafts you copied are yours.</p></section>`;}
+  const o=openR(s), r=o[0], copied=s.copied.has(r.id);
+  const tags=r.why.map(w=>`<span class="tag">${w}</span>`).join('');
+  let more='';
+  if(s.more) more=`<div class="keys" style="margin-top:6px">${!desk?`<button class="k q q0" data-act="open:${r.id}">Open in Gmail</button>`:''}<button class="k q${desk?' q0':''}" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="note:${r.id}">Note ${kh('N')}</button><button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button></div>`;
+  return `<section class="card"><div class="lab">First reply<span class="r"><button class="k q" data-act="oat">Work through them ${kh('W')}</button></span></div>
+    <div class="who"><b>${esc(r.who)}</b><span class="dim">· ${esc(r.area)}</span><span class="age">${esc(r.age)}</span></div>
+    <div class="tags" style="margin-top:8px">${tags}</div>
+    <p class="ask">${esc(r.ask)}</p>
+    ${r.draft?`<div class="draft"><span class="dl">Draft</span>${esc(r.draft)}</div>`:''}
+    <div class="keys">${keyCopy(s,r,!off)}<button class="k ${copied&&!off?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button>${desk?`<button class="k q" data-act="open:${r.id}">Open in Gmail ${kh('O')}</button>`:''}<button class="k q" data-act="more" aria-expanded="${s.more}">${s.more?'Less':'More'}</button></div>${more}${mockNote(s)}</section>`;
+}
+function alsoCard(s){
+  const c=cue(s), o=openR(s); if(!o.length&&!(s.last&&['done','later','nf'].includes(s.last.k))) return '';
+  const rest=c==='reply'?o.slice(1):o.slice(1); /* the first is in the cue or on its Then line */
+  const max=s.dev==='desk'?4:3;
+  const rows=rest.slice(0,max).map(r=>rowR(s,r,false)).join('');
+  const more=rest.length>max?`<button class="morel" data-act="tab:replies">${rest.length-max} more in Replies ›</button>`:'';
+  if(!rows&&!struck(s)) return '';
+  return `<section class="card"><div class="lab">Also waiting<span class="r"><button class="k q" data-act="tab:replies">Replies ${kh('2')}</button></span></div><div class="rl">${struck(s)}${rows}</div>${more}</section>`;
+}
+function rowR(s,r,selectable,glab){
+  const sel=selectable&&s.dev==='desk'&&s.sel===r.id?' sel':'';
+  const why=r.why.filter(w=>w!=='Waiting'&&w!==glab).join(' · ');
+  return `<button class="rr${sel}" data-act="sel:${r.id}"><span class="nm">${esc(r.who)} <span class="dim">· ${esc(r.area)}</span></span><span class="ag">${esc(r.age)}</span><span class="tx">${esc(r.ask)}</span><span class="rs">${esc(why)}</span></button>`;
+}
+function dayItems(){
+  const E=evs(), out=[];
+  for(let i=0;i<E.length;i++){const e=E[i];
+    if(e.clash&&E[i+1]&&E[i+1].clash===e.id){out.push({t:e.t,end:Math.max(e.t+e.d,E[i+1].t+E[i+1].d),cl:[e,E[i+1]]});i++}
+    else out.push({t:e.t,end:e.t+e.d,ev:e});}
+  return out;
+}
+function evRow(s,e,cls){return `<div class="ev"><b>${esc(e.title)}</b><div class="m">${esc(e.meta)} · ${dur(e.d)}</div></div>`}
+function dayRows(s,full){
+  const items=dayItems(); let out=''; let nowDone=false, gapDone=false, prevEnd=0;
+  const nowRow=()=>`<div class="nowr"><span class="tm">${nowS(s)}</span><i></i></div>`;
+  const gapRow=(to,len,first)=>`<div class="gapr"><span></span><div class="g"><span class="mono">Free until ${fmt(to)} · ${dur(len).toUpperCase()}</span>${first&&!full&&cue(s)==='reply'?`<br>A free stretch for replies. <button class="k q q0" data-act="oat" style="min-height:30px">Work through them</button>`:''}</div></div>`;
+  items.forEach(it=>{
+    const past=it.end<=s.time, on=it.t<=s.time&&s.time<it.end;
+    if(!full&&past){prevEnd=it.end;return}
+    if(!nowDone&&s.time<it.t){out+=nowRow();nowDone=true;const from=Math.max(s.time,prevEnd);if(it.t-from>=30){out+=gapRow(it.t,it.t-from,true);gapDone=true}}
+    else if(full&&nowDone&&it.t-prevEnd>=30) out+=gapRow(it.t,it.t-prevEnd,false);
+    if(it.cl){
+      const ack=s.clashAck?`<div class="cl" style="color:var(--dim)">Got it ${s.ackAt||'10:06'}${s.last&&s.last.k==='gotit'?'':''}</div>`:`<div class="cl"><span class="led wn"></span>▲ Clash · pick one</div>`;
+      out+=`<div class="tr${past?' past':''}"><span class="tm">${fmt(it.t)}</span><div class="clb">${ack}${it.cl.map(e=>evRow(s,e)).join('')}${s.clashAck&&s.last&&s.last.k==='gotit'?`<div>${undoK()}</div>`:''}</div></div>`;
+    } else {
+      out+=`<button class="tr${past?' past':''}${on?' on':''}" data-act="tab:agenda"><span class="tm">${fmt(it.t)}</span>${evRow(s,it.ev)}</button>`;
+    }
+    if(on&&!nowDone){out+=nowRow();nowDone=true}
+    prevEnd=Math.max(prevEnd,it.end);
+  });
+  if(!nowDone) out+=nowRow();
+  out+=`<div class="endr">Clear from ${fmt(prevEnd)}</div>`;
+  return out;
+}
+function dayCard(s){
+  const pastN=dayItems().filter(it=>it.end<=s.time).length;
+  return `<section class="card"><div class="lab">Your day<span class="r"><button class="k q" data-act="tab:agenda">Agenda ${kh('3')}</button></span></div>
+  ${pastN?`<div class="sub" style="margin:-6px 0 4px">${pastN} done earlier</div>`:''}<div class="tl">${dayRows(s,false)}</div></section>`;
+}
+function knowCard(s){
+  const items=NOTES.filter(n=>!(n.alert&&cue(s)==='alert')&&!(n.id==='ex'&&s.time>=720)).map(n=>{
+    let after='';
+    if(n.alert) after=s.sit==='alert'?`<div class="sub">Seen ${s.seenAt||'06:41'} ${s.last&&s.last.k==='seen'?undoK():''}</div>`:`<div class="sub">Seen 06:20</div>`;
+    return `<div class="note"><p>${esc(n.txt)}</p>${after}</div>`}).join('');
+  return `<section class="card"><div class="lab">Worth knowing</div>${items}</section>`;
+}
+function comingCard(s){
+  return `<section class="card"><div class="lab">Coming up</div><div class="kv">${ADV.map(a=>`<span class="d">${a.d}</span><span>${esc(a.t)}</span>`).join('')}</div></section>`;
+}
+function today(s){
+  const desk=s.dev==='desk', c=cue(s), wrap=c==='wrap';
+  const hl=wrap?'That’s the day, Sam.':(s.time>=720?'Good afternoon, Sam.':'Good morning, Sam.');
+  const dl=`<div class="dline"><span>${desk?'Thursday 5 November':'Thu 5 Nov'} · ${s.time>=1020?'check-in 17:00':'brief 06:30'}</span>${desk?'':`<button class="k q" data-act="voice" style="min-height:28px">Read it to me</button>`}</div>`;
+  const promise=wrap?'':' · Nothing was sent. Drafts wait for you.';
+  const foot=`<div class="foot"><span>Written 06:30 from 4 Google accounts, 8 calendars, Slack${s.checked?` · checked ${s.checked}, nothing new`:''}${promise}</span></div>`;
+  if(desk) return `<div class="inner"><div class="hero"><div>${dl}<h1 class="hl">${hl}</h1></div><div><div class="dline" style="justify-content:flex-end"><button class="k q" data-act="voice">Read it to me ${kh('R')}</button></div>${lede(s)}</div></div>
+    <div class="g75"><div class="col">${nextCard(s)}${alsoCard(s)}</div><div class="col">${dayCard(s)}${knowCard(s)}${comingCard(s)}</div></div>${foot}</div>`;
+  return `${dl}<h1 class="hl">${hl}</h1>${lede(s)}<div class="col" style="margin-top:18px">${nextCard(s)}${dayCard(s)}${alsoCard(s)}${knowCard(s)}${comingCard(s)}</div>${foot}`;
+}
+
+/* ---------- Replies ---------- */
+function replyDetail(s,r){
+  const desk=s.dev==='desk', off=s.sit==='offline', copied=s.copied.has(r.id);
+  const tags=r.why.map(w=>`<span class="tag">${w}</span>`).join('');
+  const a=`<section class="card"><div class="lab">What they want<span class="r mono" style="font:500 13px var(--mono);color:var(--dim)">${esc(r.age)}</span></div>
+    <div class="who"><b style="font-size:26px">${esc(r.who)}</b><span class="dim">· ${esc(r.area)}</span></div>
+    <div class="tags" style="margin-top:10px">${tags}</div>
+    <p class="ask" style="font-size:19px;margin-bottom:12px">${esc(r.ask)}</p>
+    <p class="sub" style="margin:0;padding-left:14px;border-left:2px solid var(--rule);font-size:15.5px">${esc(r.said)}</p></section>`;
+  const b=`<section class="card"><div class="lab">Your draft${desk?'<span class="r sub" style="font-size:14px">Edit before you copy. Nothing sends from here.</span>':''}</div>${desk?'':'<p class="sub" style="margin:-8px 0 10px">Edit before you copy. Nothing sends from here.</p>'}
+    ${r.draft?`<textarea class="draft" aria-label="Draft">${esc(r.draft)}</textarea>`:'<div class="draft">No draft: this looks like a shop mailing. Not for me?</div>'}
+    <div class="keys">${r.draft?keyCopy(s,r,!off):`<button class="k go" data-act="notfor:${r.id}">Not for me ${kh('X')}</button>`}<button class="k ${copied&&!off?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button><button class="k q" data-act="open:${r.id}">Open in Gmail ${kh('O')}</button></div>
+    <div class="keys" style="margin-top:6px"><button class="k q q0" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="note:${r.id}">Note ${kh('N')}</button>${r.draft?`<button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button>`:''}</div>${mockNote(s)}</section>`;
+  return a+b;
+}
+function replies(s){
+  const desk=s.dev==='desk', o=openR(s);
+  if(!desk&&s.detail){const r=rep(s.sel);return `<button class="k q q0" data-act="back" style="margin-bottom:8px">‹ Replies</button><div class="col">${replyDetail(s,r)}</div>`}
+  const groups=GROUPS.map(([g,name])=>{const rs=o.filter(r=>r.grp===g);const st=struck(s,g);if(!rs.length&&!st)return '';
+    return `<section class="card"><div class="lab">${name}</div><div class="rl">${st}${rs.map(r=>rowR(s,r,true,name)).join('')}</div></section>`}).join('');
+  const head=`<div class="phead"><div><div class="dline">Replies</div><h1 class="h2">${o.length?`${o.length} people are waiting`:'Nobody is waiting on you'}</h1></div>${o.length?`<button class="k" data-act="oat">Work through them ${kh('W')}</button>`:''}</div>`;
+  if(!o.length) return `<div class="inner">${head}<section class="card"><p class="say" style="margin:0">All clear. Nothing was sent.</p></section></div>`;
+  if(!desk) return head+`<div class="col">${groups}</div>`;
+  const cur=o.find(r=>r.id===s.sel)||o[0];
+  return `<div class="inner">${head}<div class="g57"><div class="col">${groups}</div><div class="col">${replyDetail(s,cur)}</div></div></div>`;
+}
+function oat(s){
+  const o=openR(s), total=REPLIES.length, desk=s.dev==='desk';
+  const prog=REPLIES.map((r,i)=>`<i class="${s.done.has(r.id)||s.later.has(r.id)||s.nf.has(r.id)?'d':(o[0]&&o[0].id===r.id?'c':'')}"></i>`).join('');
+  if(!o.length){const a=s.done.size,l=s.later.size+s.nf.size;
+    return `<div class="solo"><div class="prog">${prog}</div><div class="dline"><span>Work through them</span><span>${total} of ${total}</span></div>
+    <section class="card" style="margin-top:14px"><div class="lab">All answered · ${nowS(s)}</div><div class="figs"><div><b>${a}</b><span>Answered</span></div><div><b>${l}</b><span>For tomorrow</span></div></div><div class="wal"></div><p class="say" style="margin:0 0 18px">Nothing was sent. The drafts you copied are yours.</p><button class="k" data-act="tab:today">Back to Today</button></section></div>`;}
+  const r=o[0], copied=s.copied.has(r.id), n=total-o.length+1;
+  return `<div class="solo"><div class="prog">${prog}</div><div class="dline"><span>Work through them</span><span>${n} of ${total}</span></div>
+  <section class="card" style="margin-top:14px"><div class="who"><b style="font-size:28px">${esc(r.who)}</b><span class="dim">· ${esc(r.area)}</span><span class="age">${esc(r.age)}</span></div>
+  <div class="tags" style="margin-top:10px">${r.why.map(w=>`<span class="tag">${w}</span>`).join('')}</div><p class="ask" style="font-size:20px">${esc(r.ask)}</p>
+  ${r.draft?`<div class="draft"><span class="dl">Draft</span>${esc(r.draft)}</div>`:'<div class="draft">No draft: this looks like a shop mailing.</div>'}
+  <div class="keys">${r.draft?keyCopy(s,r,true):`<button class="k go" data-act="notfor:${r.id}">Not for me ${kh('X')}</button>`}<button class="k ${copied?'go':''}" data-act="done:${r.id}">Done ${kh('D')}</button></div>
+  <div class="keys" style="margin-top:6px"><button class="k q q0" data-act="later:${r.id}">Later ${kh('L')}</button><button class="k q" data-act="open:${r.id}">Open ${kh('O')}</button>${r.draft?`<button class="k q" data-act="notfor:${r.id}">Not for me ${kh('X')}</button>`:''}</div>${mockNote(s)}</section>
+  ${desk?'':'<p class="sub" style="text-align:center;margin-top:12px">Swipe right for done, left for later</p>'}
+  <div style="margin-top:10px"><button class="k q q0" data-act="tab:today">‹ Back</button></div></div>`;
+}
+
+/* ---------- Agenda ---------- */
+function agenda(s){
+  const desk=s.dev==='desk';
+  const head=`<div class="phead"><div><div class="dline">Agenda</div><h1 class="h2">Thursday 5 November</h1></div></div>`;
+  const tl=`<section class="card"><div class="lab">Today<span class="r sub" style="font-size:14px">8 calendars</span></div><div class="tl">${dayRows(s,true)}</div></section>`;
+  const inv=`<section class="card"><div class="lab">Invites to answer</div>${INV.map(i=>`<div class="note"><p style="font-weight:500">${esc(i.t)}</p><div class="sub">${esc(i.m)}</div><button class="k q q0" data-act="mock:Google Calendar opens this invite in a new tab." style="min-height:32px">Answer in Google Calendar</button></div>`).join('')}</section>`;
+  const pos=`<section class="card"><div class="lab">From mail, not booked</div>${POSS.map(i=>`<div class="note"><p style="font-weight:500">${esc(i.t)}</p><div class="sub">${esc(i.m)}</div></div>`).join('')}</section>`;
+  return `<div class="inner">${head}<div class="g75"><div class="col">${tl}</div><div class="col">${inv}${pos}${mockNote(s)}</div></div></div>`;
+}
+
+/* ---------- Ask (chat) ---------- */
+function subrow(s){
+  const cur={ask:'ask',people:'people',knowme:'knowme'}[s.view];
+  return `<nav class="subrow">${[['ask','Ask'],['people','People'],['knowme','Know me']].map(([v,l])=>`<button data-act="tab:${v}" ${cur===v?'aria-current="page"':''}>${l}</button>`).join('')}</nav>`;
+}
+function ansHTML(s,T,ti){
+  return T.a.map(([t,n])=>esc(t)+(n?`<button class="fn" data-act="hi:${ti}.${n}" aria-label="Source ${n}">${n}</button>`:'')).join('');
+}
+function turnPair(s,T,ti,stage){
+  const desk=s.dev==='desk';
+  const u=`<div class="turn u"><div><div class="meta">You · ${T.t}</div><div class="bub">${esc(T.q)}</div></div>${desk?'<div></div>':''}</div>`;
+  if(stage==='reading') return u+`<div class="turn a"><div><div class="meta">Callsheet</div><div class="bub"><div class="reading"><span class="slot"></span>${esc(T.reading)}<button class="k" data-act="stop">Stop</button></div></div></div>${desk?'<div></div>':''}</div>`;
+  const srcs=`<div class="srcs">${T.src.map(([a,b],i)=>`<div class="src${s.hi===ti+'.'+(i+1)?' hi':''}"><span class="fn">${i+1}</span><span><b>${esc(a)}</b>${esc(b)}</span></div>`).join('')}</div>`;
+  const how=s.how.has(ti)?`<div class="how">${T.how.map(h=>`<div>${esc(h)}</div>`).join('')}</div>`:'';
+  const rem=T.rem&&s.rem===0&&ti===0?`<div class="rem"><span class="lb">Remember this?</span><p>${esc(T.rem)}</p><div class="keys"><button class="k" data-act="rem:1">Save to Know me</button><button class="k q" data-act="rem:2">Not now</button></div></div>`
+    :T.rem&&s.rem===1&&ti===0?`<div class="rem" style="border-style:solid;border-color:var(--hair)"><span class="lb">Saved to Know me · 07:03</span> <button class="k q" data-act="rem:0">Undo</button></div>`:'';
+  const a=`<div class="turn a"><div><div class="meta">Callsheet</div><div class="bub"><p>${ansHTML(s,T,ti)}</p>${desk?'':srcs}
+    <div class="acts"><span class="sp">${esc(T.read)}</span><button class="k q" data-act="how:${ti}" aria-expanded="${s.how.has(ti)}">${s.how.has(ti)?'Hide how':'How I found it'}</button><button class="k q" data-act="mock:Copied the answer and its sources.">Copy</button></div>${how}</div>${rem}</div>${desk?srcs:''}</div>`;
+  return u+a;
+}
+function ask(s){
+  const desk=s.dev==='desk', hasQ=!!s.q.trim()&&s.sit!=='offline';
+  let thread='';
+  if(s.conv==='new'){
+    thread=`<div class="cempty"><h2 class="h2">Ask about your mail, chat, calendar and notes.</h2><p class="sub" style="font-size:16px">It reads only. Every answer shows where it came from.</p><div class="sugs">${SUGS.map(q=>`<button class="sug" data-act="sug:${esc(q)}">${esc(q)}</button>`).join('')}</div></div>`;
+  } else if(s.conv!=='today'){
+    const c=CONVS.find(x=>x[2]===s.conv);
+    thread=`<div class="tw"><div class="turn u"><div><div class="meta">You · ${c[0]}</div><div class="bub">${c[2]==='y'?'When does the supplier contract end?':'What time is the dentist?'}</div></div>${desk?'<div></div>':''}</div><div class="turn a"><div><div class="meta">Callsheet</div><div class="bub"><p>${c[2]==='y'?'31 March, with 60 days’ notice, so the decision is due by 30 January.':'Friday 6 November at 08:40.'}<span class="fn">1</span></p><div class="acts"><span class="sp">Read 1 thread</span></div></div></div>${desk?`<div class="srcs"><div class="src"><span class="fn">1</span><span><b>Gmail · ${c[2]==='y'?'Co. B':'Personal'}</b>${c[2]==='y'?'Contract, page 4':'Surgery reminder, 30 Oct'}</span></div></div>`:''}</div></div>`;
+  } else {
+    let t=turnPair(s,TURNS[0],0,'done');
+    if(s.asked===1) t+=turnPair(s,TURNS[1],1,'reading');
+    if(s.asked===2) t+=turnPair(s,TURNS[1],1,'done');
+    thread=`<div class="tw">${desk?'':`<div class="earl"><span>Earlier: Yesterday, Mon</span><button class="k q" data-act="conv:new">New question</button></div>`}${t}</div>`;
+  }
+  const comp=`<div class="composer"><input class="askin" placeholder="Ask about your mail, chat, calendar and notes" value="${esc(s.q)}" aria-label="Ask"><button class="k askgo${hasQ?' go':''}" data-act="askgo">Ask ${kh('↵')}</button></div><div class="cfoot"><span>Reads only · nothing leaves this box</span>${desk?'':''}</div>`;
+  const side=desk?`<aside class="card convs"><div class="lab">Conversations</div><button class="k" data-act="conv:new" style="width:100%;margin-bottom:12px">New question</button>${CONVS.map(([d,t,id])=>`<button class="cv${s.conv===id?' sel':''}" data-act="conv:${id}"><span class="d">${d}</span><span class="t">${esc(t)}</span></button>`).join('')}<div class="cvnote">Answers use what's on this box: 2,412 threads, 8 calendars, Slack. Nothing is sent or changed.</div></aside>`:'';
+  return `${subrow(s)}<div class="chat">${side}<div class="cmain"><div class="thread" data-scroll="end">${thread}</div>${comp}</div></div>`;
+}
+
+/* ---------- People ---------- */
+function people(s){
+  const desk=s.dev==='desk';
+  if(!desk&&s.person) return subrow(s)+`<button class="k q q0" data-act="person:" style="margin-bottom:8px">‹ People</button>`+personCards(s,PEOPLE.find(p=>p.id===s.person));
+  let pair='';
+  if(s.pair<PAIRS.length){const P=PAIRS[s.pair];
+    const F=[['name','Name'],['mail','Mail'],['phone','Phone'],['chat','Chat']];
+    const grid=`<div class="match">${desk?'<span class="h"></span>':''}<span class="h">One record</span><span class="h"></span><span class="h">The other</span>${F.map(([k,l])=>`${desk?`<span class="f">${l}</span>`:''}<span>${esc(P.a[k])}</span><span class="g${P.m[k]==='='?' eq':''}">${P.m[k]}</span><span>${esc(P.b[k])}</span>`).join('')}</div>`;
+    pair=`<section class="card"><div class="lab">Same person? · ${s.pair+1} of ${PAIRS.length}</div>${grid}<div class="leg">= same · ≈ close · ≠ different · · one side has none</div><p class="why">${esc(P.why)}</p>
+    <div class="keys"><button class="k" data-act="pair:same">Same person</button><button class="k" data-act="pair:not">Not the same</button><button class="k q" data-act="pair:unsure">Not sure</button></div></section>`;
+  } else pair=`<section class="card"><div class="lab">Same person?</div><p class="say" style="margin:0">All checked. It asks again only if it finds a new pair.</p></section>`;
+  const conf=s.last&&s.last.k==='pair'?`<div class="strk" style="margin-top:-8px"><span class="w" style="text-decoration:none;color:var(--ink2)">${esc(s.last.m)}</span>${undoK()}</div>`:'';
+  const list=`<section class="card"><div class="lab">You hear from most</div><div class="rl">${PEOPLE.map(p=>`<button class="rr${desk&&(s.person||'pn')===p.id?' sel':''}" data-act="person:${p.id}"><span class="nm">${esc(p.name)}</span><span class="rs">${p.ac?'Always counts':''}</span><span class="tx dim">${esc(p.w)} · ${esc(p.last)}</span></button>`).join('')}</div></section>`;
+  const head=`<div class="phead"><div><div class="dline">From mail, Slack and Signal</div><h1 class="h2">People</h1></div></div>`;
+  if(!desk) return subrow(s)+head+`<div class="col">${pair}${conf}${list}</div>`;
+  return `<div class="inner">${subrow(s)}${head}<div class="g75"><div class="col">${pair}${conf}${list}</div><div class="col">${personCards(s,PEOPLE.find(p=>p.id===(s.person||'pn')))}</div></div></div>`;
+}
+function personCards(s,p){
+  const r=p.wait?rep(p.wait):null, ac=s.acOff&&s.acOff.has(p.id)?false:p.ac;
+  return `<div class="col"><section class="card"><div class="lab">${esc(p.w)}</div><h2 class="h2" style="font-size:28px;margin-bottom:16px">${esc(p.name)}</h2>
+  <div class="dl"><span class="t">Always counts</span><span><button class="cb" role="checkbox" aria-checked="${ac}" data-act="ac:${p.id}"><span class="bx"></span><span>${ac?'On':'Off'}<small>Never hidden, never sorted away</small></span></button></span>
+  <span class="t">Where</span><span>${p.where.map(esc).join('<br>')}</span>
+  <span class="t">Last heard</span><span>${esc(p.last)}</span>
+  <span class="t">Waiting on you</span><span>${r?`<button class="k q q0" data-act="sel:${r.id}" style="min-height:28px">${esc(r.ask)} ›</button>`:'<span class="dim">Nothing</span>'}</span></div></section>
+  <section class="card"><div class="lab">Note for Callsheet<span class="r"><button class="k q" data-act="mock:A note box opens here.">${p.note?'Change':'Add'}</button></span></div><p style="margin:0" class="${p.note?'':'dim'}">${p.note?esc(p.note):'No note yet.'}</p></section>${mockNote(s)}</div>`;
+}
+
+/* ---------- Know me ---------- */
+function knowme(s){
+  const desk=s.dev==='desk';
+  const head=`<div class="phead"><div><div class="dline">Stays on this box</div><h1 class="h2">Know me</h1><p class="sub" style="font-size:16px;margin:6px 0 0">Callsheet uses this to sort replies and write drafts that sound like you. Forgetting a fact doesn’t touch your mail.</p></div></div>`;
+  const chk=FACTS.map((f,i)=>({...f,i})).filter(f=>f.chk);
+  if(s.km==='check'){
+    const f=chk[s.kmi]||chk[0];
+    const prog=chk.map((_,i)=>`<i class="${i<s.kmi?'d':i===s.kmi?'c':''}"></i>`).join('');
+    return `${subrow(s)}<div class="solo"><div class="prog">${prog}</div><div class="dline"><span>Check what it wrote</span><span>${s.kmi+1} of ${chk.length}</span></div>
+    <section class="card" style="margin-top:14px"><p class="big">${esc(f.t)}</p><p class="sub" style="font-family:var(--mono);font-size:13px;margin:0 0 18px">From ${esc(f.s)}</p>
+    ${s.kmq?`<label class="sub" for="kmq">What’s right?</label><input id="kmq" class="inp" value="Priya N. leads finance at Co. A; my manager is Dev R." style="margin:6px 0 14px"><div class="keys"><button class="k go" data-act="km:next">Save and next ${kh('↵')}</button><button class="k q" data-act="km:unq">Cancel</button></div>`
+      :`<div class="keys"><button class="k" data-act="km:next">Right</button><button class="k" data-act="km:quite">Not quite</button><button class="k q" data-act="km:next">Forget this</button></div>`}</section>
+    <div style="margin-top:10px"><button class="k q q0" data-act="km:home">‹ Know me</button></div></div>`;
+  }
+  if(s.km==='q'){const Q=QS[0];
+    return `${subrow(s)}<div class="solo"><div class="prog"><i class="c"></i><i></i><i></i><i></i></div><div class="dline"><span>A few questions</span><span>1 of 4</span></div>
+    <section class="card" style="margin-top:14px"><p class="big">${esc(Q.q)}</p><div class="opts" style="margin:14px 0 18px">${Q.o.map((o,i)=>`<button class="opt" role="radio" aria-checked="${s.kmAns===i}" data-act="km:ans:${i}"><span class="rd"></span><span>${esc(o)}</span></button>`).join('')}</div>
+    <div class="keys"><button class="k ${s.kmAns!=null?'go':''}" data-act="km:home" ${s.kmAns==null?'disabled':''}>Save and next</button><button class="k q" data-act="km:home">Skip</button></div></section></div>`;
+  }
+  const checked=s.kmDone;
+  const steps=`<section class="card"><div class="lab">Three steps</div>
+   <div class="stp done"><span class="n">✓</span><div><b>Read your history</b><div class="sub">Done 4 Nov · 2,412 threads, 8 calendars, 1 Slack</div></div><div class="keys"><button class="k q" data-act="mock:Reading your history again takes about 20 min.">Read again</button></div></div>
+   <div class="stp${checked?' done':''}"><span class="n">${checked?'✓':'2'}</span><div><b>Check what it wrote</b><div class="sub">${checked?'Checked today':'2 to check'}</div></div><div class="keys">${checked?'':`<button class="k go" data-act="km:check">Check 2 things</button>`}</div></div>
+   <div class="stp"><span class="n">3</span><div><b>A few questions</b><div class="sub">4 questions${checked?'':' · after step 2'}</div></div><div class="keys"><button class="k ${checked?'go':''}" data-act="km:q" ${checked?'':'disabled'}>Answer</button></div></div></section>`;
+  const facts=`<section class="card"><div class="lab">What it knows</div>${FACTS.map((f,i)=>`<div class="fact${s.forgot.has(i)?' gone':''}"><span class="i">${String(i+1).padStart(2,'0')}</span><span class="tx">${esc(f.t)}${f.chk&&!checked?`<span class="chk">▲ To check</span>`:''}</span><span class="s">${esc(f.s)}</span><button class="k q" data-act="forget:${i}">${s.forgot.has(i)?'Undo':'Forget'}</button></div>`).join('')}${s.rem===1?`<div class="fact"><span class="i">07</span><span class="tx">${esc(TURNS[0].rem)}</span><span class="s">Saved from Ask · today</span><span></span></div>`:''}</section>`;
+  return `${subrow(s)}${desk?'<div class="inner">':''}${head}<div class="col">${steps}${facts}${mockNote(s)}</div>${desk?'</div>':''}`;
+}
+
+/* ---------- Projects ---------- */
+function track(s,desk){
+  /* five weeks: 3 Nov … 1 Dec; positions in % */
+  const W=['3 Nov','10 Nov','17 Nov','24 Nov','1 Dec'], X=d=>((d-3)/32*100);
+  const wk=W.map((w,i)=>`<span class="wt" style="left:${i*25}%"></span><span class="wk" style="left:${Math.min(96,Math.max(4,i*25))}%">${w}</span>`).join('');
+  return `<div class="track"><div class="ln"></div>${wk}
+   <span class="ms done" style="left:${X(4)}%"></span>
+   <span class="ms old" style="left:${X(14)}%"></span>
+   <span class="arr" style="left:${X(14)}%;width:${X(21)-X(14)}%"></span>
+   <span class="ms new" style="left:${X(21)}%"></span><span class="ml" style="left:${X(21)}%">Fitting <span style="color:var(--warn-ink)">▲</span></span>
+   <span class="ms" style="left:${X(24)}%"></span><span class="ml" style="left:${X(26)}%">${desk?'Electrics':''}</span>
+   <span class="needle" style="left:${X(5)}%"></span><span class="nl" style="left:${X(5)}%">Today</span></div>`;
+}
+function projects(s){
+  const desk=s.dev==='desk';
+  const head=`<div class="phead"><div><div class="dline">Projects</div><h1 class="h2">3 projects</h1></div></div>`;
+  const list=PROJ.map(p=>`<section class="card pick${(desk&&(s.proj||'kr')===p.id)?' sel':''}" data-act="proj:${p.id}" role="button" tabindex="0"><div class="pj"><b>${esc(p.name)}</b><span class="st${p.w?' wn':''}">${p.w?'▲ ':''}${p.st}</span><span class="sub" style="grid-column:1/-1">${esc(p.m)}</span></div></section>`).join('')
+   +`<section class="card dash"><div class="lab" style="margin-bottom:6px">Suggested</div><div class="pj"><b>School trip forms?</b><span></span><span class="sub" style="grid-column:1/-1">3 mails from the school office this month</span></div><div class="keys" style="margin-top:10px"><button class="k" data-act="mock:School trip forms is now a project.">Add project</button><button class="k q" data-act="mock:It won’t suggest this again.">No thanks</button></div></section>`;
+  const p=PROJ.find(x=>x.id===(s.proj||'kr'));
+  let detail='';
+  if(p.id==='kr'){
+    detail=`<section class="card cue-wn"><div class="lab wn"><span class="led wn"></span>▲ Slipped a week</div><h2 class="h2" style="font-size:28px">Kitchen refit</h2><p class="sub" style="font-size:16px;margin:6px 0 0">The fitter moved the fitting from 14 to 21 November<span class="fn">1</span>.</p></section>
+    <section class="card"><div class="lab">Five weeks</div>${track(s,desk)}<div class="sub" style="font-size:13px;font-family:var(--mono)">Filled: done · dashed: where it was · amber: where it is now</div></section>
+    <section class="card"><div class="lab">Tasks</div><div style="display:grid;gap:6px">${TASKS.map(([id,t])=>`<button class="cb" role="checkbox" aria-checked="${s.tasks.has(id)}" data-act="task:${id}"><span class="bx"></span><span style="${s.tasks.has(id)?'text-decoration:line-through;color:var(--dim)':''}">${esc(t)}</span></button>`).join('')}</div></section>
+    <section class="card"><div class="lab">Source</div><div class="src"><span class="fn">1</span><span><b>Gmail · Personal</b>Fitter, 4 Nov: “we’ll need to move your fitting to Friday 21st”</span></div></section>`;
+  } else detail=`<section class="card"><div class="lab">${esc(p.st)}</div><h2 class="h2" style="font-size:28px">${esc(p.name)}</h2><p class="sub" style="font-size:16px;margin:6px 0 0">${esc(p.m)}. Nothing needs you here.</p></section>`;
+  if(!desk&&s.proj) return `<button class="k q q0" data-act="proj:" style="margin-bottom:8px">‹ Projects</button><div class="col">${detail}</div>`;
+  if(!desk) return head+`<div class="col">${list}${mockNote(s)}</div>`;
+  return `<div class="inner">${head}<div class="g57"><div class="col">${list}${mockNote(s)}</div><div class="col">${detail}</div></div></div>`;
+}
+
+/* ---------- Setup ---------- */
+function ctCheck(v){const m=/^(\d{1,2}):(\d{2})$/.exec(v.trim());if(!m)return{ok:false,m:'Write it as 06:30.'};const h=+m[1],mi=+m[2];if(h>23||mi>59)return{ok:false,m:'Write it as 06:30.'};return{ok:true,m:`Next brief at ${String(h).padStart(2,'0')}:${m[2]} tomorrow.`}}
+function setupSec(s,sp){
+  const desk=s.dev==='desk', T=s.tg;
+  const cb=(k,l,sm)=>`<button class="cb" role="checkbox" aria-checked="${!!T[k]}" data-act="tg:${k}"><span class="bx"></span><span>${l}${sm?`<small>${sm}</small>`:''}</span></button>`;
+  const rad=(k,v,l,sm)=>`<button class="opt" role="radio" aria-checked="${T[k]===v}" data-act="tv:${k}:${v}"><span class="rd"></span><span>${l}${sm?`<small>${sm}</small>`:''}</span></button>`;
+  if(sp==='day'){
+    const cts=CALLT.map((c,i)=>{const ed=s.ce===i;const chk=ctCheck(s.ctv||c.t);
+      return `<div class="ct"><span class="t">${c.t}</span><span><b style="font-weight:500">${c.n}</b><div class="sub">${c.w} · ${c.d}</div></span><button class="k q" data-act="ce:${ed?'x':i}">${ed?'Cancel':'Change'}</button>
+      ${ed?`<div class="ctedit"><label class="sub" for="cti">New time</label><input id="cti" class="inp ctinput" value="${esc(s.ctv||c.t)}" inputmode="numeric"><span class="ctmsg${chk.ok?'':' bad'}" id="ctmsg">${chk.m}</span>
+      <div class="aseg" role="group"><button aria-pressed="true">Careful</button><button aria-pressed="false">Fast</button></div><span class="sub">Careful: about 3–5 min, from the last 7 briefs.</span><div class="keys"><button class="k" data-act="ce:x">Use this time</button></div></div>`:''}</div>`}).join('');
+    return `<section class="card"><div class="lab">Call times</div>${cts}</section>
+    <section class="card"><div class="lab">Tell me when it’s ready</div><div style="display:grid;gap:8px">${cb('phone','Sam’s phone','A push at each call time')}${cb('tablet','Kitchen tablet')}</div></section>
+    <section class="card"><div class="lab">Quiet hours<span class="r"><button class="k q" data-act="mock:A time picker opens here.">Change</button></span></div><p style="margin:0">22:00 to 06:00</p><p class="sub" style="margin:2px 0 0">No pushes; Read it to me starts muted.</p></section>
+    <section class="card"><div class="lab">Lighting</div><div class="aseg" role="group">${['auto','day','night'].map(v=>`<button aria-pressed="${T.light===v}" data-act="tv:light:${v}">${v==='auto'?'Auto':v==='day'?'Day':'Night'}</button>`).join('')}</div><p class="sub" style="margin:8px 0 0">Auto follows sunset at home.</p></section>`;
+  }
+  if(sp==='conn'){
+    const acc=[['sam@co-a.example','Co. A · mail, calendar'],['sam@co-b.example','Co. B · mail, calendar'],['sam@home.example','Personal · mail, calendar'],['family calendar','Personal · calendar only']];
+    const rows=acc.map(([a,m],i)=>{
+      if(i===1&&s.gOff){const fail=s.retry===1;
+        return `<div class="srow off"><span><b>${a}</b><div class="sub">Offline · last read 06:30${fail?'<br>Tried 06:36. Still no answer. Check the account’s password in Google, then try again.':''}</div></span><button class="k go" data-act="retry">Try again</button></div>`}
+      return `<div class="srow"><span><b>${a}</b><div class="sub">${m}</div></span><span class="st">${i===1&&s.retry===2?'On · back 06:37':'On'}</span></div>`}).join('');
+    return `<section class="card"><div class="lab">Google accounts<span class="r"><button class="k q" data-act="mock:Google’s sign-in opens in a new tab.">Connect another</button></span></div>${rows}</section>
+    <section class="card"><div class="lab">Chat</div><div class="srow"><span><b>Slack</b><div class="sub">Co. A workspace · reads channels you’re in</div></span><span class="st">On</span></div><div class="srow"><span><b>Signal</b><div class="sub">Not linked</div></span><button class="k q" data-act="mock:A QR code to scan with Signal opens here.">Link</button></div></section>
+    <section class="card"><div class="lab">Notes</div><div class="srow"><span><b>Notes folder</b><div class="sub">notes/ · 214 files</div></span><span class="st">On</span></div></section>`;
+  }
+  if(sp==='ai'){
+    return `<section class="card"><div class="lab">Who writes the drafts</div><div class="opts">${rad('writer','off','Nobody','Lists only, no drafts')}${rad('writer','box','On this box','Private; slower, plainer drafts')}${rad('writer','claude','Claude','Better drafts; the text of each message is sent to write it')}</div></section>
+    <section class="card"><div class="lab">Sorting</div><div class="opts">${rad('sort','off','Off','Newest first')}${rad('sort','rank','Rank','Most important first')}${rad('sort','group','Group and rank','Needs you, For your info, Sorted')}</div><p class="sub" style="margin:10px 0 0">Sorting can group and rank. It never hides anything.</p></section>
+    <section class="card"><div class="lab">Ask</div>${cb('chat','Ask on this device','Uses the local index; nothing leaves this box')}</section>`;
+  }
+  if(sp==='adv'){
+    return `<section class="card"><div class="lab">Advanced</div>${DRAWERS.map(([id,l])=>{const o=s.drw===id;let b='';
+      if(o&&id==='start') b=`<div class="body"><p style="margin:0">Removes the local index, your profile and its facts, call times and rules. Your mail, calendars and chats aren’t touched.</p><div><button class="k dark" data-act="confirm">Start over…</button></div></div>`;
+      else if(o&&id==='key') b=`<div class="body"><p style="margin:0">A key is saved. It’s never shown again.</p><div><button class="k" data-act="mock:A box for a new key opens here.">Replace the key</button></div></div>`;
+      else if(o) b=`<div class="body"><p style="margin:0" class="dim">Rarely needed. The defaults work.</p></div>`;
+      return `<div class="drw"><button data-act="drw:${o?'':id}" aria-expanded="${o}">${l}<span>${o?'−':'+'}</span></button>${b}</div>`}).join('')}</section>`;
+  }
+  return '';
+}
+function setup(s){
+  const desk=s.dev==='desk';
+  const head=`<div class="phead"><div><div class="dline">Last refreshed 06:30</div><h1 class="h2">Setup</h1></div><button class="k" data-act="refresh">Refresh now</button></div>`;
+  const idx=`<section class="card idx">${SETS.map(([id,l,n,sub])=>`<button class="ix" data-act="sp:${id}" ${s.sp===id&&desk?'aria-current="page"':''}><span class="l">${l}</span><b>${n}</b><span class="sub">${id==='conn'&&s.gOff&&s.retry<2?'Co. B Google offline':sub}</span>${desk?'':'<span class="ch">›</span>'}</button>`).join('')}</section>`;
+  if(!desk){
+    if(s.sp==='home') return head+idx+mockNote(s);
+    const n=SETS.find(x=>x[0]===s.sp);
+    return `<button class="k q q0" data-act="sp:home" style="margin-bottom:4px">‹ Setup</button><div class="dline">${n[1]}</div><h1 class="h2" style="margin-bottom:14px">${n[2]}</h1><div class="col">${setupSec(s,s.sp)}${mockNote(s)}</div>`;
+  }
+  return `<div class="inner">${head}<div class="g57" style="grid-template-columns:minmax(0,4fr) minmax(0,8fr)"><div class="col">${idx}</div><div class="col">${setupSec(s,s.sp==='home'?'day':s.sp)}${mockNote(s)}</div></div></div>`;
+}
+
+/* ---------- Voice ---------- */
+function voice(s){
+  const desk=s.dev==='desk', i=s.voice, L=VOICE[i], end=i===VOICE.length-1;
+  const rail=desk?`<aside class="vrail">${SECS.map((sec,si)=>`<div class="vsec"><div class="lab">${String(si+1).padStart(2,'0')} ${sec}</div>${VOICE.map((v,vi)=>v.s===si?`<button class="vl${vi===i?' cur':vi<i?' past':''}" data-act="vjump:${vi}">${esc(v.g)}</button>`:'').join('')}</div>`).join('')}</aside>`
+    :`<div class="vstrip">${VOICE.map((v,vi)=>`<i class="${vi===i?'cur':vi<i?'past':''}"></i>`).join('')}</div>`;
+  const prev=i>0?`<p class="vprev">${esc(VOICE[i-1].t)}</p>`:'';
+  const fill=`<div class="vfill"><i class="${s.playing&&!end?'run':end?'full':'part'}" ${s.playing&&!end?'data-act="vauto"':''}></i></div>`;
+  const keys=end?`<button class="k" data-act="vback">‹ Back</button><button class="k" data-act="vjump:0">Play again</button><button class="k" data-act="vclose">Close</button>`
+    :`<button class="k" data-act="vback">‹ Back</button><button class="k go" data-act="vpause">${s.playing?'Pause':'Play'}</button><button class="k" data-act="vnext">Next ›</button>`;
+  return `<div class="vhead"><span class="dline" style="min-height:0">${desk?'Read it to me · ':''}${String(L.s+1).padStart(2,'0')} ${SECS[L.s]} · line ${i+1} of ${VOICE.length}</span><button class="k q" data-act="vclose">Close</button></div>
+  <div class="vo">${rail}<div class="vmain">${prev}<p class="vcur">${esc(L.t)}</p>${fill}${s.heard?`<p class="heard">${esc(s.heard)}</p>`:''}</div></div>
+  <div class="vbar">${keys}<span class="say">Say: next · back · later · repeat · stop</span></div>`;
+}
+
+/* ---------- overlays ---------- */
+function overlay(s){
+  if(s.nfOpen){const r=rep(s.nfOpen), locked=r.why.includes('Always counts');
+    return `<div class="veil" data-act="close"><div class="sheet" data-act="noop" role="dialog" aria-label="Not for me"><h3>Not for me</h3><p class="sub" style="margin:0 0 16px;font-size:16px">${esc(r.who)} · ${esc(r.ask)}</p>
+    <div class="opts"><button class="opt" role="radio" aria-checked="${s.nfScope==='one'}" data-act="nfs:one"><span class="rd"></span><span>Just this one<small>It leaves Replies. Their next message still comes in.</small></span></button>
+    <button class="opt" role="radio" aria-checked="${s.nfScope==='all'}" data-act="nfs:all" ${locked?'disabled':''}><span class="rd"></span><span>Everything from ${esc(r.who)}<small>${locked?`${esc(r.who)} always counts, so only this message moves.`:'Added to Never needs a reply, in Setup. Never for invites or security mail.'}</small></span></button></div>
+    <div class="keys" style="margin-top:18px"><button class="k go" data-act="nfsave">Move it</button><button class="k q" data-act="close">Cancel</button></div></div></div>`;}
+  if(s.find) return `<div class="veil" data-act="close"><div class="sheet fa" data-act="noop" role="dialog" aria-label="Find or ask"><div class="in">${SEARCH}<span>priya</span></div>
+    <div class="grp"><div class="lab">People and replies</div><button class="o sel" data-act="sel:1"><span>Priya N. · Q4 budget sign-off</span><span class="kh">↵</span></button><button class="o" data-act="person:pn"><span>Priya N. · person</span></button></div>
+    <div class="grp"><div class="lab">Ask</div><button class="o" data-act="sug:What did Priya ask this week?"><span>Ask: What did Priya ask this week?</span></button></div>
+    <div class="ft">Reads, copies or opens. Nothing is sent.</div></div></div>`;
+  if(s.confirm) return `<div class="veil"><div class="sheet" role="alertdialog" aria-label="Start over"><h3>Start over?</h3><p style="margin:0 0 18px">This removes the local index (2,412 threads), your profile and its 6 facts, the three call times and 1 rule. Your mail, calendars and chats aren’t touched.</p><div class="keys"><button class="k" data-act="keep">Keep everything</button><button class="k dark" data-act="mock:Started over. (The mockup stops here.)">Start over</button></div></div></div>`;
+  return '';
+}
+
+/* ---------- render ---------- */
+function render(F){
+  const s=F.st, desk=s.dev==='desk';
+  const tab={today:'today',replies:'replies',oat:'replies',agenda:'agenda',ask:'ask',people:'ask',knowme:'ask',projects:'projects'}[s.view];
+  let body='';
+  if(s.view==='voice'){
+    F.app.className=`app ${desk?'desk':'phone'} ${s.theme}`;
+    F.app.innerHTML=`<div class="trim"></div>${voice(s)}`;return;
+  }
+  body={today,replies,oat,agenda,ask,people,knowme,projects,setup}[s.view](s);
+  const veiled=!!(s.find||s.nfOpen||s.confirm);
+  const fill=s.view==='ask';
+  const bar=s.sit==='offline'&&!s.checked?`<div class="bar"><p><b style="font-weight:500">Can’t reach Callsheet.</b> Showing the 06:30 brief. Copy still works; the rest waits until it’s back.${s.retry===1?' <span class="dim">Tried 06:35: no answer. Check you’re on home Wi-Fi or the VPN.</span>':''}</p><button class="k go" data-act="retryall">Try again</button></div>`:'';
+  if(desk){
+    const nav=TABS.map(([v,l],i)=>`<button data-act="tab:${v}" ${tab===v?'aria-current="page"':''}>${l}</button>`).join('');
+    F.app.innerHTML=`<div class="trim"></div><header class="mast"><div class="wm">Callsheet</div><nav class="nav">${nav}</nav><div class="tools"><button class="tl" data-act="find">Find ${kh('/')}</button><button class="tl" data-act="refresh">Refresh</button><button class="tl" data-act="tab:setup" ${s.view==='setup'?'aria-current="page"':''}>Setup</button></div></header>${bar}<main class="pg${fill?' fill':''}">${body}</main>${overlay(s)}`;
+  } else {
+    const nav=TABS.map(([v,l])=>`<button data-act="tab:${v}" ${tab===v?'aria-current="page"':''}>${l}</button>`).join('');
+    F.app.innerHTML=`<div class="trim"></div><header class="ptop"><div class="wm">Callsheet</div><div class="tools"><button class="ib" data-act="find" aria-label="Find or ask">${SEARCH}</button><button class="tl" data-act="tab:setup" ${s.view==='setup'?'aria-current="page"':''}>Setup</button></div></header>${bar}<main class="pg${fill?' fill':''}">${body}</main><nav class="tabbar">${nav}</nav>${overlay(s)}`;
+  }
+  F.app.className=`app ${desk?'desk':'phone'} ${s.theme}${veiled?' veiled':''}${s.sit==='offline'&&!s.checked?' veiled':''}`;
+  const th=F.app.querySelector('[data-scroll="end"]');if(th)th.scrollTop=th.scrollHeight;
+}
+function nextOpen(s,id){const o=openR(s);return o.length?o[0].id:id}
+function act(F,a){
+  const s=F.st, desk=s.dev==='desk', [k,...rest]=a.split(':'), v=rest.join(':'), id=+v, at=nowS(s);
+  if(k!=='mock'&&k!=='noop')s.mock=null;
+  switch(k){
+    case 'noop':return;
+    case 'tab': s.view=v;s.detail=false;s.person=null;s.proj=null;s.more=false;s.find=false;s.nfOpen=null;s.km='home';s.kmq=false;if(v==='setup')s.sp=desk?'day':'home';if(v==='ask'&&s.conv==='')s.conv='today';break;
+    case 'copy': s.copied.add(id);s.copiedAt=at;s.last={k:'copy',id,at};break;
+    case 'done': s.done.add(id);s.last={k:'done',id,at};s.more=false;if(s.sel===id)s.sel=nextOpen(s,id);if(!desk&&s.view==='replies')s.detail=false;break;
+    case 'later': s.later.add(id);s.last={k:'later',id,at};s.more=false;if(s.sel===id)s.sel=nextOpen(s,id);if(!desk)s.detail=false;break;
+    case 'notfor': s.nfOpen=id;s.nfScope='one';break;
+    case 'nfs': s.nfScope=v;break;
+    case 'nfsave': s.nf.add(s.nfOpen);s.last={k:'nf',id:s.nfOpen,at};if(s.sel===s.nfOpen)s.sel=nextOpen(s,s.nfOpen);s.nfOpen=null;if(!desk)s.detail=false;break;
+    case 'note': s.mock='A note box opens under the row: “Note for Callsheet”.';break;
+    case 'open': s.mock='Gmail opens this thread in a new tab.';break;
+    case 'undo':{const L=s.last;if(!L)break;if(L.k==='copy')s.copied.delete(L.id);if(L.k==='done')s.done.delete(L.id);if(L.k==='later')s.later.delete(L.id);if(L.k==='nf')s.nf.delete(L.id);
+      if(L.k==='seen')s.alertSeen=false;if(L.k==='gotit')s.clashAck=false;if(L.k==='pair')s.pair=Math.max(0,s.pair-1);s.last=null;break}
+    case 'more': s.more=!s.more;break;
+    case 'sel': s.sel=id;s.find=false;if(s.view!=='replies'){s.view='replies'}s.detail=true;break;
+    case 'back': s.detail=false;break;
+    case 'alertseen': s.alertSeen=true;s.seenAt=at;s.last={k:'seen',at};break;
+    case 'alertcheck': s.mock='Google’s security page for the Co. A account opens in a new tab.';break;
+    case 'gotit': s.clashAck=true;s.ackAt=at;s.last={k:'gotit',at};break;
+    case 'oat': s.view='oat';s.more=false;break;
+    case 'voice': s.view='voice';s.voice=0;s.playing=true;s.heard=null;break;
+    case 'vnext': s.voice=Math.min(VOICE.length-1,s.voice+1);s.heard=null;break;
+    case 'vback': s.voice=Math.max(0,s.voice-1);s.heard=null;break;
+    case 'vpause': s.playing=!s.playing;break;
+    case 'vjump': s.voice=id;s.playing=true;s.heard=null;break;
+    case 'vauto': return;
+    case 'vclose': s.view='today';break;
+    case 'find': s.find=true;break;
+    case 'close': s.find=false;s.nfOpen=null;break;
+    case 'refresh': s.checked=at;s.last=null;break;
+    case 'retryall': s.retry++;if(s.retry>=2){s.checked=at;s.sit='normal';s.retry=0}break;
+    case 'fn': s.fnOpen=id;break;
+    case 'mock': s.mock=v;break;
+    /* ask */
+    case 'conv': s.conv=v;s.q='';break;
+    case 'sug': s.view='ask';s.find=false;s.conv='today';s.q=v;if(v==='When is the boiler visit?'){s.q='';s.asked=1;setTimeout(()=>{if(F.st.asked===1){F.st.asked=2;render(F)}},1400)}else s.mock='In the product this would be asked now; the mockup has one sample answer.';break;
+    case 'askgo': if(!s.q.trim())return;s.conv='today';s.asked=1;s.q='';setTimeout(()=>{if(F.st.asked===1){F.st.asked=2;render(F)}},1400);break;
+    case 'stop': s.asked=0;s.q=TURNS[1].q;break;
+    case 'how':{const n=id;s.how.has(n)?s.how.delete(n):s.how.add(n);break}
+    case 'hi': s.hi=s.hi===v?null:v;break;
+    case 'rem': s.rem=id;break;
+    /* people */
+    case 'pair':{const P=PAIRS[s.pair];s.last={k:'pair',at,m:v==='same'?`${P.a.name} and ${P.b.name} are one person now.`:v==='not'?`It won’t ask about ${P.a.name} and ${P.b.name} again.`:`Skipped. It may ask again later.`};s.pair++;break}
+    case 'person': s.person=v||null;s.view='people';s.find=false;break;
+    case 'ac':{s.acOff=s.acOff||new Set();s.acOff.has(v)?s.acOff.delete(v):s.acOff.add(v);break}
+    /* know me */
+    case 'km':
+      if(v==='check'){s.km='check';s.kmi=0;s.kmq=false}
+      else if(v==='quite')s.kmq=true; else if(v==='unq')s.kmq=false;
+      else if(v==='next'){s.kmq=false;if(s.kmi<1)s.kmi++;else{s.km='home';s.kmDone=true}}
+      else if(v==='q'){s.km='q';s.kmAns=null}
+      else if(v.startsWith('ans'))s.kmAns=+v.split(':')[1];
+      else {s.km='home'}
+      break;
+    case 'forget': s.forgot.has(id)?s.forgot.delete(id):s.forgot.add(id);break;
+    /* projects */
+    case 'proj': s.proj=v||null;break;
+    case 'task': s.tasks.has(v)?s.tasks.delete(v):s.tasks.add(v);break;
+    /* setup */
+    case 'sp': s.sp=v;s.ce=null;s.drw=null;break;
+    case 'ce': if(v==='x'){s.ce=null;s.ctv=''}else{s.ce=id;s.ctv=CALLT[id].t}break;
+    case 'tg': s.tg[v]=!s.tg[v];break;
+    case 'tv':{const [kk,vv]=v.split(':');s.tg[kk]=vv;break}
+    case 'retry': s.retry++;if(s.retry>=2){s.gOff=false;s.retry=2}break;
+    case 'drw': s.drw=v||null;break;
+    case 'confirm': s.confirm=true;break;
+    case 'keep': s.confirm=false;break;
+  }
+  render(F);
+}
+
+/* ---------- frames ---------- */
+const FR=[];
+function makeFrame(host,dev,st,w,h){
+  const W=w||(dev==='desk'?1440:390), H=h||(dev==='desk'?900:844);
+  host.innerHTML='';const scr=document.createElement('div');scr.className='screen';scr.tabIndex=0;
+  scr.setAttribute('aria-label',dev==='desk'?'Desktop frame':'Phone frame');
+  const sc=document.createElement('div');sc.className='scaler';sc.style.width=W+'px';sc.style.height=H+'px';
+  const app=document.createElement('div');app.style.width=W+'px';app.style.height=H+'px';sc.appendChild(app);scr.appendChild(sc);host.appendChild(scr);
+  const F={host,scr,sc,app,W,H,st:Object.assign(base(dev),st||{})};
+  app.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t||t.disabled)return;if(t.dataset.act==='noop'&&t!==e.target&&e.target.closest('[data-act]')===t){return}e.stopPropagation();act(F,t.dataset.act)});
+  app.addEventListener('mouseover',e=>{const t=e.target.closest('.turn.a .fn[data-act]');if(t){const v=t.dataset.act.slice(3);if(F.st.hi!==v){F.st.hi=v;F.app.querySelectorAll('.src').forEach(x=>x.classList.remove('hi'));const [ti,n]=v.split('.');const turn=t.closest('.turn');const ss=turn&&turn.querySelectorAll('.src');if(ss&&ss[n-1])ss[n-1].classList.add('hi')}}});
+  app.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('askin')){e.preventDefault();e.stopPropagation();act(F,'askgo')}
+    if(e.key==='Enter'&&e.target.classList.contains('pick')){e.preventDefault();act(F,e.target.dataset.act)}});
+  app.addEventListener('input',e=>{const t=e.target;
+    if(t.classList.contains('askin')){F.st.q=t.value;const b=F.app.querySelector('.askgo');if(b)b.classList.toggle('go',!!t.value.trim()&&F.st.sit!=='offline')}
+    if(t.classList.contains('ctinput')){F.st.ctv=t.value;const c=ctCheck(t.value),m=F.app.querySelector('#ctmsg');if(m){m.textContent=c.m;m.classList.toggle('bad',!c.ok)}}});
+  app.addEventListener('animationend',e=>{if(e.target.dataset&&e.target.dataset.act==='vauto'&&F.st.playing&&F.st.view==='voice'){F.st.voice=Math.min(VOICE.length-1,F.st.voice+1);render(F)}});
+  if(dev==='desk') scr.addEventListener('keydown',e=>deskKey(F,e));
+  FR.push(F);render(F);fitOne(F);return F;
+}
+function fitOne(F){const w=F.scr.clientWidth||F.host.clientWidth;const k=w/F.W;F.sc.style.transform=`scale(${k})`;F.scr.style.height=(F.H*k)+'px'}
+function fit(){FR.forEach(fitOne)}
+addEventListener('resize',fit);
+function deskKey(F,e){
+  const s=F.st,k=e.key;
+  if((e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')&&k!=='Escape')return;
+  if(e.metaKey||e.ctrlKey){if(k.toLowerCase()==='k'){e.preventDefault();act(F,'find')}return}
+  const o=openR(s);const cur=s.view==='replies'?(o.find(r=>r.id===s.sel)||o[0]):o[0];
+  const c=cue(s);
+  const map={'/':'find','r':'voice','w':'oat','u':'undo','1':'tab:today','2':'tab:replies','3':'tab:agenda','4':'tab:ask','5':'tab:projects'};
+  if(k==='Escape'){e.preventDefault();if(s.find||s.nfOpen)act(F,'close');else if(s.confirm)act(F,'keep');else if(s.view==='voice')act(F,'vclose');else act(F,'tab:today');return}
+  if(s.find&&k==='Enter'){e.preventDefault();act(F,'sel:1');return}
+  if(s.confirm)return;
+  if(s.view==='voice'){if(k===' '){e.preventDefault();act(F,'vpause')}if(k==='ArrowRight')act(F,'vnext');if(k==='ArrowLeft')act(F,'vback');return}
+  if(s.nfOpen&&k==='Enter'){e.preventDefault();act(F,'nfsave');return}
+  if(map[k]){e.preventDefault();act(F,map[k]);return}
+  if(k==='Enter'&&s.view==='today'){e.preventDefault();if(c==='alert')act(F,'alertcheck');else if(c==='clash')act(F,'tab:agenda');else if(cur)act(F,(s.copied.has(cur.id)?'done:':'copy:')+cur.id);return}
+  if(!cur||!['today','replies','oat'].includes(s.view))return;
+  const L={c:'copy:',d:'done:',l:'later:',o:'open:',n:'note:',x:'notfor:'}[k.toLowerCase()];
+  if(L){e.preventDefault();act(F,L+cur.id);return}
+  if(k==='j'||k==='k'){e.preventDefault();const i=o.indexOf(cur);const nx=o[Math.max(0,Math.min(o.length-1,i+(k==='j'?1:-1)))];if(nx){s.sel=nx.id;s.view='replies';render(F)}}
+}
+
+/* ---------- flows ---------- */
+const D=(...ids)=>new Set(ids);
+const both=(o,p)=>({p:Object.assign({},o,p||{}),k:Object.assign({},o)});
+const FLOWS=[
+ {n:'A · Morning: Today',steps:[
+  {d:'<b>06:34.</b> Today in five groups. The headline and summary sit on the sheet; under them, one panel each for the first reply, who else is waiting, your day, what’s worth knowing and what’s coming up. The orange is Copy draft, once.',...both({})},
+  {d:'<b>Copy draft.</b> The key becomes “Copied 06:41” in words, with Undo beside it, and Done becomes the orange.',...both({copied:D(1),copiedAt:'06:41',last:{k:'copy',id:1,at:'06:41'}})},
+  {d:'<b>Done.</b> Priya leaves the first-reply panel; School office takes it. In Also waiting the change stays visible as one struck-through line with Undo.',...both({copied:D(1),done:D(1),last:{k:'done',id:1,at:'06:42'},time:402})},
+  {d:'<b>Phone: a source.</b> Tap a footnote number in the summary to see where the sentence came from.',...both({},{fnOpen:2})}]},
+ {n:'B · Alert first',steps:[
+  {d:'<b>A new sign-in.</b> The alert takes the first panel, marked with a red edge and the red key; nothing on the screen is orange. Its summary sentence steps aside and ⁴ moves onto the label. Priya waits on the Then line with a quiet Copy draft.',...both({sit:'alert'})},
+  {d:'<b>It was me.</b> The panel hands back to Priya and the orange returns. Worth knowing says “Seen 06:41” with Undo.',...both({sit:'alert',alertSeen:true,seenAt:'06:41',last:{k:'seen',at:'06:41'}})}]},
+ {n:'C · The clash, within the hour',steps:[
+  {d:'<b>10:05.</b> The clash is less than an hour away and takes the first panel, with an amber edge. In Your day the bracket keeps its amber mark. The summary sentence about it steps aside.',...both({time:605})},
+  {d:'<b>Got it.</b> The panel returns to Priya; the bracket says “Got it 10:06” with Undo, in place.',...both({time:606,clashAck:true,ackAt:'10:06',last:{k:'gotit',at:'10:06'}})}]},
+ {n:'D · Replies',steps:[
+  {d:'<b>Replies, grouped by why they wait.</b> Three short panels instead of one list of seven. On desktop the reply opens beside them as two panels: what they want, then your draft to edit and copy.',p:{view:'replies'},k:{view:'replies',sel:1}},
+  {d:'<b>Phone: the reply.</b> Full screen, the same two panels.',p:{view:'replies',sel:1,detail:true},k:{view:'replies',sel:2}},
+  {d:'<b>Not for me on a shop mailing.</b> A bottom sheet on the phone, centred on desktop. “Just this one” is chosen; the row presses in.',p:{view:'replies',sel:7,detail:true,nfOpen:7},k:{view:'replies',sel:7,nfOpen:7}},
+  {d:'<b>Locked for people who always count.</b> The wider choice is disabled, and says why.',p:{view:'replies',sel:1,detail:true,nfOpen:1},k:{view:'replies',sel:1,nfOpen:1}},
+  {d:'<b>Moved.</b> The line stays in its group, struck through, with Undo.',...both({view:'replies',nf:D(7),sel:1,last:{k:'nf',id:7,at:'06:44'}})}]},
+ {n:'E · One at a time',steps:[
+  {d:'<b>Work through them.</b> One panel, one person. A thin bar of seven segments on top shows where you are.',...both({view:'oat'})},
+  {d:'<b>Copied.</b> Done is now the orange. Swipes on the phone do the same (right = done, left = later).',...both({view:'oat',copied:D(1),copiedAt:'06:41',last:{k:'copy',id:1,at:'06:41'}})},
+  {d:'<b>All answered.</b> Two figures, the walnut rule drawn once, and “Nothing was sent” in words. No orange.',...both({view:'oat',done:D(1,2,3,5,6,7),later:D(4)})}]},
+ {n:'F · Agenda',steps:[
+  {d:'<b>Agenda at 12:40.</b> The day in one panel: past things dimmed, lunch marked “on now”, free stretches printed. Invites and things mentioned in mail but not booked sit in their own panels beside it. No orange: answering happens in Google Calendar.',...both({time:760,view:'agenda',clashAck:true})}]},
+ {n:'G · Ask',steps:[
+  {d:'<b>A conversation.</b> Your question in a bubble on the right, Callsheet’s answer on the left in a panel, its sources beside it (under it on the phone). Hover a number to light its source. Remember this? offers to save a fact; you press Save.',...both({view:'ask'})},
+  {d:'<b>How I found it.</b> Three short steps, folded into the answer.',...both({view:'ask',how:D(0),hi:'0.2'})},
+  {d:'<b>Typed.</b> Ask turns orange only once there’s a question to send. Try typing in either frame and pressing Enter.',...both({view:'ask',q:'When is the boiler visit?',rem:1})},
+  {d:'<b>Reading.</b> Callsheet’s turn shows a lit slot and the source it’s reading, with Stop. Nothing spins or loops.',...both({view:'ask',asked:1,rem:1})},
+  {d:'<b>The answer.</b> Plain about what isn’t true yet: nothing is booked, and your draft hasn’t been sent.',...both({view:'ask',asked:2,rem:1})},
+  {d:'<b>New question.</b> An empty chat: one line, and four suggestions to start from.',...both({view:'ask',conv:'new'})}]},
+ {n:'H · People',steps:[
+  {d:'<b>Same person?</b> Two records field by field with the match gutter (= same, ≈ close, ≠ different, · missing), the reason in one line, and three neutral answers.',...both({view:'people'})},
+  {d:'<b>Same person.</b> Said in place with Undo; pair 2 of 3 is next.',...both({view:'people',pair:1,last:{k:'pair',at:'07:10',m:'Priya N. and Priya Nair are one person now.'}})},
+  {d:'<b>A person.</b> Always counts as a flat tick box, where Callsheet sees them, last heard, what’s waiting, and a note in its own panel.',...both({view:'people',person:'pn'})}]},
+ {n:'I · Know me',steps:[
+  {d:'<b>Know me.</b> Two panels: the three steps (Check 2 things is the one orange), then what it knows, each fact with its source and Forget. Two are marked To check.',...both({view:'knowme'})},
+  {d:'<b>Check, one at a time.</b> The fact large, its source, and three neutral answers: orange would lean on your answer.',...both({view:'knowme',km:'check'})},
+  {d:'<b>Not quite.</b> A box to say what’s right; Save and next becomes the orange.',...both({view:'knowme',km:'check',kmq:true})},
+  {d:'<b>A question.</b> Option rows; the chosen one presses in, and Save and next lights up.',...both({view:'knowme',km:'q',kmAns:1,kmDone:true})}]},
+ {n:'J · Projects',steps:[
+  {d:'<b>Projects.</b> One small panel per project, the status in words; only Slipped carries the amber mark. A suggestion is a dashed panel with Add project. On desktop Kitchen refit is open beside the list.',p:{view:'projects'},k:{view:'projects',proj:'kr'}},
+  {d:'<b>Kitchen refit.</b> Four panels: what happened, the five-week slip track, tasks, and the source mail.',...both({view:'projects',proj:'kr'})}]},
+ {n:'K · Setup',steps:[
+  {d:'<b>Setup.</b> The four sections A–D as one index panel; the open section is a few small panels. Call times, who to tell, quiet hours, lighting. No orange anywhere.',p:{view:'setup',sp:'home'},k:{view:'setup',sp:'day'}},
+  {d:'<b>Change a call time.</b> It checks as you type (try “6:45” or “25:00”) and says what it costs.',...both({view:'setup',sp:'day',ce:0})},
+  {d:'<b>A connection fails.</b> The only orange Setup ever shows: Try again, on the broken row. The first try fails and says what to check.',...both({view:'setup',sp:'conn',gOff:true,retry:1})},
+  {d:'<b>AI.</b> Who writes, and how sorting works, as option rows that press in.',...both({view:'setup',sp:'ai'})},
+  {d:'<b>Start over.</b> In its closed drawer, then a confirm that names what goes. Keep everything comes first; the destructive key is dark, never orange or red.',...both({view:'setup',sp:'adv',drw:'start',confirm:true})}]},
+ {n:'L · Read it to me',steps:[
+  {d:'<b>Read it to me.</b> Desktop: the four sections down a quiet rail, the current line marked with an ink edge, the line itself at 38 px and the one before it dimmed. Phone: the rail folds to a thin strip. Pause is the one orange.',...both({view:'voice',voice:0,playing:false})},
+  {d:'<b>“Later”, said aloud.</b> Confirmed in words under the line.',...both({view:'voice',voice:2,playing:false,heard:'Heard “later”. Priya N. waits for your desk at 12:30.'})},
+  {d:'<b>The end.</b> No orange: Back, Play again, Close.',...both({view:'voice',voice:6,playing:false})}]},
+ {n:'M · End of the day',steps:[
+  {d:'<b>17:40.</b> Everyone answered. The first panel becomes the end: Answered and For tomorrow, the walnut rule, “Nothing was sent”. The headline is “That’s the day, Sam.”',...both({time:1060,done:D(1,2,3,5,7),later:D(4,6),clashAck:true})}]},
+ {n:'N · Away from home',steps:[
+  {d:'<b>Can’t reach Callsheet.</b> A dashed bar above the 06:30 brief. Try again is the orange; Copy draft drops to a plain key.',...both({sit:'offline'})},
+  {d:'<b>First try fails</b> and says what to check.',...both({sit:'offline',retry:1})}]},
+ {n:'O · Find or ask',steps:[
+  {d:'<b>/ or ⌘K.</b> The page behind loses its orange. On the phone it’s a bottom sheet. Enter opens Priya’s reply.',...both({find:true})}]}
+];
+let G={light:'day',w:1440,flow:0,step:0};
+function applyStep(){
+  const st=FLOWS[G.flow].steps[G.step];
+  FR.length=0;
+  makeFrame(document.getElementById('fd'),'desk',Object.assign({theme:G.light},st.k),G.w,900);
+  makeFrame(document.getElementById('fp'),'phone',Object.assign({theme:G.light},st.p));
+  FR.push(...GAL);
+  document.getElementById('capd').textContent=`Desktop ${G.w} × 900`;
+  document.getElementById('stepdesc').innerHTML=`<span class="eyebrow">${FLOWS[G.flow].n.split(' · ')[0]} · step ${G.step+1} of ${FLOWS[G.flow].steps.length}</span><br>${st.d}`;
+  document.getElementById('stepnums').innerHTML=FLOWS[G.flow].steps.map((_,i)=>`<button aria-pressed="${i===G.step}" data-i="${i}">${i+1}</button>`).join('');
+  document.querySelectorAll('#flowbtns button').forEach((b,i)=>b.setAttribute('aria-pressed',i===G.flow));
+  fit();
+}
+document.getElementById('flowbtns').innerHTML=FLOWS.map((f,i)=>`<button data-i="${i}">${f.n}</button>`).join('');
+document.getElementById('flowbtns').onclick=e=>{const b=e.target.closest('button');if(!b)return;G.flow=+b.dataset.i;G.step=0;applyStep()};
+document.getElementById('stepnums').onclick=e=>{const b=e.target.closest('button');if(!b)return;G.step=+b.dataset.i;applyStep()};
+document.getElementById('sprev').onclick=()=>{if(G.step>0)G.step--;else if(G.flow>0){G.flow--;G.step=FLOWS[G.flow].steps.length-1}applyStep()};
+document.getElementById('snext').onclick=()=>{if(G.step<FLOWS[G.flow].steps.length-1)G.step++;else{G.flow=(G.flow+1)%FLOWS.length;G.step=0}applyStep()};
+function seg(id,cb){const el=document.getElementById(id);el.onclick=e=>{const b=e.target.closest('button');if(!b)return;el.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));cb(b.dataset.v)}}
+seg('c-light',v=>{G.light=v;applyStep()});seg('c-w',v=>{G.w=+v;applyStep()});
+seg('c-page',v=>{if(v==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',v)});
+
+/* ---------- gallery ---------- */
+const GAL=[];
+function gal(hostId,dev,cap,st){const fig=document.createElement('figure');const fr=document.createElement('div');fr.className='frame'+(dev==='phone'?' ph':'');fig.appendChild(fr);const fc=document.createElement('figcaption');fc.textContent=cap;fig.appendChild(fc);document.getElementById(hostId).appendChild(fig);GAL.push(makeFrame(fr,dev,st,dev==='desk'?1280:390,dev==='desk'?800:844))}
+gal('gald','desk','Today · Day · 06:34',{theme:'day'});
+gal('gald','desk','Today · Night · 06:34',{theme:'night'});
+gal('gald','desk','Ask · Day · a conversation',{theme:'day',view:'ask',asked:2,rem:1});
+gal('gald','desk','Ask · Night · a conversation',{theme:'night',view:'ask',asked:2,rem:1,hi:'1.1'});
+gal('gald','desk','Replies · Day',{theme:'day',view:'replies'});
+gal('gald','desk','Replies · Night',{theme:'night',view:'replies',sel:4});
+gal('gald','desk','Agenda · Day · 12:40',{theme:'day',view:'agenda',time:760,clashAck:true});
+gal('gald','desk','Agenda · Night · 10:05',{theme:'night',view:'agenda',time:605});
+gal('gald','desk','People · Day',{theme:'day',view:'people'});
+gal('gald','desk','Know me · Night',{theme:'night',view:'knowme'});
+gal('gald','desk','Projects · Day · Kitchen refit',{theme:'day',view:'projects',proj:'kr'});
+gal('gald','desk','Projects · Night',{theme:'night',view:'projects',proj:'kr'});
+gal('gald','desk','Setup · Day · Your day',{theme:'day',view:'setup',sp:'day'});
+gal('gald','desk','Setup · Night · Connections',{theme:'night',view:'setup',sp:'conn'});
+gal('gald','desk','Read it to me · Day',{theme:'day',view:'voice',voice:2,playing:false});
+gal('gald','desk','Read it to me · Night',{theme:'night',view:'voice',voice:2,playing:false});
+gal('galp','phone','Today · Day',{theme:'day'});
+gal('galp','phone','Today · Night',{theme:'night'});
+gal('galp','phone','Alert · Day',{theme:'day',sit:'alert'});
+gal('galp','phone','Clash · Night · 10:05',{theme:'night',time:605});
+gal('galp','phone','Replies · Day',{theme:'day',view:'replies'});
+gal('galp','phone','A reply · Night',{theme:'night',view:'replies',sel:1,detail:true});
+gal('galp','phone','Ask · Day',{theme:'day',view:'ask',asked:2,rem:1});
+gal('galp','phone','Ask · Night',{theme:'night',view:'ask'});
+gal('galp','phone','New question · Night',{theme:'night',view:'ask',conv:'new'});
+gal('galp','phone','Agenda · Day',{theme:'day',view:'agenda',time:760,clashAck:true});
+gal('galp','phone','People · Night',{theme:'night',view:'people'});
+gal('galp','phone','Know me · Day',{theme:'day',view:'knowme'});
+gal('galp','phone','Kitchen refit · Night',{theme:'night',view:'projects',proj:'kr'});
+gal('galp','phone','Setup · Day',{theme:'day',view:'setup',sp:'home'});
+gal('galp','phone','Call times · Night',{theme:'night',view:'setup',sp:'day'});
+gal('galp','phone','One at a time · Day',{theme:'day',view:'oat'});
+gal('galp','phone','Read it to me · Night',{theme:'night',view:'voice',voice:2,playing:false});
+gal('galp','phone','End of day · Night',{theme:'night',time:1060,done:D(1,2,3,5,7),later:D(4,6),clashAck:true});
+applyStep();
+addEventListener('load',fit);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+</script>
+</body>
+</html>
