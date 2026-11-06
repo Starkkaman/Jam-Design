@@ -284,3 +284,8 @@ Verbatim: "The only real issues I have are in Home Assistant it's confusing if a
 - DECISION: no more design rounds for now. The paddle's OFF state is to be fixed in the real HA build.
 - Isaac: "Alright I think we have our starting place for this global look and design drafts that can be passed on to the other agents to incorperate."
 - DECISION: `HANDOFF.md` is the starting place. Callsheet, JamFin and Jam-Dash start from round 6; Jam Home from round 7 on round 6; Lobby isn't started (round 6 is reference only); NervOS is paused.
+- Isaac's answers to the handoff questions:
+  - other apps' switch accents: "Still by kind";
+  - purifier power: "Probably the switch, but I may change my mind";
+  - Lobby and NervOS: "I'll work with each of them on what they should feel like."
+- The Goodnight question needed explaining; it's still open.

@@ -38,7 +38,7 @@ One shared **language**, each app a **design of its own** (Isaac: "Everything sh
 10. **Switches:**
     - **Lights:** the ON/OFF paddle, where the pressed half is the state.
     - **Everything else** (plugs, fans, settings, automations, app options): the **channel-reveal switch**. It's small; off is a plain dark channel, and on, the thumb slides and an accent colour is revealed in the channel. It's flat, takes ~180 ms and is instant in Calm.
-    - **Accent rule (Isaac's choice): colour by kind, with a per-device override** the user can set. Kind colours start from `mockups/pass7/switch-study.html` / `notes/pass7-switches.md` option B: plugs/power blue, air/climate teal, automations violet, settings steel. Accents never use the control orange or the ok/warn/alert colours.
+    - **Accent rule (Isaac's choice): colour by kind, with a per-device override** the user can set. This applies in every app, not just Jam Home. Kind colours start from `mockups/pass7/switch-study.html` / `notes/pass7-switches.md` option B: plugs/power blue, air/climate teal, automations violet, settings steel. Accents never use the control orange or the ok/warn/alert colours.
     - The switch is also a subtle accent in other apps' settings; the switch study shows it in each.
     - It's never used for lights, destructive actions, things that aren't instant, or choices with three or more options.
 11. **TV:**
@@ -59,11 +59,12 @@ Full reasoning and the earlier rule-by-rule sort: `notes/RULES-TIERS.md`. Its la
 | **Lobby** (TV launcher) | `mockups/pass6/tv-launcher.html`, for reference only | `notes/pass6-tv-launcher.md` | **Not started.** Isaac doesn't know yet what he wants. Round 6 is only a clean-up: no Home Assistant except maybe the door-lock status, no audio settings up top, less silly. Don't restyle Lobby until he decides. |
 | **NervOS** | none | none | **Paused.** Isaac likes what NervOS already has. Don't restyle it until he says so. |
 
-## Open questions for Isaac (none block starting)
-1. The other apps' switch accent: each app's own hue (plum, steel, teal) or the same kind colours as Jam Home?
-2. Air purifier power: the small switch (round 7) or the round lit power key it had before?
-3. Jam Home's Goodnight round: bring back as a plain list of "Turn off / Leave on" rows?
-4. Lobby and NervOS: what each should feel like (Lobby's round 6 notes end with questions to help).
+## Answered after handoff (Isaac, 2026-11-06)
+1. Switch accent in the other apps: **by kind as well**, the same rule as Jam Home.
+2. Air purifier power: **the small switch** for now ("I may change my mind").
+3. Lobby and NervOS: Isaac will work with each app's agent directly on how it should feel.
+
+Still open: whether Jam Home gets a Goodnight list back (see `decisions.md`).
 
 ## Where to find things
 - `decisions.md`: every decision, with Isaac's words.
